@@ -34,7 +34,7 @@ const OrgSwitcherOverlay: FC<Props> = ({ orgs, onClose, currentOrg }) => {
         testID="switch-overlay--header"
       />
       <Overlay.Body>
-        <p className="org-switcher--prompt">Choose an production line</p>
+        <p className="org-switcher--prompt">Choose an production line.</p>
         <SortingHat list={orgs} sortKey="name" direction={Sort.Ascending}>
           {sortedOrgs => (
             <div className="org-switcher--list">
