@@ -1,0 +1,3 @@
+[spacy_models]
+en_machinaide_nlp = en_machinaide_nlp
+

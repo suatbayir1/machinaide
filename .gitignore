@@ -1,0 +1,4 @@
+node_modules/
+backend/logs/
+influxdb/ui/node_modules/
+influxdb/go1.13.9.linux-amd64.tar.gz

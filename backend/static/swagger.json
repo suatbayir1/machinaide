@@ -1,0 +1,2066 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Within the scope of the Machinaide project, an API was developed using the Python language and Flask framework in line with the needs. This page contains information on how to use the API developed within the Machinaide project. This page explains how to send a request to the developed methods, which parameters will be sent, and what kind of results will be obtained.",
+        "version": "1.0",
+        "title": "Machinaide REST API Documentation",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "email": "suat@erstesoftware.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    },
+    "host": "vmi474601.contaboserver.net",
+    "basePath": "/api",
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "Transactions such as authentication, authorization, creating a new user, and logging in are collected in this class."
+        },
+        {
+            "name": "Digital Twin",
+            "description": "An operation such as listing existing digital twins, adding a new digital twin, searching for digital twins are all collected in this class."
+        },
+        {
+            "name": "Object",
+            "description": "Operations such as viewing existing 3D visuals, adding and deleting a new 3D visual object are collected in this class."
+        },
+        {
+            "name": "Factory",
+            "description": "Operations such as accessing the list of existing factories, machines, components, and sensors are collected in this class."
+        },
+        {
+            "name": "Failure",
+            "description": "Operations such as a list of existing fault records, adding a new fault record, deleting or updating a fault record are collected under this class."
+        },
+        {
+            "name": "Maintenance",
+            "description": "Operations such as a list of existing maintenance records, adding a new maintenance record, deleting or updating a maintenance record are collected under this class."
+        },
+        {
+            "name": "Log",
+            "description": "A list of logs and operations such as log search is collected in this class."
+        },
+        {
+            "name": "Prediction",
+            "description": "Operations such as a list of existing machine learning models, adding a new machine learning model and searching are collected in this class."
+        }
+    ],
+    "schemes": [
+        "https",
+        "http"
+    ],
+    "paths": {
+        "/auth/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "This method is used to log into the system and take a token.",
+                "description": "To use this method, you must log in with your username and password. If you do not know your username and password, please contact the developer team. After entering your username and password correctly, you will have a token. You can access other methods using this token.",
+                "operationId": "login",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "Username and password object that needs to be login to the system.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Authentication"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/dt": {
+            "get": {
+                "tags": [
+                    "Digital Twin"
+                ],
+                "summary": "This method allows to fetch all digital twin information.",
+                "description": "This method allows to fetch all digital twin information. The hierarchy of factory, machine, component, and sensor can be accessed through this method.",
+                "operationId": "dt",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/dt/getGeneralInfo": {
+            "get": {
+                "tags": [
+                    "Digital Twin"
+                ],
+                "summary": "This method is used to access general information about the list and number of machines, components, sensors available in the system.",
+                "description": "This method is used to access general information about the list and number of machines, components, sensors available in the system.",
+                "operationId": "getGeneralInfo",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/dt/add": {
+            "post": {
+                "tags": [
+                    "Digital Twin"
+                ],
+                "summary": "This method is used to add a new machine, component, or sensor.",
+                "description": "This method is used to add a new machine, component, or sensor. It is allowed to add multiple components with the machine and add multiple sensors with components.",
+                "operationId": "add",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/DTAdd"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "409": {
+                        "description": "Data already exists"
+                    }
+                }
+            }
+        },
+        "/dt/delete": {
+            "delete": {
+                "tags": [
+                    "Digital Twin"
+                ],
+                "summary": " This method enables the desired machine, component, or sensor and its visual object information to be deleted.",
+                "description": "This method enables the desired machine, component, or sensor and its visual object information to be deleted. The (Machine, Component, Sensor) and name of the record to be deleted should be sent.",
+                "operationId": "delete",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "example": "Component",
+                                "description": "This field must be Machine, Component or Sensor"
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "robot",
+                                "description": "Is the unique name of the record to be deleted"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/dt/getFileInfo": {
+            "get": {
+                "tags": [
+                    "Digital Twin"
+                ],
+                "summary": "This method returns the list of existing textures and URL information.",
+                "description": "This method returns the list of existing textures and URL information.",
+                "operationId": "getFileInfo",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successfull"
+                    }
+                }
+            }
+        },
+        "/dt/fileUpload": {
+            "post": {
+                "tags": [
+                    "Digital Twin"
+                ],
+                "summary": "This method allows adding textures to be used when creating 3D digital twin objects.",
+                "description": "This method allows adding textures to be used when creating 3D digital twin objects.",
+                "operationId": "fileUpload",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "formData",
+                        "name": "file",
+                        "description": "The file to be uploaded in binary format should be added here.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "filename",
+                        "description": "This field specifies the name of the texture to be added",
+                        "required": true,
+                        "type": "string",
+                        "example": "filename1.png"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successfull"
+                    },
+                    "409": {
+                        "description": "Data already exists"
+                    }
+                }
+            }
+        },
+        "/object/getObjectPool": {
+            "get": {
+                "tags": [
+                    "Object"
+                ],
+                "summary": "This method returns the list of 3D visual objects that existing in the system.",
+                "description": "This method returns the list of 3D visual objects that existing in the system.",
+                "operationId": "getObjectPool",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successfull"
+                    }
+                }
+            }
+        },
+        "/object/removeObject": {
+            "delete": {
+                "tags": [
+                    "Object"
+                ],
+                "summary": "This method allows to deletion of a 3D visual object from the system.",
+                "description": "Description will be here",
+                "operationId": "removeObject",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "Specifies the name of the object to be deleted",
+                        "required": true,
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "example": "sensorA"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successfull"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/object/saveComponentObject": {
+            "post": {
+                "tags": [
+                    "Object"
+                ],
+                "summary": "Save 3D image information.",
+                "description": "This method allows updating an existing 3D visual component. 3D objects in the component can be deleted, a new object can be added or the properties of the existing object can be changed.",
+                "operationId": "add",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "3D visual information to be saved",
+                        "required": true,
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "example": "visualA"
+                            },
+                            "children": {
+                                "type": "list",
+                                "example": [
+                                    {
+                                        "boxMeasure": {
+                                            "depth": 1,
+                                            "height": 1,
+                                            "width": 1
+                                        },
+                                        "color": "#f95f53",
+                                        "geometryType": "BoxGeometry",
+                                        "isRender": false,
+                                        "name": "object_RfMuJg",
+                                        "opacity": 1,
+                                        "position": {
+                                            "x": 1,
+                                            "y": 1,
+                                            "z": 1
+                                        },
+                                        "rotate": {
+                                            "x": 0,
+                                            "y": 0,
+                                            "z": 0
+                                        },
+                                        "scale": {
+                                            "x": 1,
+                                            "y": 1,
+                                            "z": 1
+                                        },
+                                        "texture": "null"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/object/saveAsComponentObject": {
+            "post": {
+                "tags": [
+                    "Object"
+                ],
+                "summary": "Save as 3D image information",
+                "description": "This method allows creating a new component that holds the 3D object information.",
+                "operationId": "saveAsComponentObject",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "3D visual information to be saved",
+                        "required": true,
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "example": "visualA"
+                            },
+                            "children": {
+                                "type": "list",
+                                "example": [
+                                    {
+                                        "boxMeasure": {
+                                            "depth": 1,
+                                            "height": 1,
+                                            "width": 1
+                                        },
+                                        "color": "#f95f53",
+                                        "geometryType": "BoxGeometry",
+                                        "isRender": false,
+                                        "name": "object_RfMuJg",
+                                        "opacity": 1,
+                                        "position": {
+                                            "x": 1,
+                                            "y": 1,
+                                            "z": 1
+                                        },
+                                        "rotate": {
+                                            "x": 0,
+                                            "y": 0,
+                                            "z": 0
+                                        },
+                                        "scale": {
+                                            "x": 1,
+                                            "y": 1,
+                                            "z": 1
+                                        },
+                                        "texture": "null"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successfull"
+                    },
+                    "409": {
+                        "description": "Data already exists"
+                    }
+                }
+            }
+        },
+        "/factory/getFactories": {
+            "get": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "This method contains a list of existing factories and some information about each factory.",
+                "description": "This method contains a list of existing factories and some information about each factory.",
+                "operationId": "getFactories",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/factory/getMachines": {
+            "post": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "This method returns a list of machines belonging to a factory and some information about each machine.",
+                "description": "This method returns a list of machines belonging to a factory and some information about each machine.",
+                "operationId": "getMachines",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "ID of the desired factory.",
+                        "required": true,
+                        "properties": {
+                            "factoryId": {
+                                "type": "string",
+                                "example": "Ermetal"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/factory/getComponents": {
+            "post": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "This method returns a list of components for a machine and some information about each component.",
+                "description": "This method returns a list of components for a machine and some information about each component.",
+                "operationId": "getComponents",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "properties": {
+                            "factoryId": {
+                                "type": "string",
+                                "example": "Ermetal",
+                                "description": "ID of the desired factory."
+                            },
+                            "machineId": {
+                                "type": "string",
+                                "example": "Press030",
+                                "description": "The ID of the desired machine."
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/factory/getSensors": {
+            "post": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "This method returns a list of sensors for a component and some information about each sensor.",
+                "description": "This method returns a list of sensors for a component and some information about each sensor.",
+                "operationId": "getSensors",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "properties": {
+                            "factoryId": {
+                                "type": "string",
+                                "example": "Ermetal",
+                                "description": "ID of the desired factory."
+                            },
+                            "machineId": {
+                                "type": "string",
+                                "example": "Press030",
+                                "description": "ID of the desired machine."
+                            },
+                            "componentId": {
+                                "type": "string",
+                                "example": "dengeleme",
+                                "description": "ID of the desired component."
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/factory/addMachineAction": {
+            "post": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "This method is used to add a new machine action record.",
+                "description": "This method is used to add a new machine action record.",
+                "operationId": "addMachineAction",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/MachineAction"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/factory/getAllMachineActions": {
+            "post": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "Returns a list of all machine actions.",
+                "description": "Returns a list of all machine actions.",
+                "operationId": "getAllMachineActions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "3D visual information to be saved",
+                        "required": true,
+                        "properties": {
+                            "machineID": {
+                                "type": "string",
+                                "example": "Press030",
+                                "description": "Unique ID of the machine in question"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/factory/updateMachineAction": {
+            "put": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "The machine allows the action record to be updated",
+                "description": "The machine allows the action record to be updated.",
+                "operationId": "updateMachineAction",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "properties": {
+                            "recordId": {
+                                "type": "string",
+                                "example": "602e6a229efcb123bdfde",
+                                "description": "Is the unique ID of the machine action record to be updated."
+                            },
+                            "jobName": {
+                                "type": "string",
+                                "example": "job 1",
+                                "description": "Refers to the work that the machine has to do."
+                            },
+                            "material": {
+                                "type": "string",
+                                "example": "material 1",
+                                "description": "Specifies which material the machine will work on."
+                            },
+                            "startTime": {
+                                "type": "datetime",
+                                "example": "2021-03-23T16:44",
+                                "description": "Indicates when the machine will start the task."
+                            },
+                            "endTime": {
+                                "type": "datetime",
+                                "example": "2021-03-23T16:44",
+                                "description": "Indicates when the machine will end the task."
+                            },
+                            "jobDescription": {
+                                "type": "string",
+                                "example": "job description",
+                                "description": "Specifies a description of the task that the machine will do."
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/factory/deleteMachineAction": {
+            "delete": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "The machine allows the action record to be deleted",
+                "description": "The machine allows the action record to be deleted.",
+                "operationId": "deleteMachineAction",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "properties": {
+                            "recordId": {
+                                "type": "string",
+                                "example": "602e6a229efcb123bdfde",
+                                "description": "Is the unique ID of the machine action record to be deleted."
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invalid recordId"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/factory/isMachineActionExists": {
+            "post": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "This method is used to inquire whether the machine action record, which comes as a parameter, exists in the system.",
+                "description": "This method is used to inquire whether the machine action record, which comes as a parameter, exists in the system.",
+                "operationId": "isMachineActionExists",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/MachineAction"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "409": {
+                        "description": "Record already exists"
+                    }
+                }
+            }
+        },
+        "/failure/getAllFailures": {
+            "get": {
+                "tags": [
+                    "Failure"
+                ],
+                "summary": "This method returns a list of all fault records available in the system.",
+                "description": "This method returns a list of all fault records available in the system.",
+                "operationId": "getAllFailures",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/failure/addFailure": {
+            "post": {
+                "tags": [
+                    "Failure"
+                ],
+                "summary": "This method is used to create a new fault record.",
+                "description": "This method is used to create a new fault record.",
+                "operationId": "addFailure",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Failure"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/failure/isFailureExist": {
+            "post": {
+                "tags": [
+                    "Failure"
+                ],
+                "summary": "This method is used to inquire whether the fault record, which comes as a parameter, exists in the system.",
+                "description": "This method is used to inquire whether the fault record, which comes as a parameter, exists in the system.",
+                "operationId": "isFailureExist",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Failure"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "409": {
+                        "description": "Data already exists"
+                    }
+                }
+            }
+        },
+        "/failure/updateFailure": {
+            "post": {
+                "tags": [
+                    "Failure"
+                ],
+                "summary": "This method is used to update an existing fault record.",
+                "description": "This method is used to update an existing fault record.",
+                "operationId": "updateFailure",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "properties": {
+                            "recordId": {
+                                "type": "string",
+                                "example": "602e6a229efcb123bdfde",
+                                "description": "Is the unique ID of the fault record to be updated"
+                            },
+                            "sourceName": {
+                                "type": "string",
+                                "example": "Press030.dengeleme",
+                                "description": "Shows the name of the component for which the fault record was created. [Machine].[Component].[Sensor]"
+                            },
+                            "factoryID": {
+                                "type": "string",
+                                "example": "Ermetal",
+                                "description": "The unique identity of the factory you are in."
+                            },
+                            "sid": {
+                                "type": "string",
+                                "example": "dengeleme",
+                                "description": "Unique ID of the part where the fault occurred."
+                            },
+                            "severity": {
+                                "type": "string",
+                                "example": "major",
+                                "description": "Indicates the severity of the fault record."
+                            },
+                            "cost": {
+                                "type": "integer",
+                                "example": 1500,
+                                "description": "Shows how many units the fault cost."
+                            },
+                            "description": {
+                                "type": "string",
+                                "example": "there is an oil leak.",
+                                "description": "Contains an explanation about the malfunction."
+                            },
+                            "startTime": {
+                                "type": "datetime",
+                                "example": "2021-03-23T16:44",
+                                "description": "Shows the date the fault started."
+                            },
+                            "endTime": {
+                                "type": "datetime",
+                                "example": "2021-03-24T16:44",
+                                "description": "Shows the date the fault ended."
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/failure/removeFailure": {
+            "delete": {
+                "tags": [
+                    "Failure"
+                ],
+                "summary": "This method is used to delete a fault record from the system.",
+                "description": "This method is used to delete a fault record from the system.",
+                "operationId": "removeFailure",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "properties": {
+                            "recordId": {
+                                "type": "string",
+                                "example": "602e6a229efcb123bdfde"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/maintenance/getAllMaintenance": {
+            "get": {
+                "tags": [
+                    "Maintenance"
+                ],
+                "summary": "This method returns a list of all maintenance records available in the system.",
+                "description": "This method returns a list of all maintenance records available in the system.",
+                "operationId": "getAllMaintenance",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/maintenance/addMaintenance": {
+            "post": {
+                "tags": [
+                    "Maintenance"
+                ],
+                "summary": "This method is used to create a new maintenance record.",
+                "description": "This method is used to create a new maintenance record.",
+                "operationId": "addMaintenance",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "Data to be included in the maintenance record to be attached",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Maintenance"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/maintenance/updateMaintenance": {
+            "post": {
+                "tags": [
+                    "Maintenance"
+                ],
+                "summary": "This method is used to update an existing maintenance record.",
+                "description": "This method is used to update an existing maintenance record.",
+                "operationId": "updateMaintenance",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "properties": {
+                            "recordId": {
+                                "type": "string",
+                                "example": "602e6a229efcb123bdfde",
+                                "description": "Is the unique ID of the maintenance record to be updated."
+                            },
+                            "factoryID": {
+                                "type": "string",
+                                "example": "Ermetal",
+                                "description": "The unique identity of the factory you are in."
+                            },
+                            "asset": {
+                                "type": "string",
+                                "example": "Press030.dengeleme",
+                                "description": "Shows the name of the component for which the maintenance record was created. [Machine].[Component].[Sensor]"
+                            },
+                            "sid": {
+                                "type": "string",
+                                "example": "sensor1",
+                                "description": "Id of the device is maintained."
+                            },
+                            "date": {
+                                "type": "datetime",
+                                "example": "2021-03-02T19:07",
+                                "description": "Indicates the date of maintenance."
+                            },
+                            "faultType": {
+                                "type": "string",
+                                "example": "Fault 1",
+                                "description": "Indicates the general type of fault."
+                            },
+                            "maintenanceType": {
+                                "type": "string",
+                                "example": "Maintenance 1",
+                                "description": "Indicates the maintenance type of fault."
+                            },
+                            "request": {
+                                "type": "string",
+                                "example": "Request detail",
+                                "description": "Indicates the maintenance request."
+                            },
+                            "reason": {
+                                "type": "string",
+                                "example": "Reason detail",
+                                "description": "Indicates the area where maintenance is performed."
+                            },
+                            "jobDescription": {
+                                "type": "string",
+                                "example": "Job description",
+                                "description": "Indicates the job description."
+                            },
+                            "duration": {
+                                "type": "integer",
+                                "example": 7500,
+                                "description": "Indicates how long the maintained part has not been used."
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/maintenance/removeMaintenance": {
+            "delete": {
+                "tags": [
+                    "Maintenance"
+                ],
+                "summary": "This method is used to delete an existing maintenance record.",
+                "description": "This method is used to delete an existing maintenance record.",
+                "operationId": "removeMaintenance",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "properties": {
+                            "recordId": {
+                                "type": "string",
+                                "example": "602e6a229efcb123bdfde"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/maintenance/isMaintenanceExist": {
+            "post": {
+                "tags": [
+                    "Maintenance"
+                ],
+                "summary": "This method is used to inquire whether the maintenance record, which comes as a parameter, exists in the system.",
+                "description": "This method is used to inquire whether the maintenance record, which comes as a parameter, exists in the system.",
+                "operationId": "isMaintenanceExist",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Failure"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/log/getLogs": {
+            "post": {
+                "tags": [
+                    "Log"
+                ],
+                "summary": "This method allows filtering the list of existing logs in the system according to certain criteria.",
+                "description": "This method allows filtering the list of existing logs in the system according to certain criteria.",
+                "operationId": "getLogs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "properties": {
+                            "ip": {
+                                "type": "string",
+                                "example": "127.0.0.1",
+                                "description": "It is the desired IP address for IP-based filtering."
+                            },
+                            "endpoint": {
+                                "type": "string",
+                                "example": "dt/",
+                                "description": "The desired endpoint address for endpoint-based filtering."
+                            },
+                            "startTime": {
+                                "type": "datetime",
+                                "example": "2021-03-15T10:53:00.000Z",
+                                "description": "Start date your logs will fetch."
+                            },
+                            "endTime": {
+                                "type": "datetime",
+                                "example": "2022-03-24T10:53:02.795Z",
+                                "description": "End date your logs will fetch."
+                            },
+                            "username": {
+                                "type": "string",
+                                "example": "machinaide",
+                                "description": "Desired username for user-based filtering."
+                            },
+                            "status": {
+                                "type": "list",
+                                "example": [
+                                    200,
+                                    400,
+                                    401,
+                                    404,
+                                    409
+                                ],
+                                "description": "Allows filtering of the HTTP status codes returned as a result. is defined as a sequence."
+                            },
+                            "log_type": {
+                                "type": "list",
+                                "example": [
+                                    "INFO",
+                                    "ERROR",
+                                    "WARNING",
+                                    "DUPLICATED"
+                                ],
+                                "description": "It allows filtering according to log results. is defined as a sequence."
+                            },
+                            "request_type": {
+                                "type": "list",
+                                "example": [
+                                    "POST",
+                                    "PUT",
+                                    "GET",
+                                    "DELETE"
+                                ],
+                                "description": "It allows filtering according to the HTTP type of the sent request. is defined as a sequence."
+                            },
+                            "skip": {
+                                "type": "integer",
+                                "example": 0,
+                                "description": "The last index to fetch data."
+                            },
+                            "limit": {
+                                "type": "integer",
+                                "example": 10,
+                                "description": "How much data will be fetched."
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/prediction/getAllPrediction": {
+            "get": {
+                "tags": [
+                    "Prediction"
+                ],
+                "summary": "This method returns a list of predictive models.",
+                "description": "This method returns a list of predictive models.",
+                "operationId": "getAllPrediction",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/prediction/getPredictionById": {
+            "post": {
+                "tags": [
+                    "Prediction"
+                ],
+                "summary": "This method is used to search id based prediction record.",
+                "description": "This method is used to search id based prediction record.",
+                "operationId": "getPredictionById",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "properties": {
+                            "modelID": {
+                                "type": "string",
+                                "example": "modelID 1",
+                                "description": "Specifies the model id of the record to search."
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/prediction/getPredictionInfo": {
+            "post": {
+                "tags": [
+                    "Prediction"
+                ],
+                "summary": "This method returns information about the feedback given by the person and users who created the relevant machine learning model.",
+                "description": "This method returns information about the feedback given by the person and users who created the relevant machine learning model.",
+                "operationId": "getPredictionInfo",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "properties": {
+                            "modelID": {
+                                "type": "string",
+                                "example": "modelID 1",
+                                "description": "Specifies the model id of the record to search."
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "petstore_auth": {
+            "type": "oauth2",
+            "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
+            "flow": "implicit",
+            "scopes": {
+                "write:pets": "modify pets in your account",
+                "read:pets": "read your pets"
+            }
+        },
+        "api_key": {
+            "type": "apiKey",
+            "name": "api_key",
+            "in": "header"
+        }
+    },
+    "definitions": {
+        "Token": {
+            "type": "string",
+            "format": "string",
+            "example": ""
+        },
+        "Authentication": {
+            "type": "object",
+            "required": [
+                "username",
+                "password"
+            ],
+            "properties": {
+                "username": {
+                    "type": "string",
+                    "example": "doejohn",
+                    "description": "The username you will use to log into the system."
+                },
+                "password": {
+                    "type": "string",
+                    "example": "john123",
+                    "description": "The password you will use to log into the system."
+                }
+            }
+        },
+        "Failure": {
+            "type": "object",
+            "required": [
+                "factoryID",
+                "sid",
+                "sourceName"
+            ],
+            "properties": {
+                "sourceName": {
+                    "type": "string",
+                    "example": "Press030.dengeleme",
+                    "description": "Shows the name of the component for which the fault record was created. [Machine].[Component].[Sensor]"
+                },
+                "factoryID": {
+                    "type": "string",
+                    "example": "Ermetal",
+                    "description": "The unique identity of the factory you are in."
+                },
+                "sid": {
+                    "type": "string",
+                    "example": "dengeleme",
+                    "description": "Unique ID of the part where the fault occurred."
+                },
+                "severity": {
+                    "type": "string",
+                    "example": "major",
+                    "description": "Indicates the severity of the fault record."
+                },
+                "cost": {
+                    "type": "integer",
+                    "example": 1500,
+                    "description": "Shows how many units the fault cost."
+                },
+                "description": {
+                    "type": "string",
+                    "example": "there is an oil leak.",
+                    "description": "Contains an explanation about the malfunction."
+                },
+                "startTime": {
+                    "type": "datetime",
+                    "example": "2021-03-23T16:44",
+                    "description": "Shows the date the fault started."
+                },
+                "endTime": {
+                    "type": "datetime",
+                    "example": "2021-03-24T16:44",
+                    "description": "Shows the date the fault ended."
+                }
+            }
+        },
+        "MachineAction": {
+            "type": "object",
+            "required": [
+                "jobName",
+                "material",
+                "startTime"
+            ],
+            "properties": {
+                "jobName": {
+                    "type": "string",
+                    "example": "job 1",
+                    "description": "Refers to the work that the machine has to do."
+                },
+                "material": {
+                    "type": "string",
+                    "example": "material 1",
+                    "description": "Specifies which material the machine will work on."
+                },
+                "startTime": {
+                    "type": "datetime",
+                    "example": "2021-03-23T16:44",
+                    "description": "Indicates when the machine will start the task."
+                },
+                "endTime": {
+                    "type": "datetime",
+                    "example": "2021-03-23T16:44",
+                    "description": "Indicates when the machine will end the task."
+                },
+                "jobDescription": {
+                    "type": "string",
+                    "example": "job description",
+                    "description": "Specifies a description of the task that the machine will do."
+                }
+            }
+        },
+        "Maintenance": {
+            "type": "object",
+            "required": [
+                "asset",
+                "sid",
+                "date"
+            ],
+            "properties": {
+                "factoryID": {
+                    "type": "string",
+                    "example": "Ermetal",
+                    "description": "The unique identity of the factory you are in."
+                },
+                "asset": {
+                    "type": "string",
+                    "example": "Press030.dengeleme",
+                    "description": "Shows the name of the component for which the maintenance record was created. [Machine].[Component].[Sensor]"
+                },
+                "sid": {
+                    "type": "string",
+                    "example": "sensor1",
+                    "description": "Id of the device is maintained."
+                },
+                "date": {
+                    "type": "datetime",
+                    "example": "2021-03-02T19:07",
+                    "description": "Indicates the date of maintenance."
+                },
+                "faultType": {
+                    "type": "string",
+                    "example": "Fault 1",
+                    "description": "Indicates the general type of fault."
+                },
+                "maintenanceType": {
+                    "type": "string",
+                    "example": "Maintenance 1",
+                    "description": "Indicates the maintenance type of fault."
+                },
+                "request": {
+                    "type": "string",
+                    "example": "Request detail",
+                    "description": "Indicates the maintenance request."
+                },
+                "reason": {
+                    "type": "string",
+                    "example": "Reason detail",
+                    "description": "Indicates the area where maintenance is performed."
+                },
+                "jobDescription": {
+                    "type": "string",
+                    "example": "Job description",
+                    "description": "Indicates the job description."
+                },
+                "duration": {
+                    "type": "integer",
+                    "example": 7500,
+                    "description": "Indicates how long the maintained part has not been used."
+                }
+            }
+        },
+        "DTAdd": {
+            "type": "object",
+            "required": [
+                "@id",
+                "type",
+                "parent",
+                "@type"
+            ],
+            "properties": {
+                "@id": {
+                    "type": "string",
+                    "example": "Item1234",
+                    "description": "The unique identity of the item to add. (machine, component, sensor)"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "Machine",
+                    "description": "A field indicating the type of item to add. This field must be Machine, Component, Sensor. (machine, component, sensor)"
+                },
+                "parent": {
+                    "type": "string",
+                    "example": "Press030",
+                    "description": "The information under which item the data to be added will be added. (machine, component, sensor)"
+                },
+                "@type": {
+                    "type": "string",
+                    "example": "Interface",
+                    "description": "This field was created according to the Azure DTDL structure. This field must be Interface, Component, Telemetry. (machine, component, sensor)"
+                },
+                "displayName": {
+                    "type": "string",
+                    "example": "Temperature A Sensor",
+                    "description": "This field specifies the name of the added item to be displayed. (machine, component, sensor)"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "temperatureSensorA",
+                    "description": "This field is the name of the item to be added to be used in the program. (machine, component, sensor)"
+                },
+                "contents": {
+                    "type": "list",
+                    "example": [
+                        {
+                            "@id": "compName",
+                            "@type": "Component",
+                            "description": "comp description",
+                            "displayName": "Component Name",
+                            "name": "a1",
+                            "parent": "new",
+                            "sensors": [],
+                            "type": "Component"
+                        },
+                        {
+                            "@id": "compName",
+                            "@type": "Component",
+                            "description": "comp description",
+                            "displayName": "Component Name",
+                            "name": "a1",
+                            "parent": "new",
+                            "sensors": [],
+                            "type": "Component"
+                        }
+                    ],
+                    "description": "This fields keeps the list of components in the machine. (machine)"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "This sensor measures the temperature information of the part number A",
+                    "description": "This field contains explanation information about the added item. (component, sensor)"
+                },
+                "sensors": {
+                    "type": "list",
+                    "example": [
+                        {
+                            "@id": "sensor1",
+                            "@type": [
+                                "Telemetry",
+                                "Temperature"
+                            ],
+                            "description": "sensor1 description",
+                            "displayName": "sensor1",
+                            "name": "sensor1",
+                            "parent": "component1",
+                            "schema": "real",
+                            "type": "Sensor",
+                            "unit": "real"
+                        }
+                    ],
+                    "description": "This field keeps the list of sensors in the component. (component)"
+                },
+                "visual": {
+                    "type": "object",
+                    "example": [],
+                    "description": "This field keeps the 3D visual information of the relevant item. If the added item is a component this field must be an array of objects. If the added item is a sensor this field must object. (component, sensor)"
+                },
+                "unit": {
+                    "type": "string",
+                    "example": "double",
+                    "description": "This field indicates the type of data the sensor carries. (sensor)"
+                }
+            }
+        },
+        "ApiResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "externalDocs": {
+        "description": "Find out more about Swagger",
+        "url": "http://swagger.io"
+    }
+}

@@ -1,0 +1,75 @@
+2021-04-08T17:34:06.453+0200 I CONTROL  [initandlisten] MongoDB starting : pid=21021 port=27017 dbpath=/var/lib/mongodb 64-bit host=vmi474601.contaboserver.net
+2021-04-08T17:34:06.453+0200 I CONTROL  [initandlisten] db version v3.6.8
+2021-04-08T17:34:06.453+0200 I CONTROL  [initandlisten] git version: 8e540c0b6db93ce994cc548f000900bdc740f80a
+2021-04-08T17:34:06.453+0200 I CONTROL  [initandlisten] OpenSSL version: OpenSSL 1.1.1f  31 Mar 2020
+2021-04-08T17:34:06.453+0200 I CONTROL  [initandlisten] allocator: tcmalloc
+2021-04-08T17:34:06.453+0200 I CONTROL  [initandlisten] modules: none
+2021-04-08T17:34:06.453+0200 I CONTROL  [initandlisten] build environment:
+2021-04-08T17:34:06.453+0200 I CONTROL  [initandlisten]     distarch: x86_64
+2021-04-08T17:34:06.453+0200 I CONTROL  [initandlisten]     target_arch: x86_64
+2021-04-08T17:34:06.453+0200 I CONTROL  [initandlisten] options: { net: { port: 27017 }, security: { authorization: "enabled" }, storage: { dbPath: "/var/lib/mongodb" } }
+2021-04-08T17:34:06.454+0200 I -        [initandlisten] Detected data files in /var/lib/mongodb created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2021-04-08T17:34:06.454+0200 I STORAGE  [initandlisten] 
+2021-04-08T17:34:06.454+0200 I STORAGE  [initandlisten] ** WARNING: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine
+2021-04-08T17:34:06.454+0200 I STORAGE  [initandlisten] **          See http://dochub.mongodb.org/core/prodnotes-filesystem
+2021-04-08T17:34:06.454+0200 I STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=3468M,session_max=20000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),cache_cursors=false,compatibility=(release="3.0",require_max="3.0"),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000),statistics_log=(wait=0),verbose=(recovery_progress),
+2021-04-08T17:34:07.730+0200 I STORAGE  [initandlisten] WiredTiger message [1617896047:730232][21021:0x7f0633e20ac0], txn-recover: Main recovery loop: starting at 5/128896
+2021-04-08T17:34:07.835+0200 I STORAGE  [initandlisten] WiredTiger message [1617896047:835329][21021:0x7f0633e20ac0], txn-recover: Recovering log 5 through 6
+2021-04-08T17:34:07.931+0200 I STORAGE  [initandlisten] WiredTiger message [1617896047:931706][21021:0x7f0633e20ac0], txn-recover: Recovering log 6 through 6
+2021-04-08T17:34:07.985+0200 I STORAGE  [initandlisten] WiredTiger message [1617896047:985322][21021:0x7f0633e20ac0], txn-recover: Set global recovery timestamp: 0
+2021-04-08T17:34:08.027+0200 I CONTROL  [initandlisten] ** WARNING: You are running this process as the root user, which is not recommended.
+2021-04-08T17:34:08.027+0200 I CONTROL  [initandlisten] 
+2021-04-08T17:34:08.027+0200 I CONTROL  [initandlisten] ** WARNING: This server is bound to localhost.
+2021-04-08T17:34:08.027+0200 I CONTROL  [initandlisten] **          Remote systems will be unable to connect to this server. 
+2021-04-08T17:34:08.027+0200 I CONTROL  [initandlisten] **          Start the server with --bind_ip <address> to specify which IP 
+2021-04-08T17:34:08.027+0200 I CONTROL  [initandlisten] **          addresses it should serve responses from, or with --bind_ip_all to
+2021-04-08T17:34:08.027+0200 I CONTROL  [initandlisten] **          bind to all interfaces. If this behavior is desired, start the
+2021-04-08T17:34:08.027+0200 I CONTROL  [initandlisten] **          server with --bind_ip 127.0.0.1 to disable this warning.
+2021-04-08T17:34:08.027+0200 I CONTROL  [initandlisten] 
+2021-04-08T17:34:08.058+0200 I FTDC     [initandlisten] Initializing full-time diagnostic data capture with directory '/var/lib/mongodb/diagnostic.data'
+2021-04-08T17:34:08.059+0200 I NETWORK  [initandlisten] waiting for connections on port 27017
+2021-04-08T17:34:08.084+0200 I NETWORK  [listener] connection accepted from 127.0.0.1:33200 #1 (1 connection now open)
+2021-04-08T17:34:08.084+0200 I NETWORK  [listener] connection accepted from 127.0.0.1:33202 #2 (2 connections now open)
+2021-04-08T17:34:08.085+0200 I NETWORK  [conn2] received client metadata from 127.0.0.1:33202 conn2: { driver: { name: "PyMongo", version: "3.11.2" }, os: { type: "Linux", name: "Linux", architecture: "x86_64", version: "5.4.0-56-generic" }, platform: "CPython 3.8.5.final.0" }
+2021-04-08T17:34:08.085+0200 I NETWORK  [conn1] received client metadata from 127.0.0.1:33200 conn1: { driver: { name: "PyMongo", version: "3.11.2" }, os: { type: "Linux", name: "Linux", architecture: "x86_64", version: "5.4.0-56-generic" }, platform: "CPython 3.8.5.final.0" }
+2021-04-08T17:34:08.197+0200 I NETWORK  [listener] connection accepted from 127.0.0.1:33204 #3 (3 connections now open)
+2021-04-08T17:34:08.197+0200 I NETWORK  [conn3] received client metadata from 127.0.0.1:33204 conn3: { driver: { name: "PyMongo", version: "3.11.2" }, os: { type: "Linux", name: "Linux", architecture: "x86_64", version: "5.4.0-56-generic" }, platform: "CPython 3.8.5.final.0" }
+2021-04-08T17:34:08.230+0200 I NETWORK  [listener] connection accepted from 127.0.0.1:33206 #4 (4 connections now open)
+2021-04-08T17:34:08.231+0200 I NETWORK  [conn4] received client metadata from 127.0.0.1:33206 conn4: { driver: { name: "PyMongo", version: "3.11.2" }, os: { type: "Linux", name: "Linux", architecture: "x86_64", version: "5.4.0-56-generic" }, platform: "CPython 3.8.5.final.0" }
+2021-04-08T17:34:08.232+0200 I NETWORK  [listener] connection accepted from 127.0.0.1:33208 #5 (5 connections now open)
+2021-04-08T17:34:08.236+0200 I NETWORK  [conn5] received client metadata from 127.0.0.1:33208 conn5: { driver: { name: "PyMongo", version: "3.11.2" }, os: { type: "Linux", name: "Linux", architecture: "x86_64", version: "5.4.0-56-generic" }, platform: "CPython 3.8.5.final.0" }
+2021-04-08T17:34:08.259+0200 I NETWORK  [listener] connection accepted from 127.0.0.1:33210 #6 (6 connections now open)
+2021-04-08T17:34:08.260+0200 I NETWORK  [listener] connection accepted from 127.0.0.1:33212 #7 (7 connections now open)
+2021-04-08T17:34:08.260+0200 I NETWORK  [conn6] received client metadata from 127.0.0.1:33210 conn6: { driver: { name: "PyMongo", version: "3.11.2" }, os: { type: "Linux", name: "Linux", architecture: "x86_64", version: "5.4.0-56-generic" }, platform: "CPython 3.8.5.final.0" }
+2021-04-08T17:34:08.260+0200 I NETWORK  [listener] connection accepted from 127.0.0.1:33214 #8 (8 connections now open)
+2021-04-08T17:34:08.260+0200 I NETWORK  [conn8] received client metadata from 127.0.0.1:33214 conn8: { driver: { name: "PyMongo", version: "3.11.2" }, os: { type: "Linux", name: "Linux", architecture: "x86_64", version: "5.4.0-56-generic" }, platform: "CPython 3.8.5.final.0" }
+2021-04-08T17:34:08.261+0200 I NETWORK  [listener] connection accepted from 127.0.0.1:33216 #9 (9 connections now open)
+2021-04-08T17:34:08.261+0200 I NETWORK  [listener] connection accepted from 127.0.0.1:33218 #10 (10 connections now open)
+2021-04-08T17:34:08.262+0200 I NETWORK  [conn10] received client metadata from 127.0.0.1:33218 conn10: { driver: { name: "PyMongo", version: "3.11.2" }, os: { type: "Linux", name: "Linux", architecture: "x86_64", version: "5.4.0-56-generic" }, platform: "CPython 3.8.5.final.0" }
+2021-04-08T17:34:08.262+0200 I NETWORK  [listener] connection accepted from 127.0.0.1:33220 #11 (11 connections now open)
+2021-04-08T17:34:08.262+0200 I NETWORK  [conn11] received client metadata from 127.0.0.1:33220 conn11: { driver: { name: "PyMongo", version: "3.11.2" }, os: { type: "Linux", name: "Linux", architecture: "x86_64", version: "5.4.0-56-generic" }, platform: "CPython 3.8.5.final.0" }
+2021-04-08T17:34:08.264+0200 I NETWORK  [listener] connection accepted from 127.0.0.1:33222 #12 (12 connections now open)
+2021-04-08T17:34:08.264+0200 I NETWORK  [listener] connection accepted from 127.0.0.1:33224 #13 (13 connections now open)
+2021-04-08T17:34:08.264+0200 I NETWORK  [conn12] received client metadata from 127.0.0.1:33222 conn12: { driver: { name: "PyMongo", version: "3.11.2" }, os: { type: "Linux", name: "Linux", architecture: "x86_64", version: "5.4.0-56-generic" }, platform: "CPython 3.8.5.final.0" }
+2021-04-08T17:34:08.264+0200 I NETWORK  [listener] connection accepted from 127.0.0.1:33226 #14 (14 connections now open)
+2021-04-08T17:34:08.265+0200 I NETWORK  [conn14] received client metadata from 127.0.0.1:33226 conn14: { driver: { name: "PyMongo", version: "3.11.2" }, os: { type: "Linux", name: "Linux", architecture: "x86_64", version: "5.4.0-56-generic" }, platform: "CPython 3.8.5.final.0" }
+2021-04-08T17:34:08.266+0200 I NETWORK  [listener] connection accepted from 127.0.0.1:33228 #15 (15 connections now open)
+2021-04-08T17:34:08.266+0200 I NETWORK  [conn7] received client metadata from 127.0.0.1:33212 conn7: { driver: { name: "PyMongo", version: "3.11.2" }, os: { type: "Linux", name: "Linux", architecture: "x86_64", version: "5.4.0-56-generic" }, platform: "CPython 3.8.5.final.0" }
+2021-04-08T17:34:08.272+0200 I NETWORK  [conn13] received client metadata from 127.0.0.1:33224 conn13: { driver: { name: "PyMongo", version: "3.11.2" }, os: { type: "Linux", name: "Linux", architecture: "x86_64", version: "5.4.0-56-generic" }, platform: "CPython 3.8.5.final.0" }
+2021-04-08T17:34:08.273+0200 I NETWORK  [conn15] received client metadata from 127.0.0.1:33228 conn15: { driver: { name: "PyMongo", version: "3.11.2" }, os: { type: "Linux", name: "Linux", architecture: "x86_64", version: "5.4.0-56-generic" }, platform: "CPython 3.8.5.final.0" }
+2021-04-08T17:34:08.273+0200 I NETWORK  [conn9] received client metadata from 127.0.0.1:33216 conn9: { driver: { name: "PyMongo", version: "3.11.2" }, os: { type: "Linux", name: "Linux", architecture: "x86_64", version: "5.4.0-56-generic" }, platform: "CPython 3.8.5.final.0" }
+2021-04-08T17:34:08.298+0200 I NETWORK  [listener] connection accepted from 127.0.0.1:33230 #16 (16 connections now open)
+2021-04-08T17:34:08.298+0200 I NETWORK  [conn16] received client metadata from 127.0.0.1:33230 conn16: { driver: { name: "PyMongo", version: "3.11.2" }, os: { type: "Linux", name: "Linux", architecture: "x86_64", version: "5.4.0-56-generic" }, platform: "CPython 3.8.5.final.0" }
+2021-04-08T17:34:08.300+0200 I NETWORK  [listener] connection accepted from 127.0.0.1:33232 #17 (17 connections now open)
+2021-04-08T17:34:08.300+0200 I NETWORK  [conn17] received client metadata from 127.0.0.1:33232 conn17: { driver: { name: "PyMongo", version: "3.11.2" }, os: { type: "Linux", name: "Linux", architecture: "x86_64", version: "5.4.0-56-generic" }, platform: "CPython 3.8.5.final.0" }
+2021-04-08T17:34:08.311+0200 I ACCESS   [conn17] Successfully authenticated as principal machinaide on admin
+2021-04-08T17:34:08.321+0200 I NETWORK  [listener] connection accepted from 127.0.0.1:33234 #18 (18 connections now open)
+2021-04-08T17:34:08.321+0200 I NETWORK  [conn18] received client metadata from 127.0.0.1:33234 conn18: { driver: { name: "PyMongo", version: "3.11.2" }, os: { type: "Linux", name: "Linux", architecture: "x86_64", version: "5.4.0-56-generic" }, platform: "CPython 3.8.5.final.0" }
+2021-04-08T17:34:08.345+0200 I CONTROL  [signalProcessingThread] got signal 2 (Interrupt), will terminate after current cmd ends
+2021-04-08T17:34:08.345+0200 I NETWORK  [signalProcessingThread] shutdown: going to close listening sockets...
+2021-04-08T17:34:08.345+0200 I NETWORK  [signalProcessingThread] removing socket file: /tmp/mongodb-27017.sock
+2021-04-08T17:34:08.345+0200 I FTDC     [signalProcessingThread] Shutting down full-time diagnostic data capture
+2021-04-08T17:34:08.345+0200 I STORAGE  [signalProcessingThread] WiredTigerKVEngine shutting down
+2021-04-08T17:34:08.432+0200 I STORAGE  [signalProcessingThread] shutdown: removing fs lock...
+2021-04-08T17:34:08.432+0200 I CONTROL  [signalProcessingThread] now exiting
+2021-04-08T17:34:08.432+0200 I CONTROL  [signalProcessingThread] shutting down with code:0

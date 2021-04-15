@@ -1,0 +1,11 @@
+[
+	["Show the component sampleComp1 and component sampleComp2 sensors with pressure value is less than 50 and larger than 30 in the last 10 days", {"entities": [[19, 30, "COMP"], [45, 56, "COMP"], [88, 100, "VALUE"], [105, 119, "VALUE"], [127, 139, "RANGE"]]}],
+	["Show the component sampleComp1 and component sampleComp2 sensors with pressure value is less than 50 and larger than 30 in the last 10 days", {"entities": [[45, 56, "COMP"]]}],
+	["Show the component sampleComp1 and component sampleComp2 sensors with pressure value is less than 50 and larger than 30 in the last 10 days", {"entities": [[88, 100, "VALUE"]]}],
+	["Show the component sampleComp1 and component sampleComp2 sensors with pressure value is less than 50 and larger than 30 in the last 10 days", {"entities": [[19, 30, "COMP"], [88, 100, "VALUE"], [105, 119, "VALUE"], [127, 139, "RANGE"]]}],
+	["Show the component sampleComp1 and component sampleComp2 sensors with pressure value is less than 50 and larger than 30 in the last 10 days", {"entities": [[19, 30, "COMP"], [88, 100, "VALUE"], [127, 139, "RANGE"]]}],
+	["Show the component sampleComp1 and component sampleComp2 sensors with pressure value is less than 50 and larger than 30 in the last 10 days", {"entities": [[87, 100, "VALUE"], [19, 31, "MACH"]]}],
+	["Show the component sampleComp1 and component sampleComp2 sensors with pressure value is less than 50 and larger than 30 in the last 10 days", {"entities": [[19, 30, "COMP"]]}],
+	["Show the component sampleComp1 and component sampleComp2 sensors with pressure value is less than 50 and larger than 30 in the last 15 days", {"entities": [[19, 30, "COMP"], [126, 139, "RANGE"], [88, 100, "VALUE"], [105, 119, "VALUE"]]}],
+	["Show the component sampleComp1 and component sampleComp2 sensors with pressure value is less than 50 and larger than 30 in the last 20 days", {"entities": [[19, 30, "COMP"], [88, 100, "VALUE"], [105, 119, "VALUE"], [127, 139, "RANGE"]]}]
+]

@@ -1,0 +1,17 @@
+[
+    ["Show me component yaglama's sensors", {"entities": [[18, 25, "COMP"]]}],
+    ["Show me component dengeleme's sensors", {"entities": [[18, 27, "COMP"]]}],
+    ["Show me component anaMotor's sensors", {"entities": [[18, 26, "COMP"]]}],
+    ["Show me jpress's sensors", {"entities": [[8, 14, "COMP"]]}],
+    ["Show me machine Press030's components", {"entities": [[16, 24, "MACH"]]}],
+    ["Show me machine Press123's all sensors", {"entities": [[16, 24, "MACH"]]}],
+    ["Show me Press123's all components", {"entities": [[8, 16, "MACH"]]}],
+    ["Show me machine Press030", {"entities": [[16, 24, "MACH"]]}],
+    ["Show me sensor sensor1", {"entities": [[15, 22, "SENS"]]}],
+    ["Show me sensor heat234", {"entities": [[15, 22, "SENS"]]}],
+    ["Show me machine ana makine's component uselessComp", {"entities": [[16, 26, "MACH"], [39, 50, "COMP"]]}],
+    ["Show me sensors with heat value is greater than 50 in the last 24 hours", {"entities": [[35, 50, "VALUE"], [58, 71, "RANGE"]]}],
+    ["Show me component Press12's sensors with heat value between 20 and 30", {"entities": [[18, 25, "COMP"],[52, 69, "VALUE"]]}],
+    ["Show me sensors with pressure value less than 120", {"entities": [[36, 49, "VALUE"]]}],
+    ["Show me sensors with heat value greater than 60 but less than 70", {"entities": [[32, 47, "VALUE"], [52, 64, "VALUE"]]}]
+]
