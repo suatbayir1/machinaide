@@ -106,7 +106,7 @@ const UserWidget: FC<Props> = ({
             <Link className={className} to={`${orgPrefix}/members`} />
           )}
         />
-        <TreeNav.UserItem
+        {/* <TreeNav.UserItem
           id="about"
           label="About"
           testID="user-nav-item-about"
@@ -114,10 +114,10 @@ const UserWidget: FC<Props> = ({
           linkElement={className => (
             <Link className={className} to={`${orgPrefix}/about`} />
           )}
-        />
+        /> */}
         <TreeNav.UserItem
           id="switch-orgs"
-          label="Organizations"
+          label="Production Lines"
           testID="user-nav-item-orgs"
           linkElement={className => (
             <Link className={className} to="/orgs/list" />
@@ -131,7 +131,7 @@ const UserWidget: FC<Props> = ({
         />
         <TreeNav.UserItem
           id="create-org"
-          label="Create Organization"
+          label="Create Production Line"
           testID="user-nav-item-create-orgs"
           linkElement={className => (
             <Link className={className} to="/orgs/new" />

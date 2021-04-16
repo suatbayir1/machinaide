@@ -52,7 +52,7 @@ class OrgListOverlay extends PureComponent<Props, State> {
             <Overlay visible={true}>
                 <Overlay.Container maxWidth={500}>
                     <Overlay.Header
-                        title="Organization List"
+                        title="Production Line List"
                         onDismiss={this.closeModal}
                         testID="create-org-overlay--header"
                     />

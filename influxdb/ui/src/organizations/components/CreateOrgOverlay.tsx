@@ -1,15 +1,15 @@
 // Libraries
-import React, {PureComponent, ChangeEvent} from 'react'
-import {connect, ConnectedProps} from 'react-redux'
-import {RouteComponentProps, withRouter} from 'react-router-dom'
+import React, { PureComponent, ChangeEvent } from 'react'
+import { connect, ConnectedProps } from 'react-redux'
+import { RouteComponentProps, withRouter } from 'react-router-dom'
 
-import {sample, startCase} from 'lodash'
+import { sample, startCase } from 'lodash'
 
 // Components
-import {Form, Input, Button, Overlay} from '@influxdata/clockface'
+import { Form, Input, Button, Overlay } from '@influxdata/clockface'
 
 // Types
-import {Bucket, Organization} from 'src/types'
+import { Bucket, Organization } from 'src/types'
 import {
   ButtonType,
   ComponentColor,
@@ -17,9 +17,9 @@ import {
 } from '@influxdata/clockface'
 
 // Actions
-import {createOrgWithBucket} from 'src/organizations/actions/thunks'
+import { createOrgWithBucket } from 'src/organizations/actions/thunks'
 
-interface OwnProps {}
+interface OwnProps { }
 
 type ReduxProps = ConnectedProps<typeof connector>
 type Props = OwnProps & ReduxProps & RouteComponentProps
@@ -37,8 +37,8 @@ class CreateOrgOverlay extends PureComponent<Props, State> {
   constructor(props) {
     super(props)
     this.state = {
-      org: {name: ''},
-      bucket: {name: '', retentionRules: [], readableRetention: 'forever'},
+      org: { name: '' },
+      bucket: { name: '', retentionRules: [], readableRetention: 'forever' },
       orgNameInputStatus: ComponentStatus.Default,
       bucketNameInputStatus: ComponentStatus.Default,
       orgErrorMessage: '',
@@ -60,18 +60,18 @@ class CreateOrgOverlay extends PureComponent<Props, State> {
       <Overlay visible={true}>
         <Overlay.Container maxWidth={500}>
           <Overlay.Header
-            title="Create Organization"
+            title="Create Production Line"
             onDismiss={this.closeModal}
             testID="create-org-overlay--header"
           />
           <Form onSubmit={this.handleCreateOrg}>
             <Overlay.Body>
               <Form.Element
-                label="Organization Name"
+                label="Production Line Name"
                 errorMessage={orgErrorMessage}
               >
                 <Input
-                  placeholder="Give your organization a name"
+                  placeholder="Give your production line a name"
                   name="name"
                   autoFocus={true}
                   value={org.name}
@@ -112,7 +112,7 @@ class CreateOrgOverlay extends PureComponent<Props, State> {
   }
 
   private get submitButtonStatus(): ComponentStatus {
-    const {org, bucket} = this.state
+    const { org, bucket } = this.state
 
     if (org.name && bucket.name) {
       return ComponentStatus.Default
@@ -122,8 +122,8 @@ class CreateOrgOverlay extends PureComponent<Props, State> {
   }
 
   private handleCreateOrg = async () => {
-    const {org, bucket} = this.state
-    const {createOrgWithBucket} = this.props
+    const { org, bucket } = this.state
+    const { createOrgWithBucket } = this.props
 
     await createOrgWithBucket(org, bucket)
   }
@@ -135,7 +135,7 @@ class CreateOrgOverlay extends PureComponent<Props, State> {
   private handleChangeOrgInput = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     const key = e.target.name
-    const org = {...this.state.org, [key]: value}
+    const org = { ...this.state.org, [key]: value }
 
     if (!value) {
       return this.setState({
@@ -155,7 +155,7 @@ class CreateOrgOverlay extends PureComponent<Props, State> {
   private handleChangeBucketInput = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     const key = e.target.name
-    const bucket = {...this.state.bucket, [key]: value}
+    const bucket = { ...this.state.bucket, [key]: value }
 
     if (!value) {
       return this.setState({

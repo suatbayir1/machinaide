@@ -422,7 +422,7 @@ class UsersIndex extends Component<Props, State> {
                                             <Table.Header>
                                                 <Table.Row>
                                                     <Table.HeaderCell style={{ width: "200px" }}>Username</Table.HeaderCell>
-                                                    <Table.HeaderCell style={{ width: "200px" }}>Organizations</Table.HeaderCell>
+                                                    <Table.HeaderCell style={{ width: "200px" }}>Production Lines</Table.HeaderCell>
                                                     <Table.HeaderCell style={{ width: "250px" }}>Role</Table.HeaderCell>
                                                     <Table.HeaderCell style={{ width: "200px" }}>Active</Table.HeaderCell>
                                                     <Table.HeaderCell style={{ width: "50px" }}></Table.HeaderCell>

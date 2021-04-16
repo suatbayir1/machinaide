@@ -1,19 +1,19 @@
 // Libraries
-import React, {PureComponent} from 'react'
+import React, { PureComponent } from 'react'
 import _ from 'lodash'
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 // Components
-import {Tabs, Orientation, ComponentSize} from '@influxdata/clockface'
+import { Tabs, Orientation, ComponentSize } from '@influxdata/clockface'
 import CloudExclude from 'src/shared/components/cloud/CloudExclude'
 import CloudOnly from 'src/shared/components/cloud/CloudOnly'
-import {FeatureFlag} from 'src/shared/utils/featureFlag'
+import { FeatureFlag } from 'src/shared/utils/featureFlag'
 
 // Constants
-import {CLOUD_USERS_PATH, CLOUD_URL} from 'src/shared/constants'
+import { CLOUD_USERS_PATH, CLOUD_URL } from 'src/shared/constants'
 
 // Decorators
-import {ErrorHandling} from 'src/shared/decorators/errors'
+import { ErrorHandling } from 'src/shared/decorators/errors'
 
 interface Props {
   activeTab: string
@@ -34,7 +34,7 @@ interface OrgPageTab {
 @ErrorHandling
 class OrgNavigation extends PureComponent<Props> {
   public render() {
-    const {activeTab, orgID} = this.props
+    const { activeTab, orgID } = this.props
 
     const tabs: OrgPageTab[] = [
       {
@@ -49,11 +49,11 @@ class OrgNavigation extends PureComponent<Props> {
         cloudOnly: true,
         href: `${CLOUD_URL}/organizations/${orgID}${CLOUD_USERS_PATH}`,
       },
-      {
-        text: 'About',
-        id: 'about',
-        link: `/orgs/${orgID}/about`,
-      },
+      // {
+      //   text: 'About',
+      //   id: 'about',
+      //   link: `/orgs/${orgID}/about`,
+      // },
     ]
 
     return (

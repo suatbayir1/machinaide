@@ -694,27 +694,27 @@ export const removeBucketLabelFailed = (): Notification => ({
 
 export const orgCreateSuccess = (): Notification => ({
   ...defaultSuccessNotification,
-  message: 'Organization was successfully created',
+  message: 'Production line was successfully created',
 })
 
 export const orgCreateFailed = (): Notification => ({
   ...defaultErrorNotification,
-  message: 'Failed to create organization',
+  message: 'Failed to create production line',
 })
 
 export const orgDeleteSuccess = (orgName: string): Notification => ({
   ...defaultSuccessNotification,
-  message: `Organization was successfully deleted "${orgName}"`
+  message: `Production line was successfully deleted "${orgName}"`
 })
 
 export const orgEditSuccess = (): Notification => ({
   ...defaultSuccessNotification,
-  message: 'Organization was successfully updated',
+  message: 'Production line was successfully updated',
 })
 
 export const orgEditFailed = (): Notification => ({
   ...defaultErrorNotification,
-  message: 'Failed to update organization',
+  message: 'Failed to update production line',
 })
 
 export const orgRenameSuccess = (orgName: string): Notification => ({

@@ -76,7 +76,7 @@ class AddMemberOverlay extends PureComponent<Props, State> {
         const result = await MemberService.addMemberToOrganization(payload, this.props.orgID);
 
         if (result["code"] === "internal error") {
-            this.props.handleChangeNotification("error", "This user already a member of this organization");
+            this.props.handleChangeNotification("error", "This user already a member of this production line");
             return;
         }
 
@@ -89,7 +89,7 @@ class AddMemberOverlay extends PureComponent<Props, State> {
 
         console.log(mongoResult);
 
-        this.props.handleChangeNotification("success", "User successfully added to the organization");
+        this.props.handleChangeNotification("success", "User successfully added to the production line");
         this.props.getMembers();
         this.props.handleDismissAddMemberOverlay();
     }
