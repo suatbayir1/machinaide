@@ -17,6 +17,35 @@ class OrganizationService {
         }
     }
 
+    getAllOwnersFromOrganization = async (orgID) => {
+        const url = `${INFLUX.CHRONOGRAF_URL}api/v2/orgs/${orgID}/owners`;
+
+        const request = fetch(url);
+
+        try {
+            const response = await request;
+            const res = await response.json();
+            return res;
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    removeOwnerOfAnOrganization = async (orgID, userID) => {
+        const url = `${INFLUX.CHRONOGRAF_URL}api/v2/orgs/${orgID}/owners/${userID}`;
+
+        const request = fetch(url, {
+            method: 'DELETE'
+        });
+
+        try {
+            const response = await request;
+            return response;
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
     deleteOrganizationFromUsers = async (payload) => {
         const url = `${BACKEND.API_URL}user/removeOrganizationFromAllUsers`;
 

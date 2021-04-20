@@ -8,7 +8,7 @@ import os
 # flask server
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = 'machinaide' ## name of the used database
-app.config['MONGO_URI'] = 'mongodb://machinaide:erste2020@localhost:27017/machinaide'
+app.config['MONGO_URI'] = 'mongodb://machinaide:erste2020@localhost:27017/admin'
 mongo = PyMongo(app)
 
 def train_model():

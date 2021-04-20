@@ -36,6 +36,7 @@ dbtoken = "FlviKxQ-RHHWxd1FRkHIc5VwNZuFnP6QTmsJcU6GI7nrd4cuqaTx3cCijZchENMH0zSGu
 # constants
 
 comparisons = {'GREATER': '>', 'EQUAL': '==', 'LESS': '<'}
+stats = {'MIN': 'min()', 'MAX': 'max()', 'AVG': 'mean()'}
 math_symbols = ['>', '>=', '<', '<=', '=', '==']
 math_symbol_dict = {'>': ' greater than ', '>=': ' greater than or equal to ', '<': ' less than ', '<=': ' less than or equal to ', '=': ' equal to ', '==': ' equal to '}
 threshold = 85 # string matching score threshold
@@ -44,8 +45,10 @@ threshold = 85 # string matching score threshold
 # given machine/component/sensor names
 
 COMP_NAMES = ["yaglama", "anaMotor", "compName", "sampleComp1", "sampleComp2"]
+SENS_NAMES = ["pressSens"]
 
-nlp = spacy.load("/home/machinaide/nlp/training/model-best")
+# nlp = spacy.load("/home/machinaide/nlp/training/model-best")
+nlp = spacy.load("/home/machinaide/nlp/test-model/training/model-best")
 
 """ for pipe in nlp.pipeline:
     print(pipe) """
@@ -79,9 +82,25 @@ matcher.add("GREATER", great_pattern)
 matcher.add("LESS", less_than_pattern)
 matcher.add("EQUAL", equal_to_pattern)
 
+stat_matcher = Matcher(nlp.vocab, validate=True)
+
+if(stat_matcher.get('MIN')):
+    stat_matcher.remove('MIN')
+if(stat_matcher.get('MAX')):
+    stat_matcher.remove('MAX')
+if(stat_matcher.get('AVG')):
+    stat_matcher.remove('AVG')
+
+min_pattern = [[{'LOWER': 'min'}], [{'LOWER': 'minimum'}]]
+max_pattern = [[{'LOWER': 'max'}], [{'LOWER': 'maximum'}]]
+avg_pattern = [[{'LOWER': 'avg'}], [{'LOWER': 'average'}], [{'LOWER': 'mean'}]]
+stat_matcher.add("MIN", min_pattern)
+stat_matcher.add("MAX", max_pattern)
+stat_matcher.add("AVG", avg_pattern)
+
 # format flux query based on detected entities
 
-def createQuery(doc, matcher):
+def createQuery(doc, matcher, stat_matcher):
     query = ""
     
     # get the db/bucket
@@ -95,7 +114,7 @@ def createQuery(doc, matcher):
     # get range
     range_entities = [ent for ent in doc.ents if ent.label_ == "RANGE"]
 
-    labels = [{"tag": ent.label_ , "start": ent.start_char, "end": ent.end_char} for ent in doc.ents]
+    labels = [{"tag": ent.label_ , "start": ent.start_char, "end": ent.end_char, "thing": ent.text} for ent in doc.ents]
     print("LABELS", labels)
 
     if(len(range_entities) > 0):
@@ -106,7 +125,7 @@ def createQuery(doc, matcher):
             if(token.pos_ == "NUM"):
                 which_date = token.text + token.head.text
         date = dateparser.parse(which_date)
-        # print("date:",date, which_date)
+        print("date:",date, which_date)
         if(date):
             year = date.year
             month = "0" + str(date.month) if date.month < 10 else date.month
@@ -117,6 +136,7 @@ def createQuery(doc, matcher):
             query_date = "{}-{}-{}T{}:{}:{}Z".format(year, month, day, hour, minute, second)
             query = query + "|> range(start: {})".format(query_date)
         else:
+            query = query + "|> range(start: -1h)"
             print("we need a default range query")
     else:
         print("we need a default range query")
@@ -136,6 +156,7 @@ def createQuery(doc, matcher):
                 comp_name = res[0][0]
                 comps.append(comp_name)
     comp_temp = ""
+    #eliminate duplicates
     comps = list(dict.fromkeys(comps))
     # print("****COMPS****", comps)
     for i in range(len(comps)):
@@ -164,9 +185,9 @@ def createQuery(doc, matcher):
     sens_temp = ""
     for i in range(len(sensors)):
         if(i != len(sensors)-1):
-            sens_temp = sens_temp + " r._field == {} or".format("\"" + sensors[i] + "\"")
+            sens_temp = sens_temp + " r._field == \\{} or".format("\"" + sensors[i] + "\\" + "\"")
         else:
-            sens_temp = sens_temp + " r._field == {}".format("\"" + sensors[i] + "\"")
+            sens_temp = sens_temp + " r._field == \\{}".format("\"" + sensors[i] + "\\" + "\"")
         
     if(len(sens_temp) > 0):
         query = query + "|> filter(fn: (r) => {} )".format(sens_temp)
@@ -211,6 +232,17 @@ def createQuery(doc, matcher):
     #     temp = temp + " r._value {}".format(value)
     if(len(temp) > 0):
         query = query + "|> filter(fn: (r) => {} )".format(temp)
+
+    stat_temp = ""
+    for match_id, start, end in stat_matcher(doc):
+        print("stats", doc[start:end])
+        string_id = nlp.vocab.strings[match_id]
+        replacement = stats[string_id]
+        stat_temp = "|> {}".format(replacement)
+    
+    if(len(stat_temp) > 0):
+        query = query + stat_temp
+
     return {"query": query, "labels": labels} 
 
 
@@ -388,7 +420,7 @@ def post_question():
         print("get result from model")
         # ner part
         doc = nlp(fixed_question)
-        result = createQuery(doc, matcher)
+        result = createQuery(doc, matcher, stat_matcher)
         query_result = result["query"]
         labels = result["labels"]
         print("from nlp-----> ", query_result)

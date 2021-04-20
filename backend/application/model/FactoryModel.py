@@ -91,7 +91,7 @@ class FactoryModel():
                                         "displayName": sensor["displayName"],
                                         "name": sensor["name"],
                                         "description": sensor["description"],
-                                        "sensorStatus": sensor["status"],
+                                        "sensorStatus": sensor["status"] if "status" in sensor else "unknown",
                                     }
 
                                     sensors.append(currentSensor)

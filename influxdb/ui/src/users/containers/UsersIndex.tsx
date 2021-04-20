@@ -3,6 +3,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom'
 import { connect, ConnectedProps } from 'react-redux'
 import UserService from 'src/users/services/UserService';
 import MemberService from 'src/members/services/MemberService';
+import OrganizationService from 'src/organizations/services/OrganizationService';
 import AddUserOverlay from 'src/users/components/AddUserOverlay';
 import ImportUserFile from 'src/users/components/ImportUserFile';
 import { getAll } from 'src/resources/selectors'
@@ -12,7 +13,6 @@ import { dataToCSV, dataToXLSX } from 'src/shared/parsing/dataToCsv';
 import download from 'src/external/download.js';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
-import Select from "react-dropdown-select";
 import { Link } from "react-router-dom"
 import HomeIcon from '@material-ui/icons/Home';
 import {
@@ -51,7 +51,6 @@ import { getByID } from 'src/resources/selectors'
 
 // Types
 import { AppState, Organization, ResourceType } from 'src/types'
-import { User } from '@influxdata/influx';
 
 type ReduxProps = ConnectedProps<typeof connector>
 type RouterProps = RouteComponentProps<{ orgID: string }>
@@ -124,9 +123,6 @@ class UsersIndex extends Component<Props, State> {
         }
 
         const deleteFromMongoResult = await UserService.deleteUserFromMongo(payload);
-
-        console.log(deleteFromMongoResult);
-        console.log(deleteResult.status);
 
         if (deleteResult.status === 204 && deleteFromMongoResult.data.summary.code === 200) {
             this.handleChangeNotification("success", "User deleted successfully");
@@ -259,7 +255,7 @@ class UsersIndex extends Component<Props, State> {
             "status": user.status === "active" ? "inactive" : "active"
         }
 
-        const influxResult = await UserService.updateUser(payload, user["userID"]);
+        await UserService.updateUser(payload, user["userID"]);
 
         const mongoResult = await UserService.updateUserFromMongo(payload);
 
@@ -301,7 +297,7 @@ class UsersIndex extends Component<Props, State> {
                 "name": user["username"]
             }
 
-            const influxResult = await MemberService.addMemberToOrganization(memberToOrgPayload, org["id"]);
+            await MemberService.addMemberToOrganization(memberToOrgPayload, org["id"]);
 
             this.handleChangeNotification("success", "User successfully added to the organization");
             this.getUsers();
@@ -311,6 +307,13 @@ class UsersIndex extends Component<Props, State> {
     }
 
     deleteUserFromOrganization = async (user, org) => {
+        const owners = await OrganizationService.getAllOwnersFromOrganization(org["id"]);
+        const isOwner = owners.users.find(u => u.name == user.username);
+
+        if (isOwner !== undefined) {
+            await OrganizationService.removeOwnerOfAnOrganization(org["id"], isOwner["id"]);
+        }
+
         const payload = {
             "oid": user["_id"]["$oid"],
             "organizations": user["organizations"].filter(obj => { return obj !== org })
@@ -319,7 +322,7 @@ class UsersIndex extends Component<Props, State> {
         const mongoResult = await UserService.updateUserFromMongo(payload);
 
         if (mongoResult.data.summary.code === 200) {
-            const influxResult = await MemberService.removeMemberFromOrganization(org["id"], user["userID"])
+            await MemberService.removeMemberFromOrganization(org["id"], user["userID"])
 
             this.handleChangeNotification("success", "User successfully deleted from organization");
             this.getUsers();

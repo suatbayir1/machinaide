@@ -8,6 +8,13 @@ import {Input, InputType,
 } from '@influxdata/clockface'
 import { BACKEND } from "src/config";
 import {TextAnnotator} from 'react-text-annotate'
+import GaugeChart from 'src/shared/components/GaugeChart'
+import {GaugeViewProperties} from 'src/types/dashboards'
+import {
+    DEFAULT_GAUGE_COLORS,
+  } from 'src/shared/constants/thresholds'
+import {Color} from 'src/types'
+import {defaultViewQuery, defaultView} from 'src/views/helpers'
 import {Context} from 'src/clockface'
 import SearchWidget from 'src/shared/components/search_widget/SearchWidget'
 
@@ -26,10 +33,12 @@ interface State{
     feedbackArrived: boolean
     errorHappened: boolean
     overlayVisible: boolean
+    graphOverlay: boolean
     annotations: Object[]
     entities: Object[]
     value: Object[]
     tag: string
+    properties: GaugeViewProperties
 }
 
 const styles = {
@@ -59,7 +68,7 @@ const tags = [
 
 class NLPSearch extends PureComponent<Props, State>{
     // private triggerRef: RefObject<ButtonRef> = createRef()
-    state = {
+    state: Readonly<State> = {
         question: '',
         fixedQuestion: '',
         data: '',
@@ -70,14 +79,21 @@ class NLPSearch extends PureComponent<Props, State>{
         feedbackArrived: false,
         errorHappened: false,
         overlayVisible: false,
+        graphOverlay: false,
         annotations: [],
         entities: [],
         value: [],
         tag: 'MACH',
+        properties: {} as GaugeViewProperties,
     }
 
     componentDidMount(){
         console.log("nlp comp is mounted")
+        this.setState({properties: 
+            {...this.defaultGaugeViewProperties(),
+            type: 'gauge',
+            shape: 'chronograf-v2',
+            legend: {}}})
     }
 
     async postQuestion(): Promise<void> {
@@ -269,6 +285,53 @@ class NLPSearch extends PureComponent<Props, State>{
         )
     }
 
+    graphOverlayComponent = () => {
+        return(
+            <Overlay visible={this.state.graphOverlay}>
+                <Overlay.Container maxWidth={750} style={{minHeight: "300px"}}>
+                    <Overlay.Header
+                        title="Graph Overlay"
+                        onDismiss={()=>this.setState({graphOverlay: !this.state.graphOverlay})}
+                    />
+                    <Overlay.Body>
+                    <Grid>
+                    <Grid.Row>
+                        <Grid.Column widthXS={Columns.Six}>
+                            Some text here
+                        </Grid.Column>
+                        <Grid.Column widthXS={Columns.Six}>
+                            <div style={{width: 'auto', height: '250px'}}>
+                            <GaugeChart
+                                value={77}
+                                properties={this.state.properties}
+                                theme={'dark'}
+                            /></div>
+                        </Grid.Column>
+                    </Grid.Row>
+                    </Grid>
+                    </Overlay.Body>
+                </Overlay.Container>
+            </Overlay>
+        )
+    }
+
+    defaultGaugeViewProperties = () => {
+        return {
+          queries: [defaultViewQuery()],
+          colors: DEFAULT_GAUGE_COLORS as Color[],
+          prefix: '',
+          tickPrefix: '',
+          suffix: '',
+          tickSuffix: '',
+          note: '',
+          showNoteWhenEmpty: false,
+          decimalPlaces: {
+            isEnforced: true,
+            digits: 2,
+          },
+        }
+    }
+
     render(){
         return(
             <Grid>
@@ -284,7 +347,7 @@ class NLPSearch extends PureComponent<Props, State>{
                             spellCheck={true}
                             name="question"
                             value={this.state.question}
-                            placeholder="Enter question"
+                            placeholder="Enter a question"
                             onChange={this.onChange}
                             rows={2}
                         />
@@ -295,6 +358,14 @@ class NLPSearch extends PureComponent<Props, State>{
                             icon={IconFont.Search}
                             color={ComponentColor.Primary}
                         />
+                        <Button
+                            text=""
+                            onClick={()=>this.setState({graphOverlay: !this.state.graphOverlay})}
+                            type={ButtonType.Button}
+                            icon={IconFont.AddCell}
+                            color={ComponentColor.Secondary}
+                        />
+                        {this.graphOverlayComponent()}
                     </div>
                 </Grid.Row>
                 <Grid.Row>
