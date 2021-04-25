@@ -1,23 +1,23 @@
 // Libraries
-import React, {PureComponent} from 'react'
-import {connect} from 'react-redux'
+import React, { PureComponent } from 'react'
+import { connect } from 'react-redux'
 import memoizeOne from 'memoize-one'
 
 // Components
 import DashboardCard from 'src/dashboards/components/dashboard_index/DashboardCard'
-import {TechnoSpinner} from '@influxdata/clockface'
+import { TechnoSpinner } from '@influxdata/clockface'
 import AssetLimitAlert from 'src/cloud/components/AssetLimitAlert'
 
 // Selectors
-import {getSortedResources, SortTypes} from 'src/shared/utils/sort'
+import { getSortedResources, SortTypes } from 'src/shared/utils/sort'
 
 // Types
-import {AppState, Dashboard, RemoteDataState} from 'src/types'
-import {Sort} from 'src/clockface'
-import {LimitStatus} from 'src/cloud/actions/limits'
+import { AppState, Dashboard, RemoteDataState } from 'src/types'
+import { Sort } from 'src/clockface'
+import { LimitStatus } from 'src/cloud/actions/limits'
 
 // Utils
-import {extractDashboardLimits} from 'src/cloud/utils/limits'
+import { extractDashboardLimits } from 'src/cloud/utils/limits'
 
 interface StateProps {
   limitStatus: LimitStatus
@@ -25,6 +25,7 @@ interface StateProps {
 
 interface OwnProps {
   dashboards: Dashboard[]
+  dashboardType: string
   sortKey: string
   sortDirection: Sort
   sortType: SortTypes
@@ -91,6 +92,7 @@ class DashboardCards extends PureComponent<OwnProps & StateProps> {
   public render() {
     const {
       dashboards,
+      dashboardType,
       sortDirection,
       sortKey,
       sortType,
@@ -103,25 +105,39 @@ class DashboardCards extends PureComponent<OwnProps & StateProps> {
       sortType
     )
 
-    const {windowSize, pages} = this.state
+    const { windowSize, pages } = this.state
 
     return (
-      <div style={{height: '100%', display: 'grid'}}>
+      <div style={{ height: '100%', display: 'grid' }}>
         <div className="dashboards-card-grid">
           {sortedDashboards
             .filter(d => d.status === RemoteDataState.Done)
             .slice(0, pages * windowSize)
-            .map(({id, name, description, labels, meta}) => (
-              <DashboardCard
-                key={id}
-                id={id}
-                name={name}
-                labels={labels}
-                updatedAt={meta.updatedAt}
-                description={description}
-                onFilterChange={onFilterChange}
-              />
-            ))}
+            .map(({ id, name, description, labels, meta }) => {
+              if (dashboardType === "System Health") {
+                if (!name.includes("Monitor")) {
+                  return;
+                }
+              }
+
+              if (dashboardType === "Organization's Dashboards") {
+                if (name.includes("Personalized by")) {
+                  return;
+                }
+              }
+
+              return (
+                <DashboardCard
+                  key={id}
+                  id={id}
+                  name={name}
+                  labels={labels}
+                  updatedAt={meta.updatedAt}
+                  description={description}
+                  onFilterChange={onFilterChange}
+                />
+              )
+            })}
           <AssetLimitAlert
             className="dashboards--asset-alert"
             resourceName="dashboards"
@@ -130,7 +146,7 @@ class DashboardCards extends PureComponent<OwnProps & StateProps> {
         </div>
         {windowSize * pages < dashboards.length && (
           <div
-            style={{height: '140px', margin: '14px auto'}}
+            style={{ height: '140px', margin: '14px auto' }}
             ref={this.registerSpinner}
           >
             <TechnoSpinner />
@@ -143,7 +159,7 @@ class DashboardCards extends PureComponent<OwnProps & StateProps> {
 
 const mstp = (state: AppState) => {
   const {
-    cloud: {limits},
+    cloud: { limits },
   } = state
 
   return {

@@ -1,0 +1,22 @@
+{"text": "Show me component yaglama's sensors", "cats": {"mongodb": 0.0, "influxdb": 1.0}}
+{"text": "Show me component dengeleme's sensors", "cats": {"mongodb": 0.0, "influxdb": 1.0}}
+{"text": "Show me component anaMotor's sensors", "cats": {"mongodb": 0.0, "influxdb": 1.0}}
+{"text": "Show me jpress's sensors", "cats": {"mongodb": 0.0, "influxdb": 1.0}}
+{"text": "Show me machine Press030's components", "cats": {"mongodb": 0.0, "influxdb": 1.0}}
+{"text": "Show me machine Press123's all sensors", "cats": {"mongodb": 0.0, "influxdb": 1.0}}
+{"text": "Show me Press123's all components", "cats": {"mongodb": 0.0, "influxdb": 1.0}}
+{"text": "Show me machine Press030", "cats": {"mongodb": 0.0, "influxdb": 1.0}}
+{"text": "Show me sensor sensor1", "cats": {"mongodb": 0.0, "influxdb": 1.0}}
+{"text": "Show me sensor heat234", "cats": {"mongodb": 0.0, "influxdb": 1.0}}
+{"text": "Show me machine ana makine's component uselessComp", "cats": {"mongodb": 0.0, "influxdb": 1.0}}
+{"text": "Show me sensors with heat value is greater than 50 in the last 24 hours", "cats": {"mongodb": 0.0, "influxdb": 1.0}}
+{"text": "Show me component Press12's sensors with heat value between 20 and 30", "cats": {"mongodb": 0.0, "influxdb": 1.0}}
+{"text": "Show me sensors with pressure value less than 120", "cats": {"mongodb": 0.0, "influxdb": 1.0}}
+{"text": "Show me sensors with heat value greater than 60 but less than 70", "cats": {"mongodb": 0.0, "influxdb": 1.0}}
+{"text": "What is the maximum value of the component sampleComp's sensor heatX12 in the last hour?", "cats": {"mongodb": 0.0, "influxdb": 1.0}}
+{"text": "Show me the average value of component Pres31's sensor pressE23 in the last week", "cats": {"mongodb": 0.0, "influxdb": 1.0}}
+{"text": "Show me the components that have maintenance records in the last week", "cats": {"mongodb": 1.0, "influxdb": 0.0}}
+{"text": "Show me the component Press12's sensors that have failure records in the last month", "cats": {"mongodb": 1.0, "influxdb": 0.0}}
+{"text": "Show me the components that have replacements in the last 2 weeks", "cats": {"mongodb": 1.0, "influxdb": 0.0}}
+{"text": "How many times did component Yaglama have maintenance in the last month", "cats": {"mongodb": 1.0, "influxdb": 0.0}}
+{"text": "How many products did machine Press030 manufacture in this week", "cats": {"mongodb": 1.0, "influxdb": 0.0}}

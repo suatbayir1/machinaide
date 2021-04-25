@@ -2,6 +2,7 @@ import spacy
 from fuzzywuzzy import process # string matching based on a score https://github.com/seatgeek/fuzzywuzzy
 import dateparser
 import random 
+import datetime
 import datetime as dt
 from spellchecker import SpellChecker
 from spacy.util import minibatch, compounding, decaying
@@ -13,6 +14,7 @@ from flask_cors import CORS
 from flask import jsonify
 from flask import request
 from flask_pymongo import PyMongo
+from pymongo import MongoClient
 
 # for querying influxdb through api
 import requests
@@ -22,10 +24,10 @@ from bson.json_util import dumps
 
 # flask server
 app = Flask(__name__)
-app.config['MONGO_DBNAME'] = 'machinaide' ## name of the used database
-app.config['MONGO_URI'] = 'mongodb://machinaide:erste2020@localhost:27017/admin'
+# app.config['DATABASE'] = 'machinaide' ## name of the used database
+# app.config['MONGO_URI'] = 'mongodb://machinaide:erste2020@localhost:27017/admin'
 CORS(app,supports_credentials=True)
-mongo = PyMongo(app)
+mongo = MongoClient('mongodb://machinaide:erste2020@localhost:27017/')
 influx_api = "http://localhost:8086/api/v2"
 
 # spellchecker
@@ -48,19 +50,24 @@ COMP_NAMES = ["yaglama", "anaMotor", "compName", "sampleComp1", "sampleComp2"]
 SENS_NAMES = ["pressSens"]
 
 # nlp = spacy.load("/home/machinaide/nlp/training/model-best")
-nlp = spacy.load("/home/machinaide/nlp/test-model/training/model-best")
+nlp = spacy.load("/home/machinaide/nlp/ner-pipe/training/model-best")
 
 """ for pipe in nlp.pipeline:
     print(pipe) """
 
 # The source pipeline with different components
 source_nlp = spacy.load("en_core_web_trf")
+
+# the textcat pipeline
+textcat_nlp = spacy.load("/home/machinaide/nlp/textcat-pipe/training/model-best")
 # print("source pipes",source_nlp.pipe_names)
+nlp.add_pipe("textcat", source=textcat_nlp)
 
 for pipe in source_nlp.pipeline:
-    if(pipe[0] != "ner"):
+    if(pipe[0] != "ner" and pipe[0] != "textcat"):
         nlp.add_pipe(pipe[0], source=source_nlp)
-# print("after", nlp.pipe_names)
+
+print("after", nlp.pipe_names)
 
 matcher = Matcher(nlp.vocab, validate=True)
 
@@ -101,6 +108,15 @@ stat_matcher.add("AVG", avg_pattern)
 # format flux query based on detected entities
 
 def createQuery(doc, matcher, stat_matcher):
+
+    textcat = nlp.get_pipe("textcat")
+    scores = textcat.predict([doc])
+    # nlp.set_annotations(doc, scores)
+    print("#########\n", scores)
+    predicted_labels = scores.argmax(axis=1)
+    textcat_labels = [textcat.labels[label] for label in predicted_labels]
+    # print([textcat.labels[label] for label in predicted_labels])
+
     query = ""
     
     # get the db/bucket
@@ -139,6 +155,7 @@ def createQuery(doc, matcher, stat_matcher):
             query = query + "|> range(start: -1h)"
             print("we need a default range query")
     else:
+        query = query + "|> range(start: -1h)"
         print("we need a default range query")
     
     # get components/measurements
@@ -234,16 +251,19 @@ def createQuery(doc, matcher, stat_matcher):
         query = query + "|> filter(fn: (r) => {} )".format(temp)
 
     stat_temp = ""
+    graph_overlay = False
     for match_id, start, end in stat_matcher(doc):
         print("stats", doc[start:end])
+        graph_overlay = True
         string_id = nlp.vocab.strings[match_id]
         replacement = stats[string_id]
         stat_temp = "|> {}".format(replacement)
+        break
     
     if(len(stat_temp) > 0):
         query = query + stat_temp
 
-    return {"query": query, "labels": labels} 
+    return {"query": query, "labels": labels, "graphOverlay": graph_overlay, "textcatLabels": textcat_labels} 
 
 
 """ doc2 = nlp("Show the component comname and component yaglam sensors with pressure value is less than 50 and larger 30 in the last 2 days")
@@ -354,15 +374,20 @@ def from_train_data(data):
     return {"query": query}
 
 def check_in_training_data(question):
-    exist = mongo.db.nlp_questions.find_one({"question": question})
+    exist = mongo.machinaide.nlp_questions.find_one({"question": question})
     if(exist):
         # send annotations to create query from annotations
         data = from_train_data(exist)
-        return {"exists":True, "query":data["query"], "labels": exist["entities"]}
+        return {"exists":True, "query":data["query"], "labels": exist["entities"], "cat": exist["cat"]}
     else:
         # tell that model should create the query
         return {"exists":False}
 
+def category_parse(cat):
+    if(cat == "Sensor data"):
+        return "influxdb"
+    elif(cat == "Metadata"):
+        return "mongodb"
 
 @app.route('/postQuestion', methods=['POST'])
 def post_question():
@@ -416,6 +441,8 @@ def post_question():
         print("from mongo data ---- ", in_mongodb["query"])
         query_result = in_mongodb["query"]
         labels = in_mongodb["labels"]
+        textcat_labels = [category_parse(in_mongodb["cat"])]
+        graph_overlay = False # TODO: create min/max check for training data 
     else:
         print("get result from model")
         # ner part
@@ -423,6 +450,8 @@ def post_question():
         result = createQuery(doc, matcher, stat_matcher)
         query_result = result["query"]
         labels = result["labels"]
+        textcat_labels = result["textcatLabels"]
+        graph_overlay = result["graphOverlay"]
         print("from nlp-----> ", query_result)
     # payload = "{\"query\": \"from(bucket: \\\"nlp_sample\\\")|> range(start: 2021-03-04T13:42:06Z)|> filter(fn: (r) =>  r._measurement == \\\"sampleComp1\\\" )|> filter(fn: (r) =>  r._value > 4 and r._value < 77 )\",\"type\": \"flux\"}"
     payload2 = "{\"query\": \"" + query_result + "\",\"type\": \"flux\"}"
@@ -434,7 +463,7 @@ def post_question():
     
     if('json' in api_response.headers.get('Content-Type')):
         print(api_response.json())
-        return jsonify(error=api_response.json()["message"], entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed)
+        return jsonify(error=api_response.json()["message"], entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed, graphOverlay=False, textcatLabels=textcat_labels)
     if(api_response.text):
         """ lines = api_response.text.split('\r\n')
         data = []
@@ -459,13 +488,13 @@ def post_question():
 
         print("data: ", send_data)
         return jsonify(result=send_data) """
-        return jsonify(query=query_result, data=api_response.text, entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed)
+        return jsonify(query=query_result, data=api_response.text, entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed, graphOverlay=graph_overlay, textcatLabels=textcat_labels)
     else:
-        return jsonify(msg="No response", entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed)
+        return jsonify(msg="No response", entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed, graphOverlay=graph_overlay, textcatLabels=textcat_labels)
 
 @app.route('/postTrainData', methods=['PUT'])
 def postTrainData():
-    res = mongo.db.nlp_questions.update_one({"question": request.json['question']}, {"$set": {"entities": request.json["entities"]}}, upsert=True)
+    res = mongo.machinaide.nlp_questions.update_one({"question": request.json['question']}, {"$set": {"entities": request.json["entities"], "cat": request.json["cat"]}}, upsert=True)
     return jsonify(msg="Train data added.")
     """ exist = mongo.db.nlp_questions.find_one({"question": request.json['question']})
     if(exist):
@@ -489,7 +518,9 @@ def sample_query():
 
 @app.route('/testAPI', methods=['GET'])
 def testAPI():
-    res = dumps(mongo.db.nlp_questions.find())
+    res = dumps(mongo.machinaide.nlp_questions.find())
+    # res = dumps(mongo.machinaide.failures.find())
+    print(res)
     return jsonify(msg="Working", res=res)
 
 if __name__ == '__main__':

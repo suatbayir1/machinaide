@@ -1,0 +1,10 @@
+{
+  "labels":[
+    "maintenance",
+    "failure",
+    "maintenancecount",
+    "failurecount"
+  ],
+  "threshold":0.5,
+  "positive_label":null
+}

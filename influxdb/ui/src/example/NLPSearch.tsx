@@ -38,7 +38,9 @@ interface State{
     entities: Object[]
     value: Object[]
     tag: string
+    category: string
     properties: GaugeViewProperties
+    textcatLabels: any[]
 }
 
 const styles = {
@@ -66,6 +68,11 @@ const tags = [
     'RANGE'
 ]
 
+const cats = [
+    'Sensor data',
+    'Metadata'
+]
+
 class NLPSearch extends PureComponent<Props, State>{
     // private triggerRef: RefObject<ButtonRef> = createRef()
     state: Readonly<State> = {
@@ -84,7 +91,9 @@ class NLPSearch extends PureComponent<Props, State>{
         entities: [],
         value: [],
         tag: 'MACH',
+        category: 'Sensor data',
         properties: {} as GaugeViewProperties,
+        textcatLabels: [],
     }
 
     componentDidMount(){
@@ -151,7 +160,7 @@ class NLPSearch extends PureComponent<Props, State>{
                 entities: res["entities"],
                 fixedQuestion: res["fixedQuestion"],
                 isFixed: res['isFixed'],
-                value: []})
+                value: [], textcatLabels: res['textcatLabels']})
             }
             else if(res["data"]){
                 let query = res["query"].replaceAll("|>", "\n\t|>")
@@ -165,7 +174,8 @@ class NLPSearch extends PureComponent<Props, State>{
                     resultArrived: true, 
                     feedbackArrived: false,
                     overlayVisible: false,
-                    value: [],
+                    graphOverlay: res["graphOverlay"],
+                    value: [], textcatLabels: res['textcatLabels']
                 })
             }
             else{
@@ -173,7 +183,7 @@ class NLPSearch extends PureComponent<Props, State>{
                 entities: res["entities"],
                 fixedQuestion: res["fixedQuestion"],
                 isFixed: res['isFixed'],
-                value: []})
+                value: [], textcatLabels: res['textcatLabels']})
             }            
         }).catch(err=>console.log(err))
     }
@@ -188,7 +198,7 @@ class NLPSearch extends PureComponent<Props, State>{
     }
 
     sendAnnotations = () => {
-        let data = {question: this.state.fixedQuestion, entities: []}
+        let data = {question: this.state.fixedQuestion, entities: [], cat: this.state.category}
         let entities = []
         for(let annotation of this.state.value){
             let entity = {}
@@ -241,7 +251,28 @@ class NLPSearch extends PureComponent<Props, State>{
                                         />
                                     </div>
                                 </Grid.Column>
-                                <Grid.Column widthXS={Columns.Seven}/>
+                                <Grid.Column widthXS={Columns.Two}/>
+                                <Grid.Column widthXS={Columns.Four} style={{marginBottom: "7px", marginTop: "7px"}}>
+                                    <div className="tabbed-page--header-right">
+                                        <Icon key="brush" glyph={IconFont.Annotate} style={{color: InfluxColors.Galaxy, fontSize: '22px', marginRight: '3px'}} />
+                                        <label style={{color: InfluxColors.Mist, marginRight: '10px'}}>Category: </label>
+                                        <SelectDropdown 
+                                            selectedOption={this.state.category} options={cats} onSelect={(selectedCat)=>this.setState({category: selectedCat})} 
+                                        />
+                                        <QuestionMarkTooltip
+                                            style={{marginLeft: "5px"}}
+                                            diameter={15}
+                                            color={ComponentColor.Secondary}
+                                            tooltipContents={<div style={{whiteSpace: 'pre-wrap', fontSize: "13px"}}>
+                                                <div style={{color: InfluxColors.Star}}>{"Text Classification:"}
+                                                <hr style={{borderStyle: 'none none solid none', borderWidth: '2px', borderColor: '#BE2EE4', boxShadow: '0 0 5px 0 #8E1FC3', margin: '3px'}}/>
+                                                </div>
+                                                {"Select the category of the text to help the model to choose correct sources."}                                            
+                                                </div>}
+                                        />
+                                    </div>
+                                </Grid.Column>
+                                <Grid.Column widthXS={Columns.One}/>                               
                             </Grid.Row>
                             <Grid.Row>
                                 <Grid.Column widthXS={Columns.One}/>
@@ -295,19 +326,21 @@ class NLPSearch extends PureComponent<Props, State>{
                     />
                     <Overlay.Body>
                     <Grid>
-                    <Grid.Row>
-                        <Grid.Column widthXS={Columns.Six}>
-                            Some text here
-                        </Grid.Column>
-                        <Grid.Column widthXS={Columns.Six}>
-                            <div style={{width: 'auto', height: '250px'}}>
-                            <GaugeChart
-                                value={77}
-                                properties={this.state.properties}
-                                theme={'dark'}
-                            /></div>
-                        </Grid.Column>
-                    </Grid.Row>
+                        <Grid.Row>
+                            <div style={{textAlign: 'center'}}>--- Some text here ---</div>
+                        </Grid.Row>
+                        <Grid.Row>
+                            <Grid.Column widthXS={Columns.Three}/>
+                            <Grid.Column widthXS={Columns.Six}>
+                                <div style={{width: 'auto', height: '250px'}}>
+                                <GaugeChart
+                                    value={77}
+                                    properties={this.state.properties}
+                                    theme={'dark'}
+                                /></div>
+                            </Grid.Column>
+                            <Grid.Column widthXS={Columns.Three}/>
+                        </Grid.Row>
                     </Grid>
                     </Overlay.Body>
                 </Overlay.Container>
@@ -358,13 +391,13 @@ class NLPSearch extends PureComponent<Props, State>{
                             icon={IconFont.Search}
                             color={ComponentColor.Primary}
                         />
-                        <Button
+                        {/* <Button
                             text=""
                             onClick={()=>this.setState({graphOverlay: !this.state.graphOverlay})}
                             type={ButtonType.Button}
                             icon={IconFont.AddCell}
                             color={ComponentColor.Secondary}
-                        />
+                        /> */}
                         {this.graphOverlayComponent()}
                     </div>
                 </Grid.Row>
@@ -452,6 +485,9 @@ class NLPSearch extends PureComponent<Props, State>{
                             {this.overlayComponent()}
                         </div>
                     }
+                </Grid.Row>
+                <Grid.Row>
+                    <div style={{borderBottom: "solid 2px", borderColor: InfluxColors.Mountain}}>{(this.state.textcatLabels && this.state.textcatLabels.length) ? JSON.stringify(this.state.textcatLabels) : ''}</div>
                 </Grid.Row>
             </Grid>
         )

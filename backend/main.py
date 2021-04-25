@@ -15,6 +15,7 @@ from application.controller.PredictionController import prediction
 from application.controller.LogController import log
 from application.controller.MaintenanceController import maintenance
 from application.controller.UserController import user
+import time
 
 today = datetime.date.today()
 logging.basicConfig(filename=f'/home/machinaide/backend/logs/current.log', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s %(funcName)s %(module)s : %(message)s')
@@ -67,9 +68,9 @@ def get_messages(topicname):
             reset_offset_on_start=True
         ):
             print(f"consumer: {i.value.decode()}")
-            # return return_response(data = i.value.decode(), success = True, message = "get_sensor_value")
             yield 'data:{0}\n\n'.format(i.value.decode())
     return Response(events(), mimetype = "text/event-stream")
+
 
 if __name__ == "__main__":
     app.run(debug = True, port = 9632)

@@ -1,11 +1,11 @@
-import {ActionTypes} from 'src/userSettings/actions'
+import { ActionTypes } from 'src/userSettings/actions'
 
 export interface UserSettingsState {
   showVariablesControls: boolean
 }
 
 export const initialState = (): UserSettingsState => ({
-  showVariablesControls: true,
+  showVariablesControls: false,
 })
 
 export const userSettingsReducer = (
@@ -14,7 +14,7 @@ export const userSettingsReducer = (
 ): UserSettingsState => {
   switch (action.type) {
     case 'TOGGLE_SHOW_VARIABLES_CONTROLS':
-      return {...state, showVariablesControls: !state.showVariablesControls}
+      return { ...state, showVariablesControls: !state.showVariablesControls }
     default:
       return state
   }

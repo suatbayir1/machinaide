@@ -83,11 +83,11 @@ const DashboardHeader: FC<Props> = ({
   const [interval, setInterval] = React.useState(1500);
   const [allCellData, setAllCellData] = React.useState([]);
 
+
+
   useEffect(() => {
     if (dashboard && dashboard.name.includes("Monitor")) {
-      // window.setInterval(() => {
       queryResults(timeRange, autoRefresh);
-      // }, autoRefresh["interval"]);
     }
 
     if (demoDataset) {
@@ -104,6 +104,7 @@ const DashboardHeader: FC<Props> = ({
   }
 
   const handleSystemInfo = () => {
+    queryResults(timeRange, autoRefresh);
     setDialogBox(true);
   }
 
@@ -179,7 +180,6 @@ const DashboardHeader: FC<Props> = ({
 
   const resolveQuery = async (query: string): Promise<any> => {
     let url = `${INFLUX.CHRONOGRAF_URL}api/v2/query?orgID=${org.id}`;
-    // let url = "http://localhost:9090/api/v2/query?orgID=d572bde16b31757c";
 
     const fetchPromise = fetch(url, {
       method: 'POST',
@@ -206,8 +206,10 @@ const DashboardHeader: FC<Props> = ({
     let tempVariables = {
       "v.timeRangeStart": `-${timeRange.duration}`,
       "v.timeRangeStop": 'now()',
-      "v.windowPeriod": (interval.interval / 1000).toString() + 's'
+      "v.windowPeriod": interval.interval === 0 ? "5s" : (interval.interval / 1000).toString() + 's'
     }
+
+    console.log(tempVariables);
 
     for (let key in tempVariables) {
       if (query.includes(key)) {
@@ -236,8 +238,6 @@ const DashboardHeader: FC<Props> = ({
 
     return result;
   }
-
-
 
   const queryResults = async (timeRange, interval) => {
     const dashboard = await getDashboardCells();

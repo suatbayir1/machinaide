@@ -138,15 +138,27 @@ class SystemInfoBox extends PureComponent<Props, State> {
                                                     />
 
                                                     <div>
-                                                        <Typography variant="body1" gutterBottom>
-                                                            Disk Percentage Used: 11.67
-                                                        </Typography>
-                                                        <Typography variant="body1" gutterBottom>
+                                                        {
+                                                            Object.keys(item["jsonData"]).map(key => {
+                                                                return (
+                                                                    <React.Fragment key={key}>
+                                                                        <Typography key={"disk_used"} variant="body1" gutterBottom>
+                                                                            Disk Percentage Used: {item["jsonData"][key].toFixed(2)} %
+                                                                        </Typography>
+
+                                                                        <Typography key={"disk_remaining"} variant="body1" gutterBottom>
+                                                                            Disk Percent Remaining:  {(100 - item["jsonData"][key]).toFixed(2)} %
+                                                                        </Typography>
+                                                                    </React.Fragment>
+                                                                )
+                                                            })
+                                                        }
+                                                        {/* <Typography variant="body1" gutterBottom>
                                                             Disk Percent Remaining : 88.33
-                                                        </Typography>
-                                                        <Typography variant="body1" gutterBottom>
+                                                        </Typography> */}
+                                                        {/* <Typography variant="body1" gutterBottom>
                                                             Approx Time Till Full Usage:
-                                                        </Typography>
+                                                        </Typography> */}
                                                     </div>
                                                 </ResourceCard>
                                             </Grid.Column>
@@ -170,14 +182,14 @@ class SystemInfoBox extends PureComponent<Props, State> {
                                                         Object.keys(item["jsonData"]).map(key => {
                                                             if (percentCellList.includes(item["cellName"])) {
                                                                 return (
-                                                                    <Typography variant="body1" gutterBottom>
+                                                                    <Typography key={key} variant="body1" gutterBottom>
                                                                         {key}: {item["jsonData"][key].toFixed(2)} %
                                                                     </Typography>
                                                                 )
                                                             } else if (item["cellName"] === "Total Memory") {
                                                                 return (
-                                                                    <Typography variant="body" gutterBottom>
-                                                                        {key}: { Math.round(item["jsonData"][key] / 1000000000)} GB
+                                                                    <Typography key={key} variant="body1" gutterBottom>
+                                                                        {key}: { Math.round(item["jsonData"][key])} GB
                                                                     </Typography>
                                                                 )
                                                             }

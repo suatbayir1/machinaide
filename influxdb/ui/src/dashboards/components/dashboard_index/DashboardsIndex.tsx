@@ -1,15 +1,15 @@
 // Libraries
-import React, {PureComponent} from 'react'
-import {RouteComponentProps} from 'react-router-dom'
-import {connect, ConnectedProps} from 'react-redux'
-import {Switch, Route} from 'react-router-dom'
+import React, { PureComponent } from 'react'
+import { RouteComponentProps } from 'react-router-dom'
+import { connect, ConnectedProps } from 'react-redux'
+import { Switch, Route } from 'react-router-dom'
 
 // Decorators
-import {ErrorHandling} from 'src/shared/decorators/errors'
+import { ErrorHandling } from 'src/shared/decorators/errors'
 
 // Components
 import DashboardsIndexContents from 'src/dashboards/components/dashboard_index/DashboardsIndexContents'
-import {Page} from '@influxdata/clockface'
+import { Page, SelectDropdown } from '@influxdata/clockface'
 import SearchWidget from 'src/shared/components/search_widget/SearchWidget'
 import AddResourceDropdown from 'src/shared/components/AddResourceDropdown'
 import GetAssetLimits from 'src/cloud/components/GetAssetLimits'
@@ -20,23 +20,25 @@ import CreateFromTemplateOverlay from 'src/templates/components/createFromTempla
 import DashboardExportOverlay from 'src/dashboards/components/DashboardExportOverlay'
 
 // Utils
-import {pageTitleSuffixer} from 'src/shared/utils/pageTitles'
-import {extractDashboardLimits} from 'src/cloud/utils/limits'
+import { pageTitleSuffixer } from 'src/shared/utils/pageTitles'
+import { extractDashboardLimits } from 'src/cloud/utils/limits'
 
 // Actions
-import {createDashboard as createDashboardAction} from 'src/dashboards/actions/thunks'
-import {setDashboardSort} from 'src/dashboards/actions/creators'
+import { createDashboard as createDashboardAction } from 'src/dashboards/actions/thunks'
+import { setDashboardSort } from 'src/dashboards/actions/creators'
 
 // Types
-import {AppState, ResourceType} from 'src/types'
-import {Sort} from '@influxdata/clockface'
-import {SortTypes} from 'src/shared/utils/sort'
-import {DashboardSortKey} from 'src/shared/components/resource_sort_dropdown/generateSortItems'
+import { AppState, ResourceType } from 'src/types'
+import { Sort } from '@influxdata/clockface'
+import { SortTypes } from 'src/shared/utils/sort'
+import { DashboardSortKey } from 'src/shared/components/resource_sort_dropdown/generateSortItems'
 
 type ReduxProps = ConnectedProps<typeof connector>
-type Props = ReduxProps & RouteComponentProps<{orgID: string}>
+type Props = ReduxProps & RouteComponentProps<{ orgID: string }>
 
 interface State {
+  dashboardType: string
+  dashboardTypes: string[]
   searchTerm: string
 }
 
@@ -46,13 +48,25 @@ class DashboardIndex extends PureComponent<Props, State> {
     super(props)
 
     this.state = {
+      dashboardType: 'All Dashboards',
+      dashboardTypes: ["All Dashboards", "Organization's Dashboards", "System Health"],
       searchTerm: '',
     }
   }
 
+  componentDidMount() {
+    console.log(localStorage.getItem("userRole"));
+    if (localStorage.getItem("userRole") !== "admin") {
+      this.setState({
+        dashboardType: "Organization's Dashboards",
+        dashboardTypes: this.state.dashboardTypes.filter(d => d !== "All Dashboards")
+      })
+    }
+  }
+
   public render() {
-    const {createDashboard, sortOptions, limitStatus} = this.props
-    const {searchTerm} = this.state
+    const { createDashboard, sortOptions, limitStatus } = this.props
+    const { searchTerm } = this.state
 
     return (
       <>
@@ -64,6 +78,7 @@ class DashboardIndex extends PureComponent<Props, State> {
             <Page.Title title="Dashboards" />
             <RateLimitAlert />
           </Page.Header>
+
           <Page.ControlBar fullWidth={false}>
             <Page.ControlBarLeft>
               <SearchWidget
@@ -77,6 +92,12 @@ class DashboardIndex extends PureComponent<Props, State> {
                 sortKey={sortOptions.sortKey}
                 sortType={sortOptions.sortType}
                 onSelect={this.handleSort}
+              />
+              <SelectDropdown
+                options={this.state.dashboardTypes}
+                selectedOption={this.state.dashboardType}
+                onSelect={(e) => this.setState({ dashboardType: e })}
+                style={{ width: '210px' }}
               />
             </Page.ControlBarLeft>
             <Page.ControlBarRight>
@@ -98,6 +119,7 @@ class DashboardIndex extends PureComponent<Props, State> {
             <GetAssetLimits>
               <DashboardsIndexContents
                 searchTerm={searchTerm}
+                dashboardType={this.state.dashboardType}
                 onFilterChange={this.handleFilterDashboards}
                 sortDirection={sortOptions.sortDirection}
                 sortType={sortOptions.sortType}
@@ -129,18 +151,18 @@ class DashboardIndex extends PureComponent<Props, State> {
     sortDirection: Sort,
     sortType: SortTypes
   ): void => {
-    this.props.setDashboardSort({sortKey, sortDirection, sortType})
+    this.props.setDashboardSort({ sortKey, sortDirection, sortType })
   }
 
   private handleFilterDashboards = (searchTerm: string): void => {
-    this.setState({searchTerm})
+    this.setState({ searchTerm })
   }
 
   private summonImportOverlay = (): void => {
     const {
       history,
       match: {
-        params: {orgID},
+        params: { orgID },
       },
     } = this.props
     history.push(`/orgs/${orgID}/dashboards-list/import`)
@@ -150,7 +172,7 @@ class DashboardIndex extends PureComponent<Props, State> {
     const {
       history,
       match: {
-        params: {orgID},
+        params: { orgID },
       },
     } = this.props
     history.push(`/orgs/${orgID}/dashboards-list/import/template`)
@@ -159,7 +181,7 @@ class DashboardIndex extends PureComponent<Props, State> {
 
 const mstp = (state: AppState) => {
   const {
-    cloud: {limits},
+    cloud: { limits },
   } = state
   const sortOptions = state.resources.dashboards['sortOptions']
 

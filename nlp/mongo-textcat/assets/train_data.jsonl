@@ -1,0 +1,12 @@
+{"text": "Show me the components that have maintenance records in the last week", "cats": {"maintenance": 1.0, "failure": 0.0, "maintenancecount": 0.0, "failurecount": 0.0}}
+{"text": "Show me the component Press12's sensors that have failure records in the last month", "cats": {"maintenance": 0.0, "failure": 1.0, "maintenancecount": 0.0, "failurecount": 0.0}}
+{"text": "How many times did component Yaglama have maintenance in the last month", "cats": {"maintenance": 0.0, "failure": 0.0, "maintenancecount": 1.0, "failurecount": 0.0}}
+{"text": "How many failures did machine Press030 have in this week", "cats": {"maintenance": 0.0, "failure": 0.0, "maintenancecount": 0.0, "failurecount": 1.0}}
+{"text": "How many maintenance records does component yaglama have between 20.10.2020 and 15.04.2021", "cats": {"maintenance": 0.0, "failure": 0.0, "maintenancecount": 1.0, "failurecount": 0.0}}
+{"text": "Which parts have maintenance records from 05.10.2021 to 05.11.2021", "cats": {"maintenance": 1.0, "failure": 0.0, "maintenancecount": 0.0, "failurecount": 0.0}}
+{"text": "Which parts  had failure in the last week?", "cats": {"maintenance": 0.0, "failure": 1.0, "maintenancecount": 0.0, "failurecount": 0.0}}
+{"text": "What is the count of maintenance records of machine Press45", "cats": {"maintenance": 0.0, "failure": 0.0, "maintenancecount": 1.0, "failurecount": 0.0}}
+{"text": "Show the count of failures of sensor Sens345", "cats": {"maintenance": 0.0, "failure": 0.0, "maintenancecount": 0.0, "failurecount": 1.0}}
+{"text": "Display sensors that have maintenance records this week", "cats": {"maintenance": 1.0, "failure": 0.0, "maintenancecount": 0.0, "failurecount": 0.0}}
+{"text": "How many failure records does component Comp234 have in the last week.", "cats": {"maintenance": 0.0, "failure": 0.0, "maintenancecount": 0.0, "failurecount": 1.0}}
+{"text": "Which components have failures in the last 24 hour", "cats": {"maintenance": 0.0, "failure": 1.0, "maintenancecount": 0.0, "failurecount": 0.0}}

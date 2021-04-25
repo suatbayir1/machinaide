@@ -1,26 +1,27 @@
 // Libraries
-import React, {PureComponent} from 'react'
-import {connect, ConnectedProps} from 'react-redux'
-import {withRouter, RouteComponentProps} from 'react-router-dom'
+import React, { PureComponent } from 'react'
+import { connect, ConnectedProps } from 'react-redux'
+import { withRouter, RouteComponentProps } from 'react-router-dom'
 
 // Components
 import DashboardCards from 'src/dashboards/components/dashboard_index/DashboardCards'
 import DashboardsTableEmpty from 'src/dashboards/components/dashboard_index/DashboardsTableEmpty'
 
 // Utilities
-import {getLabels} from 'src/labels/actions/thunks'
+import { getLabels } from 'src/labels/actions/thunks'
 
 // Actions
-import {createDashboard, getDashboards} from 'src/dashboards/actions/thunks'
+import { createDashboard, getDashboards } from 'src/dashboards/actions/thunks'
 
 // Types
-import {AppState, Dashboard, RemoteDataState} from 'src/types'
-import {Sort} from '@influxdata/clockface'
-import {DashboardSortKey} from 'src/shared/components/resource_sort_dropdown/generateSortItems'
-import {SortTypes} from 'src/shared/utils/sort'
+import { AppState, Dashboard, RemoteDataState } from 'src/types'
+import { Sort } from '@influxdata/clockface'
+import { DashboardSortKey } from 'src/shared/components/resource_sort_dropdown/generateSortItems'
+import { SortTypes } from 'src/shared/utils/sort'
 
 interface OwnProps {
   searchTerm: string
+  dashboardType: string
   onFilterChange: (searchTerm: string) => void
   filterComponent?: JSX.Element
   dashboards: Dashboard[]
@@ -30,7 +31,7 @@ interface OwnProps {
 }
 
 type ReduxProps = ConnectedProps<typeof connector>
-type Props = OwnProps & ReduxProps & RouteComponentProps<{orgID: string}>
+type Props = OwnProps & ReduxProps & RouteComponentProps<{ orgID: string }>
 
 class DashboardsTable extends PureComponent<Props> {
   public componentDidMount() {
@@ -41,6 +42,7 @@ class DashboardsTable extends PureComponent<Props> {
   public render() {
     const {
       status,
+      dashboardType,
       dashboards,
       onFilterChange,
       sortKey,
@@ -64,6 +66,7 @@ class DashboardsTable extends PureComponent<Props> {
     return (
       <DashboardCards
         dashboards={dashboards}
+        dashboardType={dashboardType}
         sortKey={sortKey}
         sortDirection={sortDirection}
         sortType={sortType}
@@ -76,7 +79,7 @@ class DashboardsTable extends PureComponent<Props> {
     const {
       history,
       match: {
-        params: {orgID},
+        params: { orgID },
       },
     } = this.props
     history.push(`/orgs/${orgID}/dashboards-list/import`)
@@ -86,7 +89,7 @@ class DashboardsTable extends PureComponent<Props> {
     const {
       history,
       match: {
-        params: {orgID},
+        params: { orgID },
       },
     } = this.props
     history.push(`/orgs/${orgID}/dashboards-list/import/template`)

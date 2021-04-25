@@ -144,6 +144,9 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
         let eventSource = new EventSource(`${BACKEND.API_URL}topic/sensors_data`);
         eventSource.onmessage = e => {
             let currentData = JSON.parse(e.data);
+
+            console.log(currentData);
+
             let tempCurrentSensorValue = this.state.currentSensorValue;
 
             let found = false;
