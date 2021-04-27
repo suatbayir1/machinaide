@@ -659,13 +659,17 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                                 <Grid.Row>
                                     <Grid.Column widthXS={Columns.Four}>
                                         <div className="tabbed-page--header-left">
-                                            <Button
-                                                text="Add"
-                                                icon={IconFont.Plus}
-                                                onClick={this.openAddNodeOverlay}
-                                                type={ButtonType.Button}
-                                                color={ComponentColor.Primary}
-                                            />
+                                            {
+                                                ["admin"].includes(localStorage.getItem("userRole")) &&
+                                                <Button
+                                                    text="Add"
+                                                    icon={IconFont.Plus}
+                                                    onClick={this.openAddNodeOverlay}
+                                                    type={ButtonType.Button}
+                                                    color={ComponentColor.Primary}
+                                                />
+                                            }
+
                                             <Dropdown
                                                 testID="dropdown--gen-token"
                                                 button={(active, onClick) => (

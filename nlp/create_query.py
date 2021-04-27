@@ -3,7 +3,6 @@ from fuzzywuzzy import process # string matching based on a score https://github
 import dateparser
 import random 
 import datetime
-import datetime as dt
 from spellchecker import SpellChecker
 from spacy.util import minibatch, compounding, decaying
 from spacy.matcher import Matcher
@@ -20,6 +19,7 @@ from pymongo import MongoClient
 import requests
 import json
 from bson.json_util import dumps
+import mongo_queries as mongoq
 
 
 # flask server
@@ -60,6 +60,10 @@ source_nlp = spacy.load("en_core_web_trf")
 
 # the textcat pipeline
 textcat_nlp = spacy.load("/home/machinaide/nlp/textcat-pipe/training/model-best")
+
+# the mongodb textcat pipeline
+mongo_textcat_nlp = spacy.load("/home/machinaide/nlp/mongo-textcat/training/model-best")
+
 # print("source pipes",source_nlp.pipe_names)
 nlp.add_pipe("textcat", source=textcat_nlp)
 
@@ -115,156 +119,194 @@ def createQuery(doc, matcher, stat_matcher):
     print("#########\n", scores)
     predicted_labels = scores.argmax(axis=1)
     textcat_labels = [textcat.labels[label] for label in predicted_labels]
-    # print([textcat.labels[label] for label in predicted_labels])
-
-    query = ""
-    
-    # get the db/bucket
-    machine_entities = [ent for ent in doc.ents if ent.label_ == "MACH"]
-    # print(bucket)
-    if(len(machine_entities) > 0):
-        query = query + "from(bucket: {})".format("\"" + machine_entities[0].text + "\"")
-    else:
-        query = query + "from(bucket: \\{})".format("\"" + "nlp_sample" + "\\" + "\"")
-    
-    # get range
-    range_entities = [ent for ent in doc.ents if ent.label_ == "RANGE"]
-
     labels = [{"tag": ent.label_ , "start": ent.start_char, "end": ent.end_char, "thing": ent.text} for ent in doc.ents]
     print("LABELS", labels)
+    # print([textcat.labels[label] for label in predicted_labels])
+    if(textcat_labels[0] == 'influxdb'):
 
-    if(len(range_entities) > 0):
-        which_date = range_entities[0].text
-        for token in range_entities[0]:
-            # if there is numerical value, get its head in dependency tree. e.g. 7-->days
-            # print(token.text, token.pos_)
-            if(token.pos_ == "NUM"):
-                which_date = token.text + token.head.text
-        date = dateparser.parse(which_date)
-        print("date:",date, which_date)
-        if(date):
-            year = date.year
-            month = "0" + str(date.month) if date.month < 10 else date.month
-            day = "0" + str(date.day) if date.day < 10 else date.day
-            hour = "0" + str(date.hour) if date.hour < 10 else date.hour
-            minute = "0" + str(date.minute) if date.minute < 10 else date.minute
-            second = "0" + str(date.second) if date.second < 10 else date.second
-            query_date = "{}-{}-{}T{}:{}:{}Z".format(year, month, day, hour, minute, second)
-            query = query + "|> range(start: {})".format(query_date)
+        query = ""
+        
+        # get the db/bucket
+        machine_entities = [ent for ent in doc.ents if ent.label_ == "MACH"]
+        # print(bucket)
+        if(len(machine_entities) > 0):
+            query = query + "from(bucket: {})".format("\"" + machine_entities[0].text + "\"")
+        else:
+            query = query + "from(bucket: \\{})".format("\"" + "nlp_sample" + "\\" + "\"")
+        
+        # get range
+        range_entities = [ent for ent in doc.ents if ent.label_ == "RANGE"]
+
+        if(len(range_entities) > 0):
+            which_date = range_entities[0].text
+            for token in range_entities[0]:
+                # if there is numerical value, get its head in dependency tree. e.g. 7-->days
+                # print(token.text, token.pos_)
+                if(token.pos_ == "NUM"):
+                    which_date = token.text + token.head.text
+            date = dateparser.parse(which_date)
+            print("date:",date, which_date)
+            if(date):
+                year = date.year
+                month = "0" + str(date.month) if date.month < 10 else date.month
+                day = "0" + str(date.day) if date.day < 10 else date.day
+                hour = "0" + str(date.hour) if date.hour < 10 else date.hour
+                minute = "0" + str(date.minute) if date.minute < 10 else date.minute
+                second = "0" + str(date.second) if date.second < 10 else date.second
+                query_date = "{}-{}-{}T{}:{}:{}Z".format(year, month, day, hour, minute, second)
+                query = query + "|> range(start: {})".format(query_date)
+            else:
+                query = query + "|> range(start: -1h)"
+                print("we need a default range query")
         else:
             query = query + "|> range(start: -1h)"
             print("we need a default range query")
-    else:
-        query = query + "|> range(start: -1h)"
-        print("we need a default range query")
-    
-    # get components/measurements
-    comp_entities = [ent for ent in doc.ents if ent.label_ == "COMP"]
-    comps = []
-    for ent in comp_entities:
-        comp_name = ""
-        if(ent.text in COMP_NAMES):
-            comp_name = ent.text
-            comps.append(comp_name)
-        else:
-            res = process.extract(ent.text, COMP_NAMES, limit=1)
-            # for now we get the best result but we need to set a score threshold
-            if(len(res)>0 and res[0][1]>threshold):
-                comp_name = res[0][0]
+        
+        # get components/measurements
+        comp_entities = [ent for ent in doc.ents if ent.label_ == "COMP"]
+        comps = []
+        for ent in comp_entities:
+            comp_name = ""
+            if(ent.text in COMP_NAMES):
+                comp_name = ent.text
                 comps.append(comp_name)
-    comp_temp = ""
-    #eliminate duplicates
-    comps = list(dict.fromkeys(comps))
-    # print("****COMPS****", comps)
-    for i in range(len(comps)):
-        if(i != len(comps)-1):
-            comp_temp = comp_temp + " r._measurement == \\{} or".format("\"" + comps[i] + "\\" + "\"")
-        else:
-            comp_temp = comp_temp + " r._measurement == \\{}".format("\"" + comps[i] + "\\" + "\"")
-        
-    if(len(comp_temp) > 0):
-        query = query + "|> filter(fn: (r) => {} )".format(comp_temp)
-        
-    # get sensors/fields
-    sens_entities = [ent for ent in doc.ents if ent.label_ == "SENS"]
-    sensors = []
-    for ent in sens_entities:
-        sens_name = ""
-        if(ent.text in SENS_NAMES):
-            sens_name = ent.text
-            sensors.append(sens_name)
-        else:
-            res = process.extract(ent.text, SENS_NAMES, limit=1)
-            # for now we get the best result but we need to set a score threshold
-            if(len(res)>0  and res[0][1]>threshold):
-                sens_name = res[0][0]
-                sensors.append(comp_name)
-    sens_temp = ""
-    for i in range(len(sensors)):
-        if(i != len(sensors)-1):
-            sens_temp = sens_temp + " r._field == \\{} or".format("\"" + sensors[i] + "\\" + "\"")
-        else:
-            sens_temp = sens_temp + " r._field == \\{}".format("\"" + sensors[i] + "\\" + "\"")
-        
-    if(len(sens_temp) > 0):
-        query = query + "|> filter(fn: (r) => {} )".format(sens_temp)
-        
-    # get value comparisons
-    val_ents = [ent for ent in doc.ents if ent.label_ == "VALUE"]
-    values = []
-    for ent in val_ents:
-        poses = [ent for token in ent if token.pos_=="CCONJ"]
-        print("has conjunction:", poses)
-        if len(poses) > 0:
-            nums = [token.text for token in ent if token.pos_=="NUM"]
-            print("nums are:", nums)
-            big_num = max(int(nums[0]), int(nums[1]))
-            small_num = min(int(nums[0]), int(nums[1]))
-            sm_query = "> {}".format(small_num)
-            values.append(sm_query)
-            bn_query = "< {}".format(big_num)
-            values.append(bn_query)
-        else:
-            for match_id, start, end in matcher(ent):
-                # bunun yerine sadece num u bul ve matchden çıkanla birleştir yapılabilir sanki daha iyi
-                # print(start, end, ent[start: end])
-                string_id = nlp.vocab.strings[match_id]  # Get string representation
-                replacement = comparisons[string_id]
-                if(start == 0):
-                    # new_one = nlp.make_doc(f"{replacement} " + ent[-1].text)
-                    new_one = f"{replacement} " + ent[-1].text
-                else: 
-                    # new_one = nlp.make_doc(ent[:start].text + f"{replacement} " + ent[-1].text)
-                    # print(new_one)
-                    new_one = ent[:start].text + f"{replacement} " + ent[-1].text
-                values.append(new_one)
-    # print(values)
-    temp = ""
-    for i in range(len(values)):
-        if(i != len(values)-1):
-            temp = temp + " r._value {} and".format(values[i])
-        else:
-            temp = temp + " r._value {}".format(values[i])
-    # for value in values:
-    #     temp = temp + " r._value {}".format(value)
-    if(len(temp) > 0):
-        query = query + "|> filter(fn: (r) => {} )".format(temp)
+            else:
+                res = process.extract(ent.text, COMP_NAMES, limit=1)
+                # for now we get the best result but we need to set a score threshold
+                if(len(res)>0 and res[0][1]>threshold):
+                    comp_name = res[0][0]
+                    comps.append(comp_name)
+        comp_temp = ""
+        #eliminate duplicates
+        comps = list(dict.fromkeys(comps))
+        # print("****COMPS****", comps)
+        for i in range(len(comps)):
+            if(i != len(comps)-1):
+                comp_temp = comp_temp + " r._measurement == \\{} or".format("\"" + comps[i] + "\\" + "\"")
+            else:
+                comp_temp = comp_temp + " r._measurement == \\{}".format("\"" + comps[i] + "\\" + "\"")
+            
+        if(len(comp_temp) > 0):
+            query = query + "|> filter(fn: (r) => {} )".format(comp_temp)
+            
+        # get sensors/fields
+        sens_entities = [ent for ent in doc.ents if ent.label_ == "SENS"]
+        sensors = []
+        for ent in sens_entities:
+            sens_name = ""
+            if(ent.text in SENS_NAMES):
+                sens_name = ent.text
+                sensors.append(sens_name)
+            else:
+                res = process.extract(ent.text, SENS_NAMES, limit=1)
+                # for now we get the best result but we need to set a score threshold
+                if(len(res)>0  and res[0][1]>threshold):
+                    sens_name = res[0][0]
+                    sensors.append(comp_name)
+        sens_temp = ""
+        for i in range(len(sensors)):
+            if(i != len(sensors)-1):
+                sens_temp = sens_temp + " r._field == \\{} or".format("\"" + sensors[i] + "\\" + "\"")
+            else:
+                sens_temp = sens_temp + " r._field == \\{}".format("\"" + sensors[i] + "\\" + "\"")
+            
+        if(len(sens_temp) > 0):
+            query = query + "|> filter(fn: (r) => {} )".format(sens_temp)
+            
+        # get value comparisons
+        val_ents = [ent for ent in doc.ents if ent.label_ == "VALUE"]
+        values = []
+        for ent in val_ents:
+            poses = [ent for token in ent if token.pos_=="CCONJ"]
+            print("has conjunction:", poses)
+            if len(poses) > 0:
+                nums = [token.text for token in ent if token.pos_=="NUM"]
+                print("nums are:", nums)
+                big_num = max(int(nums[0]), int(nums[1]))
+                small_num = min(int(nums[0]), int(nums[1]))
+                sm_query = "> {}".format(small_num)
+                values.append(sm_query)
+                bn_query = "< {}".format(big_num)
+                values.append(bn_query)
+            else:
+                for match_id, start, end in matcher(ent):
+                    # bunun yerine sadece num u bul ve matchden çıkanla birleştir yapılabilir sanki daha iyi
+                    # print(start, end, ent[start: end])
+                    string_id = nlp.vocab.strings[match_id]  # Get string representation
+                    replacement = comparisons[string_id]
+                    if(start == 0):
+                        # new_one = nlp.make_doc(f"{replacement} " + ent[-1].text)
+                        new_one = f"{replacement} " + ent[-1].text
+                    else: 
+                        # new_one = nlp.make_doc(ent[:start].text + f"{replacement} " + ent[-1].text)
+                        # print(new_one)
+                        new_one = ent[:start].text + f"{replacement} " + ent[-1].text
+                    values.append(new_one)
+        # print(values)
+        temp = ""
+        for i in range(len(values)):
+            if(i != len(values)-1):
+                temp = temp + " r._value {} and".format(values[i])
+            else:
+                temp = temp + " r._value {}".format(values[i])
+        # for value in values:
+        #     temp = temp + " r._value {}".format(value)
+        if(len(temp) > 0):
+            query = query + "|> filter(fn: (r) => {} )".format(temp)
 
-    stat_temp = ""
-    graph_overlay = False
-    for match_id, start, end in stat_matcher(doc):
-        print("stats", doc[start:end])
-        graph_overlay = True
-        string_id = nlp.vocab.strings[match_id]
-        replacement = stats[string_id]
-        stat_temp = "|> {}".format(replacement)
-        break
-    
-    if(len(stat_temp) > 0):
-        query = query + stat_temp
+        stat_temp = ""
+        graph_overlay = False
+        for match_id, start, end in stat_matcher(doc):
+            print("stats", doc[start:end])
+            graph_overlay = True
+            string_id = nlp.vocab.strings[match_id]
+            replacement = stats[string_id]
+            stat_temp = "|> {}".format(replacement)
+            break
+        
+        if(len(stat_temp) > 0):
+            query = query + stat_temp
 
-    return {"query": query, "labels": labels, "graphOverlay": graph_overlay, "textcatLabels": textcat_labels} 
-
+        return {"query": query, "labels": labels, "graphOverlay": graph_overlay, "textcatLabels": textcat_labels}
+    elif(textcat_labels[0] == 'mongodb'):
+        mongo_textcat = mongo_textcat_nlp.get_pipe("textcat")
+        scores = mongo_textcat.predict([doc])
+        # nlp.set_annotations(doc, scores)
+        predicted_labels = scores.argmax(axis=1)
+        textcat_labels_mongo = [mongo_textcat.labels[label] for label in predicted_labels]
+        if(textcat_labels_mongo[0] == "failure"):
+            from_date = datetime.datetime(2021, 4, 10, 12, 30, 30, 125000)
+            to_date = datetime.datetime.now()
+            res = mongoq.get_sources_from_failures(from_date, to_date)
+            res = ", ".join(res)
+            return {"query": res, "labels": labels, "graphOverlay": False, "textcatLabels": textcat_labels, "mongoTextcat": "failure"}
+        elif(textcat_labels_mongo[0] == "maintenance"):
+            from_date = datetime.datetime(2021, 4, 10, 12, 30, 30, 125000)
+            res = mongoq.get_sources_from_maintenance(from_date)
+            res = ", ".join(res)
+            return {"query": res, "labels": labels, "graphOverlay": False, "textcatLabels": textcat_labels, "mongoTextcat": "maintenance"}
+        elif(textcat_labels_mongo[0] == "failurecount"):
+            # TODO check if these source names are in the given source names array, if not just throw them away
+            source_entities = [ent.text for ent in doc.ents if (ent.label_ == "MACH" or ent.label_ == "COMP" or ent.label_ == "SENS")]
+            if(len(source_entities)>0):
+                res = mongoq.failure_count(source_entities, "", "")
+                return {"query": str(res), "labels": labels, "graphOverlay": False, "textcatLabels": textcat_labels, "mongoTextcat": "failurecount"}
+            else:
+                res = mongoq.failure_count("default_source", "", "")
+                return {"query": str(res), "labels": labels, "graphOverlay": False, "textcatLabels": textcat_labels, "mongoTextcat": "failurecount"}
+        elif(textcat_labels_mongo[0] == "maintenancecount"):
+            # TODO check if these source names are in the given source names array, if not just throw them away
+            source_entities = [ent.text for ent in doc.ents if (ent.label_ == "MACH" or ent.label_ == "COMP" or ent.label_ == "SENS")]
+            if(len(source_entities)>0):
+                res = mongoq.maintenance_count(source_entities, "")
+                return {"query": str(res), "labels": labels, "graphOverlay": False, "textcatLabels": textcat_labels, "mongoTextcat": "maintenancecount"}
+            else:
+                res = mongoq.maintenance_count("Press030", "")
+                return {"query": str(res), "labels": labels, "graphOverlay": False, "textcatLabels": textcat_labels, "mongoTextcat": "maintenancecount"}
+        else:
+            return {"query": "NOTHING", "labels": labels, "graphOverlay": False, "textcatLabels": textcat_labels, "mongoTextcat": "nothing"}
+    else:
+        return {"query": "NOTHING", "labels": labels, "graphOverlay": False, "textcatLabels": textcat_labels}
 
 """ doc2 = nlp("Show the component comname and component yaglam sensors with pressure value is less than 50 and larger 30 in the last 2 days")
 for ent in doc.ents: 
@@ -453,44 +495,48 @@ def post_question():
         textcat_labels = result["textcatLabels"]
         graph_overlay = result["graphOverlay"]
         print("from nlp-----> ", query_result)
-    # payload = "{\"query\": \"from(bucket: \\\"nlp_sample\\\")|> range(start: 2021-03-04T13:42:06Z)|> filter(fn: (r) =>  r._measurement == \\\"sampleComp1\\\" )|> filter(fn: (r) =>  r._value > 4 and r._value < 77 )\",\"type\": \"flux\"}"
-    payload2 = "{\"query\": \"" + query_result + "\",\"type\": \"flux\"}"
-    # print("*** ", payload)
-    print("-- ", payload2)
-    url = "http://localhost:8086/api/v2/query?orgID=" + orgID #d572bde16b31757c"
-    headers = {'Authorization': 'Token '+dbtoken,'Content-Type': 'application/json'}
-    api_response = requests.request('POST', url, headers=headers, data=payload2)
-    
-    if('json' in api_response.headers.get('Content-Type')):
-        print(api_response.json())
-        return jsonify(error=api_response.json()["message"], entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed, graphOverlay=False, textcatLabels=textcat_labels)
-    if(api_response.text):
-        """ lines = api_response.text.split('\r\n')
-        data = []
-        print("lines? ",len(lines), lines)
-        for line in lines:
-            if(line != ''):
-                data.append(line.split(','))
-        sensor_index = -1
-        component_index = -1
-        for i in range(0, len(data[0])):
-            if(data[0][i] == '_field'):
-                sensor_index = i
-            if(data[0][i] == '_measurement'):
-                component_index = i
+    if(textcat_labels[0] == "influxdb"):
+        # payload = "{\"query\": \"from(bucket: \\\"nlp_sample\\\")|> range(start: 2021-03-04T13:42:06Z)|> filter(fn: (r) =>  r._measurement == \\\"sampleComp1\\\" )|> filter(fn: (r) =>  r._value > 4 and r._value < 77 )\",\"type\": \"flux\"}"
+        payload2 = "{\"query\": \"" + query_result + "\",\"type\": \"flux\"}"
+        # print("*** ", payload)
+        print("-- ", payload2)
+        url = "http://localhost:8086/api/v2/query?orgID=" + orgID #d572bde16b31757c"
+        headers = {'Authorization': 'Token '+dbtoken,'Content-Type': 'application/json'}
+        api_response = requests.request('POST', url, headers=headers, data=payload2)
+        
+        if('json' in api_response.headers.get('Content-Type')):
+            print(api_response.json())
+            return jsonify(error=api_response.json()["message"], entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed, graphOverlay=False, textcatLabels=textcat_labels)
+        if(api_response.text):
+            """ lines = api_response.text.split('\r\n')
+            data = []
+            print("lines? ",len(lines), lines)
+            for line in lines:
+                if(line != ''):
+                    data.append(line.split(','))
+            sensor_index = -1
+            component_index = -1
+            for i in range(0, len(data[0])):
+                if(data[0][i] == '_field'):
+                    sensor_index = i
+                if(data[0][i] == '_measurement'):
+                    component_index = i
 
-        send_data = {"components": [], "sensors": []}
-        for j in range(1, len(data)):
-            if(sensor_index != -1):
-                send_data['sensors'].append(data[j][sensor_index])
-            if(component_index != -1):
-                send_data['components'].append(data[j][component_index])
+            send_data = {"components": [], "sensors": []}
+            for j in range(1, len(data)):
+                if(sensor_index != -1):
+                    send_data['sensors'].append(data[j][sensor_index])
+                if(component_index != -1):
+                    send_data['components'].append(data[j][component_index])
 
-        print("data: ", send_data)
-        return jsonify(result=send_data) """
-        return jsonify(query=query_result, data=api_response.text, entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed, graphOverlay=graph_overlay, textcatLabels=textcat_labels)
-    else:
-        return jsonify(msg="No response", entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed, graphOverlay=graph_overlay, textcatLabels=textcat_labels)
+            print("data: ", send_data)
+            return jsonify(result=send_data) """
+            return jsonify(query=query_result, data=api_response.text, entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed, graphOverlay=graph_overlay, textcatLabels=textcat_labels)
+        else:
+            return jsonify(msg="No response", entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed, graphOverlay=graph_overlay, textcatLabels=textcat_labels)
+    elif(textcat_labels[0] == "mongodb"):
+        print("result of mongo textcat-->", result["mongoTextcat"])
+        return jsonify(query=query_result,data="mongo-data", entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed, graphOverlay=graph_overlay, textcatLabels=textcat_labels)
 
 @app.route('/postTrainData', methods=['PUT'])
 def postTrainData():

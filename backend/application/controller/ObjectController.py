@@ -13,7 +13,7 @@ model = ObjectModel()
 logger = MongoLogger()
 
 @obj.route("/getObjectPool", methods = ["GET"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin"])
 def get_object_pool(token):
     data = model.get_object_pool()
     message = "Get_Object_Pool_Successfully"
@@ -21,7 +21,7 @@ def get_object_pool(token):
     return return_response(data = data, success = True, message = message), 200
 
 @obj.route("/saveComponentObject", methods = ["POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin"])
 def save_component_object(token):
     if request.method == "POST":
         result = model.save_component_object(request.json)
@@ -30,7 +30,7 @@ def save_component_object(token):
         return return_response(success = True, message = message)
 
 @obj.route("/saveAsComponentObject", methods = ["POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin"])
 def save_as_component_object(token):
     if request.method == "POST":
         result = model.save_as_component_object(request.json)         
@@ -45,7 +45,7 @@ def save_as_component_object(token):
             return return_response(success = True, message = message), 200          
 
 @obj.route("/removeObject", methods = ["POST", "DELETE"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin"])
 def remove_object(token):
     result = model.remove_object(request.json)
     if result:

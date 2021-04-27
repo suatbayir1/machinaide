@@ -147,12 +147,10 @@ const SetOrg: FC<Props> = ({
         <Route path={`${orgPath}/tasks`} component={TasksPage} />
 
         {/* DT */}
-        {/* <Route path={`${orgPath}/dt`} component={DigitalTwinPage} /> */}
-        <PermittedRoute exact path={`${orgPath}/dt`} component={DigitalTwinPage} allowedRoles={["member", "viewer", "admin", "editor"]} />
-
+        <PermittedRoute exact path={`${orgPath}/dt`} component={DigitalTwinPage} allowedRoles={["member", "admin", "editor"]} />
 
         {/* ObjectCreator */}
-        <Route path={`${orgPath}/object-creator`} component={ObjectCreatorPage} />
+        <PermittedRoute exact path={`${orgPath}/object-creator`} component={ObjectCreatorPage} allowedRoles={["admin"]} />
 
         {/* Factory/Machines/Components/Sensors Hierarchy */}
         <Route path={`${orgPath}/allFactories`} component={AllFactories} />
@@ -172,16 +170,14 @@ const SetOrg: FC<Props> = ({
         <Route exact path={`${orgPath}/alerts/:hardwareName`} component={AlertsPage} />
 
         {/* User Manual */}
-        <Route exact path={`${orgPath}/user-manual`} component={UserManualContainer} />
-        <Route exact path={`${orgPath}/user-manual/:page`} component={UserManualContainer} />
-        {/* <Route exact path={`${orgPath}/user-manual/maintenance-page`} component={MaintenancePageUserManual} /> */}
-
+        <PermittedRoute exact path={`${orgPath}/user-manual`} component={UserManualContainer} allowedRoles={["member", "admin", "editor"]} />
+        <PermittedRoute exact path={`${orgPath}/user-manual/:page`} component={UserManualContainer} allowedRoles={["member", "admin", "editor"]} />
 
         {/* ERRORS PAGE */}
         <Route exact path={`${orgPath}/errors/401`} component={Error401Page} />
 
         {/* LOGS PAGE */}
-        <PermittedRoute exact path={`${orgPath}/logs`} component={LogsPage} allowedRoles={["member", "viewer", "admin", "editor"]} />
+        <PermittedRoute exact path={`${orgPath}/logs`} component={LogsPage} allowedRoles={["admin"]} />
 
 
         {/* EXAMPLE */}
@@ -274,7 +270,7 @@ const SetOrg: FC<Props> = ({
 
         {/* Users */}
         {!CLOUD && (
-          <Route path={`${orgPath}/users`} component={UsersIndex} />
+          <PermittedRoute exact path={`${orgPath}/users`} component={UsersIndex} allowedRoles={["admin"]} />
         )}
 
         {/* About */}

@@ -228,7 +228,7 @@ export const generateNavItems = (orgID: string): NavItem[] => {
         location: `${orgPrefix}/object-creator`,
       },
       activeKeywords: ['object-creator'],
-      permitted: ["member", "admin", "editor"],
+      permitted: ["admin"],
     },
     {
       id: 'allFactories',
@@ -240,6 +240,7 @@ export const generateNavItems = (orgID: string): NavItem[] => {
         location: `${orgPrefix}/allFactories`,
       },
       activeKeywords: ['allFactories'],
+      permitted: ["member", "admin", "editor"],
     },
     {
       id: 'logs',
@@ -251,7 +252,7 @@ export const generateNavItems = (orgID: string): NavItem[] => {
         location: `${orgPrefix}/logs`,
       },
       activeKeywords: ['logs'],
-      permitted: ["admin", "editor"]
+      permitted: ["admin"],
     },
     {
       id: 'examples',
@@ -263,6 +264,7 @@ export const generateNavItems = (orgID: string): NavItem[] => {
         location: `${orgPrefix}/examples`,
       },
       activeKeywords: ['examples'],
+      permitted: ["member", "admin", "editor"],
     },
     {
       id: 'userManual',
@@ -274,7 +276,7 @@ export const generateNavItems = (orgID: string): NavItem[] => {
         location: `${orgPrefix}/user-manual`,
       },
       activeKeywords: ['userManual'],
-      permitted: ["admin", "editor"]
+      permitted: ["admin", "editor", "member"],
     },
   ]
 }

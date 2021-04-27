@@ -24,7 +24,6 @@ import FailureService from 'src/shared/services/FailureService';
 interface Props {
     fileTypesToAccept?: string
     containerClass?: string
-    handleSubmit: (uploadContent: string) => void
     submitText: string
     submitOnDrop: boolean
     submitOnUpload: boolean

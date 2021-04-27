@@ -21,11 +21,16 @@ class LogService {
             const response = await request;
             const res = await response.json();
 
+            if (response.status !== 200) {
+                throw new Error(res.data.message.text);
+            }
+
             if (res.data.success !== true) return;
             const result = JSON.parse(res.data.data);
             const total_count = res.data.summary.total_count;
             return { result, total_count };
         } catch (err) {
+            alert(err);
             console.log(err);
         }
     }

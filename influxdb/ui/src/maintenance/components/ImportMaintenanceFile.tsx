@@ -25,7 +25,6 @@ import { Link } from "react-router-dom"
 interface Props {
     fileTypesToAccept?: string
     containerClass?: string
-    handleSubmit: (uploadContent: string) => void
     submitText: string
     submitOnDrop: boolean
     submitOnUpload: boolean
@@ -215,23 +214,6 @@ class ImportMaintenanceFile extends PureComponent<Props, State> {
 
         element.click();
 
-        document.body.removeChild(element);
-    }
-
-    private downloadExample = () => {
-        let str =
-            `
-asset,sid,date,faultType,maintenanceType,request,reason,jobDescription,duration
-Press030.robot,robot,2021-03-02T19:07,New Fault,New Maintenance,New Request,New Reason,New Job Description,999
-Press030.robot,robot,2021-03-02T19:07,New Fault,New Maintenance,New Request,New Reason,New Job Description,999
-`
-        let fileTitle = "example.csv";
-        var element = document.createElement('a');
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(str));
-        element.setAttribute('download', fileTitle);
-        element.style.display = 'none';
-        document.body.appendChild(element);
-        element.click();
         document.body.removeChild(element);
     }
 

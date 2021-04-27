@@ -85,11 +85,11 @@ class UsersIndex extends Component<Props, State> {
             notificationType: '',
             notificationMessage: '',
             filterUsername: '',
-            filterRole: ["member", "editor", "viewer", "admin"],
+            filterRole: ["member", "editor", "admin"],
             filterStatus: ["active", "inactive"],
             filteredUserList: [],
             visibleImportFileOverlay: false,
-            roleList: ["member", "editor", "admin", "viewer"],
+            roleList: ["member", "editor", "admin"],
             spinnerLoading: RemoteDataState.Loading,
             isLoading: false,
         }

@@ -41,7 +41,7 @@ def token_required(f=None, roles=None):
         if not token:
             message = "Token is missing"
             logger.add_log("ERROR", request.remote_addr, '', request.method, request.url, '', message,  403)
-            return return_response(data = [], success = False, message = message), 403
+            return return_response(data = [], success = False, message = message, code = 403), 403
 
         try:
             data = jwt.decode(token, config.authentication["SECRET_KEY"])
@@ -53,11 +53,11 @@ def token_required(f=None, roles=None):
                 else:
                     message = "This user cannot access this method"
                     logger.add_log("ERROR", request.remote_addr, data["username"], request.method, request.url, '', message,  401)
-                    return return_response(data = [], success = False, message = "This user cannot access this method"), 401
+                    return return_response(data = [], success = False, message = "This user cannot access this method", code = 401), 401
             else:
                 message = "Token expired"
                 logger.add_log("ERROR", request.remote_addr, data["username"], request.method, request.url, '', message,  401)
-                return return_response(data = [], success = False, message = message), 401
+                return return_response(data = [], success = False, message = message, code = 401), 401
         except:
             message = "Token is invalid"
             logger.add_log("ERROR", request.remote_addr, '', request.method, request.url, '', message,  401)

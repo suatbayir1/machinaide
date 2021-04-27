@@ -95,9 +95,15 @@ class UserService {
         try {
             const response = await request;
             const res = await response.json();
+
+            if (response.status !== 200) {
+                throw new Error(res.data.message.text);
+            }
+
             if (res.data.success !== true) return;
             return res;
         } catch (err) {
+            alert(err);
             console.log(err);
         }
     }
@@ -137,9 +143,15 @@ class UserService {
         try {
             const response = await request;
             const res = await response.json();
+
+            if (response.status !== 200) {
+                throw new Error(res.data.message.text);
+            }
+
             if (res.data.success !== true) return;
             return res;
         } catch (err) {
+            alert(err);
             console.log(err);
         }
     }
@@ -163,8 +175,14 @@ class UserService {
         try {
             const response = await request;
             const res = await response.json();
+
+            if (response.status !== 200) {
+                throw new Error(res.data.message.text);
+            }
+
             return res;
         } catch (err) {
+            alert(err);
             console.log(err);
         }
     }
@@ -188,8 +206,14 @@ class UserService {
         try {
             const response = await request;
             const res = await response.json();
+
+            if (response.status !== 200) {
+                throw new Error(res.data.message.text);
+            }
+
             return res;
         } catch (err) {
+            alert(err);
             console.log(err);
         }
     }

@@ -23,6 +23,7 @@ import {
     SelectDropdown,
     Input,
     InputType,
+    ComponentStatus,
 } from '@influxdata/clockface'
 import "src/style/custom.css"
 import DTService from "src/shared/services/DTService";
@@ -353,19 +354,6 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                             </Form.Element>
                         </Grid.Column>
                     </Grid.Row>
-                    {/* <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
-                            <Form.Element label="Description">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["description"]}
-                                    description="Description"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["description"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                    </Grid.Row> */}
                     <Grid.Row>
                         <Grid.Column widthXS={Columns.Twelve}>
                             <Form.Element label="Parent">
@@ -383,6 +371,7 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                         <Grid.Column widthXS={Columns.Twelve}>
                             <Form.Element label="Data Source">
                                 <SelectDropdown
+                                    buttonStatus={["admin"].includes(localStorage.getItem("userRole")) ? ComponentStatus.Valid : ComponentStatus.Disabled}
                                     options={["sensors_data"]}
                                     selectedOption={this.state.sSelectedDataSource}
                                     onSelect={(e) => this.setState({ sSelectedDataSource: e })}
@@ -398,6 +387,7 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                     onChange={this.handleChangeInput}
                                     value={this.state.sMinValue}
                                     type={InputType.Number}
+                                    status={["admin"].includes(localStorage.getItem("userRole")) ? ComponentStatus.Default : ComponentStatus.Disabled}
                                 />
                             </Form.Element>
                         </Grid.Column>
@@ -408,6 +398,7 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                     onChange={this.handleChangeInput}
                                     value={this.state.sMaxValue}
                                     type={InputType.Number}
+                                    status={["admin"].includes(localStorage.getItem("userRole")) ? ComponentStatus.Default : ComponentStatus.Disabled}
                                 />
                             </Form.Element>
                         </Grid.Column>
@@ -436,19 +427,6 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                             </Form.Element>
                         </Grid.Column>
                     </Grid.Row>
-                    {/* <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
-                            <Form.Element label="Schema">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["schema"]}
-                                    description="Schema"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["schema"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                    </Grid.Row> */}
                     <Grid.Row>
                         <Grid.Column widthXS={Columns.Twelve}>
                             <Form.Element label="Unit">
@@ -521,19 +499,7 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
     }
 
     public render() {
-        // const { generalInfo, spinnerLoading } = this.state;
         const { selectedGraphNode, generalInfo, spinnerLoading } = this.props;
-        // let renderElements;
-
-        // if (selectedGraphNode["type"] === 'Factory') {
-        //     renderElements = this.factoryElements
-        // } else if (selectedGraphNode["type"] === 'Machine') {
-        //     renderElements = this.machineElements
-        // } else if (selectedGraphNode["type"] === 'Component') {
-        //     renderElements = this.componentElements
-        // } else if (selectedGraphNode["type"] === 'Sensor') {
-        //     renderElements = this.sensorElements
-        // }
 
         return (
             <>
@@ -628,10 +594,6 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                         </Grid>
                     </Panel.Header>
                     <Panel.Body size={ComponentSize.ExtraSmall}>
-                        {/* {
-                            renderElements
-                        } */}
-
                         {
                             this.props.selectedGraphNode["type"] === "Factory" && this.factoryElements
                         }
@@ -655,17 +617,20 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                     Object.keys(selectedGraphNode).length !== 0 &&
                                     selectedGraphNode["type"] === "Sensor" &&
                                     <div style={{ float: 'right' }}>
-                                        <ConfirmationButton
-                                            icon={IconFont.Checkmark}
-                                            onConfirm={this.handleUpdateSensor}
-                                            text={"Update"}
-                                            popoverColor={ComponentColor.Success}
-                                            popoverAppearance={Appearance.Outline}
-                                            color={ComponentColor.Success}
-                                            confirmationLabel="Do you want to update ?"
-                                            confirmationButtonColor={ComponentColor.Success}
-                                            confirmationButtonText="Yes"
-                                        />
+                                        {
+                                            ["admin"].includes(localStorage.getItem("userRole")) &&
+                                            <ConfirmationButton
+                                                icon={IconFont.Checkmark}
+                                                onConfirm={this.handleUpdateSensor}
+                                                text={"Update"}
+                                                popoverColor={ComponentColor.Success}
+                                                popoverAppearance={Appearance.Outline}
+                                                color={ComponentColor.Success}
+                                                confirmationLabel="Do you want to update ?"
+                                                confirmationButtonColor={ComponentColor.Success}
+                                                confirmationButtonText="Yes"
+                                            />
+                                        }
                                     </div>
                                 }
 
@@ -673,17 +638,20 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                     Object.keys(selectedGraphNode).length !== 0 &&
                                     selectedGraphNode["type"] !== "Factory" &&
                                     <div style={{ float: 'right' }}>
-                                        <ConfirmationButton
-                                            icon={IconFont.Remove}
-                                            onConfirm={this.handleDeleteNode}
-                                            text={"Delete"}
-                                            popoverColor={ComponentColor.Danger}
-                                            popoverAppearance={Appearance.Outline}
-                                            color={ComponentColor.Danger}
-                                            confirmationLabel="Do you want to delete ?"
-                                            confirmationButtonColor={ComponentColor.Success}
-                                            confirmationButtonText="Yes"
-                                        />
+                                        {
+                                            ["admin"].includes(localStorage.getItem("userRole")) &&
+                                            <ConfirmationButton
+                                                icon={IconFont.Remove}
+                                                onConfirm={this.handleDeleteNode}
+                                                text={"Delete"}
+                                                popoverColor={ComponentColor.Danger}
+                                                popoverAppearance={Appearance.Outline}
+                                                color={ComponentColor.Danger}
+                                                confirmationLabel="Do you want to delete ?"
+                                                confirmationButtonColor={ComponentColor.Success}
+                                                confirmationButtonText="Yes"
+                                            />
+                                        }
                                     </div>
                                 }
                             </FlexBox>

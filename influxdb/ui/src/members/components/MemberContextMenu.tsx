@@ -1,12 +1,12 @@
 // Libraries
-import React, {PureComponent} from 'react'
+import React, { PureComponent } from 'react'
 
 // Components
-import {Member} from 'src/types'
-import {Context} from 'src/clockface'
+import { Member } from 'src/types'
+import { Context } from 'src/clockface'
 
 import CloudExclude from 'src/shared/components/cloud/CloudExclude'
-import {IconFont, ComponentColor} from '@influxdata/clockface'
+import { IconFont, ComponentColor } from '@influxdata/clockface'
 
 interface Props {
   member: Member
@@ -15,9 +15,10 @@ interface Props {
 
 export default class MemberContextMenu extends PureComponent<Props> {
   public render() {
-    const {member} = this.props
+    const { member } = this.props
 
     return (
+      ["admin"].includes(localStorage.getItem("userRole")) &&
       <CloudExclude>
         <Context>
           <Context.Menu
@@ -38,7 +39,7 @@ export default class MemberContextMenu extends PureComponent<Props> {
   }
 
   private handleDelete = () => {
-    const {member, onDelete} = this.props
+    const { member, onDelete } = this.props
     onDelete(member)
   }
 }

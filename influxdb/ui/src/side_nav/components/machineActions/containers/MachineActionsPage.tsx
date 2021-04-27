@@ -528,25 +528,31 @@ class MachineActionsPage extends PureComponent<Props, State> {
                                                                                     type={ButtonType.Submit}
                                                                                     onClick={() => { this.handleDetailSelectedRow(row) }}
                                                                                 />
-                                                                                <Button
-                                                                                    size={ComponentSize.ExtraSmall}
-                                                                                    icon={IconFont.Pencil}
-                                                                                    color={ComponentColor.Primary}
-                                                                                    type={ButtonType.Submit}
-                                                                                    onClick={() => { this.handleClickEditRow(row) }}
-                                                                                />
-                                                                                <ConfirmationButton
-                                                                                    icon={IconFont.Remove}
-                                                                                    onConfirm={() => { this.deleteMachineActionRecord(row) }}
-                                                                                    text={""}
-                                                                                    size={ComponentSize.ExtraSmall}
-                                                                                    popoverColor={ComponentColor.Danger}
-                                                                                    popoverAppearance={Appearance.Outline}
-                                                                                    color={ComponentColor.Danger}
-                                                                                    confirmationLabel="Do you want to delete ?"
-                                                                                    confirmationButtonColor={ComponentColor.Danger}
-                                                                                    confirmationButtonText="Yes"
-                                                                                />
+                                                                                {
+                                                                                    ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
+                                                                                    <Button
+                                                                                        size={ComponentSize.ExtraSmall}
+                                                                                        icon={IconFont.Pencil}
+                                                                                        color={ComponentColor.Primary}
+                                                                                        type={ButtonType.Submit}
+                                                                                        onClick={() => { this.handleClickEditRow(row) }}
+                                                                                    />
+                                                                                }
+                                                                                {
+                                                                                    ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
+                                                                                    <ConfirmationButton
+                                                                                        icon={IconFont.Remove}
+                                                                                        onConfirm={() => { this.deleteMachineActionRecord(row) }}
+                                                                                        text={""}
+                                                                                        size={ComponentSize.ExtraSmall}
+                                                                                        popoverColor={ComponentColor.Danger}
+                                                                                        popoverAppearance={Appearance.Outline}
+                                                                                        color={ComponentColor.Danger}
+                                                                                        confirmationLabel="Do you want to delete ?"
+                                                                                        confirmationButtonColor={ComponentColor.Danger}
+                                                                                        confirmationButtonText="Yes"
+                                                                                    />
+                                                                                }
                                                                             </FlexBox>
                                                                         </Table.Cell>
                                                                     </Table.Row>
@@ -610,23 +616,29 @@ class MachineActionsPage extends PureComponent<Props, State> {
                                                             <p>Import in this order: machineID, jobName, material, startTime, endTime, jobDescription</p>
                                                         )}
                                                     />
-                                                    <Button
-                                                        ref={this.importButtonRef}
-                                                        text="Import"
-                                                        type={ButtonType.Button}
-                                                        icon={IconFont.Import}
-                                                        color={ComponentColor.Success}
-                                                        onClick={() => this.setState({ overlay: true })}
-                                                        style={{ width: '110px' }}
-                                                    />
-                                                    <Button
-                                                        text="Add"
-                                                        type={ButtonType.Button}
-                                                        icon={IconFont.Plus}
-                                                        color={ComponentColor.Primary}
-                                                        style={{ width: '110px' }}
-                                                        onClick={() => { this.setState({ openAddUpdateMachineActionOverlay: true, editMode: false }) }}
-                                                    />
+                                                    {
+                                                        ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
+                                                        <Button
+                                                            ref={this.importButtonRef}
+                                                            text="Import"
+                                                            type={ButtonType.Button}
+                                                            icon={IconFont.Import}
+                                                            color={ComponentColor.Success}
+                                                            onClick={() => this.setState({ overlay: true })}
+                                                            style={{ width: '110px' }}
+                                                        />
+                                                    }
+                                                    {
+                                                        ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
+                                                        <Button
+                                                            text="Add"
+                                                            type={ButtonType.Button}
+                                                            icon={IconFont.Plus}
+                                                            color={ComponentColor.Primary}
+                                                            style={{ width: '110px' }}
+                                                            onClick={() => { this.setState({ openAddUpdateMachineActionOverlay: true, editMode: false }) }}
+                                                        />
+                                                    }
                                                 </FlexBox>
                                             </div>
                                         </Grid.Row>

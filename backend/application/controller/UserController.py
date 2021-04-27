@@ -11,7 +11,7 @@ model = UserModel()
 logger = MongoLogger()
 
 @user.route("/getAll", methods = ["GET"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin"])
 def get_all(token):
     result = model.get_all()
     message = "All users fetched in successfully"
@@ -19,7 +19,7 @@ def get_all(token):
     return return_response(data = result, success = True, message = message, code = 200), 200
 
 @user.route("/delete", methods = ["POST", "DELETE"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin"])
 def delete(token):
     result = model.delete(request.json["userID"])
 
@@ -33,7 +33,7 @@ def delete(token):
         return return_response(success = True, message = message, code = 200), 200
 
 @user.route("/update", methods = ["POST", "PUT", "PATCH"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin"])
 def update(token):
     try:
         key_list = ["oid", "status", "role", "organizations"]
@@ -58,8 +58,8 @@ def update(token):
     except:
         return {"text": "error"}
 
-@user.route("/isUserAlreadyExist", methods = ["POST", "DELETE"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@user.route("/isUserAlreadyExist", methods = ["POST"])
+@token_required(roles = ["admin"])
 def is_user_already_exist(token):
     result = model.is_user_already_exist(request.json)
 
@@ -74,7 +74,7 @@ def is_user_already_exist(token):
 
 
 @user.route("/addUserToOrganization", methods = ["POST", "PUT"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin"])
 def add_user_to_organization(token):
     try:
         result = model.add_user_to_organization(request.json)
@@ -91,7 +91,7 @@ def add_user_to_organization(token):
         return {"text": "error"}
 
 @user.route("/removeUserFromOrganization", methods = ["POST", "DELETE"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin"])
 def remove_user_from_organization(token):
     try:
         result = model.remove_user_from_organization(request.json)
@@ -108,7 +108,7 @@ def remove_user_from_organization(token):
         return {"text": "error"}
 
 @user.route("/removeOrganizationFromAllUsers", methods = ["POST", "DELETE"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin"])
 def remove_organization_from_all_users(token):
     try:
         result = model.remove_organization_from_all_users(request.json)

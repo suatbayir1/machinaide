@@ -11,7 +11,7 @@ model = PredictionModel()
 logger = MongoLogger()
 
 @prediction.route("/getAllPrediction", methods = ["GET"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "editor", "member"])
 def get_all_prediction(token):
     result = model.get_all_prediction()
     message = "get_all_prediction"
@@ -19,7 +19,7 @@ def get_all_prediction(token):
     return return_response(data = result, success = True, message = message), 200
 
 @prediction.route("/getPredictionById", methods = ["GET", "POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "member", "editor"])
 def get_prediction_by_id(token):
     result = model.get_prediction_by_id(request.json)
     message = "get_prediction_by_id"
@@ -27,7 +27,7 @@ def get_prediction_by_id(token):
     return return_response(data = result, success = True, message = message), 200
 
 @prediction.route("/getPredictionInfo", methods = ["GET", "POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "member", "editor"])
 def get_prediction_info(token):
     result = model.get_prediction_info(request.json)
     message = "get_prediction_info"
@@ -35,15 +35,17 @@ def get_prediction_info(token):
     return return_response(data = result, success = True, message = message), 200
 
 @prediction.route("/addPrediction", methods = ["POST"])
+@token_required(roles = ["admin"])
 def add_prediction():
     result = model.add_prediction()
     message = "added_prediction"
-    logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+    logger.add_log("INFO", request.remote_addr, "", request.method, request.url, "", message,  200)
     return return_response(data = [], success = True, message = message)
 
 @prediction.route("/addPredictionInfo", methods = ["POST"])
+@token_required(roles = ["admin"])
 def add_prediction_info():
     result = model.add_prediction_info()
     message = "added_prediction_info"
-    logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+    logger.add_log("INFO", request.remote_addr, "", request.method, request.url, "", message,  200)
     return return_response(data = [], success = True, message = message)

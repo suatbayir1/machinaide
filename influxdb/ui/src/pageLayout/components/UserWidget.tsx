@@ -88,15 +88,18 @@ const UserWidget: FC<Props> = ({
         />
       </CloudOnly>
       <CloudExclude>
-        <TreeNav.UserItem
-          id="users"
-          label="Users"
-          testID="user-nav-item-users"
-          active={getNavItemActivation(['users'], location.pathname)}
-          linkElement={className => (
-            <Link className={className} to={`${orgPrefix}/users`} />
-          )}
-        />
+        {
+          ["admin"].includes(localStorage.getItem("userRole")) &&
+          <TreeNav.UserItem
+            id="users"
+            label="Users"
+            testID="user-nav-item-users"
+            active={getNavItemActivation(['users'], location.pathname)}
+            linkElement={className => (
+              <Link className={className} to={`${orgPrefix}/users`} />
+            )}
+          />
+        }
         <TreeNav.UserItem
           id="members"
           label="Members"
@@ -106,37 +109,34 @@ const UserWidget: FC<Props> = ({
             <Link className={className} to={`${orgPrefix}/members`} />
           )}
         />
-        {/* <TreeNav.UserItem
-          id="about"
-          label="About"
-          testID="user-nav-item-about"
-          active={getNavItemActivation(['about'], location.pathname)}
-          linkElement={className => (
-            <Link className={className} to={`${orgPrefix}/about`} />
-          )}
-        /> */}
-        <TreeNav.UserItem
-          id="switch-orgs"
-          label="Production Lines"
-          testID="user-nav-item-orgs"
-          linkElement={className => (
-            <Link className={className} to="/orgs/list" />
-          )}
-        />
+        {
+          ["admin"].includes(localStorage.getItem("userRole")) &&
+          <TreeNav.UserItem
+            id="switch-orgs"
+            label="Production Lines"
+            testID="user-nav-item-orgs"
+            linkElement={className => (
+              <Link className={className} to="/orgs/list" />
+            )}
+          />
+        }
         <TreeNav.UserItem
           id="switch-orgs"
           label="Switch Production Line"
           testID="user-nav-item-switch-orgs"
           onClick={handleSwitchOrganizations}
         />
-        <TreeNav.UserItem
-          id="create-org"
-          label="Create Production Line"
-          testID="user-nav-item-create-orgs"
-          linkElement={className => (
-            <Link className={className} to="/orgs/new" />
-          )}
-        />
+        {
+          ["admin"].includes(localStorage.getItem("userRole")) &&
+          <TreeNav.UserItem
+            id="create-org"
+            label="Create Production Line"
+            testID="user-nav-item-create-orgs"
+            linkElement={className => (
+              <Link className={className} to="/orgs/new" />
+            )}
+          />
+        }
       </CloudExclude>
       <TreeNav.UserItem
         id="logout"

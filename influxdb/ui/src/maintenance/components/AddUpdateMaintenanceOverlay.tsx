@@ -17,7 +17,6 @@ import {
     InputType,
     Notification,
 } from '@influxdata/clockface'
-import FailureService from 'src/shared/services/FailureService'
 import DTService from 'src/shared/services/DTService';
 import MaintenanceService from 'src/maintenance/services/MaintenanceService';
 

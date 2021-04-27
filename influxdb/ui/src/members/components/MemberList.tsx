@@ -86,14 +86,17 @@ export default class MemberList extends PureComponent<Props, State> {
               sort={sortKey === this.headerKeys[1] ? sortDirection : Sort.None}
               onClick={onClickColumn}
             />
-            <Button
-              text={"Add Member"}
-              size={ComponentSize.Small}
-              icon={IconFont.Plus}
-              color={ComponentColor.Success}
-              type={ButtonType.Submit}
-              onClick={this.addMember}
-            />
+            {
+              ["admin"].includes(localStorage.getItem("userRole")) &&
+              <Button
+                text={"Add Member"}
+                size={ComponentSize.Small}
+                icon={IconFont.Plus}
+                color={ComponentColor.Success}
+                type={ButtonType.Submit}
+                onClick={this.addMember}
+              />
+            }
           </ResourceList.Header>
           <ResourceList.Body
             emptyState={this.props.emptyState}

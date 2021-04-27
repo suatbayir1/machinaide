@@ -12,7 +12,7 @@ logger = MongoLogger()
 
 
 @maintenance.route("/getAllMaintenance", methods = ["GET"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "member", "editor"])
 def get_all_maintenance(token):
     result = model.get_all_maintenance()
     message = "All maintenance records were successfully fetched"
@@ -20,7 +20,7 @@ def get_all_maintenance(token):
     return return_response(data = result, success = True, message = message), 200
 
 @maintenance.route("/addMaintenance", methods = ["POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "editor"])
 def add_maintenance(token):
     requiredField = ["asset", "date", "maintenanceType", "faultType"]
 
@@ -35,8 +35,8 @@ def add_maintenance(token):
     logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, request.json, message,  200)
     return return_response(data = [], success = True, message = message, code = 200), 200
 
-@maintenance.route("/updateMaintenance", methods = ["POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@maintenance.route("/updateMaintenance", methods = ["POST", "PUT"])
+@token_required(roles = ["admin", "editor"])
 def update_maintenance(token):
     result = model.update_maintenance(request.json)
 
@@ -50,7 +50,7 @@ def update_maintenance(token):
         return return_response(success = True, message = message, code = 200), 200
 
 @maintenance.route("/removeMaintenance", methods = ["POST", "DELETE"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "editor"])
 def remove_maintenance(token):
     result = model.remove_maintenance(request.json)
 
@@ -64,7 +64,7 @@ def remove_maintenance(token):
         return return_response(success = True, message = message, code = 200), 200
 
 @maintenance.route("/isMaintenanceExist", methods = ["POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "editor"])
 def is_maintenance_exist(token):
     result = model.is_maintenance_exist(request.json)
     if not result:

@@ -11,7 +11,7 @@ model = FailureModel()
 logger = MongoLogger()
 
 @failure.route("/getAllFailures", methods = ["GET"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "member", "editor"])
 def get_all_failures(token):
     result = model.get_all_failures()
     message = "get_all_failures"
@@ -19,7 +19,7 @@ def get_all_failures(token):
     return return_response(data = result, success = True, message = message), 200
 
 @failure.route("/addFailure", methods = ["POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "editor"])
 def add_failure(token):
     result = model.add_failure(request.json)
     message = "added_failure"
@@ -27,7 +27,7 @@ def add_failure(token):
     return return_response(success = True, message = message), 200
 
 @failure.route("/isFailureExist", methods = ["POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "editor"])
 def is_failure_exist(token):
     result = model.is_failure_exist(request.json)
     if not result:
@@ -39,8 +39,8 @@ def is_failure_exist(token):
         logger.add_log("DUPLICATED", request.remote_addr, token["username"], request.method, request.url, request.json, message,  409)
         return return_response(success = True, message = "failure_already_exists"), 409
 
-@failure.route("/updateFailure", methods = ["POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@failure.route("/updateFailure", methods = ["POST", "PUT"])
+@token_required(roles = ["admin", "editor"])
 def update_failure(token):
     result = model.update_failure(request.json)
 
@@ -54,7 +54,7 @@ def update_failure(token):
         return return_response(success = True, message = message), 200
 
 @failure.route("/removeFailure", methods = ["POST", "DELETE"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "editor"])
 def remove_failure(token):
     result = model.remove_failure(request.json)
 

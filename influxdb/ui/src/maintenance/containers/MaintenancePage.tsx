@@ -30,7 +30,6 @@ import {
 } from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
-import ConfirmDialog from 'src/side_nav/components/newAdd/modules/printDialogBox'
 import { Link } from "react-router-dom"
 import HomeIcon from '@material-ui/icons/Home';
 import 'src/side_nav/components/newAdd/customCss/general.css';
@@ -658,10 +657,10 @@ class MaintenancePage extends PureComponent<Props, State> {
                                 <Link color="inherit" to="/">
                                     <HomeIcon style={{ marginTop: '4px' }} />
                                 </Link>
-                                <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/allFactories`}>
+                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/allFactories`}>
                                     Factories
                                 </Link>
-                                <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/failures/${this.props.match.params["FID"]}`}>
+                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/failures/${this.props["match"].params["FID"]}`}>
                                     Failures
                                 </Link>
 
@@ -758,25 +757,31 @@ class MaintenancePage extends PureComponent<Props, State> {
                                                                                     type={ButtonType.Submit}
                                                                                     onClick={() => { this.handleDetailSelectedRow(row) }}
                                                                                 />
-                                                                                <Button
-                                                                                    size={ComponentSize.ExtraSmall}
-                                                                                    icon={IconFont.Pencil}
-                                                                                    color={ComponentColor.Primary}
-                                                                                    type={ButtonType.Submit}
-                                                                                    onClick={() => { this.handleClickEditRow(row) }}
-                                                                                />
-                                                                                <ConfirmationButton
-                                                                                    icon={IconFont.Remove}
-                                                                                    onConfirm={() => { this.removeMaintenanceRecord(row) }}
-                                                                                    text={""}
-                                                                                    size={ComponentSize.ExtraSmall}
-                                                                                    popoverColor={ComponentColor.Danger}
-                                                                                    popoverAppearance={Appearance.Outline}
-                                                                                    color={ComponentColor.Danger}
-                                                                                    confirmationLabel="Do you want to delete ?"
-                                                                                    confirmationButtonColor={ComponentColor.Danger}
-                                                                                    confirmationButtonText="Yes"
-                                                                                />
+                                                                                {
+                                                                                    ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
+                                                                                    <Button
+                                                                                        size={ComponentSize.ExtraSmall}
+                                                                                        icon={IconFont.Pencil}
+                                                                                        color={ComponentColor.Primary}
+                                                                                        type={ButtonType.Submit}
+                                                                                        onClick={() => { this.handleClickEditRow(row) }}
+                                                                                    />
+                                                                                }
+                                                                                {
+                                                                                    ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
+                                                                                    <ConfirmationButton
+                                                                                        icon={IconFont.Remove}
+                                                                                        onConfirm={() => { this.removeMaintenanceRecord(row) }}
+                                                                                        text={""}
+                                                                                        size={ComponentSize.ExtraSmall}
+                                                                                        popoverColor={ComponentColor.Danger}
+                                                                                        popoverAppearance={Appearance.Outline}
+                                                                                        color={ComponentColor.Danger}
+                                                                                        confirmationLabel="Do you want to delete ?"
+                                                                                        confirmationButtonColor={ComponentColor.Danger}
+                                                                                        confirmationButtonText="Yes"
+                                                                                    />
+                                                                                }
                                                                             </FlexBox>
                                                                         </Table.Cell>
                                                                     </Table.Row>
@@ -840,23 +845,29 @@ class MaintenancePage extends PureComponent<Props, State> {
                                                             <p>Import in this order: asset, sid, date, faultType, maintenanceType, request, reason, jobDescription, duration</p>
                                                         )}
                                                     />
-                                                    <Button
-                                                        ref={this.importButtonRef}
-                                                        text="Import"
-                                                        type={ButtonType.Button}
-                                                        icon={IconFont.Import}
-                                                        color={ComponentColor.Success}
-                                                        onClick={() => this.setState({ overlay: true })}
-                                                        style={{ width: '110px' }}
-                                                    />
-                                                    <Button
-                                                        text="Add"
-                                                        type={ButtonType.Button}
-                                                        icon={IconFont.Plus}
-                                                        color={ComponentColor.Primary}
-                                                        style={{ width: '110px' }}
-                                                        onClick={() => { this.setState({ openAddUpdateMaintenanceOverlay: true, editMode: false }) }}
-                                                    />
+                                                    {
+                                                        ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
+                                                        <Button
+                                                            ref={this.importButtonRef}
+                                                            text="Import"
+                                                            type={ButtonType.Button}
+                                                            icon={IconFont.Import}
+                                                            color={ComponentColor.Success}
+                                                            onClick={() => this.setState({ overlay: true })}
+                                                            style={{ width: '110px' }}
+                                                        />
+                                                    }
+                                                    {
+                                                        ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
+                                                        <Button
+                                                            text="Add"
+                                                            type={ButtonType.Button}
+                                                            icon={IconFont.Plus}
+                                                            color={ComponentColor.Primary}
+                                                            style={{ width: '110px' }}
+                                                            onClick={() => { this.setState({ openAddUpdateMaintenanceOverlay: true, editMode: false }) }}
+                                                        />
+                                                    }
                                                 </FlexBox>
                                             </div>
                                         </Grid.Row>
@@ -864,25 +875,19 @@ class MaintenancePage extends PureComponent<Props, State> {
                                     </Grid>
                                 </Grid.Column>
 
-                                <ConfirmDialog
-                                    open={this.state.dialogBox}
-                                    setOpen={this.setOpen}
-                                    data={this.state.filteredFailures}
-                                ></ConfirmDialog>
-
                                 <ImportMaintenanceFile
                                     overlay={this.state.overlay}
                                     onClose={this.handleCloseImportDataForm}
                                     getAllMaintenance={this.getAllMaintenance}
                                     setNotificationData={this.setNotificationData}
                                     fileTypesToAccept=".csv, .xlsx"
-                                    orgID={this.props.match.params["orgID"]}
+                                    orgID={this.props["match"].params["orgID"]}
                                 />
 
                                 <MaintenanceDetailOverlay
                                     visibleMaintenanceOverlay={this.state.openMaintenanceDetailOverlay}
                                     handleDismissMaintenanceDetail={this.handleDismissMaintenanceDetail}
-                                    factoryID={this.props.match.params.FID}
+                                    factoryID={this.props["match"].params.FID}
                                     selectedDetailRow={this.state.selectedDetailRow}
                                     tableData={this.state.tableData}
                                     currentIndex={this.state.currentIndex}
@@ -893,7 +898,7 @@ class MaintenancePage extends PureComponent<Props, State> {
                                     handleDismissAddUpdateMaintenance={this.handleDismissAddUpdateMaintenance}
                                     getAllMaintenance={this.getAllMaintenance}
                                     isEdit={this.state.editMode}
-                                    factoryID={this.props.match.params.FID}
+                                    factoryID={this.props["match"].params.FID}
                                     updateData={this.state.updateData}
                                 />
                             </Page.Contents>

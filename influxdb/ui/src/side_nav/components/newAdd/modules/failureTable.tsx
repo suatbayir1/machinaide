@@ -27,12 +27,10 @@ import {
     TechnoSpinner,
     RemoteDataState,
     ConfirmationButton,
-    TimeRange,
     Dropdown,
 } from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
-import ConfirmDialog from './printDialogBox'
 import { Link } from "react-router-dom"
 import HomeIcon from '@material-ui/icons/Home';
 import 'src/side_nav/components/newAdd/customCss/general.css';
@@ -155,10 +153,10 @@ class FailureTable extends PureComponent<Props, State> {
         const nextYear = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
         const previousYear = new Date(new Date().setFullYear(new Date().getFullYear() - 1));
 
-        const startLower = this.state.startTimeRange.lower === undefined ? previousYear : new Date(this.state.startTimeRange.lower);
-        const startUpper = this.state.startTimeRange.upper === undefined ? nextYear : new Date(this.state.startTimeRange.upper);
-        const endLower = this.state.endTimeRange.lower === undefined ? previousYear : new Date(this.state.endTimeRange.lower);
-        const endUpper = this.state.endTimeRange.upper === undefined ? nextYear : new Date(this.state.endTimeRange.upper);
+        const startLower = this.state.startTimeRange["lower"] === undefined ? previousYear : new Date(this.state.startTimeRange["lower"]);
+        const startUpper = this.state.startTimeRange["upper"] === undefined ? nextYear : new Date(this.state.startTimeRange["upper"]);
+        const endLower = this.state.endTimeRange["lower"] === undefined ? previousYear : new Date(this.state.endTimeRange["lower"]);
+        const endUpper = this.state.endTimeRange["upper"] === undefined ? nextYear : new Date(this.state.endTimeRange["upper"]);
 
         // get all data
         if (this.state.selectedFactory === "ALL") {
@@ -581,9 +579,6 @@ class FailureTable extends PureComponent<Props, State> {
                         color={ComponentColor.Danger}
                         onClick={this.resetStartTimeRange}
                     />
-                    {/* </FlexBox> */}
-
-                    {/* <FlexBox margin={ComponentSize.Small}> */}
                     <p style={{ fontSize: '12px', marginLeft: '20px !important', fontWeight: 600 }}>   End Time Range</p>
                     <Popover
                         appearance={Appearance.Outline}
@@ -633,36 +628,8 @@ class FailureTable extends PureComponent<Props, State> {
         });
     }
 
-    routeMaintenancePage = () => {
-        console.log(this.props.history);
-    }
-
     render() {
         const { spinnerLoading, isLoading } = this.state;
-
-        const exportList =
-            (
-                <React.Fragment>
-                    <Dropdown.Item
-                        testID="dropdown-item generate-token--read-write"
-                        id={'csv'}
-                        key={'csv'}
-                        value={'csv'}
-                        onClick={this.handleChangeExportType}
-                    >
-                        {'csv'}
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                        testID="dropdown-item generate-token--read-write"
-                        id={'xlsx'}
-                        key={'xlsx'}
-                        value={'xlsx'}
-                        onClick={this.handleChangeExportType}
-                    >
-                        {'xlsx'}
-                    </Dropdown.Item>
-                </React.Fragment>
-            );
 
         return (
             <Page>
@@ -712,13 +679,13 @@ class FailureTable extends PureComponent<Props, State> {
                                 <Link color="inherit" to="/">
                                     <HomeIcon style={{ marginTop: '4px' }} />
                                 </Link>
-                                <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/allFactories`}>
+                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/allFactories`}>
                                     Factories
                         </Link>
-                                <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/machines/<factoryID>`}>
+                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/<factoryID>`}>
                                     Machines
                         </Link>
-                                <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/machines/<factoryID>/<machineID>`}>
+                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/<factoryID>/<machineID>`}>
                                     Components
                         </Link>
                                 <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Failures</Typography>
@@ -813,32 +780,33 @@ class FailureTable extends PureComponent<Props, State> {
                                                                         <Table.Cell>{row["endTime"]}</Table.Cell>
                                                                         <Table.Cell>
                                                                             <FlexBox margin={ComponentSize.Medium} >
-                                                                                <Button
-                                                                                    size={ComponentSize.ExtraSmall}
-                                                                                    icon={IconFont.Pencil}
-                                                                                    color={ComponentColor.Primary}
-                                                                                    type={ButtonType.Submit}
-                                                                                    onClick={() => { this.handleClickEditRow(row) }}
-                                                                                />
-                                                                                {/* <Button
-                                                                                    size={ComponentSize.ExtraSmall}
-                                                                                    icon={IconFont.Remove}
-                                                                                    color={ComponentColor.Danger}
-                                                                                    type={ButtonType.Submit}
-                                                                                    onClick={() => { this.removeFailureRecord(row) }}
-                                                                                /> */}
-                                                                                <ConfirmationButton
-                                                                                    icon={IconFont.Remove}
-                                                                                    onConfirm={() => { this.removeFailureRecord(row) }}
-                                                                                    text={""}
-                                                                                    size={ComponentSize.ExtraSmall}
-                                                                                    popoverColor={ComponentColor.Danger}
-                                                                                    popoverAppearance={Appearance.Outline}
-                                                                                    color={ComponentColor.Danger}
-                                                                                    confirmationLabel="Do you want to delete ?"
-                                                                                    confirmationButtonColor={ComponentColor.Danger}
-                                                                                    confirmationButtonText="Yes"
-                                                                                />
+                                                                                {
+                                                                                    ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
+                                                                                    <Button
+                                                                                        size={ComponentSize.ExtraSmall}
+                                                                                        icon={IconFont.Pencil}
+                                                                                        color={ComponentColor.Primary}
+                                                                                        type={ButtonType.Submit}
+                                                                                        onClick={() => { this.handleClickEditRow(row) }}
+                                                                                    />
+                                                                                }
+
+                                                                                {
+                                                                                    ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
+                                                                                    <ConfirmationButton
+                                                                                        icon={IconFont.Remove}
+                                                                                        onConfirm={() => { this.removeFailureRecord(row) }}
+                                                                                        text={""}
+                                                                                        size={ComponentSize.ExtraSmall}
+                                                                                        popoverColor={ComponentColor.Danger}
+                                                                                        popoverAppearance={Appearance.Outline}
+                                                                                        color={ComponentColor.Danger}
+                                                                                        confirmationLabel="Do you want to delete ?"
+                                                                                        confirmationButtonColor={ComponentColor.Danger}
+                                                                                        confirmationButtonText="Yes"
+                                                                                    />
+                                                                                }
+
                                                                             </FlexBox>
                                                                         </Table.Cell>
                                                                     </Table.Row>
@@ -860,7 +828,7 @@ class FailureTable extends PureComponent<Props, State> {
                                                         type={ButtonType.Button}
                                                         icon={IconFont.Shuffle}
                                                         color={ComponentColor.Secondary}
-                                                        onClick={() => this.props.history.push(`/orgs/${this.props.match.params["orgID"]}/maintenance-records/${this.props.match.params["FID"]}`)}
+                                                        onClick={() => this.props["history"].push(`/orgs/${this.props["match"].params["orgID"]}/maintenance-records/${this.props["match"].params["FID"]}`)}
                                                         style={{ width: '200px' }}
                                                     />
                                                     <Dropdown
@@ -878,9 +846,6 @@ class FailureTable extends PureComponent<Props, State> {
                                                         )}
                                                         menu={onCollapse => (
                                                             <Dropdown.Menu onCollapse={onCollapse}>
-                                                                {/* {
-                                                                        exportList
-                                                                    } */}
                                                                 <Dropdown.Item
                                                                     testID="dropdown-item generate-token--read-write"
                                                                     id={'csv'}
@@ -914,35 +879,35 @@ class FailureTable extends PureComponent<Props, State> {
                                                             <p>Import in this order: factoryID, sid, sourceName, severity, cost, startTime, endTime, description</p>
                                                         )}
                                                     />
-                                                    <Button
-                                                        ref={this.importButtonRef}
-                                                        text="Import"
-                                                        type={ButtonType.Button}
-                                                        icon={IconFont.Import}
-                                                        color={ComponentColor.Success}
-                                                        onClick={() => this.setState({ overlay: true })}
-                                                        style={{ width: '110px' }}
-                                                    />
-                                                    <Button
-                                                        text="Add Failure"
-                                                        type={ButtonType.Button}
-                                                        icon={IconFont.Plus}
-                                                        color={ComponentColor.Primary}
-                                                        style={{ width: '110px' }}
-                                                        onClick={() => { this.setState({ openAddUpdateFailureOverlay: true, editMode: false }) }}
-                                                    />
+                                                    {
+                                                        ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
+                                                        <Button
+                                                            ref={this.importButtonRef}
+                                                            text="Import"
+                                                            type={ButtonType.Button}
+                                                            icon={IconFont.Import}
+                                                            color={ComponentColor.Success}
+                                                            onClick={() => this.setState({ overlay: true })}
+                                                            style={{ width: '110px' }}
+                                                        />
+                                                    }
+                                                    {
+                                                        ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
+                                                        <Button
+                                                            text="Add Failure"
+                                                            type={ButtonType.Button}
+                                                            icon={IconFont.Plus}
+                                                            color={ComponentColor.Primary}
+                                                            style={{ width: '110px' }}
+                                                            onClick={() => { this.setState({ openAddUpdateFailureOverlay: true, editMode: false }) }}
+                                                        />
+                                                    }
                                                 </FlexBox>
                                             </div>
                                         </Grid.Row>
 
                                     </Grid>
                                 </Grid.Column>
-
-                                <ConfirmDialog
-                                    open={this.state.dialogBox}
-                                    setOpen={this.setOpen}
-                                    data={this.state.filteredFailures}
-                                ></ConfirmDialog>
 
                                 <ImportDataForm
                                     overlay={this.state.overlay}
@@ -957,7 +922,7 @@ class FailureTable extends PureComponent<Props, State> {
                                     handleDismissAddUpdateFailure={this.handleDismissAddUpdateFailure}
                                     getAllFailures={this.getAllFailures}
                                     isEdit={this.state.editMode}
-                                    factoryID={this.props.match.params.FID}
+                                    factoryID={this.props["match"].params.FID}
                                     updateData={this.state.updateData}
                                 />
                             </Page.Contents>

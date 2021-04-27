@@ -16,7 +16,7 @@ logger = MongoLogger()
 
 
 @dt.route("/", methods = ["GET"])   
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "editor", "member"])
 def get_all(token):
     data = model.get_all()
     message = "Get data successfully"
@@ -25,7 +25,7 @@ def get_all(token):
 
 
 @dt.route("/getGeneralInfo", methods = ["GET"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "editor", "member"])
 def get_general_info(token):
     data = model.get_general_info()
     message = "Get general info data successfully"
@@ -33,7 +33,7 @@ def get_general_info(token):
     return return_response(data = data, success = True, message = message), 200
 
 @dt.route("/add", methods = ["POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin"])
 def add(token):
     if request.method == "POST":
         if request.json["type"] == "Machine":
@@ -68,7 +68,7 @@ def add(token):
                 return return_response(success = True, message = "Added_Sensor_Successfully"), 200
 
 @dt.route("/delete", methods = ["POST", "DELETE"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin"])
 def delete(token):
     if request.json["type"] == "Machine":
         result = model.delete_machine(request.json)
@@ -89,7 +89,7 @@ def delete(token):
         return return_response(success = False, message = "Type must be Machine, Component or Sensor"), 400
 
 @dt.route("/updateSensor", methods = ["POST", "PUT"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin"])
 def update_sensor(token):
     try:
         result = model.update_sensor(request.json)
@@ -105,8 +105,8 @@ def update_sensor(token):
     except:
         return return_response(success = False, message = "An error occurred while updating a sensor"), 400
 
-@dt.route("/fileUpload", methods = ["GET", "POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@dt.route("/fileUpload", methods = ["POST"])
+@token_required(roles = ["admin"])
 def file_upload(token):
     target = os.path.join(UPLOAD_FOLDER, 'textures')
     if not os.path.isdir(target):
@@ -132,7 +132,7 @@ def file_upload(token):
                                 message = "File_Uploaded_Successfully"), 200
 
 @dt.route("/getFileInfo", methods = ["GET"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "editor", "member"])
 def get_file_info(token):
     source = os.path.join(UPLOAD_FOLDER, 'textures')
     if not os.path.isdir(source):

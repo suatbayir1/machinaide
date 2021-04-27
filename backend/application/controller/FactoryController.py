@@ -11,7 +11,7 @@ model = FactoryModel()
 logger = MongoLogger()
 
 @factory.route("/getFactories", methods = ["GET"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "member", "editor"])
 def get_factories(token):
     data = model.get_factories()
     message = "get_factories_successfully"
@@ -19,7 +19,7 @@ def get_factories(token):
     return return_response(data = data, success = True, message = message), 200
 
 @factory.route("/getMachines", methods = ["GET", "POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "member", "editor"])
 def get_machines(token):
     data = model.get_machines(request.json)
     message = "get_machines_successfully"
@@ -27,7 +27,7 @@ def get_machines(token):
     return return_response(data = data, success = True, message = message)
 
 @factory.route("/getComponents", methods = ["GET", "POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "member", "editor"])
 def get_components(token):
     data = model.get_components(request.json)
     message = "get_components_successfully"
@@ -35,7 +35,7 @@ def get_components(token):
     return return_response(data = data, success = True, message = message)
 
 @factory.route("/getSensors", methods = ["GET", "POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "member", "editor"])
 def get_sensors(token):
     data = model.get_sensors(request.json)
     message = "get_sensors_successfully"
@@ -43,7 +43,7 @@ def get_sensors(token):
     return return_response(data = data, success = True, message = "get_sensors_successfully")
 
 @factory.route("/addMachineAction", methods = ["POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "editor"])
 def add_machine_action(token):
     if not request.data:
         message = "Request data cannot be empty"
@@ -56,7 +56,7 @@ def add_machine_action(token):
     return return_response(success = True, message = message, code = 200), 200
 
 @factory.route("/getAllMachineActions", methods = ["GET", "POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "member", "editor"])
 def get_all_machine_actions(token):
     if not request.data:
         message = "Request data cannot be empty"
@@ -69,7 +69,7 @@ def get_all_machine_actions(token):
     return return_response(data = data, success = True, message = message), 200
 
 @factory.route("/updateMachineAction", methods = ["POST", "PUT"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "editor"])
 def update_machine_action(token):
     if not request.data:
         message = "Request data cannot be empty"
@@ -88,7 +88,7 @@ def update_machine_action(token):
         return return_response(success = True, message = message, code = 200), 200
 
 @factory.route("/deleteMachineAction", methods = ["POST", "DELETE"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "editor"])
 def delete_machine_action(token):
     if not request.data:
         message = "Request data cannot be empty"
@@ -107,7 +107,7 @@ def delete_machine_action(token):
         return return_response(success = True, message = message, code = 200), 200
 
 @factory.route("/isMachineActionExists", methods = ["POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin", "editor"])
 def is_machine_action_exists(token):
     if not request.data:
         message = "Request data cannot be empty"

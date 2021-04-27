@@ -12,7 +12,7 @@ model = LogModel()
 logger = MongoLogger()
 
 @log.route("/getLogs", methods = ["GET", "POST"])
-@token_required(roles = ["admin", "member", "superadmin"])
+@token_required(roles = ["admin"])
 def get_logs(token):
     regexList = ["ip", "username", "endpoint"]
     arrayList = ["request_type", "log_type", "status"]

@@ -22,7 +22,6 @@ const FormDialog = (props) => {
         xlsx: false,
         csv: false,
     });
-    const [downloadCSV, setCSVDownload] = React.useState(false)
 
     const [email, setEmail] = React.useState('')
 
@@ -37,10 +36,6 @@ const FormDialog = (props) => {
 
     const handleEmail = (event) => {
         setEmail(event.target.value)
-    }
-
-    const handleDownloadCSV = (event) => {
-        setCSVDownload(true)
     }
 
     const handleSubmit = (event) => {
