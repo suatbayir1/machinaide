@@ -34,10 +34,11 @@ import FlowsIndex from 'src/notebooks/components/FlowsIndex'
 
 // My Added Components
 import DigitalTwinPage from 'src/dt/containers/DigitalTwinPage'
+import FactorySceneOverlay from 'src/dt/components/FactorySceneOverlay'
 import ObjectCreatorPage from 'src/objectCreator/containers/ObjectCreatorPage'
 
 // Factory, Machine, Component, Sensor
-import AllFactories from 'src/side_nav/components/newAdd/AllFactories';
+import AllFactories from 'src/side_nav/components/factoriesPanel/containers/AllFactories';
 import MachinesPanel from 'src/side_nav/components/newAdd/MachinesPanel';
 import ComponentsPanel from 'src/side_nav/components/newAdd/ComponentsPanel';
 import ComponentAlertHistoryTable from 'src/side_nav/components/newAdd/ComponentAlertHistoryTable';
@@ -148,6 +149,8 @@ const SetOrg: FC<Props> = ({
 
         {/* DT */}
         <PermittedRoute exact path={`${orgPath}/dt`} component={DigitalTwinPage} allowedRoles={["member", "admin", "editor"]} />
+        <PermittedRoute exact path={`${orgPath}/dt/factory-scene`} component={FactorySceneOverlay} allowedRoles={["member", "admin", "editor"]} />
+
 
         {/* ObjectCreator */}
         <PermittedRoute exact path={`${orgPath}/object-creator`} component={ObjectCreatorPage} allowedRoles={["admin"]} />

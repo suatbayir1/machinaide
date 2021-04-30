@@ -6,11 +6,12 @@ import { BACKEND } from "src/config";
 import 'src/style/custom.css'
 import * as d3 from "d3";
 import { withSize } from "react-sizeme";
+import { history } from 'src/store/history'
+import DTService from 'src/shared/services/DTService';
 import {
     Panel,
     ComponentSize,
     Form,
-    Input,
     Button,
     Grid,
     Columns,
@@ -21,7 +22,6 @@ import {
     SpinnerContainer,
     Dropdown,
     IconFont,
-    FlexBox,
     Notification,
     Gradients,
 } from '@influxdata/clockface'
@@ -34,6 +34,7 @@ interface Props {
     selectedGraphNode: object
     showAllSensorValues: boolean
     refreshGraph: boolean
+    orgID: string
 }
 
 interface State {
@@ -50,8 +51,6 @@ interface State {
     notificationVisible: boolean
     notificationType: string
     notificationMessage: string
-    lastSensorValue: number
-    showAllSensorValue: boolean
     currentSensorValue: object[]
     graphWidth: number
 }
@@ -99,8 +98,6 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
             notificationVisible: false,
             notificationType: '',
             notificationMessage: '',
-            lastSensorValue: 0,
-            showAllSensorValue: true,
             currentSensorValue: [],
             graphWidth: 860,
         };
@@ -109,14 +106,11 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
     async componentDidMount(): Promise<void> {
         await this.createGraph();
         this.getRealTimeSensorData();
-        this.generateLastSensorData();
-
         this.responsiveConfiguration();
     }
 
     componentWillUnmount() {
         window.removeEventListener('resize', () => {
-            this.responsiveConfiguration();
             this.setState({
                 graphWidth: document.querySelector("#graphDiv").clientWidth - 30
             })
@@ -138,10 +132,20 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
         if (prevProps.refreshGraph !== this.props.refreshGraph) {
             await this.createGraph();
         }
+
+        if (prevProps.showAllSensorValues !== this.props.showAllSensorValues) {
+            this.getRealTimeSensorData();
+        }
     }
 
     getRealTimeSensorData = async () => {
         let eventSource = new EventSource(`${BACKEND.API_URL}topic/sensors_data`);
+
+        if (!this.props.showAllSensorValues) {
+            eventSource.close();
+            return;
+        }
+
         eventSource.onmessage = e => {
             let currentData = JSON.parse(e.data);
 
@@ -165,16 +169,12 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
         }
     }
 
-    generateLastSensorData = () => {
-        setInterval(() => {
-            this.setState({
-                lastSensorValue: Math.floor(Math.random() * 100) + 1,
-            })
-        }, 1000);
-    }
-
     createGraph = async () => {
-        const graphInfo = await this.getGraphInfo();
+        const graphInfo = await DTService.getAllDT();
+
+        this.setState({
+            constantJsonData: graphInfo
+        });
 
         const nodes = [];
         const links = [];
@@ -264,37 +264,6 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
 
         this.graphRef.zoom(3, 1000);
         this.graphRef.d3Force('collide', d3.forceCollide(4))
-    }
-
-    getGraphInfo = async () => {
-        const url = `${BACKEND.API_URL}dt/`;
-
-        const request = fetch(url, {
-            method: 'GET',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
-                'token': window.localStorage.getItem("token")
-            }
-        })
-
-        try {
-            const response = await request;
-            const res = await response.json();
-
-            if (res.data.success !== true) return;
-            const result = JSON.parse(res.data.data)
-
-            this.setState({
-                constantJsonData: result
-            });
-            return result;
-        } catch (err) {
-            console.log(err);
-        }
     }
 
     onChangeInput = (e) => {
@@ -425,93 +394,6 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
         this.setState({ prunedTree: returnData })
     }
 
-    clickSearchHandle = () => {
-        this.handleQuery();
-
-        // let queryParameter = this.state.queryParameter
-        // let newData = this.state.constantData;
-
-        // let nodes = [];
-        // let links = [];
-
-        // // if user entry empty query string then return all initial data
-        // if (!queryParameter) {
-        //     this.setState({
-        //         prunedTree: newData
-        //     })
-        //     return;
-        // }
-
-        // newData["nodes"].forEach(node => {
-        //     Object.keys(node).forEach(property => {
-        //         let foundNode = false;
-        //         if (typeof node[property] === 'string' && node[property].toLowerCase() === queryParameter.toLowerCase()) {
-        //             nodes.push(node);
-        //             foundNode = true;
-        //         }
-
-        //         if (foundNode) {
-        //             function findParent(node) {
-        //                 let foundParent = "";
-        //                 if (node["parent"] !== undefined) {
-        //                     newData["nodes"].forEach(parentNode => {
-        //                         if (parentNode["id"].toLowerCase() === node["parent"].toLowerCase()) {
-        //                             foundParent = parentNode
-        //                         }
-        //                     })
-        //                 }
-        //                 return foundParent;
-        //             }
-
-        //             // found parent each node
-        //             while (true) {
-        //                 let result = getParentNode(node);
-
-        //                 if (!result) {
-        //                     break;
-        //                 }
-
-        //                 function getParentNode(node) {
-        //                     let parent = findParent(node);
-        //                     if (parent !== "") {
-        //                         nodes.push(parent);
-
-        //                         links.push({
-        //                             source: node["parent"],
-        //                             target: node["name"]
-        //                         })
-
-        //                         if (parent["parent"] === undefined) {
-        //                             return false;
-        //                         } else {
-        //                             getParentNode(parent);
-        //                         }
-        //                     } else {
-        //                         return false;
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     })
-        // })
-
-        // const uniqueNodes = [...new Set(nodes)];
-        // const uniqueLinks = links.filter(function (a) {
-        //     var key = a.source + '|' + a.target;
-        //     if (!this[key]) {
-        //         this[key] = true;
-        //         return true;
-        //     }
-        // }, Object.create(null));
-
-        // let returnData = {
-        //     nodes: uniqueNodes,
-        //     links: uniqueLinks,
-        // }
-
-        // this.setState({ prunedTree: returnData })
-    }
-
     getPrunedTree = () => {
         const rootId = "Ermetal"
         const nodesById = this.state.nodesById;
@@ -560,10 +442,6 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
         })
     }
 
-    handleSaveAddNode = () => {
-        alert('TODO: Add new node');
-    }
-
     handleChangeNotification = (type, message) => {
         this.setState({
             notificationVisible: true,
@@ -573,11 +451,8 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
     }
 
     render() {
-        var width = this.props.size.width;
-
         const {
             prunedTree,
-            queryParameter,
             spinnerLoading,
             selectedGraphType,
             graphTypeList,
@@ -609,55 +484,9 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                                     <Grid.Column widthXS={Columns.Twelve}>
                                         <NLPSearch />
                                     </Grid.Column>
-                                    {/* <Grid.Column widthXS={Columns.Eight}>
-                                        <Input
-                                            name="queryParameter"
-                                            placeholder="Search in graph.."
-                                            onChange={this.onChangeInput}
-                                            value={queryParameter}
-                                        />
-                                    </Grid.Column>
-                                    <Grid.Column widthXS={Columns.Four}>
-                                        <FlexBox margin={ComponentSize.Small}>
-                                            <Button
-                                                text="Search"
-                                                onClick={this.clickSearchHandle}
-                                                type={ButtonType.Button}
-                                                icon={IconFont.Search}
-                                                color={ComponentColor.Primary}
-                                            />
-                                            <Button
-                                                text="Add"
-                                                icon={IconFont.Plus}
-                                                onClick={this.openAddNodeOverlay}
-                                                type={ButtonType.Button}
-                                                color={ComponentColor.Primary}
-                                            />
-                                            <Dropdown
-                                                testID="dropdown--gen-token"
-                                                button={(active, onClick) => (
-                                                    <Dropdown.Button
-                                                        active={active}
-                                                        onClick={onClick}
-                                                        color={ComponentColor.Primary}
-                                                        testID="dropdown-button--gen-token"
-                                                    >
-                                                        {selectedGraphType['text']}
-                                                    </Dropdown.Button>
-                                                )}
-                                                menu={onCollapse => (
-                                                    <Dropdown.Menu onCollapse={onCollapse}>
-                                                        {
-                                                            graphTypeMenuList
-                                                        }
-                                                    </Dropdown.Menu>
-                                                )}
-                                            />
-                                        </FlexBox>
-                                    </Grid.Column> */}
                                 </Grid.Row>
                                 <Grid.Row>
-                                    <Grid.Column widthXS={Columns.Four}>
+                                    <Grid.Column widthXS={Columns.Twelve}>
                                         <div className="tabbed-page--header-left">
                                             {
                                                 ["admin"].includes(localStorage.getItem("userRole")) &&
@@ -670,8 +499,17 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                                                 />
                                             }
 
+                                            <Button
+                                                text="View Factory"
+                                                icon={IconFont.Pulse}
+                                                onClick={() => history.push(`/orgs/${this.props.orgID}/dt/factory-scene`)}
+                                                type={ButtonType.Button}
+                                                color={ComponentColor.Primary}
+                                            />
+
                                             <Dropdown
                                                 testID="dropdown--gen-token"
+                                                style={{ width: '125px' }}
                                                 button={(active, onClick) => (
                                                     <Dropdown.Button
                                                         active={active}
@@ -707,7 +545,6 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                             onNodeRightClick={this.handleNodeRightClick}
                             linkColor={() => "rgb(6, 111, 197)"}
                             linkWidth={3}
-                            // width={860}
                             width={this.state.graphWidth}
                             height={600}
                             linkDirectionalParticles={2}

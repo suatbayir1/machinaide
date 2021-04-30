@@ -1,21 +1,21 @@
 // Libraries
-import React, {Component} from 'react'
-import {connect} from 'react-redux'
-import {get} from 'lodash'
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import { get } from 'lodash'
 
 // Components
 import CellHeader from 'src/shared/components/cells/CellHeader'
 import CellContext from 'src/shared/components/cells/CellContext'
 import ScrollableMarkdown from 'src/shared/components/views/ScrollableMarkdown'
 import RefreshingView from 'src/shared/components/RefreshingView'
-import {ErrorHandling} from 'src/shared/decorators/errors'
+import { ErrorHandling } from 'src/shared/decorators/errors'
 import EmptyGraphMessage from 'src/shared/components/EmptyGraphMessage'
 
 // Utils
-import {getByID} from 'src/resources/selectors'
+import { getByID } from 'src/resources/selectors'
 
 // Types
-import {RemoteDataState, AppState, View, Cell, ResourceType} from 'src/types'
+import { RemoteDataState, AppState, View, Cell, ResourceType } from 'src/types'
 
 interface StateProps {
   view: View
@@ -35,7 +35,7 @@ type Props = StateProps & OwnProps
 @ErrorHandling
 class CellComponent extends Component<Props, State> {
   public render() {
-    const {cell, view} = this.props
+    const { cell, view } = this.props
 
     return (
       <>
@@ -57,7 +57,7 @@ class CellComponent extends Component<Props, State> {
   }
 
   private get viewName(): string {
-    const {view} = this.props
+    const { view } = this.props
 
     if (view && view.properties && view.properties.type !== 'markdown') {
       return view.name
@@ -67,7 +67,7 @@ class CellComponent extends Component<Props, State> {
   }
 
   private get viewNote(): string {
-    const {view} = this.props
+    const { view } = this.props
 
     if (!view || !view.properties || !view.properties.type) {
       return ''
@@ -84,7 +84,7 @@ class CellComponent extends Component<Props, State> {
   }
 
   private get view(): JSX.Element {
-    const {manualRefresh, view} = this.props
+    const { manualRefresh, view } = this.props
 
     if (!view || view.status !== RemoteDataState.Done) {
       return <EmptyGraphMessage message="Loading..." />
@@ -115,7 +115,7 @@ class CellComponent extends Component<Props, State> {
 const mstp = (state: AppState, ownProps: OwnProps) => {
   const view = getByID<View>(state, ResourceType.Views, ownProps.cell.id)
 
-  return {view}
+  return { view }
 }
 
 export default connect<StateProps, {}, OwnProps>(mstp)(CellComponent)

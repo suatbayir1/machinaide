@@ -1,10 +1,10 @@
 // Libraries
-import React, {useState, FunctionComponent} from 'react'
-import {connect} from 'react-redux'
+import React, { useState, FunctionComponent } from 'react'
+import { connect } from 'react-redux'
 import classnames from 'classnames'
 
 // Components
-import {DraggableResizer, Orientation} from '@influxdata/clockface'
+import { DraggableResizer, Orientation } from '@influxdata/clockface'
 import TimeMachineQueries from 'src/timeMachine/components/Queries'
 import TimeMachineAlerting from 'src/timeMachine/components/TimeMachineAlerting'
 import TimeMachineVis from 'src/timeMachine/components/Vis'
@@ -12,10 +12,10 @@ import ViewOptions from 'src/timeMachine/components/view_options/ViewOptions'
 import TimeMachineCheckQuery from 'src/timeMachine/components/TimeMachineCheckQuery'
 
 // Utils
-import {getActiveTimeMachine} from 'src/timeMachine/selectors'
+import { getActiveTimeMachine } from 'src/timeMachine/selectors'
 
 // Types
-import {AppState, TimeMachineTab} from 'src/types'
+import { AppState, TimeMachineTab } from 'src/types'
 
 const INITIAL_RESIZER_HANDLE = 0.5
 
@@ -74,9 +74,9 @@ const TimeMachine: FunctionComponent<StateProps> = ({
 }
 
 const mstp = (state: AppState) => {
-  const {activeTab, isViewingVisOptions} = getActiveTimeMachine(state)
+  const { activeTab, isViewingVisOptions } = getActiveTimeMachine(state)
 
-  return {activeTab, isViewingVisOptions}
+  return { activeTab, isViewingVisOptions }
 }
 
 export default connect<StateProps>(mstp)(TimeMachine)

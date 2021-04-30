@@ -30,7 +30,7 @@ import DTService from "src/shared/services/DTService";
 
 
 interface Props {
-    selectedGraphNode: string[]
+    selectedGraphNode: object
     generalInfo: string[]
     spinnerLoading: RemoteDataState
     changeShowAllSensorValues: () => void

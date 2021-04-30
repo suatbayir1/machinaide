@@ -1,0 +1,9 @@
+[
+	
+	["Show me component yaglama's sensors", {"entities": [[18, 25, "COMP"]]}],
+	["Show me component dengeleme's sensors", {"entities": [[18, 27, "COMP"]]}],
+	["Show me component anaMotor's sensors", {"entities": [[18, 26, "COMP"]]}],
+	["Show the component sampleComp1 and component sampleComp2 sensors with pressure value is less than 50 and larger than 30 in the last 10 days", {"entities": [[19, 30, "COMP"], [45, 56, "COMP"], [88, 119, "VALUE"], [127, 139, "RANGE"]]}],
+	["Show the component sampleComp1 and component sampleComp2 sensors with pressure value is less than 50 and larger than 30 from 20.04.2021 anaMotor 24.04.2021", {"entities": [[125, 135, "RANGE"], [145, 155, "RANGE"], [19, 30, "COMP"], [45, 56, "COMP"], [88, 100, "VALUE"], [105, 119, "VALUE"]]}],
+	["Show the components that have maintenance records in the last 2 hour", {"entities": [[57, 68, "RANGE"]]}]
+]

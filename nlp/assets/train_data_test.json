@@ -1,0 +1,5 @@
+[
+	["Show me component yaglama's sensors", {"entities": [[18, 25, "COMP"]]}],
+    ["Show me component dengeleme's sensors", {"entities": [[18, 27, "COMP"]]}],
+    ["Show me component anaMotor's sensors", {"entities": [[18, 26, "COMP"]]}]
+]

@@ -9,18 +9,21 @@ import {Input, InputType,
 import { BACKEND } from "src/config";
 import {TextAnnotator} from 'react-text-annotate'
 import GaugeChart from 'src/shared/components/GaugeChart'
+import SingleStat from 'src/shared/components/SingleStat';
 import {GaugeViewProperties} from 'src/types/dashboards'
 import {
     DEFAULT_GAUGE_COLORS,
   } from 'src/shared/constants/thresholds'
 import {Color} from 'src/types'
 import {defaultViewQuery, defaultView} from 'src/views/helpers'
+import FactoryDashboardService from 'src/side_nav/components/factoriesPanel/services/FactoryDashboardService';
+import { csvToJSON } from 'src/shared/helpers/FileHelper';
+import { RemoteDataState } from 'src/types'
+import {withRouter, RouteComponentProps} from 'react-router-dom'
 import {Context} from 'src/clockface'
 import SearchWidget from 'src/shared/components/search_widget/SearchWidget'
 
-interface Props{
-
-}
+type Props = RouteComponentProps<{orgID: string}>
 
 interface State{
     question: string
@@ -39,8 +42,12 @@ interface State{
     value: Object[]
     tag: string
     category: string
+    mongoTemplate: string
     properties: GaugeViewProperties
     textcatLabels: any[]
+    fluxResults: Object
+    fluxQueries: Object[]
+    intervalId: number
 }
 
 const styles = {
@@ -57,7 +64,9 @@ const colors = {
     'COMP': InfluxColors.Krypton,
     'SENS': InfluxColors.Topaz,
     'VALUE': InfluxColors.Magenta,
-    'RANGE': InfluxColors.Laser
+    'RANGE': InfluxColors.Laser,
+    'SVR': InfluxColors.Rainforest,
+    'MTYPE': InfluxColors.Daisy
 }
 
 const tags = [
@@ -65,13 +74,34 @@ const tags = [
     'COMP',
     'SENS',
     'VALUE',
-    'RANGE'
+    'RANGE',
+    'SVR',
+    'MTYPE'
 ]
 
 const cats = [
     'Sensor data',
     'Metadata'
 ]
+
+const templates = [
+    'Maintenance',
+    'Maintenance Count',
+    'Failure',
+    'Failure Count'
+]
+
+const tagInfo = ` - Select the tag from dropdown. \n - Click and highlight the text you want to annotate. 
+ - Click on the annotation to take it back. \n Tags: \n -'MACH': machine name
+ - 'COMP': component name \n - 'SENS': sensor name
+ - 'VALUE': numerical comparison value \n - 'RANGE': timestamps/dates etc.
+ - 'SVR': failure severity type \n - 'MTYPE': maintenance type`
+
+const tempInfo = ` Select the relevant template type.\n Types:
+ - "Maintenance": Returns source names that have specified maintenance records
+ - "Maintenance Count": Returns the count of specified maintenance records
+ - "Failure": Returns source names that have specified failure records
+ - "Failure Count": Returns the count of specified failure records`
 
 class NLPSearch extends PureComponent<Props, State>{
     // private triggerRef: RefObject<ButtonRef> = createRef()
@@ -92,17 +122,80 @@ class NLPSearch extends PureComponent<Props, State>{
         value: [],
         tag: 'MACH',
         category: 'Sensor data',
-        properties: {} as GaugeViewProperties,
-        textcatLabels: [],
-    }
-
-    componentDidMount(){
-        console.log("nlp comp is mounted")
-        this.setState({properties: 
-            {...this.defaultGaugeViewProperties(),
+        mongoTemplate: 'Maintenance',
+        properties: {queries: [{
+            name: defaultViewQuery().name,
+            text: `from(bucket:"system")
+            |> range(start:-1h)
+            |> filter(fn: (r) =>
+              r._measurement == "cpu" and
+              r._field == "usage_system" and
+              r["cpu"] == "cpu0"
+            )
+            |> last()`,
+            editMode: defaultViewQuery().editMode,
+            builderConfig: defaultViewQuery().builderConfig
+            }],
+            colors: DEFAULT_GAUGE_COLORS as Color[],
+            prefix: '',
+            tickPrefix: '',
+            suffix: '',
+            tickSuffix: '',
+            note: '',
+            showNoteWhenEmpty: false,
+            decimalPlaces: {
+                isEnforced: true,
+                digits: 2,
+            },
             type: 'gauge',
             shape: 'chronograf-v2',
-            legend: {}}})
+            legend: {}
+        } as GaugeViewProperties,
+        textcatLabels: [],
+        fluxResults: {},
+        fluxQueries: [{
+            key: "cpu_usage_system",
+            display: "CPU Usage Percent",
+            type: 'gauge',
+            loading: RemoteDataState.Loading,
+            query: `
+            from(bucket:"system")
+            |> range(start:-1h)
+            |> filter(fn: (r) =>
+              r._measurement == "cpu" and
+              r._field == "usage_system" and
+              r["cpu"] == "cpu0"
+            )
+            |> last()
+            `,
+            properties: {
+                queries: [defaultViewQuery()],
+                colors: [] as Color[],
+                prefix: '',
+                tickPrefix: '',
+                suffix: '',
+                tickSuffix: '',
+                note: '',
+                showNoteWhenEmpty: false,
+                decimalPlaces: {
+                    isEnforced: false,
+                    digits: 2,
+                },
+                type: 'gauge',
+                shape: 'chronograf-v2',
+                legend: {}
+            }
+        }],
+        intervalId: 0,
+    }
+
+    async componentDidMount(){
+        await this.generateChartValues();
+
+        let intervalId = window.setInterval(this.generateChartValues, 5000);
+        this.setState({ intervalId });
+        
+        //console.log("nlp comp is mounted ", this.props)
     }
 
     async postQuestion(): Promise<void> {
@@ -151,6 +244,19 @@ class NLPSearch extends PureComponent<Props, State>{
         this.setState({[e.target.name] : e.target.value})
     }
 
+    parseTemplateType = (type) => {
+        if(type === 'maintenance')
+            return 'Maintenance'
+        else if(type === 'maintenancecount')
+            return 'Maintenance Count'
+        else if(type === 'failure')
+            return 'Failure'
+        else if(type === 'failurecount')
+            return 'Failure Count'
+        else
+            return type
+    }
+
     handleSearch = () => {
         console.log(this.state.question)
         this.postQuestion().then(res=> {
@@ -164,6 +270,7 @@ class NLPSearch extends PureComponent<Props, State>{
             }
             else if(res["data"]){
                 let query = res["query"].replaceAll("|>", "\n\t|>")
+                let q2 = query.replaceAll("\\", "")
                 this.setState({
                     data: res["data"], 
                     query: query, 
@@ -175,7 +282,8 @@ class NLPSearch extends PureComponent<Props, State>{
                     feedbackArrived: false,
                     overlayVisible: false,
                     graphOverlay: res["graphOverlay"],
-                    value: [], textcatLabels: res['textcatLabels']
+                    value: [], textcatLabels: res['textcatLabels'], mongoTemplate: res['mongoTextcat'],
+                    fluxQueries: [res["graphOverlay"] ? (res['textcatLabels'] === 'mongodb' ? {...this.state.fluxQueries[0], type: 'single-stat'} : {...this.state.fluxQueries[0], query: q2}) : {...this.state.fluxQueries[0]}]
                 })
             }
             else{
@@ -189,7 +297,7 @@ class NLPSearch extends PureComponent<Props, State>{
     }
 
     addTrainData = () => {
-        let data = {question: this.state.fixedQuestion, entities: this.state.entities}
+        let data = {question: this.state.fixedQuestion, entities: this.state.entities, cat: this.state.category, mongoTextcat: this.state.mongoTemplate}
         console.log("yes-->", data)
         this.postTrainData(data).then(res=>{
             console.log(res)
@@ -198,7 +306,7 @@ class NLPSearch extends PureComponent<Props, State>{
     }
 
     sendAnnotations = () => {
-        let data = {question: this.state.fixedQuestion, entities: [], cat: this.state.category}
+        let data = {question: this.state.fixedQuestion, entities: [], cat: this.state.category, mongoTextcat: this.state.mongoTemplate}
         let entities = []
         for(let annotation of this.state.value){
             let entity = {}
@@ -214,24 +322,66 @@ class NLPSearch extends PureComponent<Props, State>{
             this.setState({
                 annotations: [],
                 resultArrived: false, feedbackArrived: true,
-                value: [], overlayVisible: false, errorHappened: false, entities: []
+                value: [], overlayVisible: false, errorHappened: false, entities: [],
+                tag: 'MACH', category: 'Sensor data', mongoTemplate: 'Maintenance',
             })
         }).catch(err=>console.log(err))
+    }
+
+    generateChartValues = async () => {
+        if(this.state.graphOverlay && this.state.textcatLabels[0] === 'influxdb'){
+            await this.loadingCharts();
+            this.state.fluxQueries.map(query => {
+                this.fluxQueryResult(query);
+            })
+        }        
+    }
+
+    loadingCharts = () => {
+        let queries = [...this.state.fluxQueries];
+        queries = queries.map(q => {
+            q["loading"] = RemoteDataState.Loading
+            return q;
+        })
+        this.setState({
+            fluxQueries: queries
+        })
+    }
+
+    fluxQueryResult = async (query) => {
+        //console.log("? ",query)
+        const csvResult = await FactoryDashboardService.fluxQuery(this.props.match.params.orgID, query["query"]);
+        const jsonResult = await csvToJSON(csvResult);
+
+        let queries = [...this.state.fluxQueries];
+        queries = queries.map(q => {
+            if (q["key"] === query["key"]) {
+                q["loading"] = RemoteDataState.Done
+            }
+            return q;
+        })
+
+        this.setState({
+            fluxResults: {
+                ...this.state.fluxResults,
+                [query["key"]]: jsonResult[0] !== undefined ? Number(Number(jsonResult[0]["_value"]).toFixed(2)) : 0,
+            },
+            fluxQueries: queries
+        })
     }
 
     overlayComponent = () =>{
         return(
             <Overlay visible={this.state.overlayVisible}>
-                <Overlay.Container maxWidth={750} style={{minHeight: "300px"}}>
+                <Overlay.Container maxWidth={900} style={{minHeight: "350px"}}>
                     <Overlay.Header
                         title="Annotate Question"
                         onDismiss={()=>this.setState({overlayVisible: !this.state.overlayVisible})}
                     />
                     <Overlay.Body>
                         <Grid>
-                            <Grid.Row style={{borderBottom: 'solid 1px', borderTop: 'solid 1px'}}>
-                                <Grid.Column widthXS={Columns.One}/>
-                                <Grid.Column widthXS={Columns.Four} style={{marginBottom: "7px", marginTop: "7px"}}>
+                            <Grid.Row style={{borderTop: 'solid 1px', borderBottom: 'solid 1px'}}>
+                                <Grid.Column widthXS={Columns.Three} style={{marginBottom: "7px", marginTop: "7px", borderRight: 'solid 1px'}}>
                                     <div className="tabbed-page--header-left">
                                         <Icon key="brush" glyph={IconFont.Brush} style={{color: colors[this.state.tag], fontSize: '20px', marginRight: '1px'}} />
                                         <label style={{color: InfluxColors.Mist, marginRight: '10px'}}>Tags: </label>
@@ -246,12 +396,11 @@ class NLPSearch extends PureComponent<Props, State>{
                                                 <div style={{color: InfluxColors.Star}}>{"How to annotate:"}
                                                 <hr style={{borderStyle: 'none none solid none', borderWidth: '2px', borderColor: '#BE2EE4', boxShadow: '0 0 5px 0 #8E1FC3', margin: '3px'}}/>
                                                 </div>
-                                                {" - Select the tag from dropdown. \n - Click and highlight the text you want to annotate. \n - Click on the annotation to take it back."}                                            
+                                                {tagInfo}                                            
                                                 </div>}
                                         />
                                     </div>
                                 </Grid.Column>
-                                <Grid.Column widthXS={Columns.Two}/>
                                 <Grid.Column widthXS={Columns.Four} style={{marginBottom: "7px", marginTop: "7px"}}>
                                     <div className="tabbed-page--header-right">
                                         <Icon key="brush" glyph={IconFont.Annotate} style={{color: InfluxColors.Galaxy, fontSize: '22px', marginRight: '3px'}} />
@@ -272,8 +421,29 @@ class NLPSearch extends PureComponent<Props, State>{
                                         />
                                     </div>
                                 </Grid.Column>
-                                <Grid.Column widthXS={Columns.One}/>                               
+                                {this.state.category === 'Metadata' &&
+                                <Grid.Column widthXS={Columns.Five} style={{marginBottom: "7px", marginTop: "7px", borderLeft: 'solid 1px'}}>
+                                    <div className="tabbed-page--header-right">
+                                        <Icon key="brush" glyph={IconFont.AnnotatePlus} style={{color: InfluxColors.Chartreuse, fontSize: '22px', marginRight: '3px'}} />
+                                        <label style={{color: InfluxColors.Mist, marginRight: '10px'}}>Template: </label>
+                                        <SelectDropdown 
+                                            selectedOption={this.parseTemplateType(this.state.mongoTemplate)} options={templates} onSelect={(selectedTemp)=>this.setState({mongoTemplate: selectedTemp})} 
+                                        />
+                                        <QuestionMarkTooltip
+                                            style={{marginLeft: "5px"}}
+                                            diameter={15}
+                                            color={ComponentColor.Secondary}
+                                            tooltipContents={<div style={{whiteSpace: 'pre-wrap', fontSize: "13px"}}>
+                                                <div style={{color: InfluxColors.Star}}>{"Metadata templates:"}
+                                                <hr style={{borderStyle: 'none none solid none', borderWidth: '2px', borderColor: '#BE2EE4', boxShadow: '0 0 5px 0 #8E1FC3', margin: '3px'}}/>
+                                                </div>
+                                                {tempInfo}                                            
+                                                </div>}
+                                        />
+                                    </div>
+                                </Grid.Column>}                            
                             </Grid.Row>
+                            <Grid.Row style={{minHeight: '25px', borderBottom: 'solid 1px'}}></Grid.Row>
                             <Grid.Row>
                                 <Grid.Column widthXS={Columns.One}/>
                                 <Grid.Column widthXS={Columns.Ten} style={{marginTop: "12px"}}>
@@ -321,23 +491,38 @@ class NLPSearch extends PureComponent<Props, State>{
             <Overlay visible={this.state.graphOverlay}>
                 <Overlay.Container maxWidth={750} style={{minHeight: "300px"}}>
                     <Overlay.Header
-                        title="Graph Overlay"
+                        title="NLPAIDE"
                         onDismiss={()=>this.setState({graphOverlay: !this.state.graphOverlay})}
                     />
                     <Overlay.Body>
                     <Grid>
                         <Grid.Row>
-                            <div style={{textAlign: 'center'}}>--- Some text here ---</div>
+                            <div style={{textAlign: 'center'}}>{this.state.question}</div>
                         </Grid.Row>
                         <Grid.Row>
                             <Grid.Column widthXS={Columns.Three}/>
                             <Grid.Column widthXS={Columns.Six}>
                                 <div style={{width: 'auto', height: '250px'}}>
-                                <GaugeChart
-                                    value={77}
-                                    properties={this.state.properties}
-                                    theme={'dark'}
-                                /></div>
+                                {this.state.fluxQueries.map(query => {
+                                    switch (this.state.textcatLabels[0]) {
+                                        case 'influxdb':
+                                            return (
+                                            <GaugeChart
+                                                value={this.state.textcatLabels[0] === 'influxdb' ? (this.state.fluxResults[query["key"]] !== undefined ? this.state.fluxResults[query["key"]] : 0) : parseInt(this.state.query)}
+                                                properties={this.state.properties}
+                                                theme={'dark'}
+                                            />)
+                                        case 'mongodb':
+                                            return (
+                                                <SingleStat
+                                                    stat={parseInt(this.state.query) ? parseInt(this.state.query) : 0}
+                                                    properties={query["properties"]}
+                                                    theme={'dark'}
+                                                />
+                                            )
+                                    }
+                                })}                                    
+                                </div>
                             </Grid.Column>
                             <Grid.Column widthXS={Columns.Three}/>
                         </Grid.Row>
@@ -349,8 +534,17 @@ class NLPSearch extends PureComponent<Props, State>{
     }
 
     defaultGaugeViewProperties = () => {
+        let query = defaultViewQuery()
+        query.text = `from(bucket:"system")
+        |> range(start:-1h)
+        |> filter(fn: (r) =>
+          r._measurement == "cpu" and
+          r._field == "usage_system" and
+          r["cpu"] == "cpu0"
+        )
+        |> last()`
         return {
-          queries: [defaultViewQuery()],
+          queries: [query],
           colors: DEFAULT_GAUGE_COLORS as Color[],
           prefix: '',
           tickPrefix: '',
@@ -402,7 +596,7 @@ class NLPSearch extends PureComponent<Props, State>{
                     </div>
                 </Grid.Row>
                 <Grid.Row>
-                    {this.state.resultArrived &&
+                    {this.state.resultArrived && 
                     (
                         <div>
                             {this.state.isFixed && (
@@ -448,7 +642,7 @@ class NLPSearch extends PureComponent<Props, State>{
                                     diameter={18}
                                     tooltipStyle={{width: 'max-content'}}
                                     tooltipContents={<div style={{whiteSpace: 'pre-wrap', fontSize: '13px'}}>
-                                        <div style={{color: InfluxColors.Pool}}>{"Created Flux query:"}
+                                        <div style={{color: InfluxColors.Pool}}>{this.state.textcatLabels[0] === "influxdb" ? "Created Flux query:" : "Result:"}
                                         <hr style={{borderStyle: 'none none solid none', borderWidth: '2px', borderColor: '#00a3ff', boxShadow: '0 0 5px 0 #066fc5', margin: '3px'}}/>
                                         </div>
                                         {this.state.query}
@@ -495,4 +689,4 @@ class NLPSearch extends PureComponent<Props, State>{
 
 }
 
-export default NLPSearch
+export default withRouter(NLPSearch)

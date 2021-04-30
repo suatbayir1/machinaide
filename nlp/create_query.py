@@ -38,19 +38,21 @@ dbtoken = "FlviKxQ-RHHWxd1FRkHIc5VwNZuFnP6QTmsJcU6GI7nrd4cuqaTx3cCijZchENMH0zSGu
 # constants
 
 comparisons = {'GREATER': '>', 'EQUAL': '==', 'LESS': '<'}
-stats = {'MIN': 'min()', 'MAX': 'max()', 'AVG': 'mean()'}
+stats = {'MIN': 'min()', 'MAX': 'max()', 'AVG': 'mean()', 'CUR': 'last()'}
 math_symbols = ['>', '>=', '<', '<=', '=', '==']
 math_symbol_dict = {'>': ' greater than ', '>=': ' greater than or equal to ', '<': ' less than ', '<=': ' less than or equal to ', '=': ' equal to ', '==': ' equal to '}
 threshold = 85 # string matching score threshold
+all_severity_types = ["minor", "major", "severe"]
+all_maintenance_types = ["Maintenance 1", "Maintenance 2", "Maintenance 3"]
 
 
 # given machine/component/sensor names
 
-COMP_NAMES = ["yaglama", "anaMotor", "compName", "sampleComp1", "sampleComp2"]
-SENS_NAMES = ["pressSens"]
+COMP_NAMES = ["yaglama", "anaMotor", "compName", "sampleComp1", "sampleComp2", "cpu", "diskio"]
+SENS_NAMES = ["pressSens", "usage_system", "io_time"]
 
 # nlp = spacy.load("/home/machinaide/nlp/training/model-best")
-nlp = spacy.load("/home/machinaide/nlp/ner-pipe/training/model-best")
+nlp = spacy.load("/home/machinaide/nlp/ner-model/training/model-best")
 
 """ for pipe in nlp.pipeline:
     print(pipe) """
@@ -102,12 +104,25 @@ if(stat_matcher.get('MAX')):
 if(stat_matcher.get('AVG')):
     stat_matcher.remove('AVG')
 
-min_pattern = [[{'LOWER': 'min'}], [{'LOWER': 'minimum'}]]
-max_pattern = [[{'LOWER': 'max'}], [{'LOWER': 'maximum'}]]
+min_pattern = [[{'LOWER': 'min'}], [{'LOWER': 'minimum'}], [{'LOWER': 'smallest'}]]
+max_pattern = [[{'LOWER': 'max'}], [{'LOWER': 'maximum'}], [{'LOWER': 'biggest'}]]
 avg_pattern = [[{'LOWER': 'avg'}], [{'LOWER': 'average'}], [{'LOWER': 'mean'}]]
+current_pattern =[[{'LOWER': 'current'}], [{'LOWER': 'last'}]]
 stat_matcher.add("MIN", min_pattern)
 stat_matcher.add("MAX", max_pattern)
 stat_matcher.add("AVG", avg_pattern)
+stat_matcher.add("CUR", current_pattern)
+
+# format date from dateparser's returned value
+def format_date(date):
+    year = date.year
+    month = "0" + str(date.month) if date.month < 10 else date.month
+    day = "0" + str(date.day) if date.day < 10 else date.day
+    hour = "0" + str(date.hour) if date.hour < 10 else date.hour
+    minute = "0" + str(date.minute) if date.minute < 10 else date.minute
+    second = "0" + str(date.second) if date.second < 10 else date.second
+    query_date = "{}-{}-{}T{}:{}:{}Z".format(year, month, day, hour, minute, second)
+    return query_date
 
 # format flux query based on detected entities
 
@@ -138,26 +153,52 @@ def createQuery(doc, matcher, stat_matcher):
         range_entities = [ent for ent in doc.ents if ent.label_ == "RANGE"]
 
         if(len(range_entities) > 0):
-            which_date = range_entities[0].text
-            for token in range_entities[0]:
-                # if there is numerical value, get its head in dependency tree. e.g. 7-->days
-                # print(token.text, token.pos_)
-                if(token.pos_ == "NUM"):
-                    which_date = token.text + token.head.text
-            date = dateparser.parse(which_date)
-            print("date:",date, which_date)
-            if(date):
-                year = date.year
-                month = "0" + str(date.month) if date.month < 10 else date.month
-                day = "0" + str(date.day) if date.day < 10 else date.day
-                hour = "0" + str(date.hour) if date.hour < 10 else date.hour
-                minute = "0" + str(date.minute) if date.minute < 10 else date.minute
-                second = "0" + str(date.second) if date.second < 10 else date.second
-                query_date = "{}-{}-{}T{}:{}:{}Z".format(year, month, day, hour, minute, second)
-                query = query + "|> range(start: {})".format(query_date)
-            else:
-                query = query + "|> range(start: -1h)"
-                print("we need a default range query")
+            if(len(range_entities) == 1):
+                which_date = range_entities[0].text
+                date2 = which_date
+                for token in range_entities[0]:
+                    # if there is numerical value, get its head in dependency tree. e.g. 7-->days
+                    # print(token.text, token.pos_)
+                    if(token.pos_ == "NUM"):
+                        date2 = token.text + token.head.text
+                date = dateparser.parse(date2)
+                if(not date):
+                    date = dateparser.parse(which_date)
+                print("date:",date, which_date)
+                if(date):
+                    query_date = format_date(date)
+                    query = query + "|> range(start: {})".format(query_date)
+                else:
+                    query = query + "|> range(start: -1h)"
+                    print("we need a default range query")
+            elif(len(range_entities) == 2):
+                start_date = range_entities[0].text
+                start2 = start_date
+                end_date = range_entities[1].text
+                end2 = end_date
+                for token in range_entities[0]:
+                    if(token.pos_ == "NUM"):
+                        start2 = token.text + token.head.text
+                for token in range_entities[1]:
+                    if(token.pos_ == "NUM"):
+                        end2 = token.text + token.head.text
+                date1 = dateparser.parse(start2)
+                if(not date1):
+                    date1 = dateparser.parse(start_date)
+                date2 = dateparser.parse(end2)
+                if(not date2):
+                    date2 = dateparser.parse(end_date)
+                if((not date1) and (not date2)):
+                    query = query + "|> range(start: -1h)"
+                elif(date1>date2):
+                    query_date1 = format_date(date1)
+                    query_date2 = format_date(date2)
+                    query = query + "|> range(start: {}, stop: {})".format(query_date2, query_date1)
+                elif(date1<date2):
+                    query_date1 = format_date(date1)
+                    query_date2 = format_date(date2)
+                    query = query + "|> range(start: {}, stop: {})".format(query_date1, query_date2)
+
         else:
             query = query + "|> range(start: -1h)"
             print("we need a default range query")
@@ -185,7 +226,7 @@ def createQuery(doc, matcher, stat_matcher):
                 comp_temp = comp_temp + " r._measurement == \\{} or".format("\"" + comps[i] + "\\" + "\"")
             else:
                 comp_temp = comp_temp + " r._measurement == \\{}".format("\"" + comps[i] + "\\" + "\"")
-            
+        # for testing purposes comp_temp = comp_temp + " r._measurement == \\{}".format("\"" + "cpu" + "\\" + "\"")
         if(len(comp_temp) > 0):
             query = query + "|> filter(fn: (r) => {} )".format(comp_temp)
             
@@ -202,7 +243,7 @@ def createQuery(doc, matcher, stat_matcher):
                 # for now we get the best result but we need to set a score threshold
                 if(len(res)>0  and res[0][1]>threshold):
                     sens_name = res[0][0]
-                    sensors.append(comp_name)
+                    sensors.append(sens_name)
         sens_temp = ""
         for i in range(len(sensors)):
             if(i != len(sensors)-1):
@@ -267,44 +308,108 @@ def createQuery(doc, matcher, stat_matcher):
         if(len(stat_temp) > 0):
             query = query + stat_temp
 
-        return {"query": query, "labels": labels, "graphOverlay": graph_overlay, "textcatLabels": textcat_labels}
+        return {"query": query, "labels": labels, "graphOverlay": graph_overlay, "textcatLabels": textcat_labels, "mongoTextcat": ""}
     elif(textcat_labels[0] == 'mongodb'):
+        # get range
+        range_entities = [ent for ent in doc.ents if ent.label_ == "RANGE"]
+
+        from_date = ""
+        to_date = dateparser.parse("now")
+        if(len(range_entities) > 0):
+            if(len(range_entities) == 1):
+                which_date = range_entities[0].text
+                date2 = which_date
+                for token in range_entities[0]:
+                    # if there is numerical value, get its head in dependency tree. e.g. 7-->days
+                    # print(token.text, token.pos_)
+                    if(token.pos_ == "NUM"):
+                        date2 = token.text + token.head.text
+                date = dateparser.parse(date2)
+                if(not date):
+                    date = dateparser.parse(which_date)
+                if(date):
+                    from_date = date
+            elif(len(range_entities) == 2):
+                start_date = range_entities[0].text
+                start2 = start_date
+                end_date = range_entities[1].text
+                end2 = end_date
+                for token in range_entities[0]:
+                    if(token.pos_ == "NUM"):
+                        start2 = token.text + token.head.text
+                for token in range_entities[1]:
+                    if(token.pos_ == "NUM"):
+                        end2 = token.text + token.head.text
+                date1 = dateparser.parse(start2)
+                if(not date1):
+                    date1 = dateparser.parse(start_date)
+                date2 = dateparser.parse(end2)
+                if(not date2):
+                    date2 = dateparser.parse(end_date)
+                if(date1 and date2):
+                    if(date1>date2):
+                        from_date = date2
+                        to_date = date1
+                    else:
+                        from_date = date1
+                        to_date = date2
+        else:
+            print("we need a default range query for mongo")
+
         mongo_textcat = mongo_textcat_nlp.get_pipe("textcat")
         scores = mongo_textcat.predict([doc])
         # nlp.set_annotations(doc, scores)
         predicted_labels = scores.argmax(axis=1)
         textcat_labels_mongo = [mongo_textcat.labels[label] for label in predicted_labels]
         if(textcat_labels_mongo[0] == "failure"):
-            from_date = datetime.datetime(2021, 4, 10, 12, 30, 30, 125000)
-            to_date = datetime.datetime.now()
-            res = mongoq.get_sources_from_failures(from_date, to_date)
+            # from_date = datetime.datetime(2021, 4, 10, 12, 30, 30, 125000)
+            # to_date = datetime.datetime.now()
+            # severity
+            severities = [ent.text for ent in doc.ents if (ent.label_ == "SVR")]
+            severity_entities = [ent for ent in severities if(ent in all_severity_types)]
+
+            print("date-->>>>>>>", from_date, to_date)
+            res = mongoq.get_sources_from_failures(from_date, to_date, severity_entities)
             res = ", ".join(res)
             return {"query": res, "labels": labels, "graphOverlay": False, "textcatLabels": textcat_labels, "mongoTextcat": "failure"}
         elif(textcat_labels_mongo[0] == "maintenance"):
-            from_date = datetime.datetime(2021, 4, 10, 12, 30, 30, 125000)
-            res = mongoq.get_sources_from_maintenance(from_date)
+            # from_date = datetime.datetime(2021, 4, 10, 12, 30, 30, 125000)
+            mtypes = [ent.text for ent in doc.ents if (ent.label_ == "MTYPE")]
+            mtype_entities = [ent for ent in mtypes if(ent in all_maintenance_types)]
+
+            print("date-->>>>>>>", from_date)
+            res = mongoq.get_sources_from_maintenance(from_date, mtype_entities)
             res = ", ".join(res)
             return {"query": res, "labels": labels, "graphOverlay": False, "textcatLabels": textcat_labels, "mongoTextcat": "maintenance"}
         elif(textcat_labels_mongo[0] == "failurecount"):
             # TODO check if these source names are in the given source names array, if not just throw them away
             source_entities = [ent.text for ent in doc.ents if (ent.label_ == "MACH" or ent.label_ == "COMP" or ent.label_ == "SENS")]
+
+            severities = [ent.text for ent in doc.ents if (ent.label_ == "SVR")]
+            severity_entities = [ent for ent in severities if(ent in all_severity_types)]
+
+            print("date-->>>>>>>", from_date, to_date)
             if(len(source_entities)>0):
-                res = mongoq.failure_count(source_entities, "", "")
-                return {"query": str(res), "labels": labels, "graphOverlay": False, "textcatLabels": textcat_labels, "mongoTextcat": "failurecount"}
+                res = mongoq.failure_count(source_entities, from_date, to_date, severity_entities)
+                return {"query": str(res), "labels": labels, "graphOverlay": True, "textcatLabels": textcat_labels, "mongoTextcat": "failurecount"}
             else:
-                res = mongoq.failure_count("default_source", "", "")
-                return {"query": str(res), "labels": labels, "graphOverlay": False, "textcatLabels": textcat_labels, "mongoTextcat": "failurecount"}
+                res = mongoq.failure_count(["default_source"], from_date, to_date, severity_entities)
+                return {"query": str(res), "labels": labels, "graphOverlay": True, "textcatLabels": textcat_labels, "mongoTextcat": "failurecount"}
         elif(textcat_labels_mongo[0] == "maintenancecount"):
             # TODO check if these source names are in the given source names array, if not just throw them away
             source_entities = [ent.text for ent in doc.ents if (ent.label_ == "MACH" or ent.label_ == "COMP" or ent.label_ == "SENS")]
+            mtypes = [ent.text for ent in doc.ents if (ent.label_ == "MTYPE")]
+            mtype_entities = [ent for ent in mtypes if(ent in all_maintenance_types)]
+
+            print("date-->>>>>>>", from_date)
             if(len(source_entities)>0):
-                res = mongoq.maintenance_count(source_entities, "")
-                return {"query": str(res), "labels": labels, "graphOverlay": False, "textcatLabels": textcat_labels, "mongoTextcat": "maintenancecount"}
+                res = mongoq.maintenance_count(source_entities, from_date, mtype_entities)
+                return {"query": str(res), "labels": labels, "graphOverlay": True, "textcatLabels": textcat_labels, "mongoTextcat": "maintenancecount"}
             else:
-                res = mongoq.maintenance_count("Press030", "")
-                return {"query": str(res), "labels": labels, "graphOverlay": False, "textcatLabels": textcat_labels, "mongoTextcat": "maintenancecount"}
+                res = mongoq.maintenance_count(["Press030"],from_date, mtype_entities)
+                return {"query": str(res), "labels": labels, "graphOverlay": True, "textcatLabels": textcat_labels, "mongoTextcat": "maintenancecount"}
         else:
-            return {"query": "NOTHING", "labels": labels, "graphOverlay": False, "textcatLabels": textcat_labels, "mongoTextcat": "nothing"}
+            return {"query": "NOTHING", "labels": labels, "graphOverlay": False, "textcatLabels": textcat_labels, "mongoTextcat": ""}
     else:
         return {"query": "NOTHING", "labels": labels, "graphOverlay": False, "textcatLabels": textcat_labels}
 
@@ -313,6 +418,92 @@ for ent in doc.ents:
     print(ent.label_, ent.text)
 print("\n\n\n",createQuery(doc, matcher))
 print("\n\n\n",createQuery(doc2, matcher)) """
+
+def mongo_query(data):
+    textcat_labels = ['mongodb']
+    question = data["question"]
+    entities = data["entities"]
+    temp =""
+    if(data["mongoTextcat"]):
+        temp = template_parse(data["mongoTextcat"])
+    source_entities = [question[entity["start"]:entity["end"]] for entity in entities if (entity["tag"]=="MACH" or entity["tag"]=="COMP" or entity["tag"]=="SENS")]
+    range_entities = [question[entity["start"]:entity["end"]] for entity in entities if entity["tag"]=="RANGE"]
+    from_date = ""
+    to_date = dateparser.parse("now")
+    if(len(range_entities) > 0):
+        if(len(range_entities) == 1):
+            which_date = range_entities[0]
+            date2 = which_date
+            for token in source_nlp(range_entities[0]):
+                # if there is numerical value, get its head in dependency tree. e.g. 7-->days
+                # print(token.text, token.pos_)
+                if(token.pos_ == "NUM"):
+                    date2 = token.text + token.head.text
+            date = dateparser.parse(date2)
+            if(not date):
+                date = dateparser.parse(which_date)
+            if(date):
+                from_date = date
+        elif(len(range_entities) == 2):
+            start_date = range_entities[0]
+            start2 = start_date
+            end_date = range_entities[1]
+            end2 = end_date
+            for token in source_nlp(range_entities[0]):
+                if(token.pos_ == "NUM"):
+                    start2 = token.text + token.head.text
+            for token in source_nlp(range_entities[1]):
+                if(token.pos_ == "NUM"):
+                    end2 = token.text + token.head.text
+            date1 = dateparser.parse(start2)
+            if(not date1):
+                date1 = dateparser.parse(start_date)
+            date2 = dateparser.parse(end2)
+            if(not date2):
+                date2 = dateparser.parse(end_date)
+            if(date1 and date2):
+                if(date1>date2):
+                    from_date = date2
+                    to_date = date1
+                else:
+                    from_date = date1
+                    to_date = date2
+    else:
+        print("we need a default range query for mongo")
+    if(temp == "failure"):
+        # from_date = datetime.datetime(2021, 4, 10, 12, 30, 30, 125000)
+        # to_date = datetime.datetime.now()
+        print("date-->>>>>>>", from_date, to_date)
+        res = mongoq.get_sources_from_failures(from_date, to_date)
+        res = ", ".join(res)
+        return {"query": res, "labels": entities, "graphOverlay": False, "textcatLabels": textcat_labels, "mongoTextcat": "failure"}
+    elif(temp == "maintenance"):
+        # from_date = datetime.datetime(2021, 4, 10, 12, 30, 30, 125000)
+        print("date-->>>>>>>", from_date)
+        res = mongoq.get_sources_from_maintenance(from_date)
+        res = ", ".join(res)
+        return {"query": res, "labels": entities, "graphOverlay": False, "textcatLabels": textcat_labels, "mongoTextcat": "maintenance"}
+    elif(temp == "failurecount"):
+        # TODO check if these source names are in the given source names array, if not just throw them away
+        print("date-->>>>>>>", from_date, to_date)
+        if(len(source_entities)>0):
+            res = mongoq.failure_count(source_entities, from_date, to_date)
+            return {"query": str(res), "labels": entities, "graphOverlay": True, "textcatLabels": textcat_labels, "mongoTextcat": "failurecount"}
+        else:
+            res = mongoq.failure_count("default_source", from_date, to_date)
+            return {"query": str(res), "labels": entities, "graphOverlay": True, "textcatLabels": textcat_labels, "mongoTextcat": "failurecount"}
+    elif(temp == "maintenancecount"):
+        # TODO check if these source names are in the given source names array, if not just throw them away
+        print("date-->>>>>>>", from_date)
+        if(len(source_entities)>0):
+            res = mongoq.maintenance_count(source_entities, from_date)
+            return {"query": str(res), "labels": entities, "graphOverlay": True, "textcatLabels": textcat_labels, "mongoTextcat": "maintenancecount"}
+        else:
+            res = mongoq.maintenance_count("Press030",from_date)
+            return {"query": str(res), "labels": entities, "graphOverlay": True, "textcatLabels": textcat_labels, "mongoTextcat": "maintenancecount"}
+    else:
+        return {"query": "NOTHING", "labels": labels, "graphOverlay": False, "textcatLabels": textcat_labels, "mongoTextcat": ""}
+
 def from_train_data(data):
     query = ""
     question = data["question"]
@@ -419,8 +610,11 @@ def check_in_training_data(question):
     exist = mongo.machinaide.nlp_questions.find_one({"question": question})
     if(exist):
         # send annotations to create query from annotations
-        data = from_train_data(exist)
-        return {"exists":True, "query":data["query"], "labels": exist["entities"], "cat": exist["cat"]}
+        if(category_parse(exist["cat"]) == 'influxdb'):
+            data = from_train_data(exist)
+        elif(category_parse(exist["cat"]) == 'mongodb'):
+            data = mongo_query(exist)
+        return {"exists":True, "query":data["query"], "labels": exist["entities"], "cat": exist["cat"], "mongoTextcat": exist["mongoTextcat"] }
     else:
         # tell that model should create the query
         return {"exists":False}
@@ -430,6 +624,17 @@ def category_parse(cat):
         return "influxdb"
     elif(cat == "Metadata"):
         return "mongodb"
+        
+
+def template_parse(temp):
+    if(temp == "Maintenance"):
+        return "maintenance"
+    elif(temp == 'Maintenance Count'):
+        return 'maintenancecount'
+    elif(temp == 'Failure'):
+        return 'failure'
+    elif(temp == 'Failure Count'):
+        return 'failure'
 
 @app.route('/postQuestion', methods=['POST'])
 def post_question():
@@ -484,6 +689,7 @@ def post_question():
         query_result = in_mongodb["query"]
         labels = in_mongodb["labels"]
         textcat_labels = [category_parse(in_mongodb["cat"])]
+        mongo_template = template_parse(in_mongodb["mongoTextcat"])
         graph_overlay = False # TODO: create min/max check for training data 
     else:
         print("get result from model")
@@ -493,6 +699,7 @@ def post_question():
         query_result = result["query"]
         labels = result["labels"]
         textcat_labels = result["textcatLabels"]
+        mongo_template = result["mongoTextcat"]
         graph_overlay = result["graphOverlay"]
         print("from nlp-----> ", query_result)
     if(textcat_labels[0] == "influxdb"):
@@ -531,16 +738,16 @@ def post_question():
 
             print("data: ", send_data)
             return jsonify(result=send_data) """
-            return jsonify(query=query_result, data=api_response.text, entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed, graphOverlay=graph_overlay, textcatLabels=textcat_labels)
+            return jsonify(query=query_result, data=api_response.text, entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed, graphOverlay=graph_overlay, textcatLabels=textcat_labels, mongoTextcat=mongo_template)
         else:
-            return jsonify(msg="No response", entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed, graphOverlay=graph_overlay, textcatLabels=textcat_labels)
+            return jsonify(msg="No response", entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed, graphOverlay=graph_overlay, textcatLabels=textcat_labels, mongoTextcat=mongo_template)
     elif(textcat_labels[0] == "mongodb"):
-        print("result of mongo textcat-->", result["mongoTextcat"])
-        return jsonify(query=query_result,data="mongo-data", entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed, graphOverlay=graph_overlay, textcatLabels=textcat_labels)
+        # print("result of mongo textcat-->", result["mongoTextcat"])
+        return jsonify(query=query_result,data="mongo-data", entities=labels, fixedQuestion=fixed_question, isFixed=is_question_fixed, graphOverlay=graph_overlay, textcatLabels=textcat_labels, mongoTextcat=mongo_template)
 
 @app.route('/postTrainData', methods=['PUT'])
 def postTrainData():
-    res = mongo.machinaide.nlp_questions.update_one({"question": request.json['question']}, {"$set": {"entities": request.json["entities"], "cat": request.json["cat"]}}, upsert=True)
+    res = mongo.machinaide.nlp_questions.update_one({"question": request.json['question']}, {"$set": {"entities": request.json["entities"], "cat": request.json["cat"], "mongoTextcat": request.json["mongoTextcat"]}}, upsert=True)
     return jsonify(msg="Train data added.")
     """ exist = mongo.db.nlp_questions.find_one({"question": request.json['question']})
     if(exist):

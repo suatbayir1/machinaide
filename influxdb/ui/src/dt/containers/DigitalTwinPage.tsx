@@ -96,6 +96,7 @@ class DigitalTwinPage extends PureComponent<Props, State> {
                   changeResultQuery={this.changeResultQuery}
                   showAllSensorValues={this.state.showAllSensorValues}
                   refreshGraph={this.state.refreshGraph}
+                  orgID={this.props["match"].params.orgID}
                 />
               </Grid.Column>
               <Grid.Column

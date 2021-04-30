@@ -1,20 +1,20 @@
 // Libraries
-import React, {PureComponent} from 'react'
-import {withRouter, RouteComponentProps} from 'react-router-dom'
-import {connect} from 'react-redux'
+import React, { PureComponent } from 'react'
+import { withRouter, RouteComponentProps } from 'react-router-dom'
+import { connect } from 'react-redux'
 
 // Components
 import TimeSeries from 'src/shared/components/TimeSeries'
-import EmptyQueryView, {ErrorFormat} from 'src/shared/components/EmptyQueryView'
+import EmptyQueryView, { ErrorFormat } from 'src/shared/components/EmptyQueryView'
 import ViewSwitcher from 'src/shared/components/ViewSwitcher'
 import ViewLoadingSpinner from 'src/shared/components/ViewLoadingSpinner'
 import CellEvent from 'src/perf/components/CellEvent'
 
 // Utils
-import {GlobalAutoRefresher} from 'src/utils/AutoRefresher'
-import {getTimeRangeWithTimezone} from 'src/dashboards/selectors'
-import {checkResultsLength} from 'src/shared/utils/vis'
-import {getActiveTimeRange} from 'src/timeMachine/selectors/index'
+import { GlobalAutoRefresher } from 'src/utils/AutoRefresher'
+import { getTimeRangeWithTimezone } from 'src/dashboards/selectors'
+import { checkResultsLength } from 'src/shared/utils/vis'
+import { getActiveTimeRange } from 'src/timeMachine/selectors/index'
 
 // Types
 import {
@@ -43,7 +43,7 @@ interface State {
   submitToken: number
 }
 
-type Props = OwnProps & StateProps & RouteComponentProps<{orgID: string}>
+type Props = OwnProps & StateProps & RouteComponentProps<{ orgID: string }>
 
 class RefreshingView extends PureComponent<Props, State> {
   public static defaultProps = {
@@ -54,7 +54,7 @@ class RefreshingView extends PureComponent<Props, State> {
   constructor(props) {
     super(props)
 
-    this.state = {submitToken: 0}
+    this.state = { submitToken: 0 }
   }
 
   public componentDidMount() {
@@ -66,8 +66,8 @@ class RefreshingView extends PureComponent<Props, State> {
   }
 
   public render() {
-    const {id, ranges, properties, manualRefresh, timeZone, theme} = this.props
-    const {submitToken} = this.state
+    const { id, ranges, properties, manualRefresh, timeZone, theme } = this.props
+    const { submitToken } = this.state
 
     return (
       <TimeSeries
@@ -117,7 +117,7 @@ class RefreshingView extends PureComponent<Props, State> {
   }
 
   private get queries(): DashboardQuery[] {
-    const {properties} = this.props
+    const { properties } = this.props
 
     switch (properties.type) {
       case 'single-stat':
@@ -129,27 +129,27 @@ class RefreshingView extends PureComponent<Props, State> {
   }
 
   private get fallbackNote(): string {
-    const {properties} = this.props
+    const { properties } = this.props
 
     switch (properties.type) {
       case 'check':
         return null
       default:
-        const {note, showNoteWhenEmpty} = properties
+        const { note, showNoteWhenEmpty } = properties
 
         return showNoteWhenEmpty ? note : null
     }
   }
 
   private incrementSubmitToken = () => {
-    this.setState({submitToken: Date.now()})
+    this.setState({ submitToken: Date.now() })
   }
 }
 
 const mstp = (state: AppState, ownProps: OwnProps) => {
   const timeRange = getTimeRangeWithTimezone(state)
   const ranges = getActiveTimeRange(timeRange, ownProps.properties.queries)
-  const {timeZone, theme} = state.app.persisted
+  const { timeZone, theme } = state.app.persisted
 
   return {
     timeRange,

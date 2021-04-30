@@ -2,18 +2,22 @@ import json
 
 from flask import Flask
 from flask_pymongo import PyMongo
+from pymongo import MongoClient
 from bson.json_util import dumps
 import os
+import schedule
+import time
  
-# flask server
-app = Flask(__name__)
-app.config['MONGO_DBNAME'] = 'machinaide' ## name of the used database
-app.config['MONGO_URI'] = 'mongodb://machinaide:erste2020@localhost:27017/admin'
-mongo = PyMongo(app)
+# # flask server
+# app = Flask(__name__)
+# app.config['MONGO_DBNAME'] = 'machinaide' ## name of the used database
+# app.config['MONGO_URI'] = 'mongodb://machinaide:erste2020@localhost:27017/admin'
+# mongo = PyMongo(app)
+mongo = MongoClient('mongodb://machinaide:erste2020@localhost:27017/')
 
 def train_model():
     train_data = []
-    questions = mongo.db.nlp_questions.find()
+    questions = mongo.machinaide.nlp_questions.find()
     
     # turn mongodb train data into json file
     for question in questions:
@@ -22,7 +26,7 @@ def train_model():
             entities.append([entity["start"], entity["end"], entity["tag"]])
         train_data.append([question["question"], {"entities": entities}])
 
-    with open('/home/machinaide/nlp/assets/train_data.json', 'w') as outfile:
+    with open('/home/machinaide/nlp/assets/train_data_test.json', 'w') as outfile:
         outfile.write(
             '[\n\t' +
             ',\n\t'.join(json.dumps(data) for data in train_data) +
@@ -43,3 +47,5 @@ schedule.every().day.at("03:00").do(train_model)
 while True:
     schedule.run_pending()
     time.sleep(60) # wait one minute
+
+# train_model()

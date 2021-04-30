@@ -1,11 +1,12 @@
 // Libraries
-import React, {PureComponent} from 'react'
-import {connect, ConnectedProps} from 'react-redux'
-import {withRouter, RouteComponentProps} from 'react-router'
+import React, { PureComponent } from 'react'
+import { connect, ConnectedProps } from 'react-redux'
+import { withRouter, RouteComponentProps } from 'react-router'
 
 // Components
 import TimeMachineFluxEditor from 'src/timeMachine/components/TimeMachineFluxEditor'
 import CSVExportButton from 'src/shared/components/CSVExportButton'
+import FileExportDropdown from 'src/shared/components/FileExportDropdown'
 import TimeMachineQueriesSwitcher from 'src/timeMachine/components/QueriesSwitcher'
 import TimeMachineRefreshDropdown from 'src/timeMachine/components/RefreshDropdown'
 import TimeRangeDropdown from 'src/shared/components/TimeRangeDropdown'
@@ -22,9 +23,9 @@ import {
 } from '@influxdata/clockface'
 
 // Actions
-import {setAutoRefresh} from 'src/timeMachine/actions'
-import {setTimeRange} from 'src/timeMachine/actions'
-import {enableUpdatedTimeRangeInVEO} from 'src/shared/actions/app'
+import { setAutoRefresh } from 'src/timeMachine/actions'
+import { setTimeRange } from 'src/timeMachine/actions'
+import { enableUpdatedTimeRangeInVEO } from 'src/shared/actions/app'
 
 // Utils
 import {
@@ -32,10 +33,10 @@ import {
   getIsInCheckOverlay,
   getActiveQuery,
 } from 'src/timeMachine/selectors'
-import {getTimeRange} from 'src/dashboards/selectors'
+import { getTimeRange } from 'src/dashboards/selectors'
 
 // Types
-import {AppState, TimeRange, AutoRefreshStatus} from 'src/types'
+import { AppState, TimeRange, AutoRefreshStatus } from 'src/types'
 
 type ReduxProps = ConnectedProps<typeof connector>
 type RouterProps = RouteComponentProps<{
@@ -47,7 +48,7 @@ type Props = ReduxProps & RouterProps
 
 class TimeMachineQueries extends PureComponent<Props> {
   public render() {
-    const {timeRange, isInCheckOverlay, activeQuery} = this.props
+    const { timeRange, isInCheckOverlay, activeQuery } = this.props
 
     return (
       <div className="time-machine-queries">
@@ -63,7 +64,8 @@ class TimeMachineQueries extends PureComponent<Props> {
             <RawDataToggle />
             {!isInCheckOverlay && (
               <>
-                <CSVExportButton />
+                {/* <CSVExportButton /> */}
+                <FileExportDropdown />
                 <TimeMachineRefreshDropdown />
                 <TimeRangeDropdown
                   timeRange={timeRange}
@@ -83,12 +85,12 @@ class TimeMachineQueries extends PureComponent<Props> {
   private handleSetTimeRange = (timeRange: TimeRange) => {
     const {
       autoRefresh,
-      location: {pathname},
+      location: { pathname },
       onEnableUpdatedTimeRangeInVEO,
       onSetAutoRefresh,
       onSetTimeRange,
       match: {
-        params: {cellID, dashboardID, orgID},
+        params: { cellID, dashboardID, orgID },
       },
     } = this.props
 
@@ -100,22 +102,22 @@ class TimeMachineQueries extends PureComponent<Props> {
     onSetTimeRange(timeRange)
 
     if (timeRange.type === 'custom') {
-      onSetAutoRefresh({...autoRefresh, status: AutoRefreshStatus.Disabled})
+      onSetAutoRefresh({ ...autoRefresh, status: AutoRefreshStatus.Disabled })
       return
     }
 
     if (autoRefresh.status === AutoRefreshStatus.Disabled) {
       if (autoRefresh.interval === 0) {
-        onSetAutoRefresh({...autoRefresh, status: AutoRefreshStatus.Paused})
+        onSetAutoRefresh({ ...autoRefresh, status: AutoRefreshStatus.Paused })
         return
       }
 
-      onSetAutoRefresh({...autoRefresh, status: AutoRefreshStatus.Active})
+      onSetAutoRefresh({ ...autoRefresh, status: AutoRefreshStatus.Active })
     }
   }
 
   private get queryEditor(): JSX.Element {
-    const {activeQuery} = this.props
+    const { activeQuery } = this.props
 
     if (activeQuery.editMode === 'builder') {
       return <TimeMachineQueryBuilder />
@@ -129,7 +131,7 @@ class TimeMachineQueries extends PureComponent<Props> {
 
 const mstp = (state: AppState) => {
   const timeRange = getTimeRange(state)
-  const {autoRefresh} = getActiveTimeMachine(state)
+  const { autoRefresh } = getActiveTimeMachine(state)
 
   const activeQuery = getActiveQuery(state)
 
