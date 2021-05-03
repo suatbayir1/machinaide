@@ -15,5 +15,8 @@
     ["Show me sensors with pressure value less than 120", {"entities": [[36, 49, "VALUE"]]}],
     ["Show me sensors with heat value greater than 60 but less than 70", {"entities": [[32, 47, "VALUE"], [52, 64, "VALUE"]]}],
     ["What is the maximum value of the component sampleComp's sensor heatX12 in the last hour?", {"entities": [[43, 53, "COMP"], [63, 70, "SENS"], [78, 87, "RANGE"]]}],
-    ["Show me the average value of component Pres31's sensor pressE23 in the last week", {"entities": [[39, 45, "COMP"], [55, 63, "SENS"], [71, 80, "RANGE"]]}]
+    ["Show me the average value of component Pres31's sensor pressE23 in the last week", {"entities": [[39, 45, "COMP"], [55, 63, "SENS"], [71, 80, "RANGE"]]}],
+    ["Show me the maximum value of sensor act_force's from 20.03.2021 to 20.04.2021", {"entities": [[36, 45, "SENS"], [53, 63, "RANGE"], [67, 77, "RANGE"]]}],
+    ["Show me components that have failure between 06-01-2020 to 16-01-2020", {"entities": [[45, 55, "RANGE"], [59, 69, "RANGE"]]}],
+    ["How many failures did machine Press030 have in 3 weeks", {"entities": [[30, 38, "MACH"], [47, 54, "RANGE"]]}]
 ]

@@ -1,4 +1,5 @@
 # node_modules/
+mongo_backups/
 backend/logs/
 influxdb/ui/node_modules/
 influxdb/go1.13.9.linux-amd64.tar.gz

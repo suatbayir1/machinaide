@@ -52,7 +52,7 @@ COMP_NAMES = ["yaglama", "anaMotor", "compName", "sampleComp1", "sampleComp2", "
 SENS_NAMES = ["pressSens", "usage_system", "io_time"]
 
 # nlp = spacy.load("/home/machinaide/nlp/training/model-best")
-nlp = spacy.load("/home/machinaide/nlp/ner-model/training/model-best")
+nlp = spacy.load("/home/machinaide/nlp/ner-pipe/training/model-best")
 
 """ for pipe in nlp.pipeline:
     print(pipe) """
@@ -64,7 +64,7 @@ source_nlp = spacy.load("en_core_web_trf")
 textcat_nlp = spacy.load("/home/machinaide/nlp/textcat-pipe/training/model-best")
 
 # the mongodb textcat pipeline
-mongo_textcat_nlp = spacy.load("/home/machinaide/nlp/mongo-textcat/training/model-best")
+mongo_textcat_nlp = spacy.load("/home/machinaide/nlp/mongo-textcat-pipe/training/model-best")
 
 # print("source pipes",source_nlp.pipe_names)
 nlp.add_pipe("textcat", source=textcat_nlp)
