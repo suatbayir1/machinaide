@@ -25,7 +25,6 @@ import { Link } from "react-router-dom"
 interface Props {
     fileTypesToAccept?: string
     containerClass?: string
-    handleSubmit: (uploadContent: string) => void
     submitText: string
     submitOnDrop: boolean
     submitOnUpload: boolean

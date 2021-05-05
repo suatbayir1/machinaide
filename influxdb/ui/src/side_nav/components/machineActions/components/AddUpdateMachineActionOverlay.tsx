@@ -1,4 +1,10 @@
+// Libraries
+import { RouteComponentProps } from 'react-router-dom'
 import React, { PureComponent } from 'react'
+import { connect, ConnectedProps } from 'react-redux'
+
+// Components
+import AddMaterialOverlay from 'src/side_nav/components/machineActions/components/AddMaterialOverlay';
 import {
     Form,
     Input,
@@ -10,48 +16,66 @@ import {
     Grid,
     Columns,
     TextArea,
-    ComponentSize,
-    Gradients,
-    Notification,
+    Dropdown,
+    DapperScrollbars,
 } from '@influxdata/clockface'
+
+// Services
 import FactoryService from 'src/shared/services/FactoryService';
 
-interface Props {
+// Actions
+import { notify as notifyAction } from 'src/shared/actions/notifications'
+
+// Constants
+import {
+    pleaseFillInTheFormCompletely,
+    machineActionUpdatedSuccessfully,
+    machineActionAddedSuccessfully,
+} from 'src/shared/copy/notifications'
+
+interface OwnProps {
     visibleAddUpdateMachineAction: boolean
     handleDismissAddUpdateMachineAction: () => void
     getAllMachineActions: () => void
     isEdit: boolean
     updateData: object
     machineID: string
+    getMaterials: () => void
+    materials: object[]
 }
 
 interface State {
-    notificationVisible: boolean
-    notificationType: string
-    notificationMessage: string
     jobName: string
-    material: string
+    material: object
     startTime: string,
     endTime: string,
     jobDescription: string
     editRowId: string
+    // materials: object[]
+    visibleAddMaterial: boolean
 }
+
+type ReduxProps = ConnectedProps<typeof connector>
+type Props = OwnProps & RouteComponentProps & ReduxProps
 
 class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
     constructor(props) {
         super(props);
 
         this.state = {
-            notificationVisible: false,
-            notificationType: '',
-            notificationMessage: '',
             jobName: "",
-            material: "",
+            material: {},
             startTime: "",
             endTime: "",
             jobDescription: "",
             editRowId: "",
+            // materials: [],
+            visibleAddMaterial: false,
         };
+    }
+
+    async componentDidMount() {
+        // await this.getMaterials();
     }
 
     async componentDidUpdate(prevProps) {
@@ -59,6 +83,11 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
             this.handleChangeEditRowData(this.props.updateData);
         }
     }
+
+    // getMaterials = async () => {
+    //     const materials = await FactoryService.getMaterials();
+    //     this.setState({ materials });
+    // }
 
     handleChangeInput = (e): void => {
         if (Object.keys(this.state).includes(e.target.name)) {
@@ -69,7 +98,7 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
     clearForm = () => {
         this.setState({
             jobName: "",
-            material: "",
+            material: {},
             startTime: "",
             endTime: "",
             jobDescription: "",
@@ -88,14 +117,13 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
     }
 
     handleClickSave = async () => {
-        if (this.state.jobName === "" || this.state.material === "" || this.state.startTime === "") {
-            this.setState({
-                notificationVisible: true,
-                notificationType: "error",
-                notificationMessage: "Please fill in the form completely",
-            })
+        if (this.state.jobName === "" || Object.keys(this.state.material).length === 0 || this.state.startTime === "") {
+            this.props.notify(pleaseFillInTheFormCompletely("Job Name, Material and Start Time cannot be empty."));
             return;
         }
+
+        let material = this.state.material;
+        delete material["_id"];
 
         const payload = {
             "jobName": this.state.jobName,
@@ -118,11 +146,7 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
         const result = await FactoryService.updateMachineAction(payload);
 
         if (result.data.summary.code === 200) {
-            this.setState({
-                notificationVisible: true,
-                notificationType: "success",
-                notificationMessage: result.data.message.text,
-            });
+            this.props.notify(machineActionUpdatedSuccessfully());
         }
 
         this.props.getAllMachineActions();
@@ -134,15 +158,21 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
         const result = await FactoryService.addMachineAction(payload);
 
         if (result.data.summary.code === 200) {
-            this.setState({
-                notificationVisible: true,
-                notificationType: "success",
-                notificationMessage: result.data.message.text,
-            })
+            this.props.notify(machineActionAddedSuccessfully());
             this.props.getAllMachineActions();
             this.props.handleDismissAddUpdateMachineAction();
             this.clearForm();
-            return;
+        }
+    }
+
+    handleSelectMaterial = (material) => {
+        switch (material) {
+            case "other":
+                this.setState({ visibleAddMaterial: true });
+                break;
+            default:
+                this.setState({ material })
+                break;
         }
     }
 
@@ -151,31 +181,18 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
         this.clearForm();
     }
 
+    handleDismissAddMaterial = () => {
+        this.setState({
+            visibleAddMaterial: false
+        })
+    }
+
     render() {
+        const { material } = this.state;
+        const { materials } = this.props;
+
         return (
             <>
-                <Notification
-                    key={"id"}
-                    id={"id"}
-                    icon={
-                        this.state.notificationType === 'success'
-                            ? IconFont.Checkmark
-                            : IconFont.Alerts
-                    }
-                    duration={5000}
-                    size={ComponentSize.Small}
-                    visible={this.state.notificationVisible}
-                    gradient={
-                        this.state.notificationType === 'success'
-                            ? Gradients.HotelBreakfast
-                            : Gradients.DangerDark
-                    }
-                    onTimeout={() => this.setState({ notificationVisible: false })}
-                    onDismiss={() => this.setState({ notificationVisible: false })}
-                >
-                    <span className="notification--message">{this.state.notificationMessage}</span>
-                </Notification>
-
                 <Overlay visible={this.props.visibleAddUpdateMachineAction}>
                     <Overlay.Container maxWidth={800}>
                         <Overlay.Header
@@ -200,10 +217,49 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
 
                                             <Grid.Column widthXS={Columns.Six}>
                                                 <Form.Element label="Material">
-                                                    <Input
-                                                        name="material"
-                                                        onChange={this.handleChangeInput}
-                                                        value={this.state.material}
+                                                    <Dropdown
+                                                        button={(active, onClick) => (
+                                                            <Dropdown.Button
+                                                                active={active}
+                                                                onClick={onClick}
+                                                                color={ComponentColor.Default}
+                                                            >
+                                                                {material["materialName"] !== undefined ? material["materialName"] : 'Select Material'}
+                                                            </Dropdown.Button>
+                                                        )}
+                                                        menu={onCollapse => (
+                                                            <DapperScrollbars
+                                                                autoHide={false}
+                                                                autoSizeHeight={true}
+                                                                style={{ maxHeight: '150px' }}
+                                                                className="data-loading--scroll-content"
+                                                            >
+                                                                <Dropdown.Menu onCollapse={onCollapse}>
+                                                                    {
+                                                                        materials.map((item, index) => {
+                                                                            return (
+                                                                                <Dropdown.Item
+                                                                                    id={item["id"]}
+                                                                                    key={index}
+                                                                                    value={item}
+                                                                                    onClick={this.handleSelectMaterial}
+                                                                                >
+                                                                                    {item["materialName"]}
+                                                                                </Dropdown.Item>
+                                                                            )
+                                                                        })
+                                                                    }
+                                                                    <Dropdown.Item
+                                                                        id={"other"}
+                                                                        key={"other"}
+                                                                        value={"other"}
+                                                                        onClick={this.handleSelectMaterial}
+                                                                    >
+                                                                        {"Other"}
+                                                                    </Dropdown.Item>
+                                                                </Dropdown.Menu>
+                                                            </DapperScrollbars>
+                                                        )}
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
@@ -269,9 +325,21 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
                         </Overlay.Body>
                     </Overlay.Container>
                 </Overlay>
+
+                <AddMaterialOverlay
+                    visibleAddMaterial={this.state.visibleAddMaterial}
+                    handleDismissAddMaterial={this.handleDismissAddMaterial}
+                    getMaterials={this.props.getMaterials}
+                />
             </>
         );
     }
 }
 
-export default AddUpdateMachineActionOverlay;
+const mdtp = {
+    notify: notifyAction,
+}
+
+const connector = connect(null, mdtp)
+
+export default connector(AddUpdateMachineActionOverlay);

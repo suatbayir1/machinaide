@@ -145,3 +145,17 @@ class FactoryModel():
     def is_machine_action_exists(self, payload):
         collection = "machine_actions"
         return cursor_to_json(self.db.find(collection, payload))
+
+    def add_material(self, payload):
+        try:
+            collection = "materials"
+            return self.db.insert_one(collection, payload)
+        except:
+            return False
+
+    def get_materials(self):
+        try:
+            collection = "materials"
+            return self.db.find(collection)
+        except:
+            return False

@@ -124,3 +124,33 @@ def is_machine_action_exists(token):
         message = "Machine action record already exists"
         logger.add_log("DUPLICATED", request.remote_addr, token["username"], request.method, request.url, request.json, message,  409)
         return return_response(success = True, message = message, code = 409)
+
+@factory.route("/addMaterial", methods = ["POST"])
+@token_required(roles = ["admin", "editor"])
+def add_material(token):
+    try:
+        if not request.data:
+            message = "Request data cannot be empty"
+            logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, "", message,  400)
+            return return_response(success = False, message = message), 400
+
+        result = model.add_material(request.json)
+
+        if not result:
+            message = "An error occurred while adding material record"
+            logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, "", message,  400)
+            return return_response(success = False, message = message, code = 400), 400
+        else:
+            message = "Material record added successfully"
+            logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+            return return_response(success = True, message = message, code = 200), 200
+    except:
+        return return_response(success = False, message = "An unexpected error has occured"), 400
+
+@factory.route("/getMaterials", methods = ["GET"])
+@token_required(roles = ["admin", "member", "editor"])
+def get_materials(token):
+    data = model.get_materials()
+    message = "All material record information has been successfully fetched"
+    logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+    return return_response(data = data, success = True, message = message), 200

@@ -26,6 +26,7 @@ import {
     ConfirmationButton,
     Input,
     Dropdown,
+    MultiSelectDropdown,
 } from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
@@ -42,7 +43,7 @@ import ImportMachineActionFile from 'src/side_nav/components/machineActions/comp
 interface Props { }
 interface State {
     filterByJob: string,
-    filterByMaterial: string,
+    filterByMaterial: string[],
     startTimeRangeOpen: boolean,
     endTimeRangeOpen: boolean,
     tableData: object[],
@@ -64,6 +65,8 @@ interface State {
     selectedDetailRow: object
     openMachineActionDetailOverlay: boolean
     currentIndex: number
+    materials: object[]
+    materialList: string[]
 }
 
 class MachineActionsPage extends PureComponent<Props, State> {
@@ -75,7 +78,7 @@ class MachineActionsPage extends PureComponent<Props, State> {
         super(props);
         this.state = {
             filterByJob: "",
-            filterByMaterial: "",
+            filterByMaterial: [],
             startTimeRangeOpen: false,
             endTimeRangeOpen: false,
             tableData: [],
@@ -103,15 +106,24 @@ class MachineActionsPage extends PureComponent<Props, State> {
             selectedDetailRow: {},
             openMachineActionDetailOverlay: false,
             currentIndex: 0,
+            materials: [],
+            materialList: [],
         };
     }
 
     async componentDidMount() {
         await this.getAllMachineActions();
+        await this.getMaterials();
         this.setState({
             isLoading: true,
             spinnerLoading: RemoteDataState.Done,
         });
+    }
+
+    getMaterials = async () => {
+        const materials = await FactoryService.getMaterials();
+        const materialList = materials.map(material => material.materialName);
+        this.setState({ materials, materialList, filterByMaterial: materialList });
     }
 
     getAllMachineActions = async () => {
@@ -139,11 +151,12 @@ class MachineActionsPage extends PureComponent<Props, State> {
 
         this.state.tableData.forEach((row) => {
             let rowStartTime = new Date(row["startTime"]);
-            let rowEndTime = new Date(row["endTime"]);
+            let rowEndTime = row["endTime"] === "" || row["endTime"] === null ? Date.now() : new Date(row["endTime"]);
 
             if (row["jobName"].toLowerCase().includes(this.state.filterByJob.toLowerCase())
-                && row["material"].toLowerCase().includes(this.state.filterByMaterial.toLowerCase())
-                && rowStartTime >= startLower && rowStartTime <= startUpper && rowEndTime >= endLower && rowEndTime <= endUpper
+                && this.state.filterByMaterial.includes(row["material"]["materialName"])
+                // && rowStartTime >= startLower && rowStartTime <= startUpper
+                // && rowEndTime >= endLower && rowEndTime <= endUpper
             ) {
                 tempFilteredRows.push(row);
             }
@@ -397,6 +410,20 @@ class MachineActionsPage extends PureComponent<Props, State> {
         })
     }
 
+    handleChangeDropdownMaterial = (option: string) => {
+        const { filterByMaterial } = this.state
+        const optionExists = filterByMaterial.find(opt => opt === option)
+        let updatedOptions = filterByMaterial
+
+        if (optionExists) {
+            updatedOptions = filterByMaterial.filter(fo => fo !== option)
+        } else {
+            updatedOptions = [...filterByMaterial, option]
+        }
+
+        this.setState({ filterByMaterial: updatedOptions }, () => this.getFilteredData())
+    }
+
     render() {
         const { spinnerLoading, isLoading } = this.state;
 
@@ -474,12 +501,11 @@ class MachineActionsPage extends PureComponent<Props, State> {
                                                 />
                                             </Grid.Column>
                                             <Grid.Column widthXS={Columns.Three}>
-                                                <Input
-                                                    icon={IconFont.Search}
-                                                    name="filterByMaterial"
-                                                    placeholder="Filter by material"
-                                                    value={this.state.filterByMaterial}
-                                                    onChange={(e) => { this.handleChangeInput(e) }}
+                                                <MultiSelectDropdown
+                                                    emptyText={"Select Material"}
+                                                    options={this.state.materialList}
+                                                    selectedOptions={this.state.filterByMaterial}
+                                                    onSelect={this.handleChangeDropdownMaterial}
                                                 />
                                             </Grid.Column>
                                         </Grid.Row>
@@ -514,7 +540,7 @@ class MachineActionsPage extends PureComponent<Props, State> {
                                                                 return (
                                                                     <Table.Row key={recordId}>
                                                                         <Table.Cell>{row["jobName"]}</Table.Cell>
-                                                                        <Table.Cell>{row["material"]}</Table.Cell>
+                                                                        <Table.Cell>{row["material"]["materialName"]}</Table.Cell>
                                                                         <Table.Cell>{row["startTime"]}</Table.Cell>
                                                                         <Table.Cell>{row["endTime"]}</Table.Cell>
                                                                         <Table.Cell>
@@ -670,6 +696,8 @@ class MachineActionsPage extends PureComponent<Props, State> {
                                     isEdit={this.state.editMode}
                                     updateData={this.state.updateData}
                                     machineID={this.props["match"].params["MID"]}
+                                    getMaterials={this.getMaterials}
+                                    materials={this.state.materials}
                                 />
                             </Page.Contents>
                         </React.Fragment>

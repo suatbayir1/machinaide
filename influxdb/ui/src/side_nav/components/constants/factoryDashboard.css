@@ -26,20 +26,7 @@
 
 
 
-#shortcutCard div:hover, h4:hover {
+#shortcutCard div:hover {
     background-color: #ffbd39 !important;
     color: #000 !important;
 }
-
-
-/* #shortcutCard h4::after {
-    position: absolute;
-    bottom: -15px;
-    left: 0;
-    right: 0;
-    content: '';
-    width: 30px;
-    height: 1px;
-    background: #ffbd39;
-    margin: 0 auto;
-} */

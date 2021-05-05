@@ -1011,3 +1011,32 @@ export const communityTemplateRenameFailed = (): Notification => ({
   ...defaultErrorNotification,
   message: `We've successfully installed your template but weren't able to name it properly. It may appear as a blank template.`,
 })
+
+// SHARED
+export const pleaseFillInTheFormCompletely = (
+  message: string
+): Notification => ({
+  ...defaultErrorNotification,
+  message: `Please fill in the form completely: ${message}`,
+})
+
+// Machine Actions
+export const machineActionUpdatedSuccessfully = (): Notification => ({
+  ...defaultSuccessNotification,
+  message: `Machine action updated successfully`,
+})
+
+export const machineActionAddedSuccessfully = (): Notification => ({
+  ...defaultSuccessNotification,
+  message: `Machine action added successfully`,
+})
+
+export const materialAddedSuccessfully = (): Notification => ({
+  ...defaultSuccessNotification,
+  message: `Material record added successfully`,
+})
+
+export const materialAddedFailure = (): Notification => ({
+  ...defaultSuccessNotification,
+  message: `An error occured while adding a material record`,
+})

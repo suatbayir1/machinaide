@@ -245,6 +245,57 @@ class FactoryService {
             console.log(err);
         }
     }
+
+    addMaterial = async (payload) => {
+        const url = `${BACKEND.API_URL}factory/addMaterial`;
+
+        const request = fetch(url, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
+            },
+            body: JSON.stringify(payload),
+        })
+
+        try {
+            const response = await request;
+            const res = await response.json();
+            return res;
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    getMaterials = async () => {
+        const url = `${BACKEND.API_URL}factory/getMaterials`;
+
+        const request = fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
+            }
+        })
+
+        try {
+            const response = await request;
+            const res = await response.json();
+
+            const result = JSON.parse(res.data.data)
+            return result;
+        } catch (err) {
+            console.log(err);
+        }
+    }
 }
 
 export default new FactoryService();
