@@ -159,3 +159,38 @@ class FactoryModel():
             return self.db.find(collection)
         except:
             return False
+
+    def delete_material(self, payload):
+        collection = "materials"
+
+        try:
+            where = {
+                "_id": ObjectId(payload["recordId"])
+            }
+
+            return self.db.delete_one(collection, where)
+        except:
+            return False
+
+    def update_material(self, payload):
+        collection = "materials"
+
+        try:
+            recordId = ObjectId(payload["recordId"])
+            del payload["recordId"]
+
+            updateData = {
+                '$set': payload
+            }
+
+            where = {
+                "_id": recordId
+            }
+
+            return self.db.update_one(collection, updateData, where)
+        except:
+            False
+
+    def is_material_exists(self, payload):
+        collection = "materials"
+        return cursor_to_json(self.db.find(collection, payload))

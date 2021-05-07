@@ -25,8 +25,8 @@ sshpass -p "JN9TUG89BbKAen" scp -r /mongo_backups/$DIR root@173.212.226.239:/mon
 INFLUX_DEST=/influx_backups/$DIR
 INFLUX_TOKEN=-Y8yuCS19k6ZD0FLiVvpY-zcEK4VhbBe6HC7WPKR7Z5X2bkm-Ag2iMJUSDSBOugpG6klF2XEddhCMkHRuJPbsQ==
 
-# save mongodb backup to same server
+# save influxdb backup to same server
 /home/machinaide/influxdb/bin/$(uname -s | tr '[:upper:]' '[:lower:]')/influx backup $INFLUX_DEST -t $INFLUX_TOKEN
 
-# send mongodb backup to another server
+# send influxdb backup to another server
 sshpass -p "JN9TUG89BbKAen" scp -r /influx_backups/$DIR root@173.212.226.239:/influx_backups/

@@ -1037,6 +1037,26 @@ export const materialAddedSuccessfully = (): Notification => ({
 })
 
 export const materialAddedFailure = (): Notification => ({
-  ...defaultSuccessNotification,
+  ...defaultErrorNotification,
   message: `An error occured while adding a material record`,
+})
+
+export const materialDeletedSuccessfully = (): Notification => ({
+  ...defaultSuccessNotification,
+  message: `Material record deleted successfully`,
+})
+
+export const materialDeletedFailure = (): Notification => ({
+  ...defaultErrorNotification,
+  message: `An error occured while deleting a material record`,
+})
+
+export const materialUpdatedSuccessfully = (): Notification => ({
+  ...defaultSuccessNotification,
+  message: `Material record updated successfully`,
+})
+
+export const materialUpdatedFailure = (): Notification => ({
+  ...defaultErrorNotification,
+  message: `An error occured while updating a material record`,
 })

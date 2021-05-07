@@ -129,6 +129,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
     }
 
     handleColorChange = (e) => {
+        console.log(e);
         this.setState({
             color: e
         })

@@ -42,6 +42,11 @@ interface OwnProps {
     machineID: string
     getMaterials: () => void
     materials: object[]
+    visibleAddMaterial: boolean
+    handleDismissAddMaterial: () => void
+    handleOpenAddMaterial: () => void
+    materialEditMode: boolean
+    materialUpdateData: object
 }
 
 interface State {
@@ -51,8 +56,7 @@ interface State {
     endTime: string,
     jobDescription: string
     editRowId: string
-    // materials: object[]
-    visibleAddMaterial: boolean
+    formOpen: boolean
 }
 
 type ReduxProps = ConnectedProps<typeof connector>
@@ -69,25 +73,16 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
             endTime: "",
             jobDescription: "",
             editRowId: "",
-            // materials: [],
-            visibleAddMaterial: false,
+            formOpen: false,
         };
     }
 
-    async componentDidMount() {
-        // await this.getMaterials();
-    }
-
-    async componentDidUpdate(prevProps) {
-        if (this.props.isEdit && prevProps.updateData !== this.props.updateData) {
+    async componentDidUpdate() {
+        if (this.props.isEdit && !this.state.formOpen) {
             this.handleChangeEditRowData(this.props.updateData);
+            this.setState({ formOpen: true });
         }
     }
-
-    // getMaterials = async () => {
-    //     const materials = await FactoryService.getMaterials();
-    //     this.setState({ materials });
-    // }
 
     handleChangeInput = (e): void => {
         if (Object.keys(this.state).includes(e.target.name)) {
@@ -102,6 +97,7 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
             startTime: "",
             endTime: "",
             jobDescription: "",
+            formOpen: false,
         });
     }
 
@@ -122,12 +118,12 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
             return;
         }
 
-        let material = this.state.material;
+        let material = { ...this.state.material };
         delete material["_id"];
 
         const payload = {
             "jobName": this.state.jobName,
-            "material": this.state.material,
+            "material": material,
             "startTime": this.state.startTime,
             "endTime": this.state.endTime,
             "jobDescription": this.state.jobDescription,
@@ -158,17 +154,17 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
         const result = await FactoryService.addMachineAction(payload);
 
         if (result.data.summary.code === 200) {
-            this.props.notify(machineActionAddedSuccessfully());
-            this.props.getAllMachineActions();
-            this.props.handleDismissAddUpdateMachineAction();
-            this.clearForm();
+            await this.props.notify(machineActionAddedSuccessfully());
+            await this.props.getAllMachineActions();
+            await this.props.handleDismissAddUpdateMachineAction();
+            await this.clearForm();
         }
     }
 
     handleSelectMaterial = (material) => {
         switch (material) {
             case "other":
-                this.setState({ visibleAddMaterial: true });
+                this.props.handleOpenAddMaterial();
                 break;
             default:
                 this.setState({ material })
@@ -179,12 +175,6 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
     closeOverlay = () => {
         this.props.handleDismissAddUpdateMachineAction();
         this.clearForm();
-    }
-
-    handleDismissAddMaterial = () => {
-        this.setState({
-            visibleAddMaterial: false
-        })
     }
 
     render() {
@@ -327,9 +317,11 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
                 </Overlay>
 
                 <AddMaterialOverlay
-                    visibleAddMaterial={this.state.visibleAddMaterial}
-                    handleDismissAddMaterial={this.handleDismissAddMaterial}
+                    visibleAddMaterial={this.props.visibleAddMaterial}
+                    handleDismissAddMaterial={this.props.handleDismissAddMaterial}
                     getMaterials={this.props.getMaterials}
+                    materialEditMode={this.props.materialEditMode}
+                    materialUpdateData={this.props.materialUpdateData}
                 />
             </>
         );

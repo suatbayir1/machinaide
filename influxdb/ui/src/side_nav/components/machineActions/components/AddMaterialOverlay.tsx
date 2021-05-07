@@ -16,6 +16,7 @@ import {
     Columns,
     TextArea,
     InputType,
+    ComponentStatus,
 } from '@influxdata/clockface'
 
 // Services
@@ -29,12 +30,16 @@ import {
     pleaseFillInTheFormCompletely,
     materialAddedSuccessfully,
     materialAddedFailure,
+    materialUpdatedSuccessfully,
+    materialUpdatedFailure,
 } from 'src/shared/copy/notifications'
 
 interface OwnProps {
     visibleAddMaterial: boolean
     handleDismissAddMaterial: () => void
     getMaterials: () => void
+    materialEditMode: boolean
+    materialUpdateData: object
 }
 
 interface State {
@@ -43,6 +48,8 @@ interface State {
     width: number
     height: number
     materialDescription: string
+    editRowId: string
+    formOpen: boolean
 }
 
 type ReduxProps = ConnectedProps<typeof connector>
@@ -58,7 +65,27 @@ class AddMaterialOverlay extends PureComponent<Props, State> {
             width: 0,
             height: 0,
             materialDescription: "",
+            editRowId: "",
+            formOpen: false,
         };
+    }
+
+    async componentDidUpdate() {
+        if (this.props.materialEditMode && !this.state.formOpen) {
+            this.handleChangeEditRowData(this.props.materialUpdateData);
+            this.setState({ formOpen: true });
+        }
+    }
+
+    handleChangeEditRowData = (editRow) => {
+        this.setState({
+            materialName: editRow.materialName,
+            thickness: editRow.thickness,
+            width: editRow.width,
+            height: editRow.height,
+            materialDescription: editRow.materialDescription,
+            editRowId: editRow._id.$oid
+        });
     }
 
     handleChangeInput = (e): void => {
@@ -74,6 +101,8 @@ class AddMaterialOverlay extends PureComponent<Props, State> {
             width: 0,
             height: 0,
             materialDescription: "",
+            editRowId: "",
+            formOpen: false,
         });
     }
 
@@ -96,6 +125,27 @@ class AddMaterialOverlay extends PureComponent<Props, State> {
             "materialDescription": this.state.materialDescription,
         }
 
+        if (this.props.materialEditMode) {
+            this.updateMaterial(payload);
+        } else {
+            this.addMaterial(payload);
+        }
+    }
+
+    updateMaterial = async (payload) => {
+        payload["recordId"] = this.state.editRowId;
+        const result = await FactoryService.updateMaterial(payload);
+
+        if (result.data.summary.code !== 200) {
+            this.props.notify(materialUpdatedFailure());
+        }
+
+        this.props.notify(materialUpdatedSuccessfully());
+        this.props.getMaterials();
+        this.closeOverlay();
+    }
+
+    addMaterial = async (payload) => {
         const result = await FactoryService.addMaterial(payload);
 
         if (result.data.summary.code !== 200) {
@@ -114,7 +164,7 @@ class AddMaterialOverlay extends PureComponent<Props, State> {
                 <Overlay visible={this.props.visibleAddMaterial}>
                     <Overlay.Container maxWidth={600}>
                         <Overlay.Header
-                            title={"Add Material"}
+                            title={this.props.materialEditMode ? "Edit Material" : "Add Material"}
                             onDismiss={this.closeOverlay}
                         />
 
@@ -129,6 +179,7 @@ class AddMaterialOverlay extends PureComponent<Props, State> {
                                                         name="materialName"
                                                         onChange={this.handleChangeInput}
                                                         value={this.state.materialName}
+                                                        status={this.props.materialEditMode ? ComponentStatus.Disabled : ComponentStatus.Default}
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>

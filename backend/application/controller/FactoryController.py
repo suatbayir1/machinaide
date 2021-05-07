@@ -80,7 +80,7 @@ def update_machine_action(token):
 
     if not result:        
         message = "Invalid recordId"
-        logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, request.json, message,  400)
+        logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, request.json, message,  400)
         return return_response(success = False, message = message, code = 400), 400
     else:
         message = "Machine action updated successfully"
@@ -154,3 +154,61 @@ def get_materials(token):
     message = "All material record information has been successfully fetched"
     logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
     return return_response(data = data, success = True, message = message), 200
+
+
+@factory.route("/deleteMaterial", methods = ["POST", "DELETE"])
+@token_required(roles = ["admin", "editor"])
+def delete_material(token):
+    if not request.data:
+        message = "Request data cannot be empty"
+        logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, "", message,  400)
+        return return_response(success = False, message = message), 400
+    
+    result = model.delete_material(request.json)
+
+    if not result:
+        message = "Invalid recordId"
+        logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, request.json, message,  400)
+        return return_response(success = False, message = message, code = 400), 400
+    else:
+        message = "Material deleted successfully"
+        logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+        return return_response(success = True, message = message, code = 200), 200
+
+@factory.route("/updateMaterial", methods = ["POST", "PUT"])
+@token_required(roles = ["admin", "editor"])
+def update_material(token):
+    if not request.data:
+        message = "Request data cannot be empty"
+        logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, "", message,  400)
+        return return_response(success = False, message = message), 400
+
+    result = model.update_material(request.json)
+
+    if not result:        
+        message = "Invalid recordId"
+        logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, request.json, message,  400)
+        return return_response(success = False, message = message, code = 400), 400
+    else:
+        message = "Machine action updated successfully"
+        logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+        return return_response(success = True, message = message, code = 200), 200
+
+@factory.route("/isMaterialExists", methods = ["POST"])
+@token_required(roles = ["admin", "editor"])
+def is_material_exists(token):
+    if not request.data:
+        message = "Request data cannot be empty"
+        logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, "", message,  400)
+        return return_response(success = False, message = message), 400
+
+    result = model.is_material_exists(request.json)
+
+    if not result:
+        message = "Material record not exists"
+        logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, request.json, message,  200)
+        return return_response(success = True, message = message, code = 200)
+    else:
+        message = "Material record already exists"
+        logger.add_log("DUPLICATED", request.remote_addr, token["username"], request.method, request.url, request.json, message,  409)
+        return return_response(success = True, message = message, code = 409)

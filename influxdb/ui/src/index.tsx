@@ -2,16 +2,16 @@ import 'babel-polyfill'
 import 'abortcontroller-polyfill/dist/polyfill-patch-fetch'
 
 // Libraries
-import React, {PureComponent} from 'react'
-import {render} from 'react-dom'
-import {Provider} from 'react-redux'
-import {Route, Switch} from 'react-router-dom'
-import {ConnectedRouter} from 'connected-react-router'
+import React, { PureComponent } from 'react'
+import { render } from 'react-dom'
+import { Provider } from 'react-redux'
+import { Route, Switch } from 'react-router-dom'
+import { ConnectedRouter } from 'connected-react-router'
 
 // Stores
 import configureStore from 'src/store/configureStore'
-import {loadLocalStorage} from 'src/localStorage'
-import {history} from 'src/store/history'
+import { loadLocalStorage } from 'src/localStorage'
+import { history } from 'src/store/history'
 
 // Components
 import Setup from 'src/Setup'
@@ -19,15 +19,16 @@ import NotFound from 'src/shared/components/NotFound'
 import GetLinks from 'src/shared/containers/GetLinks'
 
 // Utilities
-import {getRootNode} from 'src/utils/nodes'
-import {updateReportingContext} from 'src/cloud/utils/reporting'
+import { getRootNode } from 'src/utils/nodes'
+import { updateReportingContext } from 'src/cloud/utils/reporting'
 
 // Actions
-import {disablePresentationMode} from 'src/shared/actions/app'
+import { disablePresentationMode } from 'src/shared/actions/app'
 
 // Styles
 import 'src/style/chronograf.scss'
 import '@influxdata/clockface/dist/index.css'
+import 'src/index.css'
 
 const rootNode = getRootNode()
 
@@ -42,7 +43,7 @@ updateReportingContext({
 })
 
 export const store = configureStore(loadLocalStorage())
-const {dispatch} = store
+const { dispatch } = store
 
 if (window['Cypress']) {
   window['store'] = store

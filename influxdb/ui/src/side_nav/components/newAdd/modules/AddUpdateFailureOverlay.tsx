@@ -31,7 +31,6 @@ interface Props {
 }
 
 interface State {
-    formMode: boolean,
     dialogBox: boolean,
     overlay: boolean,
     allParts: object[],
@@ -52,12 +51,11 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
         super(props);
 
         this.state = {
-            formMode: false,
             dialogBox: false,
             overlay: false,
             allParts: [],
             selectedPart: {},
-            selectedSeverity: "minor",
+            selectedSeverity: "acceptable",
             costToFix: null,
             description: "",
             startTime: "",
@@ -83,7 +81,7 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
     clearForm = () => {
         this.setState({
             selectedPart: {},
-            selectedSeverity: "minor",
+            selectedSeverity: "acceptable",
             costToFix: null,
             description: "",
             startTime: "",
@@ -180,8 +178,7 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
         }
 
         this.props.getAllFailures();
-        this.props.handleDismissAddUpdateFailure();
-        this.clearForm();
+        this.closeOverlay();
     }
 
     addFailure = async (payload) => {
@@ -195,13 +192,11 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                 description: "",
                 endTime: "",
                 startTime: "",
-                selectedSeverity: "minor",
+                selectedSeverity: "acceptable",
                 selectedPart: {},
-                formMode: false,
             })
             this.props.getAllFailures();
-            this.props.handleDismissAddUpdateFailure();
-            this.clearForm();
+            this.closeOverlay();
             return;
         }
     }
@@ -212,7 +207,7 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
     }
 
     render() {
-        const { visibleAddUpdateFailure, handleDismissAddUpdateFailure } = this.props;
+        const { visibleAddUpdateFailure } = this.props;
 
         const allParts = this.state.allParts.map(item => {
             return (
@@ -289,7 +284,7 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                                             <Grid.Column widthXS={Columns.Three}>
                                                 <Form.Element label="Severity">
                                                     <SelectDropdown
-                                                        options={["minor", "major", "severe"]}
+                                                        options={["acceptable", "major", "critical"]}
                                                         selectedOption={this.state.selectedSeverity}
                                                         onSelect={(e) => this.setState({ selectedSeverity: e })}
                                                     />

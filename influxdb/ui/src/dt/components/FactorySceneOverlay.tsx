@@ -141,20 +141,6 @@ class FactorySceneOverlay extends PureComponent<Props, State> {
 
                 </Overlay.Container>
             </Overlay>
-
-
-            // <Page>
-            //     <Page.Header fullWidth={true}>
-            //         <Page.Title title={"Factory Scene"}></Page.Title>
-            //     </Page.Header>
-            //     <Page.Contents fullWidth={true} scrollable={true}>
-            //         <Grid>
-            //             <Grid.Row>
-            //                 <div id="sceneArea"></div>
-            //             </Grid.Row>
-            //         </Grid>
-            //     </Page.Contents>
-            // </Page>
         )
     }
 }

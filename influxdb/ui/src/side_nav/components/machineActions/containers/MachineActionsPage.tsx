@@ -1,4 +1,8 @@
+// Libraries
 import React, { PureComponent, createRef } from "react";
+import { Link } from "react-router-dom"
+
+// Components
 import {
     Page,
     Grid,
@@ -30,15 +34,22 @@ import {
 } from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
-import { Link } from "react-router-dom"
 import HomeIcon from '@material-ui/icons/Home';
-import 'src/side_nav/components/newAdd/customCss/general.css';
-import FactoryService from 'src/shared/services/FactoryService';
 import AddUpdateMachineActionOverlay from 'src/side_nav/components/machineActions/components/AddUpdateMachineActionOverlay';
-import { dataToCSV, dataToXLSX } from 'src/shared/parsing/dataToCsv';
-import download from 'src/external/download.js';
 import MachineActionDetailOverlay from 'src/side_nav/components/machineActions/components/MachineActionDetailOverlay';
 import ImportMachineActionFile from 'src/side_nav/components/machineActions/components/ImportMachineActionFile';
+import MaterialsPage from 'src/side_nav/components/machineActions/containers/MaterialsPage';
+
+// Constants
+import 'src/side_nav/components/newAdd/customCss/general.css';
+
+// Services
+import FactoryService from 'src/shared/services/FactoryService';
+
+// Utils
+import { dataToCSV, dataToXLSX } from 'src/shared/parsing/dataToCsv';
+import download from 'src/external/download.js';
+
 
 interface Props { }
 interface State {
@@ -67,6 +78,10 @@ interface State {
     currentIndex: number
     materials: object[]
     materialList: string[]
+    visibleMaterialsPage: boolean
+    visibleAddMaterial: boolean
+    materialEditMode: boolean,
+    materialUpdateData: object,
 }
 
 class MachineActionsPage extends PureComponent<Props, State> {
@@ -108,6 +123,10 @@ class MachineActionsPage extends PureComponent<Props, State> {
             currentIndex: 0,
             materials: [],
             materialList: [],
+            visibleMaterialsPage: false,
+            visibleAddMaterial: false,
+            materialEditMode: false,
+            materialUpdateData: {},
         };
     }
 
@@ -139,19 +158,33 @@ class MachineActionsPage extends PureComponent<Props, State> {
         });
     }
 
+    handleDismissAddMaterial = () => {
+        this.setState({
+            visibleAddMaterial: false,
+            materialEditMode: false,
+        })
+    }
+
+    handleOpenAddMaterial = () => {
+        this.setState({
+            visibleAddMaterial: true,
+            materialEditMode: false,
+        })
+    }
+
     getFilteredData = async () => {
         const tempFilteredRows = [];
 
-        const nextYear = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
-        const previousYear = new Date(new Date().setFullYear(new Date().getFullYear() - 1));
-        const startLower = this.state.startTimeRange["lower"] === undefined ? previousYear : new Date(this.state.startTimeRange["lower"]);
-        const startUpper = this.state.startTimeRange["upper"] === undefined ? nextYear : new Date(this.state.startTimeRange["upper"]);
-        const endLower = this.state.endTimeRange["lower"] === undefined ? previousYear : new Date(this.state.endTimeRange["lower"]);
-        const endUpper = this.state.endTimeRange["upper"] === undefined ? nextYear : new Date(this.state.endTimeRange["upper"]);
+        // const nextYear = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
+        // const previousYear = new Date(new Date().setFullYear(new Date().getFullYear() - 1));
+        // const startLower = this.state.startTimeRange["lower"] === undefined ? previousYear : new Date(this.state.startTimeRange["lower"]);
+        // const startUpper = this.state.startTimeRange["upper"] === undefined ? nextYear : new Date(this.state.startTimeRange["upper"]);
+        // const endLower = this.state.endTimeRange["lower"] === undefined ? previousYear : new Date(this.state.endTimeRange["lower"]);
+        // const endUpper = this.state.endTimeRange["upper"] === undefined ? nextYear : new Date(this.state.endTimeRange["upper"]);
 
         this.state.tableData.forEach((row) => {
-            let rowStartTime = new Date(row["startTime"]);
-            let rowEndTime = row["endTime"] === "" || row["endTime"] === null ? Date.now() : new Date(row["endTime"]);
+            // let rowStartTime = new Date(row["startTime"]);
+            // let rowEndTime = row["endTime"] === "" || row["endTime"] === null ? Date.now() : new Date(row["endTime"]);
 
             if (row["jobName"].toLowerCase().includes(this.state.filterByJob.toLowerCase())
                 && this.state.filterByMaterial.includes(row["material"]["materialName"])
@@ -172,6 +205,16 @@ class MachineActionsPage extends PureComponent<Props, State> {
             editMode: true,
             updateData: editRow,
             openAddUpdateMachineActionOverlay: true,
+        })
+    }
+
+    materialRecordEdit = (editRow) => {
+        console.log(editRow);
+
+        this.setState({
+            materialEditMode: true,
+            materialUpdateData: editRow,
+            visibleAddMaterial: true,
         })
     }
 
@@ -410,6 +453,12 @@ class MachineActionsPage extends PureComponent<Props, State> {
         })
     }
 
+    handleDismissMaterialsPage = () => {
+        this.setState({
+            visibleMaterialsPage: false
+        })
+    }
+
     handleChangeDropdownMaterial = (option: string) => {
         const { filterByMaterial } = this.state
         const optionExists = filterByMaterial.find(opt => opt === option)
@@ -594,6 +643,14 @@ class MachineActionsPage extends PureComponent<Props, State> {
                                         <Grid.Row style={{ marginTop: '50px' }}>
                                             <div style={{ float: 'right' }}>
                                                 <FlexBox margin={ComponentSize.Small}>
+                                                    <Button
+                                                        text="Materials"
+                                                        type={ButtonType.Button}
+                                                        icon={IconFont.DashF}
+                                                        color={ComponentColor.Secondary}
+                                                        style={{ width: '110px' }}
+                                                        onClick={() => { this.setState({ visibleMaterialsPage: true }) }}
+                                                    />
                                                     <Dropdown
                                                         style={{ width: '110px' }}
                                                         button={(active, onClick) => (
@@ -692,12 +749,27 @@ class MachineActionsPage extends PureComponent<Props, State> {
                                 <AddUpdateMachineActionOverlay
                                     visibleAddUpdateMachineAction={this.state.openAddUpdateMachineActionOverlay}
                                     handleDismissAddUpdateMachineAction={this.handleDismissAddUpdateMachineAction}
+                                    visibleAddMaterial={this.state.visibleAddMaterial}
+                                    handleDismissAddMaterial={this.handleDismissAddMaterial}
+                                    handleOpenAddMaterial={this.handleOpenAddMaterial}
                                     getAllMachineActions={this.getAllMachineActions}
                                     isEdit={this.state.editMode}
                                     updateData={this.state.updateData}
                                     machineID={this.props["match"].params["MID"]}
                                     getMaterials={this.getMaterials}
                                     materials={this.state.materials}
+                                    materialEditMode={this.state.materialEditMode}
+                                    materialUpdateData={this.state.materialUpdateData}
+                                />
+
+                                <MaterialsPage
+                                    visibleMaterialsPage={this.state.visibleMaterialsPage}
+                                    handleDismissMaterialsPage={this.handleDismissMaterialsPage}
+                                    handleOpenAddMaterial={this.handleOpenAddMaterial}
+                                    getMaterials={this.getMaterials}
+                                    materials={this.state.materials}
+                                    materialRecordEdit={this.materialRecordEdit}
+                                    orgID={this.props["match"].params["orgID"]}
                                 />
                             </Page.Contents>
                         </React.Fragment>

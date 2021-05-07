@@ -1,0 +1,9 @@
+#failureTable td{
+    padding: 8px;
+    border-left: '2px solid #31313d';
+    border-right: '2px solid #31313d';
+}
+
+.common-button-width {
+    width: 125px
+}

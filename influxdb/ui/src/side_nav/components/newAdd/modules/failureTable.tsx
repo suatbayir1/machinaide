@@ -2,7 +2,7 @@ import React, { PureComponent, createRef } from "react";
 import {
     Page,
     Grid,
-    IconFont,
+    IconFont, Icon,
     ComponentColor,
     ComponentSize,
     Button,
@@ -40,6 +40,7 @@ import FailureService from 'src/shared/services/FailureService';
 import AddUpdateFailureOverlay from 'src/side_nav/components/newAdd/modules/AddUpdateFailureOverlay';
 import { dataToCSV, dataToXLSX } from 'src/shared/parsing/dataToCsv';
 import download from 'src/external/download.js';
+import FailureAlarmScene from 'src/failures/components/FailureAlarmScene';
 
 interface Props { }
 interface State {
@@ -51,7 +52,6 @@ interface State {
     option: string,
     tableData: object[],
     filteredData: object[],
-    formMode: boolean,
     dialogBox: boolean,
     overlay: boolean,
     factories: string[],
@@ -80,6 +80,7 @@ interface State {
     isLoading: boolean,
     startTimeRange: object,
     endTimeRange: object,
+    visibleFailureAlarmScene: boolean
 }
 
 class FailureTable extends PureComponent<Props, State> {
@@ -93,12 +94,11 @@ class FailureTable extends PureComponent<Props, State> {
             startTimeRangeOpen: false,
             endTimeRangeOpen: false,
             filtersForm: false,
-            filteredSeverity: ["minor", "major", "severe"],
+            filteredSeverity: ["acceptable", "major", "critical"],
             options: ["option1", "option2", "option3", "option4"],
             option: "option1",
             tableData: [],
             filteredData: [],
-            formMode: false,
             dialogBox: false,
             overlay: false,
             factories: [],
@@ -111,7 +111,7 @@ class FailureTable extends PureComponent<Props, State> {
             selectedSensor: "ALL",
             allParts: [],
             selectedPart: {},
-            selectedSeverity: "minor",
+            selectedSeverity: "acceptable",
             costToFix: null,
             description: "",
             startTime: "",
@@ -127,6 +127,7 @@ class FailureTable extends PureComponent<Props, State> {
             isLoading: false,
             startTimeRange: {},
             endTimeRange: {},
+            visibleFailureAlarmScene: false,
         };
     }
 
@@ -393,7 +394,6 @@ class FailureTable extends PureComponent<Props, State> {
         }
 
         this.setState({
-            formMode: true,
             editMode: true,
             updateData: updateData,
             openAddUpdateFailureOverlay: true,
@@ -433,6 +433,10 @@ class FailureTable extends PureComponent<Props, State> {
             openAddUpdateFailureOverlay: false,
             editMode: false,
         });
+    }
+
+    handleDismissFailureAlarmScene = () => {
+        this.setState({ visibleFailureAlarmScene: false });
     }
 
     removeFailureRecord = async (removeRow) => {
@@ -628,6 +632,47 @@ class FailureTable extends PureComponent<Props, State> {
         });
     }
 
+    getBackgroundColor = (level) => {
+        let backgroundColor;
+
+        if (level === "acceptable") {
+            backgroundColor = "blue";
+        }
+
+        if (level === "major") {
+            backgroundColor = "orange";
+        }
+
+        if (level === "critical") {
+            backgroundColor = "red";
+        }
+
+        return {
+            color: "#fff",
+            backgroundColor: backgroundColor,
+        }
+    }
+
+    private failureIcon(level): JSX.Element {
+        let iconType;
+
+        switch (level) {
+            case 'acceptable':
+                iconType = "Checkmark"
+                break;
+            case 'major':
+                iconType = "Bell";
+                break;
+            case 'critical':
+                iconType = "Alerts";
+                break;
+        }
+
+        return (
+            <Icon glyph={IconFont[iconType]} style={{ width: '40px', fontSize: '30px !important' }} />
+        )
+    }
+
     render() {
         const { spinnerLoading, isLoading } = this.state;
 
@@ -738,7 +783,7 @@ class FailureTable extends PureComponent<Props, State> {
                                                 <Form.Element label="Severity">
                                                     <MultiSelectDropdown
                                                         emptyText={"Select severity"}
-                                                        options={["minor", "major", "severe"]}
+                                                        options={["acceptable", "major", "critical"]}
                                                         selectedOptions={this.state.filteredSeverity}
                                                         onSelect={this.handleChangeDropdownFilter}
                                                     />
@@ -758,27 +803,33 @@ class FailureTable extends PureComponent<Props, State> {
                                                     borders={BorderType.Vertical}
                                                     fontSize={ComponentSize.ExtraSmall}
                                                     cellPadding={ComponentSize.ExtraSmall}
+                                                    id={"failureTable"}
                                                 >
-                                                    <Table.Header>
-                                                        <Table.Row>
+                                                    <thead>
+                                                        <tr>
+                                                            <Table.HeaderCell style={{ width: "30px" }}></Table.HeaderCell>
                                                             <Table.HeaderCell style={{ width: "300px" }}>Machine/Component/Sensor Name</Table.HeaderCell>
                                                             <Table.HeaderCell style={{ width: "100px" }}>Severity</Table.HeaderCell>
                                                             <Table.HeaderCell style={{ width: "200px" }}>Start Time</Table.HeaderCell>
                                                             <Table.HeaderCell style={{ width: "200px" }}>End Time</Table.HeaderCell>
                                                             <Table.HeaderCell style={{ width: "50px" }}></Table.HeaderCell>
-                                                        </Table.Row>
-                                                    </Table.Header>
-                                                    <Table.Body>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
                                                         {
                                                             this.state.filteredData.map(row => {
                                                                 let recordId = row["_id"]["$oid"];
                                                                 return (
-                                                                    <Table.Row key={recordId}>
-                                                                        <Table.Cell>{row["sourceName"]}</Table.Cell>
-                                                                        <Table.Cell>{row["severity"]}</Table.Cell>
-                                                                        <Table.Cell>{row["startTime"]}</Table.Cell>
-                                                                        <Table.Cell>{row["endTime"]}</Table.Cell>
-                                                                        <Table.Cell>
+                                                                    <tr
+                                                                        key={recordId}
+                                                                        style={this.getBackgroundColor(row["severity"])}
+                                                                    >
+                                                                        <td style={{ fontSize: '15px' }}>{this.failureIcon(row["severity"])}</td>
+                                                                        <td>{row["sourceName"]}</td>
+                                                                        <td>{row["severity"]}</td>
+                                                                        <td>{row["startTime"]}</td>
+                                                                        <td>{row["endTime"]}</td>
+                                                                        <td>
                                                                             <FlexBox margin={ComponentSize.Medium} >
                                                                                 {
                                                                                     ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
@@ -808,29 +859,28 @@ class FailureTable extends PureComponent<Props, State> {
                                                                                 }
 
                                                                             </FlexBox>
-                                                                        </Table.Cell>
-                                                                    </Table.Row>
+                                                                        </td>
+                                                                    </tr>
                                                                 )
                                                             })
                                                         }
-                                                    </Table.Body>
+                                                    </tbody>
                                                 </Table>
                                             </DapperScrollbars>
                                         </Grid.Row>
 
 
-                                        <Grid.Row style={{ marginTop: '50px' }}>
+                                        <Grid.Row style={{ marginTop: '20px' }}>
                                             <div style={{ float: 'right' }}>
                                                 <FlexBox margin={ComponentSize.Small}>
-                                                    <Button
-                                                        ref={this.importButtonRef}
-                                                        text="Maintenance Records"
+                                                    {/* <Button
+                                                        text="Maintenances"
                                                         type={ButtonType.Button}
                                                         icon={IconFont.Shuffle}
                                                         color={ComponentColor.Secondary}
                                                         onClick={() => this.props["history"].push(`/orgs/${this.props["match"].params["orgID"]}/maintenance-records/${this.props["match"].params["FID"]}`)}
                                                         style={{ width: '200px' }}
-                                                    />
+                                                    /> */}
                                                     <Dropdown
                                                         style={{ width: '110px' }}
                                                         button={(active, onClick) => (
@@ -906,6 +956,29 @@ class FailureTable extends PureComponent<Props, State> {
                                             </div>
                                         </Grid.Row>
 
+                                        <Grid.Row style={{ marginTop: '5px' }}>
+                                            <div style={{ float: 'right' }}>
+                                                <FlexBox margin={ComponentSize.Small}>
+                                                    <Button
+                                                        text="3D Failures"
+                                                        type={ButtonType.Button}
+                                                        icon={IconFont.Pulse}
+                                                        color={ComponentColor.Warning}
+                                                        style={{ width: '110px' }}
+                                                        onClick={() => { this.setState({ visibleFailureAlarmScene: true }) }}
+                                                    />
+                                                    <Button
+                                                        text="Maintenance Records"
+                                                        type={ButtonType.Button}
+                                                        icon={IconFont.Shuffle}
+                                                        color={ComponentColor.Secondary}
+                                                        onClick={() => this.props["history"].push(`/orgs/${this.props["match"].params["orgID"]}/maintenance-records/${this.props["match"].params["FID"]}`)}
+                                                        style={{ width: '224px' }}
+                                                    />
+                                                </FlexBox>
+                                            </div>
+                                        </Grid.Row>
+
                                     </Grid>
                                 </Grid.Column>
 
@@ -924,6 +997,12 @@ class FailureTable extends PureComponent<Props, State> {
                                     isEdit={this.state.editMode}
                                     factoryID={this.props["match"].params.FID}
                                     updateData={this.state.updateData}
+                                />
+
+                                <FailureAlarmScene
+                                    handleDismissFailureAlarmScene={this.handleDismissFailureAlarmScene}
+                                    visibleFailureAlarmScene={this.state.visibleFailureAlarmScene}
+                                    failures={this.state.tableData}
                                 />
                             </Page.Contents>
                         </React.Fragment>

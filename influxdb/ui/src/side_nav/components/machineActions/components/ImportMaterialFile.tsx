@@ -18,7 +18,8 @@ import {
 } from '@influxdata/clockface'
 import classnames from 'classnames'
 import { csvToJSON, xlsxToJSON, fileAnalyzer } from 'src/shared/helpers/FileHelper';
-import FailureService from 'src/shared/services/FailureService';
+import FactoryService from 'src/shared/services/FactoryService';
+import { Link } from "react-router-dom"
 
 
 interface Props {
@@ -32,8 +33,8 @@ interface Props {
     className?: string
     overlay: boolean
     onClose: () => void
-    getAllFailures: () => void
-    setNotificationData: (type, message) => void
+    getMaterials: () => void
+    orgID: string
 }
 
 interface State {
@@ -53,7 +54,7 @@ interface State {
 
 let dragCounter = 0
 
-class ImportDataForm extends PureComponent<Props, State> {
+class ImportMaterialFile extends PureComponent<Props, State> {
     public static defaultProps = {
         submitText: 'Write this File',
         submitOnDrop: false,
@@ -121,6 +122,7 @@ class ImportDataForm extends PureComponent<Props, State> {
             currentError.push(error);
             this.setState({
                 errors: currentError,
+                spinnerLoading: RemoteDataState.Done,
                 isFatalError: true,
             }, () => this.calculateGeneralIstatistics());
             return;
@@ -129,8 +131,8 @@ class ImportDataForm extends PureComponent<Props, State> {
         this.setState({
             totalRecordCount: result.length === 0 ? 0 : result.length - 1,
         })
-        let headers = ["factoryID", "sid", "sourceName", "severity", "cost", "startTime", "endTime", "description"];
-        let required = ["factoryID", "sid", "sourceName", "startTime"];
+        let headers = ["materialName", "thickness", "width", "height", "materialDescription"];
+        let required = ["materialName"];
 
         const { isFatalError, errors } = await fileAnalyzer(headers, required, result, this.state.fileName);
 
@@ -145,15 +147,14 @@ class ImportDataForm extends PureComponent<Props, State> {
             });
 
             if (!isErrorLine) {
-                if (row["factoryID"] !== "" && row["sid"] !== "" && row["sourceName"] !== "" && row["startTime"] !== "") {
-                    let response = await FailureService.isFailureExist(row);
-                    if (response.data.message.text === "failure_already_exists") {
+                if (row["jobName"] !== "" && row["material"] !== "" && row["startTime"] !== "") {
+                    let response = await FactoryService.isMaterialExists(row);
+                    if (response.data.summary.code === 409) {
                         let error = {
                             "type": "DUPLICATED",
                             "color": "green",
-                            "text": `In line: ${index + 1} DUPLICATED: This failure record already exists.`
+                            "text": `In line: ${index + 1} DUPLICATED: This material record already exists.`
                         }
-                        console.log(error);
                         this.setState({
                             errors: [...this.state.errors, error],
                         }, () => this.calculateGeneralIstatistics());
@@ -177,7 +178,6 @@ class ImportDataForm extends PureComponent<Props, State> {
     }
 
     private calculateGeneralIstatistics = () => {
-        console.log("state changed", this.state.errors);
         let occurences = this.state.errors.reduce(function (r, row) {
             r[row['type']] = ++r[row['type']] || 1;
             return r;
@@ -198,9 +198,6 @@ class ImportDataForm extends PureComponent<Props, State> {
     }
 
     private downloadErrors = () => {
-        // let errors = document.getElementById("errorText").innerText.replaceAll("\n\n", "\n")
-        // console.log(errors);
-
         let errors = "";
         this.state.errors.map(error => {
             errors += error["text"] + "\n";
@@ -219,24 +216,6 @@ class ImportDataForm extends PureComponent<Props, State> {
         document.body.removeChild(element);
     }
 
-    private downloadExample = () => {
-        let str =
-            `
-factoryID, sid, sourceName, severity, cost, startTime, endTime, description
-<facotryID>,<sid>,<sourceName>,<severity>,<cost>,<startTime>,<endTime>,<description>
-<facotryID>,<sid>,<sourceName>,<severity>,<cost>,<startTime>,<endTime>,<description>
-`
-        let fileTitle = "example.csv";
-        var element = document.createElement('a');
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(str));
-        element.setAttribute('download', fileTitle);
-        element.style.display = 'none';
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
-        console.log(str);
-    }
-
     private handleWriteData = async () => {
         const { uploadContent } = this.state;
         let result;
@@ -249,7 +228,7 @@ factoryID, sid, sourceName, severity, cost, startTime, endTime, description
         }
 
         const errorLines = [];
-        const requiredList = ["factoryID", "sid", "sourceName", "startTime"];
+        const requiredList = ["materialName"];
 
         result.forEach(async (row, index) => {
             let isErrorLine = false;
@@ -262,26 +241,17 @@ factoryID, sid, sourceName, severity, cost, startTime, endTime, description
             if (isErrorLine) {
                 errorLines.push(index);
             } else {
-                if (row["factoryID"] !== "" && row["sid"] !== "" && row["sourceName"] !== "" && row["startTime"] !== "") {
-                    await FailureService.addFailure(row);
+                if (row["materialName"] !== "") {
+                    await FactoryService.addMaterial(row);
                 }
             }
         });
 
 
-        this.props.getAllFailures();
-        // this.props.onClose();
+        this.props.getMaterials();
         this.setState({
             showDownloadReport: true
         })
-
-        // if (errorLines.length > 0) {
-        //     this.props.setNotificationData("error", `${errorLines} error occurred while adding these lines`);
-        // } else {
-        //     this.props.getAllFailures();
-        //     this.props.setNotificationData("success", "All fault records have been successfully recorded");
-        //     this.props.onClose();
-        // }
     }
 
     private handleWindowDragOver = (event: DragEvent) => {
@@ -369,6 +339,7 @@ factoryID, sid, sourceName, severity, cost, startTime, endTime, description
                         icon={IconFont.Remove}
                     />
                     {
+                        this.state.generalIstatistic["ERROR"] === undefined &&
                         !this.state.isFatalError &&
                         <ConfirmationButton
                             icon={IconFont.Pencil}
@@ -393,7 +364,6 @@ factoryID, sid, sourceName, severity, cost, startTime, endTime, description
     }
 
     private handleFileClick = (e: any): void => {
-        console.log("handle file click");
         const file: File = e.currentTarget.files[0]
 
         if (!file) {
@@ -513,13 +483,12 @@ factoryID, sid, sourceName, severity, cost, startTime, endTime, description
         this.props.onClose();
     }
 
-
     render() {
         return (
             <Overlay visible={this.props.overlay}>
                 <Overlay.Container maxWidth={600}>
                     <Overlay.Header
-                        title="Import failure data"
+                        title="Import Material File"
                         onDismiss={() => { this.onDismissDialog() }}
                     />
 
@@ -635,15 +604,17 @@ factoryID, sid, sourceName, severity, cost, startTime, endTime, description
 
                                     {
                                         this.state.uploadContent === "" &&
-                                        <Button
-                                            color={ComponentColor.Primary}
-                                            text="User Manual"
-                                            size={ComponentSize.Small}
-                                            type={ButtonType.Button}
-                                            icon={IconFont.Download}
-                                            style={{ 'float': 'right', marginTop: '20px' }}
-                                            onClick={() => { this.downloadExample() }}
-                                        />
+                                        <Link color="inherit" to={`/orgs/${this.props.orgID}/user-manual`}>
+                                            <Button
+                                                color={ComponentColor.Primary}
+                                                text="User Manual"
+                                                size={ComponentSize.Small}
+                                                type={ButtonType.Button}
+                                                icon={IconFont.Download}
+                                                style={{ 'float': 'right', marginTop: '20px' }}
+                                            />
+                                        </Link>
+
                                     }
                                 </Grid.Row>
 
@@ -656,4 +627,4 @@ factoryID, sid, sourceName, severity, cost, startTime, endTime, description
     }
 }
 
-export default ImportDataForm;
+export default ImportMaterialFile;
