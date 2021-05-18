@@ -15,7 +15,7 @@ var initializeDomEvents = require('threex-domevents')
 var THREEx = {}
 initializeDomEvents(THREE, THREEx)
 var camera, controls, scene, renderer, domEvents, transformControl;
-var dae, kinematics, stats, kinematicsTween;
+var dae, kinematics, kinematicsTween;
 const tweenParameters = {};
 
 const TWEEN = require("@tweenjs/tween.js");
@@ -48,7 +48,6 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
   }
 
   async componentDidMount(): Promise<void> {
-    console.log("component did mount");
     await this.renderVisualizeData();
     await this.responsiveConfiguration();
   }
@@ -58,7 +57,6 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
       if (scene === undefined) { return; }
 
       if (Object.keys(this.props.selectedGraphNode).length > 0) {
-        console.log("first block");
         const isRemovedScene = await this.removeAllObjectFromScene();
         if (isRemovedScene) {
           const payload = {
@@ -73,8 +71,6 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
     }
 
     if (prevProps.refreshVisualizePage !== this.props.refreshVisualizePage) {
-      console.log("second block");
-
       await this.removeAllObjectFromScene();
       const cubeInfo = await DTService.getAllDT();
       const renderedCubeInfo = await this.renderInitialCubeInfo(cubeInfo);
@@ -88,8 +84,6 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
     }
 
     if (prevProps.resultNLPQuery !== this.props.resultNLPQuery) {
-      console.log("third block");
-
       await this.removeAllObjectFromScene();
       let cubeInfo = await this.handleResultNLPQuery(this.props.resultNLPQuery);
       this.cubeCreator(cubeInfo);
@@ -369,11 +363,11 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
 
           vm.addObjectToScene(cube);
         },
-        function (xhr) {
-          console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        function () {
+          // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
         },
-        function (xhr) {
-          console.log('An error happened', xhr);
+        function () {
+          // console.log('An error happened', xhr);
         }
       );
     } else {
@@ -403,6 +397,275 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
       cube.position.x = cubeInfo.position.x;
       cube.position.y = cubeInfo.position.y;
       cube.position.z = cubeInfo.position.z;
+
+      if (cubeInfo.scale !== undefined) {
+        cube.scale.x = cubeInfo.scale.x;
+        cube.scale.y = cubeInfo.scale.y;
+        cube.scale.z = cubeInfo.scale.z;
+      }
+      cube.name = cubeInfo.name;
+
+      this.addObjectToScene(cube);
+    }
+  }
+
+  addSphere(cubeInfo, wireframe) {
+    if (typeof cubeInfo !== 'object' || cubeInfo === null) {
+      return;
+    }
+
+    if (cubeInfo.texture !== undefined && cubeInfo.texture !== null) {
+      let geometry = new THREE.SphereGeometry(
+        cubeInfo.boxMeasure.radius,
+        cubeInfo.boxMeasure.widthSegments,
+        cubeInfo.boxMeasure.heightSegments
+      );
+
+      var material;
+      var loader = new THREE.TextureLoader();
+      let vm = this;
+
+      loader.load(
+        cubeInfo.texture,
+        function (texture) {
+          material = new THREE.MeshBasicMaterial({
+            map: texture,
+            color: cubeInfo.color
+          });
+          material.transparent = true;
+          material.opacity = cubeInfo.opacity
+          let cube = new THREE.Mesh(geometry, material);
+
+          cube.scale.x = cubeInfo.scale.x;
+          cube.scale.y = cubeInfo.scale.y;
+          cube.scale.z = cubeInfo.scale.z;
+
+          cube.position.x = cubeInfo.position.x;
+          cube.position.y = cubeInfo.position.y;
+          cube.position.z = cubeInfo.position.z;
+
+          cube.rotation.x = cubeInfo.rotate.x;
+          cube.rotation.y = cubeInfo.rotate.y;
+          cube.rotation.z = cubeInfo.rotate.z;
+
+          cube.name = cubeInfo.name;
+
+          vm.addObjectToScene(cube);
+        },
+        function () {
+          // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        },
+        function () {
+          // console.log('An error happened', xhr);
+        }
+      );
+    } else {
+      if (cubeInfo.boxMeasure === undefined) {
+        return;
+      }
+
+      let geometry = new THREE.SphereGeometry(
+        cubeInfo.boxMeasure.radius,
+        cubeInfo.boxMeasure.widthSegments,
+        cubeInfo.boxMeasure.heightSegments
+      );
+      let material = new THREE.MeshBasicMaterial({
+        color: cubeInfo.color
+      });
+
+      material.transparent = true;
+      material.opacity = cubeInfo.opacity;
+      material.wireframe = wireframe;
+
+      let cube = new THREE.Mesh(geometry, material);
+
+      cube.position.x = cubeInfo.position.x;
+      cube.position.y = cubeInfo.position.y;
+      cube.position.z = cubeInfo.position.z;
+
+      cube.rotation.x = cubeInfo.rotate.x;
+      cube.rotation.y = cubeInfo.rotate.y;
+      cube.rotation.z = cubeInfo.rotate.z;
+
+      if (cubeInfo.scale !== undefined) {
+        cube.scale.x = cubeInfo.scale.x;
+        cube.scale.y = cubeInfo.scale.y;
+        cube.scale.z = cubeInfo.scale.z;
+      }
+      cube.name = cubeInfo.name;
+
+      this.addObjectToScene(cube);
+    }
+  }
+
+  addCylinder(cubeInfo, wireframe) {
+    if (typeof cubeInfo !== 'object' || cubeInfo === null) {
+      return;
+    }
+
+    if (cubeInfo.texture !== undefined && cubeInfo.texture !== null) {
+      let geometry = new THREE.CylinderGeometry(
+        cubeInfo.boxMeasure.radiusTop,
+        cubeInfo.boxMeasure.radiusBottom,
+        cubeInfo.boxMeasure.height,
+        cubeInfo.boxMeasure.radialSegments,
+      );
+
+      var material;
+      var loader = new THREE.TextureLoader();
+      let vm = this;
+
+      loader.load(
+        cubeInfo.texture,
+        function (texture) {
+          material = new THREE.MeshBasicMaterial({
+            map: texture,
+            color: cubeInfo.color
+          });
+          material.transparent = true;
+          material.opacity = cubeInfo.opacity
+          let cube = new THREE.Mesh(geometry, material);
+
+          cube.scale.x = cubeInfo.scale.x;
+          cube.scale.y = cubeInfo.scale.y;
+          cube.scale.z = cubeInfo.scale.z;
+
+          cube.position.x = cubeInfo.position.x;
+          cube.position.y = cubeInfo.position.y;
+          cube.position.z = cubeInfo.position.z;
+
+          cube.rotation.x = cubeInfo.rotate.x;
+          cube.rotation.y = cubeInfo.rotate.y;
+          cube.rotation.z = cubeInfo.rotate.z;
+
+          cube.name = cubeInfo.name;
+
+          vm.addObjectToScene(cube);
+        },
+        function () {
+        },
+        function () {
+        }
+      );
+    } else {
+      if (cubeInfo.boxMeasure === undefined) {
+        return;
+      }
+
+      let geometry = new THREE.CylinderGeometry(
+        cubeInfo.boxMeasure.radiusTop,
+        cubeInfo.boxMeasure.radiusBottom,
+        cubeInfo.boxMeasure.height,
+        cubeInfo.boxMeasure.radialSegments,
+      );
+
+      let material = new THREE.MeshBasicMaterial({
+        color: cubeInfo.color
+      });
+
+      material.transparent = true;
+      material.opacity = cubeInfo.opacity;
+      material.wireframe = wireframe;
+
+      let cube = new THREE.Mesh(geometry, material);
+
+      cube.position.x = cubeInfo.position.x;
+      cube.position.y = cubeInfo.position.y;
+      cube.position.z = cubeInfo.position.z;
+
+      cube.rotation.x = cubeInfo.rotate.x;
+      cube.rotation.y = cubeInfo.rotate.y;
+      cube.rotation.z = cubeInfo.rotate.z;
+
+      if (cubeInfo.scale !== undefined) {
+        cube.scale.x = cubeInfo.scale.x;
+        cube.scale.y = cubeInfo.scale.y;
+        cube.scale.z = cubeInfo.scale.z;
+      }
+      cube.name = cubeInfo.name;
+
+      this.addObjectToScene(cube);
+    }
+  }
+
+  addTorus(cubeInfo, wireframe) {
+    if (typeof cubeInfo !== 'object' || cubeInfo === null) {
+      return;
+    }
+
+    if (cubeInfo.texture !== undefined && cubeInfo.texture !== null) {
+      let geometry = new THREE.TorusGeometry(
+        cubeInfo.boxMeasure.radius,
+        cubeInfo.boxMeasure.tube,
+        cubeInfo.boxMeasure.radialSegments,
+        cubeInfo.boxMeasure.tubularSegments,
+      );
+
+      var material;
+      var loader = new THREE.TextureLoader();
+      let vm = this;
+
+      loader.load(
+        cubeInfo.texture,
+        function (texture) {
+          material = new THREE.MeshBasicMaterial({
+            map: texture,
+            color: cubeInfo.color
+          });
+          material.transparent = true;
+          material.opacity = cubeInfo.opacity
+          let cube = new THREE.Mesh(geometry, material);
+
+          cube.scale.x = cubeInfo.scale.x;
+          cube.scale.y = cubeInfo.scale.y;
+          cube.scale.z = cubeInfo.scale.z;
+
+          cube.position.x = cubeInfo.position.x;
+          cube.position.y = cubeInfo.position.y;
+          cube.position.z = cubeInfo.position.z;
+
+          cube.rotation.x = cubeInfo.rotate.x;
+          cube.rotation.y = cubeInfo.rotate.y;
+          cube.rotation.z = cubeInfo.rotate.z;
+
+          cube.name = cubeInfo.name;
+
+          vm.addObjectToScene(cube);
+        },
+        function () {
+        },
+        function () {
+        }
+      );
+    } else {
+      if (cubeInfo.boxMeasure === undefined) {
+        return;
+      }
+
+      let geometry = new THREE.TorusGeometry(
+        cubeInfo.boxMeasure.radius,
+        cubeInfo.boxMeasure.tube,
+        cubeInfo.boxMeasure.radialSegments,
+        cubeInfo.boxMeasure.tubularSegments,
+      );
+
+      let material = new THREE.MeshBasicMaterial({
+        color: cubeInfo.color
+      });
+
+      material.transparent = true;
+      material.opacity = cubeInfo.opacity;
+      material.wireframe = wireframe;
+
+      let cube = new THREE.Mesh(geometry, material);
+
+      cube.position.x = cubeInfo.position.x;
+      cube.position.y = cubeInfo.position.y;
+      cube.position.z = cubeInfo.position.z;
+
+      cube.rotation.x = cubeInfo.rotate.x;
+      cube.rotation.y = cubeInfo.rotate.y;
+      cube.rotation.z = cubeInfo.rotate.z;
 
       if (cubeInfo.scale !== undefined) {
         cube.scale.x = cubeInfo.scale.x;
@@ -451,39 +714,13 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
     await renderer.render(scene, camera);
   }
 
-  // addRobot = async () => {
-  //   const loader = new ColladaLoader();
-
-  //   let vm = this;
-  //   await loader.load('../../assets/images/model/abb_irb52_7_120.dae', async function (collada) {
-  //     dae = collada.scene;
-  //     dae.traverse(function (child) {
-  //       if (child.isMesh) {
-  //         child.material.flatShading = true;
-  //       }
-  //     });
-
-  //     dae.scale.x = dae.scale.y = dae.scale.z = 4.0;
-  //     dae.position.x = 4;
-  //     dae.updateMatrix();
-  //     kinematics = collada.kinematics;
-
-  //     scene.add(dae);
-  //     renderer.render(scene, camera);
-  //     vm.setupTween();
-  //     vm.animate();
-  //   });
-  //   await renderer.render(scene, camera);
-  // }
-
   addObjectToScene = (object) => {
     scene.add(object);
 
-    domEvents.addEventListener(object, 'click', function (event) {
+    domEvents.addEventListener(object, 'click', function () {
       transformControl.attach(object);
       scene.add(transformControl);
       renderer.render(scene, camera);
-      console.log(object);
     })
     renderer.render(scene, camera);
   }
@@ -575,6 +812,15 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
       case "BoxGeometry":
         this.addCube(object, wireframe);
         break;
+      case "SphereGeometry":
+        this.addSphere(object, wireframe);
+        break;
+      case "CylinderGeometry":
+        this.addCylinder(object, wireframe);
+        break
+      case "TorusGeometry":
+        this.addTorus(object, wireframe);
+        break;
       case "ColladaFile":
         this.addColladaFile(object, wireframe);
         break;
@@ -582,7 +828,6 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
   }
 
   cubeCreator(payload) {
-    console.log("payload", payload);
     let CubeInfo = payload;
     let wireframe;
 
@@ -593,12 +838,6 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
     if (payload.machines === undefined) {
       CubeInfo = payload[0];
     }
-
-    // if (CubeInfo === undefined || CubeInfo.machines === undefined) {
-    //   return;
-    // }
-
-    console.log("continue");
 
     CubeInfo["machines"].forEach((machine) => {
       if (machine["contents"] !== undefined) {
@@ -627,46 +866,6 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
         })
       }
     })
-
-    // Object.keys(CubeInfo.machines).forEach((machine) => {
-    //   if (CubeInfo.machines[machine].contents !== undefined) {
-    //     Object.keys(CubeInfo.machines[machine].contents).forEach((component) => {
-    //       if (CubeInfo.machines[machine].contents[component].visual !== undefined) {
-    //         Object.keys(CubeInfo.machines[machine].contents[component].visual).forEach((visualObject) => {
-    //           if (CubeInfo.machines[machine].contents[component].visual[visualObject].isRender) {
-    //             wireframe = false;
-    //           } else {
-    //             wireframe = true;
-    //           }
-    //           this.addCube(CubeInfo.machines[machine].contents[component].visual[visualObject], wireframe);
-    //         });
-    //       }
-
-    //       Object.keys(CubeInfo.machines[machine].contents[component].sensors).forEach((sensor) => {
-    //         if (CubeInfo.machines[machine].contents[component].sensors[sensor].visual !== undefined) {
-
-    //           if (CubeInfo.machines[machine].contents[component].sensors[sensor].visual.isRender) {
-    //             wireframe = false;
-    //           } else {
-    //             wireframe = true;
-    //           }
-
-    //           // if visual objects of the sensor consist of more than one object
-    //           if (CubeInfo.machines[machine].contents[component].sensors[sensor].visual["children"] !== undefined) {
-    //             Object.keys(CubeInfo.machines[machine].contents[component].sensors[sensor].visual["children"]).forEach((sensorVisualObject) => {
-    //               this.addCube(CubeInfo.machines[machine].contents[component].sensors[sensor].visual["children"][sensorVisualObject], wireframe);
-    //             });
-
-    //           } else {
-    //             // If the visual object of the sensor consists of a single object
-    //             this.addCube(CubeInfo.machines[machine].contents[component].sensors[sensor].visual, wireframe);
-    //           }
-    //         }
-    //       });
-    //     }
-    //     );
-    //   }
-    // });
 
     renderer.render(scene, camera);
   }

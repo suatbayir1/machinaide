@@ -198,6 +198,7 @@
     "react-scrollbars-custom": "^4.0.0-alpha.8",
     "react-sizeme": "^3.0.1",
     "react-text-annotate": "^0.3.0",
+    "react-tooltip": "^4.2.19",
     "react-virtualized": "^9.18.5",
     "redux": "^4.0.0",
     "redux-auth-wrapper": "^1.0.0",

@@ -1,5 +1,5 @@
-import React, {PureComponent, ChangeEvent} from 'react'
-import {connect, ConnectedProps} from 'react-redux'
+import React, { PureComponent, ChangeEvent } from 'react'
+import { connect, ConnectedProps } from 'react-redux'
 
 // Components
 import {
@@ -18,18 +18,18 @@ import {
 } from '@influxdata/clockface'
 
 // Actions
-import {createAuthorization} from 'src/authorizations/actions/thunks'
+import { createAuthorization } from 'src/authorizations/actions/thunks'
 
 // Utils
-import {allAccessPermissions} from 'src/authorizations/utils/permissions'
-import {getOrg} from 'src/organizations/selectors'
-import {getMe} from 'src/me/selectors'
+import { allAccessPermissions } from 'src/authorizations/utils/permissions'
+import { getOrg } from 'src/organizations/selectors'
+import { getMe } from 'src/me/selectors'
 
 // Decorators
-import {ErrorHandling} from 'src/shared/decorators/errors'
+import { ErrorHandling } from 'src/shared/decorators/errors'
 
 // Types
-import {AppState, Authorization} from 'src/types'
+import { AppState, Authorization } from 'src/types'
 
 interface OwnProps {
   onClose: () => void
@@ -44,10 +44,10 @@ type Props = OwnProps & ReduxProps
 
 @ErrorHandling
 class AllAccessTokenOverlay extends PureComponent<Props, State> {
-  public state = {description: ''}
+  public state = { description: '' }
 
   render() {
-    const {description} = this.state
+    const { description } = this.state
 
     return (
       <Overlay.Container maxWidth={500}>
@@ -101,7 +101,7 @@ class AllAccessTokenOverlay extends PureComponent<Props, State> {
   }
 
   private handleSave = () => {
-    const {orgID, meID, onCreateAuthorization} = this.props
+    const { orgID, meID, onCreateAuthorization } = this.props
 
     const token: Authorization = {
       orgID,
@@ -115,9 +115,9 @@ class AllAccessTokenOverlay extends PureComponent<Props, State> {
   }
 
   private handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const {value} = e.target
+    const { value } = e.target
 
-    this.setState({description: value})
+    this.setState({ description: value })
   }
 
   private handleDismiss = () => {

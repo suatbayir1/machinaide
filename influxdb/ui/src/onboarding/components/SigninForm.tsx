@@ -4,7 +4,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom'
 import { connect, ConnectedProps } from 'react-redux'
 import { get } from 'lodash'
 
-import { BACKEND } from "src/config";
+import { BACKEND, INFLUX_USER } from "src/config";
 
 // Components
 import { Form, Input, Button, Grid } from '@influxdata/clockface'
@@ -109,7 +109,7 @@ class SigninForm extends PureComponent<Props, State> {
 
 
   private handleTokenRequest = async (payload) => {
-    const url = `${BACKEND.API_URL}auth/login`;
+    const url = `${BACKEND.API_URL}auth/loginWithLDAP`;
 
     const request = fetch(url, {
       method: 'POST',
@@ -140,17 +140,13 @@ class SigninForm extends PureComponent<Props, State> {
     const { username, password } = this.state
 
     try {
-      const resp = await postSignin({ auth: { username, password } })
+      // const resp = await postSignin({ auth: { username: username, password: password } })
+      const resp = await postSignin({ auth: { username: INFLUX_USER["USERNAME"], password: INFLUX_USER["PASSWORD"] } })
+
       const tokenResp = await this.handleTokenRequest({ username, password });
 
       localStorage.setItem("userRole", tokenResp[0]["role"]);
       localStorage.setItem("token", tokenResp[0]["token"]);
-
-      // if (!tokenResp === undefined) {
-      //   console.log("tokenResp inside", tokenResp);
-      //   window.localStorage.setItem("userRole", tokenResp[0]["role"]);
-      //   window.localStorage.setItem("token", tokenResp[0]["token"]);
-      // }
 
       if (resp.status !== 204) {
         throw new Error(resp.data.message)
@@ -180,14 +176,11 @@ class SigninForm extends PureComponent<Props, State> {
   }
 
   private handleRedirect() {
-    console.log("handleRedirect");
-
     const { history, location } = this.props
     const params = new URLSearchParams(location.search)
     const returnTo = params.get('returnTo')
 
     if (returnTo) {
-      console.log("returnTO");
       history.replace(returnTo)
     } else {
       history.push('/')

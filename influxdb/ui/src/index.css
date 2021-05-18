@@ -1,7 +1,26 @@
 #failureTable td{
     padding: 8px;
-    border-left: '2px solid #31313d';
-    border-right: '2px solid #31313d';
+    border-left: 2px solid #31313d;
+    border-right: 2px solid #31313d
+}
+
+#failureTable tr{
+    /* color: #fff; */
+    border-bottom: 2px solid #434453;
+}
+
+#failureTable .not-first:hover{
+    color: #000 !important;
+    cursor: pointer;
+    background-color: #fff !important;
+}
+
+#failureTable td:first-child{
+    font-size: 15px;
+    text-align: center;
+    color: #fff;
+    border-left: 2px solid #31313d;
+    border-right: 2px solid #31313d
 }
 
 .common-button-width {

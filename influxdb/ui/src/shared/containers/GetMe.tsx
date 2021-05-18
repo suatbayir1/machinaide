@@ -1,20 +1,20 @@
 // Libraries
-import React, {PureComponent} from 'react'
-import {Switch, Route} from 'react-router-dom'
-import {connect, ConnectedProps} from 'react-redux'
+import React, { PureComponent } from 'react'
+import { Switch, Route } from 'react-router-dom'
+import { connect, ConnectedProps } from 'react-redux'
 
 // Components
-import {SpinnerContainer, TechnoSpinner} from '@influxdata/clockface'
+import { SpinnerContainer, TechnoSpinner } from '@influxdata/clockface'
 import GetFlags from 'src/shared/containers/GetFlags'
 
 // Types
-import {RemoteDataState} from 'src/types'
+import { RemoteDataState } from 'src/types'
 
 // Actions
-import {getMe} from 'src/shared/actions/me'
+import { getMe } from 'src/shared/actions/me'
 
 // Decorators
-import {ErrorHandling} from 'src/shared/decorators/errors'
+import { ErrorHandling } from 'src/shared/decorators/errors'
 
 interface State {
   loading: RemoteDataState
@@ -34,7 +34,7 @@ class GetMe extends PureComponent<Props, State> {
   }
 
   public render() {
-    const {loading} = this.state
+    const { loading } = this.state
 
     return (
       <SpinnerContainer loading={loading} spinnerComponent={<TechnoSpinner />}>
@@ -47,7 +47,7 @@ class GetMe extends PureComponent<Props, State> {
 
   public componentDidMount() {
     this.props.getMe()
-    this.setState({loading: RemoteDataState.Done})
+    this.setState({ loading: RemoteDataState.Done })
   }
 }
 

@@ -8,3 +8,8 @@ export const BACKEND = {
 export const INFLUX = {
     "CHRONOGRAF_URL": "http://localhost:8080/"
 }
+
+export const INFLUX_USER = {
+    "USERNAME": "machinaide",
+    "PASSWORD": "erste2020"
+}

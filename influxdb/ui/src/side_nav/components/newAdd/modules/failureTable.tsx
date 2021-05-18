@@ -547,7 +547,7 @@ class FailureTable extends PureComponent<Props, State> {
     private get optionsComponents(): JSX.Element {
         return (
             <React.Fragment>
-                <FlexBox margin={ComponentSize.Small} style={{ marginRight: '10%' }}>
+                <FlexBox margin={ComponentSize.Small}>
                     <p style={{ fontSize: '12px', fontWeight: 600 }}>Start Time Range</p>
                     <Popover
                         appearance={Appearance.Outline}
@@ -636,19 +636,18 @@ class FailureTable extends PureComponent<Props, State> {
         let backgroundColor;
 
         if (level === "acceptable") {
-            backgroundColor = "blue";
+            backgroundColor = "#0000b3";
         }
 
         if (level === "major") {
-            backgroundColor = "orange";
+            backgroundColor = "#e69500";
         }
 
         if (level === "critical") {
-            backgroundColor = "red";
+            backgroundColor = "#b30000";
         }
 
         return {
-            color: "#fff",
             backgroundColor: backgroundColor,
         }
     }
@@ -669,7 +668,7 @@ class FailureTable extends PureComponent<Props, State> {
         }
 
         return (
-            <Icon glyph={IconFont[iconType]} style={{ width: '40px', fontSize: '30px !important' }} />
+            <Icon glyph={IconFont[iconType]} />
         )
     }
 
@@ -727,12 +726,12 @@ class FailureTable extends PureComponent<Props, State> {
                                 <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/allFactories`}>
                                     Factories
                         </Link>
-                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/<factoryID>`}>
+                                {/* <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/<factoryID>`}>
                                     Machines
                         </Link>
                                 <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/<factoryID>/<machineID>`}>
                                     Components
-                        </Link>
+                        </Link> */}
                                 <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Failures</Typography>
                             </Breadcrumbs>
 
@@ -822,15 +821,19 @@ class FailureTable extends PureComponent<Props, State> {
                                                                 return (
                                                                     <tr
                                                                         key={recordId}
-                                                                        style={this.getBackgroundColor(row["severity"])}
+                                                                        className="not-first"
                                                                     >
-                                                                        <td style={{ fontSize: '15px' }}>{this.failureIcon(row["severity"])}</td>
+                                                                        <td
+                                                                            style={this.getBackgroundColor(row["severity"])}
+                                                                        >
+                                                                            {this.failureIcon(row["severity"])}
+                                                                        </td>
                                                                         <td>{row["sourceName"]}</td>
                                                                         <td>{row["severity"]}</td>
                                                                         <td>{row["startTime"]}</td>
                                                                         <td>{row["endTime"]}</td>
                                                                         <td>
-                                                                            <FlexBox margin={ComponentSize.Medium} >
+                                                                            <FlexBox margin={ComponentSize.Medium}>
                                                                                 {
                                                                                     ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
                                                                                     <Button

@@ -1747,6 +1747,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                                                         <Grid.Column widthSM={Columns.Three}>
                                                             <Dropdown
                                                                 testID="dropdown--gen-token"
+                                                                style={{ maxWidth: '150px', width: '150px' }}
                                                                 button={(active, onClick) => (
                                                                     <Dropdown.Button
                                                                         active={active}
@@ -1757,7 +1758,10 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                                                                     </Dropdown.Button>
                                                                 )}
                                                                 menu={onCollapse => (
-                                                                    <Dropdown.Menu onCollapse={onCollapse}>
+                                                                    <Dropdown.Menu
+                                                                        style={{ maxWidth: '150px' }}
+                                                                        onCollapse={onCollapse}
+                                                                    >
                                                                         {
                                                                             dtList
                                                                         }

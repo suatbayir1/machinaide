@@ -11,12 +11,71 @@ import config
 import time
 from werkzeug.security import check_password_hash
 from core.logger.MongoLogger import MongoLogger
+import ldap
 
 auth = Blueprint("auth", __name__)
 
 model = AuthenticationModel()
 logger = MongoLogger()
 
+@auth.route("/loginWithLDAP", methods = ["POST"])
+def loginWithLDAP():
+    if not request.json:
+        message = "username_password_cannot_be_empty"
+        logger.add_log("ERROR", request.remote_addr, '', request.method, request.url, "", message,  400)
+        return return_response(data = [], success = False, message = message, code = 400), 400
+
+    if not request.json["username"] or not request.json["password"]:
+        message = "username_password_cannot_be_empty"
+        logger.add_log("ERROR", request.remote_addr, '', request.method, request.url, request.json, message,  400)
+        return return_response(data = [], success = False, message = message, code = 400), 400
+
+    username = request.json["username"]
+    password = request.json["password"]
+
+    try:
+        con = ldap.initialize('ldap://localhost:10389', bytes_mode=False)
+        con.protocol_version = ldap.VERSION3
+        con.set_option(ldap.OPT_REFERRALS, 0)
+
+        result = con.search_s(f'dc=example,dc=com', ldap.SCOPE_SUBTREE, f"(uid={username})")   
+
+        if not result:
+            raise Exception("User not found")
+
+        for item in result:
+            dn = item[0]
+
+            for att in item[0].split(","):
+                splitted_att = att.split("=")
+                if splitted_att[0] == "ou":
+                    role = splitted_att[1]
+
+        con.simple_bind_s(dn, password)
+
+        token = jwt.encode({
+            "username": username,
+            "role": role,
+            "expiry_time": time.mktime((datetime.datetime.now() + datetime.timedelta(days=7)).timetuple())
+        }, config.authentication["SECRET_KEY"])
+
+        message = "user_login_successfully"
+        logger.add_log("INFO", request.remote_addr, username, request.method, request.url, request.json, message,  200)
+        return return_response(data = [{'token': token.decode("UTF-8"), 'role': role}], success = True, message = message, code = 200), 200
+
+    except ldap.INVALID_CREDENTIALS:
+        con.unbind()
+        message = "password_is_wrong"
+        logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
+        return return_response(data = [], success = False, message = message, code = 400), 400
+    except ldap.SERVER_DOWN:
+        message = "LDAP Server is not running"
+        logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
+        return return_response(data = [], success = False, message = message, code = 400), 400
+    except Exception as error:
+        message = error.args[0]
+        logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
+        return return_response(data = [], success = False, message = message, code = 400), 400
 
 @auth.route("/login", methods = ["POST"])
 def login():
