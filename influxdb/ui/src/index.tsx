@@ -1,6 +1,9 @@
 import 'babel-polyfill'
 import 'abortcontroller-polyfill/dist/polyfill-patch-fetch'
 
+// Dotenv
+require("dotenv").config()
+
 // Libraries
 import React, { PureComponent } from 'react'
 import { render } from 'react-dom'

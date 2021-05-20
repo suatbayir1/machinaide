@@ -9,7 +9,5 @@ export const INFLUX = {
     "CHRONOGRAF_URL": "http://localhost:8080/"
 }
 
-export const INFLUX_USER = {
-    "USERNAME": "machinaide",
-    "PASSWORD": "erste2020"
-}
+process.env.INFLUX_USERNAME = "machinaide";
+process.env.INFLUX_PASSWORD = "erste2020";

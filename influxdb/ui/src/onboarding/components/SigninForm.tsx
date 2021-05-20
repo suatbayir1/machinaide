@@ -4,7 +4,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom'
 import { connect, ConnectedProps } from 'react-redux'
 import { get } from 'lodash'
 
-import { BACKEND, INFLUX_USER } from "src/config";
+import { BACKEND } from "src/config";
 
 // Components
 import { Form, Input, Button, Grid } from '@influxdata/clockface'
@@ -14,6 +14,9 @@ import { postSignin } from 'src/client'
 
 // Actions
 import { notify as notifyAction } from 'src/shared/actions/notifications'
+
+// Services
+import LoginService from 'src/onboarding/services/LoginService';
 
 // Constants
 import * as copy from 'src/shared/copy/notifications'
@@ -107,43 +110,15 @@ class SigninForm extends PureComponent<Props, State> {
     this.setState({ password })
   }
 
-
-  private handleTokenRequest = async (payload) => {
-    const url = `${BACKEND.API_URL}auth/loginWithLDAP`;
-
-    const request = fetch(url, {
-      method: 'POST',
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE'
-      },
-      body: JSON.stringify(payload),
-    })
-
-    try {
-      const response = await request;
-      const res = await response.json();
-
-      if (res.data.success !== true) return;
-      const result = JSON.parse(res.data.data);
-      return result;
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
   private handleSignIn = async (): Promise<void> => {
     const { notify } = this.props
     const { username, password } = this.state
+    const { INFLUX_USERNAME, INFLUX_PASSWORD } = process.env;
 
     try {
       // const resp = await postSignin({ auth: { username: username, password: password } })
-      const resp = await postSignin({ auth: { username: INFLUX_USER["USERNAME"], password: INFLUX_USER["PASSWORD"] } })
-
-      const tokenResp = await this.handleTokenRequest({ username, password });
+      const resp = await postSignin({ auth: { username: INFLUX_USERNAME, password: INFLUX_PASSWORD } })
+      const tokenResp = await LoginService.loginWithLDAP({ username, password });
 
       localStorage.setItem("userRole", tokenResp[0]["role"]);
       localStorage.setItem("token", tokenResp[0]["token"]);
@@ -153,7 +128,6 @@ class SigninForm extends PureComponent<Props, State> {
       }
 
       this.handleRedirect();
-
     } catch (error) {
       const message = get(error, 'response.data.msg', '')
       const status = get(error, 'response.status', '')
