@@ -15,62 +15,96 @@ class FactoryModel():
         return json_data
 
     def get_factories(self):
-        data = self.convert_data_to_json()
-        factories = []
+        try:
+            data = self.convert_data_to_json()
+            return data
+        except:
+            return False
 
-        for factory in data:
-            currentFactory = {
-                "id": factory["id"],
-                "factoryName": factory["factoryName"],
-                "zone": factory["zone"],
-                "description": factory["description"],
-                "name": factory["name"],
-                "machineCount": len(factory["machines"])
-            }
-            
-            factories.append(currentFactory)
+    def get_production_lines(self, payload):
+        try:
+            data = self.convert_data_to_json()
+            productionLines = []
 
-        return factories
+            for factory in data:
+                if factory["id"] == payload["factoryId"]:   
+                    for productionLine in factory["productionLines"]:
+                        currentProductionLine = {
+                            "id": productionLine["@id"],
+                            "plName": productionLine["displayName"],
+                            "description": productionLine["description"],
+                            "name": productionLine["name"],
+                            "machineCount": len(productionLine["machines"])
+                        }
+
+                        productionLines.append(currentProductionLine)
+
+            return productionLines
+        except:
+            return False
 
     def get_machines(self, payload):
-        data = self.convert_data_to_json()
-        machines = []
+        try:
+            data = self.convert_data_to_json()
+            machines = []
 
-        for factory in data:
-            if factory["id"] == payload["factoryId"]:   
-                for machine in factory["machines"]:
-                    currentMachine = {
-                        "id": machine["@id"],
-                        "machineName": machine["displayName"],
-                        "description": machine["description"],
-                        "name": machine["name"],
-                        "componentCount": len(machine["contents"])
-                    }
+            for factory in data:
+                if factory["id"] == payload["factoryId"]:   
+                    for pl in factory["productionLines"]:
+                        if payload["plId"] == "all":
+                            for machine in pl["machines"]:
+                                currentMachine = {
+                                    "id": machine["@id"],
+                                    "machineName": machine["displayName"],
+                                    "description": machine["description"],
+                                    "name": machine["name"],
+                                    "componentCount": len([comp for comp in machine["contents"] if comp["@type"] == "Component"])
+                                }
 
-                    machines.append(currentMachine)
+                                machines.append(currentMachine)
+                        else:
+                            if pl["@id"] == payload["plId"]:
+                                for machine in pl["machines"]:
+                                    currentMachine = {
+                                        "id": machine["@id"],
+                                        "machineName": machine["displayName"],
+                                        "description": machine["description"],
+                                        "name": machine["name"],
+                                        "componentCount": len([comp for comp in machine["contents"] if comp["@type"] == "Component"])
+                                    }
 
-        return machines
+                                    machines.append(currentMachine)
+
+            return machines
+        except:
+            return False
 
     def get_components(self, payload):
-        data = self.convert_data_to_json()
-        components = []
+        try:
+            data = self.convert_data_to_json()
+            components = []
 
-        for factory in data:
-            if factory["id"] == payload["factoryId"]:
-                for machine in factory["machines"]:
-                    if machine["@id"] == payload["machineId"]:
-                        for component in machine["contents"]:
-                            currentComponent = {
-                                "id": component["@id"],
-                                "componentName": component["displayName"],
-                                "description": component["description"],
-                                "name": component["name"],
-                                "sensorCount": len(component["sensors"])
-                            }
-                            
-                            components.append(currentComponent)
-        
-        return components
+            for factory in data:
+                if factory["id"] == payload["factoryId"]:
+                    for pl in factory["productionLines"]:
+                        # if pl["@id"] == payload["plId"]:
+                        for machine in pl["machines"]:
+                            if machine["@id"] == payload["machineId"]:
+                                for component in machine["contents"]:
+                                    if component["@type"] == "Component":
+                                        currentComponent = {
+                                            "id": component["@id"],
+                                            "componentName": component["displayName"],
+                                            "description": component["description"],
+                                            "name": component["name"],
+                                            "sensorCount": len(component["sensors"])
+                                        }
+                                        
+                                        components.append(currentComponent)
+            
+            return components
+        except:
+            return False
 
     def get_sensors(self, payload):
         data = self.convert_data_to_json()
@@ -78,23 +112,25 @@ class FactoryModel():
 
         for factory in data:
             if factory["id"] == payload["factoryId"]:
-                for machine in factory["machines"]:
-                    if machine["@id"] == payload["machineId"]:
-                        for component in machine["contents"]:
-                            if component["@id"] == payload["componentId"]:
-                                for sensor in component["sensors"]:
-                                    currentSensor = {
-                                        "id": sensor["@id"],
-                                        "sensorType": sensor["@type"][1],
-                                        "unit": sensor["unit"],
-                                        "type": sensor["type"],
-                                        "displayName": sensor["displayName"],
-                                        "name": sensor["name"],
-                                        "description": sensor["description"],
-                                        "sensorStatus": sensor["status"] if "status" in sensor else "unknown",
-                                    }
+                for pl in factory["productionLines"]:
+                    # if pl["@id"] == payload["plId"]:
+                    for machine in pl["machines"]:
+                        if machine["@id"] == payload["machineId"]:
+                            for component in machine["contents"]:
+                                if component["@type"] == "Component" and component["@id"] == payload["componentId"]:
+                                    for sensor in component["sensors"]:
+                                        currentSensor = {
+                                            "id": sensor["@id"],
+                                            "sensorType": sensor["@type"][1],
+                                            "unit": sensor["unit"],
+                                            "type": sensor["type"],
+                                            "displayName": sensor["displayName"],
+                                            "name": sensor["name"],
+                                            "description": sensor["description"],
+                                            "sensorStatus": sensor["status"] if "status" in sensor else "unknown",
+                                        }
 
-                                    sensors.append(currentSensor)
+                                        sensors.append(currentSensor)
 
         return sensors
 
@@ -193,4 +229,34 @@ class FactoryModel():
 
     def is_material_exists(self, payload):
         collection = "materials"
+        return cursor_to_json(self.db.find(collection, payload))
+
+    def create_dashboard(self, payload):
+        try:
+            collection = "dashboards"
+            return self.db.insert_one(collection, payload)
+        except:
+            return False
+
+    def delete_dashboard(self, payload):
+        collection = "dashboards"
+
+        try:
+            where = {
+                "dashboardID": payload["id"]
+            }
+
+            return self.db.delete_one(collection, where)
+        except:
+            return False
+
+    def get_dashboards(self):
+        try:
+            collection = "dashboards"
+            return self.db.find(collection)
+        except:
+            return False
+
+    def is_dashboard_exists(self, payload):
+        collection = "dashboards"
         return cursor_to_json(self.db.find(collection, payload))

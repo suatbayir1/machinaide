@@ -1,11 +1,11 @@
 // Libraries
-import React, {PureComponent} from 'react'
-import {connect, ConnectedProps} from 'react-redux'
-import {withRouter, RouteComponentProps} from 'react-router-dom'
+import React, { PureComponent } from 'react'
+import { connect, ConnectedProps } from 'react-redux'
+import { withRouter, RouteComponentProps } from 'react-router-dom'
 
 // Components
-import {IconFont, ComponentColor, ResourceCard} from '@influxdata/clockface'
-import {Context} from 'src/clockface'
+import { IconFont, ComponentColor, ResourceCard } from '@influxdata/clockface'
+import { Context } from 'src/clockface'
 import InlineLabels from 'src/shared/components/inlineLabels/InlineLabels'
 
 // Actions
@@ -16,16 +16,19 @@ import {
   addDashboardLabel,
   removeDashboardLabel,
 } from 'src/dashboards/actions/thunks'
-import {resetViews} from 'src/views/actions/creators'
+import { resetViews } from 'src/views/actions/creators'
 
 // Types
-import {Label} from 'src/types'
+import { Label } from 'src/types'
 
 // Constants
-import {DEFAULT_DASHBOARD_NAME} from 'src/dashboards/constants'
+import { DEFAULT_DASHBOARD_NAME } from 'src/dashboards/constants'
 
 // Utilities
-import {relativeTimestampFormatter} from 'src/shared/utils/relativeTimestampFormatter'
+import { relativeTimestampFormatter } from 'src/shared/utils/relativeTimestampFormatter'
+
+// Services
+import DashboardService from 'src/shared/services/DashboardService';
 
 interface OwnProps {
   id: string
@@ -37,7 +40,7 @@ interface OwnProps {
 }
 
 type ReduxProps = ConnectedProps<typeof connector>
-type Props = OwnProps & ReduxProps & RouteComponentProps<{orgID: string}>
+type Props = OwnProps & ReduxProps & RouteComponentProps<{ orgID: string }>
 
 class DashboardCard extends PureComponent<Props> {
   public render() {
@@ -84,13 +87,13 @@ class DashboardCard extends PureComponent<Props> {
   }
 
   private handleUpdateDashboard = (name: string) => {
-    const {id, onUpdateDashboard} = this.props
+    const { id, onUpdateDashboard } = this.props
 
-    onUpdateDashboard(id, {name})
+    onUpdateDashboard(id, { name })
   }
 
   private handleCloneDashboard = () => {
-    const {id, name, onCloneDashboard} = this.props
+    const { id, name, onCloneDashboard } = this.props
 
     onCloneDashboard(id, name)
   }
@@ -131,7 +134,8 @@ class DashboardCard extends PureComponent<Props> {
   }
 
   private handleDeleteDashboard = () => {
-    const {id, name, onDeleteDashboard} = this.props
+    const { id, name, onDeleteDashboard } = this.props
+    DashboardService.deleteDTDashboard({ id });
     onDeleteDashboard(id, name)
   }
 
@@ -141,7 +145,7 @@ class DashboardCard extends PureComponent<Props> {
       history,
       id,
       match: {
-        params: {orgID},
+        params: { orgID },
       },
     } = this.props
 
@@ -155,19 +159,19 @@ class DashboardCard extends PureComponent<Props> {
   }
 
   private handleUpdateDescription = (description: string) => {
-    const {id, onUpdateDashboard} = this.props
+    const { id, onUpdateDashboard } = this.props
 
-    onUpdateDashboard(id, {description})
+    onUpdateDashboard(id, { description })
   }
 
   private handleAddLabel = (label: Label) => {
-    const {onAddDashboardLabel, id} = this.props
+    const { onAddDashboardLabel, id } = this.props
 
     onAddDashboardLabel(id, label)
   }
 
   private handleRemoveLabel = (label: Label) => {
-    const {onRemoveDashboardLabel, id} = this.props
+    const { onRemoveDashboardLabel, id } = this.props
 
     onRemoveDashboardLabel(id, label)
   }
@@ -176,7 +180,7 @@ class DashboardCard extends PureComponent<Props> {
     const {
       history,
       match: {
-        params: {orgID},
+        params: { orgID },
       },
       id,
     } = this.props

@@ -43,7 +43,8 @@ class MachinesPanel extends PureComponent<Props, State> {
 
     getAllMachines = async () => {
         const payload = {
-            "factoryId": this.props.match.params.FID
+            "factoryId": this.props["match"].params.FID,
+            "plId": this.props["match"].params.PLID,
         };
 
         const machines = await FactoryService.getMachines(payload);
@@ -90,8 +91,11 @@ class MachinesPanel extends PureComponent<Props, State> {
                                 <Link color="inherit" to="/">
                                     <HomeIcon style={{ marginTop: '4px' }} />
                                 </Link>
-                                <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/allFactories`}>
+                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/allFactories`}>
                                     Factories
+                                </Link>
+                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/production-line/${this.props["match"].params.FID}/${this.props["match"].params.PLID}`}>
+                                    Production Lines
                                 </Link>
                                 <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Machines</Typography>
                             </Breadcrumbs>
@@ -144,68 +148,68 @@ class MachinesPanel extends PureComponent<Props, State> {
                                                                                             style={{ listStyleType: "none", marginTop: '10%', paddingLeft: '0px', fontSize: '0.800rem' }}
                                                                                         >
                                                                                             <li className="links" style={{ marginBottom: '0px' }}>
-                                                                                                <Link to={`/orgs/${this.props.match.params["orgID"]}/dashboards-list`}>
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/dashboard-router/${machine["id"]}`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                                                                                                         <div><img src="../../../assets/icons/dashboards-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
                                                                                                     </div>
                                                                                                     <span>
                                                                                                         Show Dashboards
-                                                                                </span>
+                                                                                                    </span>
                                                                                                 </Link>
                                                                                             </li>
                                                                                             <li className="links" style={{ marginBottom: '0px' }}>
-                                                                                                <Link to={`/orgs/${this.props.match.params["orgID"]}/dt`}>
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/dt`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                                                                                                         <div><img src="../../../assets/icons/tree-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
                                                                                                     </div>
-                                                                                        Show Sensor Tree
-                                                                                    </Link>
+                                                                                                    Show Sensor Tree
+                                                                                                </Link>
                                                                                             </li>
                                                                                             <li className="links" style={{ marginBottom: '0px' }}>
-                                                                                                <Link to={`/orgs/${this.props.match.params["orgID"]}/machines/${this.props.match.params.FID}/${machine["id"]}`}>
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/components/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${machine["id"]}`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                                                                                                         <div><img src="../../../assets/icons/component-list-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
                                                                                                     </div>
-                                                                                        Show Components
-                                                                                        <span style={{ color: "#bef0ff" }}>
+                                                                                                    Show Components
+                                                                                                    <span style={{ color: "#bef0ff" }}>
                                                                                                         ({machine["componentCount"]})
-                                                                                        </span>
+                                                                                                    </span>
                                                                                                 </Link>
                                                                                             </li>
                                                                                             <li className="links" style={{ marginBottom: '0px' }}>
-                                                                                                <Link to={`/orgs/${this.props.match.params["orgID"]}/alerting`}>
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/alerting`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                                                                                                         <div><img src="../../../assets/icons/alerts-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
                                                                                                     </div>
-                                                                                        Alerts
-                                                                                        <span style={{ color: "#bef0ff" }}>
+                                                                                                    Alerts
+                                                                                                    <span style={{ color: "#bef0ff" }}>
                                                                                                         (d/w/m) (0:0:0)
-                                                                                        </span>
+                                                                                                    </span>
                                                                                                 </Link>
                                                                                             </li>
                                                                                             <li className="links" style={{ marginBottom: '0px' }}>
-                                                                                                <Link to={`/orgs/${this.props.match.params["orgID"]}/machines/${this.props.match.params.FID}/${machine["id"]}/actions`}>
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/machines/${this.props["match"].params.FID}/${machine["id"]}/actions`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                                                                                                         <div><img src="../../../assets/icons/machine-action-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
                                                                                                     </div>
-                                                                                        Machine Actions
-                                                                                    </Link>
+                                                                                                    Machine Actions
+                                                                                                </Link>
                                                                                             </li>
                                                                                             <li className="links" style={{ marginBottom: '0px' }}>
-                                                                                                <Link to={`/orgs/${this.props.match.params["orgID"]}/predictions/<sensorID>`}>
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/predictions/<sensorID>`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                                                                                                         <div><img src="../../../assets/icons/prediction-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
                                                                                                     </div>
-                                                                                        Show Predictions
-                                                                                    </Link>
+                                                                                                    Show Predictions
+                                                                                                </Link>
                                                                                             </li>
                                                                                             <li className="links" style={{ marginBottom: '0px' }}>
-                                                                                                <Link to={`/orgs/${this.props.match.params["orgID"]}/failures/${this.props.match.params.FID}/${machine["id"]}`}>
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/failures/${this.props["match"].params.FID}/${machine["id"]}`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                                                                                                         <div><img src="../../../assets/icons/failure-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
                                                                                                     </div>
-                                                                                        Show Failures
-                                                                                    </Link>
+                                                                                                    Show Failures
+                                                                                                </Link>
                                                                                             </li>
                                                                                         </ul>
                                                                                     </FlexBox>

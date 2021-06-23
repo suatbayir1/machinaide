@@ -32,6 +32,7 @@ import { disablePresentationMode } from 'src/shared/actions/app'
 import 'src/style/chronograf.scss'
 import '@influxdata/clockface/dist/index.css'
 import 'src/index.css'
+import 'react-multi-email/style.css';
 
 const rootNode = getRootNode()
 

@@ -70,7 +70,13 @@ def add(token):
 @dt.route("/delete", methods = ["POST", "DELETE"])
 @token_required(roles = ["admin"])
 def delete(token):
-    if request.json["type"] == "Machine":
+    print(request.json)
+    if request.json["type"] == "ProductionLine":
+        result = model.delete_production_line(request.json)
+        message = "production_line_deleted_successfully"
+        logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, request.json, message, 200)
+        return return_response(success = True, message = message), 200
+    elif request.json["type"] == "Machine":
         result = model.delete_machine(request.json)
         message = "machine_deleted_successfully"
         logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, request.json, message,  200)
@@ -151,6 +157,49 @@ def get_file_info(token):
     message = "Get_Files_Successfully"
     logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
     return return_response(data = data, success = True, message = 'Get_Files_Successfully'), 200
+
+@dt.route("/addRelationship", methods = ["POST"])
+@token_required(roles = ["admin"])
+def add_relationship(token):
+    try:
+        if request.method == "POST":
+            result = model.add_relationship(request.json)
+            
+            if not result:
+                message = "Could not add relationship"
+                logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, request.json, message,  400)
+                return return_response(success = False, message = message, code = 400), 400
+            else:
+                message = "Added relationship successfully"
+                logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, request.json, message,  200)
+                return return_response(success = True, message = message, code = 200), 200
+    except:
+        return return_response(success = False, message = "An error occurred while adding a relationship"), 400
+
+@dt.route("/removeRelationship", methods = ["POST", "DELETE"])
+@token_required(roles = ["admin", "editor"])
+def remove_relationship(token):
+    try:
+        if not request.data:
+            message = "Request data cannot be empty"
+            logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, "", message,  400)
+            return return_response(success = False, message = message), 400
+        
+        result = model.remove_relationship(request.json)
+
+        print(result)
+
+        if not result:
+            message = "Could not delete data flow setting"
+            logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, request.json, message,  400)
+            return return_response(success = False, message = message, code = 400), 400
+        else:
+            message = "Data flow setting deleted successfully"
+            logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+            return return_response(success = True, message = message, code = 200), 200
+    except:
+        return return_response(success = False, message = message), 400
+
 
 
 @dt.route("updateAll", methods = ["POST"])

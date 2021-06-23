@@ -35,7 +35,9 @@ class FactorySceneOverlay extends PureComponent<Props, State> {
 
     componentWillUnmount() {
         window.addEventListener('resize', () => {
-            renderer.setSize(document.querySelector("#visualizeGraph").clientWidth - 40, 700);
+            if (document.querySelector("#visualizeGraph") !== null) {
+                renderer.setSize(document.querySelector("#visualizeGraph").clientWidth - 40, 700);
+            }
         });
     }
 
@@ -119,7 +121,9 @@ class FactorySceneOverlay extends PureComponent<Props, State> {
         renderer.render(scene, camera);
 
         window.addEventListener('resize', () => {
-            renderer.setSize(document.querySelector("#visualizeGraph").clientWidth - 40, 700);
+            if (document.querySelector("#visualizeGraph") !== null) {
+                renderer.setSize(document.querySelector("#visualizeGraph").clientWidth - 40, 700);
+            }
         });
     }
 

@@ -1,26 +1,9 @@
 import React, { PureComponent } from 'react'
 import {
-    Form,
-    Input,
-    Button,
-    ButtonType,
-    ComponentColor,
-    Overlay,
-    IconFont,
-    Grid,
-    ComponentStatus,
-    Columns,
-    SelectDropdown,
-    TextArea,
-    DapperScrollbars,
-    ComponentSize,
-    Table,
-    BorderType,
-    List,
-    FlexDirection,
-    Gradients,
-    FlexBox,
-    InputType,
+    Form, Input, Button, ButtonType, ComponentColor, Overlay,
+    IconFont, Grid, Columns, SelectDropdown, TextArea,
+    DapperScrollbars, ComponentSize, Table, BorderType, List,
+    FlexDirection, Gradients, FlexBox, InputType,
 } from '@influxdata/clockface'
 import { BACKEND } from "src/config";
 import TabbedPageTabs from 'src/shared/tabbedPage/TabbedPageTabs'
@@ -36,10 +19,11 @@ interface Props {
 }
 
 interface State {
+    productionLineList: string[]
     machineList: string[]
     componentList: string[]
     activeTab: string
-    mFactoryName: string
+    productionLine: string
     mMachineName: string
     mComponentName: string
     mComponentDescription: string
@@ -73,10 +57,11 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
         super(props);
 
         this.state = {
+            productionLineList: [],
             machineList: [],
             componentList: [],
             activeTab: "machine",
-            mFactoryName: "",
+            productionLine: "",
             mMachineName: "",
             mComponentName: "",
             mComponentDescription: "",
@@ -144,7 +129,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
     clearForm = () => {
         this.setState({
             activeTab: "machine",
-            mFactoryName: "",
+            productionLine: "",
             mMachineName: "",
             mComponentName: "",
             mComponentDescription: "",
@@ -169,11 +154,12 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
         let generalInfo = await this.getGeneralInfo();
 
         this.setState({
+            productionLineList: generalInfo.productionLineList,
             machineList: generalInfo.machineList,
             componentList: generalInfo.componentList,
-            mFactoryName: generalInfo.factoryID,
             cParent: generalInfo.machineList[0],
             sParent: generalInfo.componentList[0],
+            productionLine: generalInfo.productionLineList[0],
         })
     }
 
@@ -320,11 +306,16 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                 <Grid.Row>
                     <Grid.Column widthSM={Columns.Six}>
                         <Form.Element label="Factory Name">
-                            <Input
+                            <SelectDropdown
+                                options={this.state.productionLineList}
+                                selectedOption={this.state.productionLine}
+                                onSelect={(e) => this.setState({ productionLine: e })}
+                            />
+                            {/* <Input
                                 name="factoryName"
                                 value={this.state.mFactoryName}
                                 status={ComponentStatus.Disabled}
-                            />
+                            /> */}
                         </Form.Element>
                     </Grid.Column>
                     <Grid.Column widthSM={Columns.Six}>
@@ -841,7 +832,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                 payload = {
                     "@id": this.state.mMachineName,
                     "type": "Machine",
-                    "parent": this.state.mFactoryName,
+                    "parent": this.state.productionLine,
                     "@type": "Interface",
                     "displayName": this.state.mMachineName,
                     "name": this.state.mMachineName,

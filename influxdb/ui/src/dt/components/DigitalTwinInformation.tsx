@@ -66,6 +66,7 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
     async componentDidUpdate(prevProps) {
         if (prevProps.selectedGraphNode !== this.props.selectedGraphNode) {
             await this.handleChangeSelectedGraphNode(this.props.selectedGraphNode);
+            console.log(this.props.selectedGraphNode);
         }
     }
 
@@ -107,6 +108,74 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                     description="Factory Name"
                                     color={InfluxColors.Ocean}
                                     id={selectedGraphNode["factoryName"]}
+                                />
+                            </Form.Element>
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column widthXS={Columns.Twelve}>
+                            <Form.Element label={`Production Line List (${selectedGraphNode["productionLines"].length})`}>
+                                <DapperScrollbars
+                                    autoHide={false}
+                                    autoSizeHeight={true}
+                                    style={{ maxHeight: '150px' }}
+                                    className="data-loading--scroll-content"
+                                >
+                                    {
+                                        selectedGraphNode["productionLines"].map(pl => {
+                                            return (
+                                                <List.Item
+                                                    key={pl["@id"]}
+                                                    value={pl["displayName"]}
+                                                    title="Production Line Name"
+                                                    gradient={Gradients.GundamPilot}
+                                                    wrapText={true}
+                                                >
+                                                    <List.Indicator type="dot" />
+                                                    <div className="selectors--item-value selectors--item__measurement">
+                                                        {pl["displayName"]}
+                                                    </div>
+                                                </List.Item>
+                                            )
+                                        })
+                                    }
+                                </DapperScrollbars>
+                            </Form.Element>
+                        </Grid.Column>
+                    </Grid.Row>
+                </Grid>
+            </Form>
+        ]
+    }
+
+    private get productionLineElements(): JSX.Element[] {
+        const { selectedGraphNode } = this.props;
+
+        return [
+            <Form key={selectedGraphNode["id"]}>
+                <Grid>
+                    <Grid.Row>
+                        <Grid.Column widthXS={Columns.Twelve}>
+                            <Form.Element label="Type">
+                                <Label
+                                    size={ComponentSize.Small}
+                                    name={selectedGraphNode["type"]}
+                                    description="Node type"
+                                    color={InfluxColors.Ocean}
+                                    id={selectedGraphNode["type"]}
+                                />
+                            </Form.Element>
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column widthXS={Columns.Twelve}>
+                            <Form.Element label="Production Line">
+                                <Label
+                                    size={ComponentSize.Small}
+                                    name={selectedGraphNode["displayName"]}
+                                    description="Production Line Name"
+                                    color={InfluxColors.Ocean}
+                                    id={selectedGraphNode["displayName"]}
                                 />
                             </Form.Element>
                         </Grid.Column>
@@ -194,7 +263,7 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                     </Grid.Row>
                     <Grid.Row>
                         <Grid.Column widthXS={Columns.Twelve}>
-                            <Form.Element label={`Component List (${selectedGraphNode["contents"].length})`}>
+                            <Form.Element label={`Component List (${this.getComponentCount(selectedGraphNode["contents"])})`}>
                                 <DapperScrollbars
                                     autoHide={false}
                                     autoSizeHeight={true}
@@ -202,10 +271,10 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                     className="data-loading--scroll-content"
                                 >
                                     {
-                                        selectedGraphNode["contents"].map(component => {
+                                        selectedGraphNode["contents"].map((component, idx) => {
                                             return (
                                                 <List.Item
-                                                    key={component.displayName}
+                                                    key={idx}
                                                     value={component.displayName}
                                                     title="Component Name"
                                                     gradient={Gradients.GundamPilot}
@@ -296,10 +365,10 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                     className="data-loading--scroll-content"
                                 >
                                     {
-                                        selectedGraphNode["sensors"].map(sensor => {
+                                        selectedGraphNode["sensors"].map((sensor, idx) => {
                                             return (
                                                 <List.Item
-                                                    key={sensor.displayName}
+                                                    key={idx}
                                                     value={sensor.displayName}
                                                     title="Sensor Name"
                                                     gradient={Gradients.GundamPilot}
@@ -443,6 +512,14 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                 </Grid>
             </Form>
         ]
+    }
+
+    getComponentCount = (content) => {
+        let components = content.filter(c => c?.["@type"] === "Component");
+
+        console.log(content.length);
+
+        return components.length;
     }
 
     handleDeleteNode = async () => {
@@ -596,6 +673,10 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                     <Panel.Body size={ComponentSize.ExtraSmall}>
                         {
                             this.props.selectedGraphNode["type"] === "Factory" && this.factoryElements
+                        }
+
+                        {
+                            this.props.selectedGraphNode["type"] === "ProductionLine" && this.productionLineElements
                         }
 
                         {

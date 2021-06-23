@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link href="invoice.css" rel="stylesheet">
+    <title>Invoice</title>
+    <meta name="description" content="Invoice demo sample">
+    <meta name="author" content="Kozea">
+</head>
+
+<body>
+    <article id="cover">
+        <h1>{{report_title}}</h1>
+        <address>
+            Ermetal Otomotiv A.Ş.
+            Dumlupınar / Osmangazi, Bursa
+            Bursa, Turkey
+        </address>
+        <!-- <address>
+        community@kozea.fr
+        +33 4 78 84 19 28
+        https://community.kozea.fr
+      </address> -->
+    </article>
+    <header>
+        <div>
+            <img src="machinaide.png" id="logo">
+        </div>
+        <div>
+            <img src="ermetal.png" id="logocimtas">
+        </div>
+    </header>
+
+    <aside>
+        <address id="from">
+            Factory: Ermetal Otomotiv A.Ş.
+            Machine-Name: {{machine}}
+            Component-Name: {{component}}
+        </address>
+
+        <address id="to">
+            Author: {{author}}
+            Date: {{date}}
+        </address>
+    </aside>
+
+    <h2>Description</h2>
+    <p>{{description}}</p>
+
+    <h2>Summary of Data</h2>
+    <address>
+        Total Number of Alerts: 7
+    </address>
+    <address>
+        Time interval the listed alerts encompass: 17-02-2021 => 05-03-2021
+    </address>
+    <address>
+        Total number of recorded failures: 1
+    </address>
+    <address>
+        Time interval the listed failures encompass: 23/02/2021 => 23/03/2021
+    </address>
+    <address>
+        Total number of maintenance records: 64
+    </address>
+    <address>
+        Time interval the listed maintenance reports encompass: 23/02/2021 => 23/03/2021
+    </address>
+
+    <br />
+    <h2>Alerts Pie Chart Distribution</h2>
+    <!-- {{alerts_pie_chart}} -->
+
+    <h2>Alerts</h2>
+    <div class="container">
+        {{alerts_table}}
+    </div>
+
+    <br />
+    <h2>Component Failures</h2>
+    <div class="container">
+        {{compFail_table}}
+    </div>
+
+    <br />
+    <h2>Maintenance Reports Pie Chart Distribution</h2>
+    {{maint_pie_chart}}
+    <h2>Machine Maintenance Records</h2>
+    <div class="container">
+        {{maintenance_table}}
+    </div>
+
+    <!-- <br/> -->
+    <h2>Component SnapShots</h2>
+    <!-- {%for snapshot in imgList %}
+    {{snapshot}}
+    {%endfor%} -->
+    <!-- <img src="fig1.jpeg" id="graph"> -->
+</body>
+
+</html>

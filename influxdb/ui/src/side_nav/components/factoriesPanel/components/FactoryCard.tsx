@@ -18,16 +18,16 @@ interface State {
     shortcutCards: object[]
 }
 
-class FactoryCard extends PureComponent<Props, State> {
+class ProductionLineCard extends PureComponent<Props, State> {
     constructor(props) {
         super(props);
         this.state = {
             shortcutCards: [
-                { link: `/orgs/${this.props.orgID}/dashboards-list`, icon: '../../../assets/icons/dashboards-icon.png', name: 'Show Dashboards' },
-                { link: `/orgs/${this.props.orgID}/dt`, icon: '../../../assets/icons/tree-icon.png', name: 'Show Sensor Tree' },
-                { link: `/orgs/${this.props.orgID}/machines/${this.props.factory["id"]}`, icon: '../../../assets/icons/machine-list-icon.png', name: 'Show Machines' },
-                { link: `/orgs/${this.props.orgID}/alerting`, icon: '../../../assets/icons/alerts-icon.png', name: 'Show Alerts' },
-                { link: `/orgs/${this.props.orgID}/failures/${this.props.factory["id"]}`, icon: '../../../assets/icons/failure-icon.png', name: 'Show Failures' },
+                { link: `/orgs/${this.props.orgID}/dashboard-router/${this.props.factory["factoryId"]}`, icon: '../../../assets/icons/dashboards-icon.png', name: 'Show Dashboards', width: '80px', height: '80px', marginTop: '0px' },
+                { link: `/orgs/${this.props.orgID}/dt`, icon: '../../../assets/icons/tree-icon.png', name: 'Show Sensor Tree', width: '60px', height: '60px', marginTop: '20px' },
+                { link: `/orgs/${this.props.orgID}/machines/${this.props.factory["factoryId"]}/all`, icon: '../../../assets/icons/machine-list-icon.png', name: `Show Machines`, width: '60px', height: '60px', marginTop: '20px' },
+                { link: `/orgs/${this.props.orgID}/alerting`, icon: '../../../assets/icons/alerts-icon.png', name: 'Show Alerts', width: '60px', height: '60px', marginTop: '20px' },
+                { link: `/orgs/${this.props.orgID}/failures/${this.props.factory["factoryId"]}`, icon: '../../../assets/icons/failure-icon.png', name: 'Show Failures', width: '60px', height: '60px', marginTop: '20px' },
             ]
         };
     }
@@ -75,10 +75,13 @@ class FactoryCard extends PureComponent<Props, State> {
                                 style={{ paddingRight: '15px', paddingLeft: '15px' }}
                                 id={"shortcutCard"}
                             >
-                                <Link to={shortcut["link"]} className={"routingCard"} style={{ marginBottom: '40px', cursor: 'pointer' }}>
+                                <Link
+                                    to={shortcut["link"]}
+                                    className={"routingCard"}
+                                    style={{ marginBottom: '40px', cursor: 'pointer' }}
+                                >
                                     <div style={{ background: 'rgba(255, 255, 255, 0.1)', textAlign: 'center' }}>
-                                        <img src={shortcut["icon"]} width='60px' height='60px' style={{ marginTop: '20px' }} />
-                                        {/* <h4 style={{ color: 'white' }}>6</h4> */}
+                                        <img src={shortcut["icon"]} width={shortcut["width"]} height={shortcut["height"]} style={{ marginTop: shortcut["marginTop"] }} />
                                         <h4 style={{ paddingBottom: '20px', color: 'white' }}>{shortcut["name"]}</h4>
                                     </div>
                                 </Link>
@@ -91,4 +94,4 @@ class FactoryCard extends PureComponent<Props, State> {
     }
 }
 
-export default FactoryCard;
+export default ProductionLineCard;

@@ -18,6 +18,14 @@ def get_factories(token):
     logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
     return return_response(data = data, success = True, message = message), 200
 
+@factory.route("/getProductionLines", methods = ["GET", "POST"])
+@token_required(roles = ["admin", "member", "editor"])
+def get_production_lines(token):
+    data = model.get_production_lines(request.json)
+    message = "Production lines successfully fetched"
+    logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+    return return_response(data = data, success = True, message = message), 200
+
 @factory.route("/getMachines", methods = ["GET", "POST"])
 @token_required(roles = ["admin", "member", "editor"])
 def get_machines(token):
@@ -210,5 +218,74 @@ def is_material_exists(token):
         return return_response(success = True, message = message, code = 200)
     else:
         message = "Material record already exists"
+        logger.add_log("DUPLICATED", request.remote_addr, token["username"], request.method, request.url, request.json, message,  409)
+        return return_response(success = True, message = message, code = 409)
+
+@factory.route("/createDashboard", methods = ["POST"])
+@token_required(roles = ["admin", "editor"])
+def create_dashboard(token):
+    try:
+        if not request.data:
+            message = "Request data cannot be empty"
+            logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, "", message,  400)
+            return return_response(success = False, message = message), 400
+
+        result = model.create_dashboard(request.json)
+
+        if not result:
+            message = "An error occurred while adding dashboard"
+            logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, "", message,  400)
+            return return_response(success = False, message = message, code = 400), 400
+        else:
+            message = "Dashboard added successfully"
+            logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+            return return_response(success = True, message = message, code = 200), 200
+    except:
+        return return_response(success = False, message = "An unexpected error has occured"), 400
+
+
+@factory.route("/deleteDashboard", methods = ["POST", "DELETE"])
+@token_required(roles = ["admin", "editor"])
+def delete_dashboard(token):
+    if not request.data:
+        message = "Request data cannot be empty"
+        logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, "", message,  400)
+        return return_response(success = False, message = message), 400
+    
+    result = model.delete_dashboard(request.json)
+
+    if not result:
+        message = "An error occurred while deleting dashboard"
+        logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, request.json, message,  400)
+        return return_response(success = False, message = message, code = 400), 400
+    else:
+        message = "Dashboard deleted successfully"
+        logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+        return return_response(success = True, message = message, code = 200), 200
+
+@factory.route("/getDashboards", methods = ["GET"])
+@token_required(roles = ["admin", "member", "editor"])
+def get_dashboards(token):
+    data = model.get_dashboards()
+    message = "All dashboard information has been successfully fetched"
+    logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+    return return_response(data = data, success = True, message = message), 200
+
+@factory.route("/isDashboardExists", methods = ["POST"])
+@token_required(roles = ["admin", "editor"])
+def is_dashboard_exists(token):
+    if not request.data:
+        message = "Request data cannot be empty"
+        logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, "", message,  400)
+        return return_response(success = False, message = message), 400
+
+    result = model.is_dashboard_exists(request.json)
+
+    if not result:
+        message = "Dashboard record not exists"
+        logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, request.json, message,  200)
+        return return_response(success = True, message = message, code = 200)
+    else:
+        message = "Dashboard record already exists"
         logger.add_log("DUPLICATED", request.remote_addr, token["username"], request.method, request.url, request.json, message,  409)
         return return_response(success = True, message = message, code = 409)

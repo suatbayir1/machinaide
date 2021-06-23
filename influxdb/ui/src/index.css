@@ -26,3 +26,15 @@
 .common-button-width {
     width: 125px
 }
+
+.react-multi-email > input {
+    background-color: #282828 !important;
+    color: #fff !important;
+    width: auto !important;
+    outline: none !important;
+    border: 0 none !important;
+    display: inline-block !important;
+    line-height: 1;
+    vertical-align: baseline !important;
+    padding: 0.4em 0.1em !important;
+}

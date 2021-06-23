@@ -27,6 +27,7 @@ const Logout: FC<Props> = ({ history }) => {
 
         localStorage.removeItem("userRole");
         localStorage.removeItem("token");
+        localStorage.removeItem("userInfo");
 
         if (resp.status !== 204) {
           throw new Error(resp.data.message)

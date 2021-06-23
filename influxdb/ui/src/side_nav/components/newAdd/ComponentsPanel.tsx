@@ -47,14 +47,14 @@ class ComponentsPanel extends PureComponent<Props, State> {
     }
 
     async componentDidMount() {
-        console.log(this.props.match.params.FID);
         await this.getAllComponents();
     }
 
     getAllComponents = async () => {
         const payload = {
-            "factoryId": this.props.match.params.FID,
-            "machineId": this.props.match.params.MID
+            "factoryId": this.props["match"].params.FID,
+            "plId": this.props["match"].params.PLID,
+            "machineId": this.props["match"].params.MID
         }
 
         const components = await FactoryService.getComponents(payload);
@@ -102,10 +102,13 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                 <Link color="inherit" to="/">
                                     <HomeIcon style={{ marginTop: '4px' }} />
                                 </Link>
-                                <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/allFactories`}>
+                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/allFactories`}>
                                     Factories
                                 </Link>
-                                <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/machines/${this.props.match.params.FID}`}>
+                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/production-line/${this.props["match"].params.FID}/${this.props["match"].params.PLID}`}>
+                                    Production Lines
+                                </Link>
+                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/${this.props["match"].params.FID}/${this.props["match"].params.PLID}`}>
                                     Machines
                                 </Link>
                                 <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Components</Typography>
@@ -141,7 +144,7 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                                         <div style={{ marginLeft: "40%" }}>
                                                                             <img
                                                                                 src='https://cdn1.iconfinder.com/data/icons/cars-components-3/24/gears_gear_car_component_part-512.png'
-                                                                                width='100px' height='100px'
+                                                                                width='130px' height='130px'
                                                                             />
                                                                         </div>
                                                                         <FlexBox margin={ComponentSize.Small}>
@@ -165,7 +168,7 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                                                             style={{ listStyleType: "none", marginTop: '5px', paddingLeft: '0px', fontSize: '0.800rem', margin: 'auto' }}
                                                                                         >
                                                                                             <li className="links" style={{ marginBottom: '0px' }}>
-                                                                                                <Link to={`/orgs/${this.props.match.params["orgID"]}/dashboards-list`}>
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/dashboard-router/${component["id"]}`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                                                                                                         <div><img src="../../../assets/icons/dashboards-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
                                                                                                     </div>
@@ -175,7 +178,17 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                                                                 </Link>
                                                                                             </li>
                                                                                             <li className="links" style={{ marginBottom: '0px' }}>
-                                                                                                <Link to={`/orgs/${this.props.match.params["orgID"]}/dt`}>
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/snapshot-router/component-${component["id"]}`}>
+                                                                                                    <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+                                                                                                        <div><img src="../../../assets/icons/dashboards-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
+                                                                                                    </div>
+                                                                                                    <span>
+                                                                                                        Show Snapshots
+                                                                                                    </span>
+                                                                                                </Link>
+                                                                                            </li>
+                                                                                            <li className="links" style={{ marginBottom: '0px' }}>
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/dt`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                                                                                                         <div><img src="../../../assets/icons/tree-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
                                                                                                     </div>
@@ -183,7 +196,7 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                                                                 </Link>
                                                                                             </li>
                                                                                             <li className="links" style={{ marginBottom: '0px' }}>
-                                                                                                <Link to={`/orgs/${this.props.match.params["orgID"]}/machines/${this.props.match.params.FID}/${this.props.match.params.MID}/${component["id"]}/sensors`}>
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/sensors/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${this.props["match"].params.MID}/${component["id"]}`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                                                                                                         <div><img src="../../../assets/icons/sensor-list.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
                                                                                                     </div>
@@ -194,7 +207,7 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                                                                 </Link>
                                                                                             </li>
                                                                                             <li className="links" style={{ marginBottom: '0px' }}>
-                                                                                                <Link to={`/orgs/${this.props.match.params["orgID"]}/alerting`}>
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/alerting`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                                                                                                         <div><img src="../../../assets/icons/alerts-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
                                                                                                     </div>
@@ -205,7 +218,7 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                                                                 </Link>
                                                                                             </li>
                                                                                             <li className="links" style={{ marginBottom: '0px' }}>
-                                                                                                <Link to={`/orgs/${this.props.match.params["orgID"]}/predictions/<sensorID>`}>
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/predictions/<sensorID>`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                                                                                                         <div><img src="../../../assets/icons/prediction-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
                                                                                                     </div>
@@ -213,7 +226,7 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                                                                 </Link>
                                                                                             </li>
                                                                                             <li className="links" style={{ marginBottom: '0px' }}>
-                                                                                                <Link to={`/orgs/${this.props.match.params["orgID"]}/failures/:FID/:MID/:CID`}>
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/failures/:FID/:MID/:CID`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                                                                                                         <div><img src="../../../assets/icons/failure-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
                                                                                                     </div>
@@ -231,8 +244,8 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                     </div>
                                                 )
                                             }) : (
-                                                    <h1>No component found for this machine</h1>
-                                                )
+                                                <h1>No component found for this machine</h1>
+                                            )
                                         }
                                     </Grid.Row>
                                 </Grid>

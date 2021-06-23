@@ -80,7 +80,6 @@ class FailureAlarmScene extends PureComponent<Props, State> {
                 spinnerLoading: RemoteDataState.Done
             })
             renderer.render(scene, camera);
-
         }
 
         if (this.props.visibleFailureAlarmScene && prevProps.failures !== this.props.failures) {
@@ -92,7 +91,9 @@ class FailureAlarmScene extends PureComponent<Props, State> {
         renderer.render(scene, camera);
 
         window.addEventListener('resize', () => {
-            renderer.setSize(document.querySelector("#visualizeGraph").clientWidth - 40, 700);
+            if (document.querySelector("#visualizeGraph") !== null) {
+                renderer.setSize(document.querySelector("#visualizeGraph").clientWidth - 40, 700);
+            }
         });
     }
 
@@ -173,40 +174,43 @@ class FailureAlarmScene extends PureComponent<Props, State> {
 
         let splittedSource;
 
-        await cubeInfo[0]["machines"].forEach(machine => {
-            let visible = cubeInfo[0]["machines"][0]["@id"] === machine["@id"] ? true : false;
+        await
+            cubeInfo[0]["productionLines"].forEach(pl => {
+                pl["machines"].forEach(machine => {
+                    let visible = cubeInfo[0]["productionLines"][0]["machines"][0]["@id"] === machine["@id"] ? true : false;
 
-            machine["contents"].forEach(component => {
-                if (component["@type"] === "Component") {
-                    if (component["visual"] !== undefined) {
-                        component["visual"].forEach(async visual => {
-                            visual["visible"] = visible;
-                            visual["isRender"] = true;
-                            visual["color"] = greenColor;
-                        })
-                    }
-
-                    component["sensors"].forEach(async sensor => {
-                        if (sensor["visual"] !== undefined) {
-                            // if visual objects of the sensor consist of more than one object
-                            if (sensor["visual"]["children"] !== undefined) {
-                                sensor["visual"]["children"].forEach((sensorVisualObject) => {
-                                    sensorVisualObject["visible"] = visible;
-                                    sensorVisualObject["isRender"] = true;
-                                    sensorVisualObject["color"] = greenColor;
-                                    sensor["visual"]["isRender"] = true;
-                                });
-                            } else {
-                                // If the visual object of the sensor consists of a single object
-                                sensor["visual"]["visible"] = visible;
-                                sensor["visual"]["isRender"] = true;
-                                sensor["visual"]["color"] = greenColor;
+                    machine["contents"].forEach(component => {
+                        if (component["@type"] === "Component") {
+                            if (component["visual"] !== undefined) {
+                                component["visual"].forEach(async visual => {
+                                    visual["visible"] = visible;
+                                    visual["isRender"] = true;
+                                    visual["color"] = greenColor;
+                                })
                             }
+
+                            component["sensors"].forEach(async sensor => {
+                                if (sensor["visual"] !== undefined) {
+                                    // if visual objects of the sensor consist of more than one object
+                                    if (sensor["visual"]["children"] !== undefined) {
+                                        sensor["visual"]["children"].forEach((sensorVisualObject) => {
+                                            sensorVisualObject["visible"] = visible;
+                                            sensorVisualObject["isRender"] = true;
+                                            sensorVisualObject["color"] = greenColor;
+                                            sensor["visual"]["isRender"] = true;
+                                        });
+                                    } else {
+                                        // If the visual object of the sensor consists of a single object
+                                        sensor["visual"]["visible"] = visible;
+                                        sensor["visual"]["isRender"] = true;
+                                        sensor["visual"]["color"] = greenColor;
+                                    }
+                                }
+                            })
                         }
                     })
-                }
+                })
             })
-        })
 
 
 
@@ -215,32 +219,34 @@ class FailureAlarmScene extends PureComponent<Props, State> {
             splittedSource = failure["sourceName"].split(".");
 
             if (splittedSource.length === 1) {
-                cubeInfo[0]["machines"].forEach(machine => {
-                    if (splittedSource[0] === machine["name"]) {
-                        machine["contents"].forEach(component => {
-                            if (component["@type"] === "Component") {
-                                if (component["visual"] !== undefined) {
-                                    component["visual"].forEach(async visual => {
-                                        visual["color"] = await this.getFailureColor(failure["severity"])
+                cubeInfo[0]["productionLines"].forEach(pl => {
+                    pl["machines"].forEach(machine => {
+                        if (splittedSource[0] === machine["name"]) {
+                            machine["contents"].forEach(component => {
+                                if (component["@type"] === "Component") {
+                                    if (component["visual"] !== undefined) {
+                                        component["visual"].forEach(async visual => {
+                                            visual["color"] = await this.getFailureColor(failure["severity"])
+                                        })
+                                    }
+
+                                    component["sensors"].forEach(async sensor => {
+                                        if (sensor["visual"] !== undefined) {
+                                            // if visual objects of the sensor consist of more than one object
+                                            if (sensor["visual"]["children"] !== undefined) {
+                                                sensor["visual"]["children"].forEach(async (sensorVisualObject) => {
+                                                    sensorVisualObject["color"] = await this.getFailureColor(failure["severity"]);
+                                                });
+                                            } else {
+                                                // If the visual object of the sensor consists of a single object
+                                                sensor["visual"]["color"] = await this.getFailureColor(failure["severity"]);
+                                            }
+                                        }
                                     })
                                 }
-
-                                component["sensors"].forEach(async sensor => {
-                                    if (sensor["visual"] !== undefined) {
-                                        // if visual objects of the sensor consist of more than one object
-                                        if (sensor["visual"]["children"] !== undefined) {
-                                            sensor["visual"]["children"].forEach(async (sensorVisualObject) => {
-                                                sensorVisualObject["color"] = await this.getFailureColor(failure["severity"]);
-                                            });
-                                        } else {
-                                            // If the visual object of the sensor consists of a single object
-                                            sensor["visual"]["color"] = await this.getFailureColor(failure["severity"]);
-                                        }
-                                    }
-                                })
-                            }
-                        })
-                    }
+                            })
+                        }
+                    })
                 })
             }
         })
@@ -250,32 +256,34 @@ class FailureAlarmScene extends PureComponent<Props, State> {
             splittedSource = failure["sourceName"].split(".");
 
             if (splittedSource.length === 2) {
-                cubeInfo[0]["machines"].forEach(machine => {
-                    machine["contents"].forEach(component => {
-                        if (component["@type"] === "Component") {
-                            if (splittedSource[1] === component["name"]) {
-                                if (component["visual"] !== undefined) {
-                                    component["visual"].forEach(async visual => {
-                                        visual["color"] = await this.getFailureColor(failure["severity"])
+                cubeInfo[0]["productionLines"].forEach(pl => {
+                    pl["machines"].forEach(machine => {
+                        machine["contents"].forEach(component => {
+                            if (component["@type"] === "Component") {
+                                if (splittedSource[1] === component["name"]) {
+                                    if (component["visual"] !== undefined) {
+                                        component["visual"].forEach(async visual => {
+                                            visual["color"] = await this.getFailureColor(failure["severity"])
+                                        })
+                                    }
+
+                                    component["sensors"].forEach(async sensor => {
+                                        if (sensor["visual"] !== undefined) {
+                                            // if visual objects of the sensor consist of more than one object
+                                            if (sensor["visual"]["children"] !== undefined) {
+                                                sensor["visual"]["children"].forEach(async (sensorVisualObject) => {
+                                                    sensorVisualObject["color"] = await this.getFailureColor(failure["severity"]);
+                                                });
+                                            } else {
+                                                // If the visual object of the sensor consists of a single object
+                                                sensor["visual"]["color"] = await this.getFailureColor(failure["severity"]);
+                                            }
+                                            // sensor["visual"]["color"] = await this.getFailureColor(failure["severity"])
+                                        }
                                     })
                                 }
-
-                                component["sensors"].forEach(async sensor => {
-                                    if (sensor["visual"] !== undefined) {
-                                        // if visual objects of the sensor consist of more than one object
-                                        if (sensor["visual"]["children"] !== undefined) {
-                                            sensor["visual"]["children"].forEach(async (sensorVisualObject) => {
-                                                sensorVisualObject["color"] = await this.getFailureColor(failure["severity"]);
-                                            });
-                                        } else {
-                                            // If the visual object of the sensor consists of a single object
-                                            sensor["visual"]["color"] = await this.getFailureColor(failure["severity"]);
-                                        }
-                                        // sensor["visual"]["color"] = await this.getFailureColor(failure["severity"])
-                                    }
-                                })
                             }
-                        }
+                        })
                     })
                 })
             }
@@ -286,27 +294,29 @@ class FailureAlarmScene extends PureComponent<Props, State> {
             splittedSource = failure["sourceName"].split(".");
 
             if (splittedSource.length === 3) {
-                cubeInfo[0]["machines"].forEach(machine => {
-                    machine["contents"].forEach(component => {
-                        if (component["@type"] === "Component") {
-                            component["sensors"].forEach(async sensor => {
-                                if (splittedSource[2] === sensor["name"]) {
-                                    if (sensor["visual"] !== undefined) {
-                                        // if visual objects of the sensor consist of more than one object
-                                        if (sensor["visual"]["children"] !== undefined) {
-                                            sensor["visual"]["children"].forEach(async (sensorVisualObject) => {
-                                                sensorVisualObject["color"] = await this.getFailureColor(failure["severity"]);
-                                            });
-                                        } else {
-                                            // If the visual object of the sensor consists of a single object
-                                            sensor["visual"]["color"] = await this.getFailureColor(failure["severity"]);
+                cubeInfo[0]["productionLines"].forEach(pl => {
+                    pl["machines"].forEach(machine => {
+                        machine["contents"].forEach(component => {
+                            if (component["@type"] === "Component") {
+                                component["sensors"].forEach(async sensor => {
+                                    if (splittedSource[2] === sensor["name"]) {
+                                        if (sensor["visual"] !== undefined) {
+                                            // if visual objects of the sensor consist of more than one object
+                                            if (sensor["visual"]["children"] !== undefined) {
+                                                sensor["visual"]["children"].forEach(async (sensorVisualObject) => {
+                                                    sensorVisualObject["color"] = await this.getFailureColor(failure["severity"]);
+                                                });
+                                            } else {
+                                                // If the visual object of the sensor consists of a single object
+                                                sensor["visual"]["color"] = await this.getFailureColor(failure["severity"]);
+                                            }
                                         }
                                     }
-                                }
-                            })
-                        }
+                                })
+                            }
+                        })
                     })
-                })
+                });
             }
         })
         return cubeInfo;
@@ -373,33 +383,37 @@ class FailureAlarmScene extends PureComponent<Props, State> {
             CubeInfo = payload[0];
         }
 
-        CubeInfo["machines"].forEach((machine) => {
-            if (machine["contents"] !== undefined) {
-                machine["contents"].forEach((component) => {
-                    if (component["visual"] !== undefined) {
-                        component["visual"].forEach((visualObject) => {
-                            wireframe = visualObject["isRender"] ? false : true;
-                            this.handleAddObjectType(visualObject, wireframe);
-                        });
+        CubeInfo["productionLines"].forEach(pl => {
+            pl["machines"].forEach((machine) => {
+                if (machine["contents"] !== undefined) {
+                    machine["contents"].forEach((component) => {
+                        if (component["visual"] !== undefined) {
+                            component["visual"].forEach((visualObject) => {
+                                wireframe = visualObject["isRender"] ? false : true;
+                                this.handleAddObjectType(visualObject, wireframe);
+                            });
 
-                        component["sensors"].forEach((sensor) => {
-                            if (sensor["visual"] !== undefined) {
-                                wireframe = sensor["visual"]["isRender"] ? false : true;
-                                // if visual objects of the sensor consist of more than one object
-                                if (sensor["visual"]["children"] !== undefined) {
-                                    sensor["visual"]["children"].forEach((sensorVisualObject) => {
-                                        this.handleAddObjectType(sensorVisualObject, wireframe);
-                                    });
-                                } else {
-                                    // If the visual object of the sensor consists of a single object
-                                    this.handleAddObjectType(sensor["visual"], wireframe);
+                            component["sensors"].forEach((sensor) => {
+                                if (sensor["visual"] !== undefined) {
+                                    wireframe = sensor["visual"]["isRender"] ? false : true;
+                                    // if visual objects of the sensor consist of more than one object
+                                    if (sensor["visual"]["children"] !== undefined) {
+                                        sensor["visual"]["children"].forEach((sensorVisualObject) => {
+                                            this.handleAddObjectType(sensorVisualObject, wireframe);
+                                        });
+                                    } else {
+                                        // If the visual object of the sensor consists of a single object
+                                        this.handleAddObjectType(sensor["visual"], wireframe);
+                                    }
                                 }
-                            }
-                        })
-                    }
-                })
-            }
-        })
+                            })
+                        }
+                    })
+                }
+            })
+        });
+
+
         renderer.render(scene, camera);
     }
 
@@ -920,37 +934,39 @@ class FailureAlarmScene extends PureComponent<Props, State> {
             splittedSource = failure["sourceName"].split(".");
 
             if (splittedSource.length === 1) {
-                cubeInfo[0]["machines"].forEach(machine => {
-                    if (splittedSource[0] === machine["name"]) {
-                        machine["contents"].forEach(component => {
-                            if (component["@type"] === "Component") {
-                                if (component["visual"] !== undefined) {
-                                    component["visual"].forEach(async visual => {
-                                        objects.push({ "name": visual["name"], "color": await this.getFailureColor(failure["severity"]) });
-                                    })
-                                }
+                cubeInfo[0]["productionLines"].forEach(pl => {
+                    pl["machines"].forEach(machine => {
+                        if (splittedSource[0] === machine["name"]) {
+                            machine["contents"].forEach(component => {
+                                if (component["@type"] === "Component") {
+                                    if (component["visual"] !== undefined) {
+                                        component["visual"].forEach(async visual => {
+                                            objects.push({ "name": visual["name"], "color": await this.getFailureColor(failure["severity"]) });
+                                        })
+                                    }
 
-                                component["sensors"].forEach(async sensor => {
-                                    if (sensor["visual"] !== undefined) {
-                                        if (sensor["visual"]["children"] !== undefined) {
-                                            sensor["visual"]["children"].forEach(async (sensorVisualObject) => {
+                                    component["sensors"].forEach(async sensor => {
+                                        if (sensor["visual"] !== undefined) {
+                                            if (sensor["visual"]["children"] !== undefined) {
+                                                sensor["visual"]["children"].forEach(async (sensorVisualObject) => {
+                                                    objects.push({
+                                                        "name": sensorVisualObject["name"],
+                                                        "color": await this.getFailureColor(failure["severity"])
+                                                    });
+                                                });
+                                            } else {
                                                 objects.push({
-                                                    "name": sensorVisualObject["name"],
+                                                    "name": sensor["visual"]["name"],
                                                     "color": await this.getFailureColor(failure["severity"])
                                                 });
-                                            });
-                                        } else {
-                                            objects.push({
-                                                "name": sensor["visual"]["name"],
-                                                "color": await this.getFailureColor(failure["severity"])
-                                            });
+                                            }
                                         }
-                                    }
-                                })
-                            }
-                        })
-                    }
-                })
+                                    })
+                                }
+                            })
+                        }
+                    })
+                });
             }
         })
 
@@ -959,37 +975,40 @@ class FailureAlarmScene extends PureComponent<Props, State> {
             splittedSource = failure["sourceName"].split(".");
 
             if (splittedSource.length === 2) {
-                cubeInfo[0]["machines"].forEach(machine => {
-                    machine["contents"].forEach(component => {
-                        if (component["@type"] === "Component") {
-                            if (splittedSource[1] === component["name"]) {
-                                if (component["visual"] !== undefined) {
-                                    component["visual"].forEach(async visual => {
-                                        objects.push({ "name": visual["name"], "color": await this.getFailureColor(failure["severity"]) });
-                                    })
-                                }
+                cubeInfo[0]["productionLines"].forEach(pl => {
+                    pl["machines"].forEach(machine => {
+                        machine["contents"].forEach(component => {
+                            if (component["@type"] === "Component") {
+                                if (splittedSource[1] === component["name"]) {
+                                    if (component["visual"] !== undefined) {
+                                        component["visual"].forEach(async visual => {
+                                            objects.push({ "name": visual["name"], "color": await this.getFailureColor(failure["severity"]) });
+                                        })
+                                    }
 
-                                component["sensors"].forEach(async sensor => {
-                                    if (sensor["visual"] !== undefined) {
-                                        if (sensor["visual"]["children"] !== undefined) {
-                                            sensor["visual"]["children"].forEach(async (sensorVisualObject) => {
+                                    component["sensors"].forEach(async sensor => {
+                                        if (sensor["visual"] !== undefined) {
+                                            if (sensor["visual"]["children"] !== undefined) {
+                                                sensor["visual"]["children"].forEach(async (sensorVisualObject) => {
+                                                    objects.push({
+                                                        "name": sensorVisualObject["name"],
+                                                        "color": await this.getFailureColor(failure["severity"])
+                                                    });
+                                                });
+                                            } else {
                                                 objects.push({
-                                                    "name": sensorVisualObject["name"],
+                                                    "name": sensor["visual"]["name"],
                                                     "color": await this.getFailureColor(failure["severity"])
                                                 });
-                                            });
-                                        } else {
-                                            objects.push({
-                                                "name": sensor["visual"]["name"],
-                                                "color": await this.getFailureColor(failure["severity"])
-                                            });
+                                            }
                                         }
-                                    }
-                                })
+                                    })
+                                }
                             }
-                        }
+                        })
                     })
                 })
+
             }
         })
 
@@ -998,31 +1017,33 @@ class FailureAlarmScene extends PureComponent<Props, State> {
             splittedSource = failure["sourceName"].split(".");
 
             if (splittedSource.length === 3) {
-                cubeInfo[0]["machines"].forEach(machine => {
-                    machine["contents"].forEach(component => {
-                        if (component["@type"] === "Component") {
-                            component["sensors"].forEach(async sensor => {
-                                if (splittedSource[2] === sensor["name"]) {
-                                    if (sensor["visual"] !== undefined) {
-                                        if (sensor["visual"]["children"] !== undefined) {
-                                            sensor["visual"]["children"].forEach(async (sensorVisualObject) => {
+                cubeInfo[0]["productionLines"].forEach(pl => {
+                    pl["machines"].forEach(machine => {
+                        machine["contents"].forEach(component => {
+                            if (component["@type"] === "Component") {
+                                component["sensors"].forEach(async sensor => {
+                                    if (splittedSource[2] === sensor["name"]) {
+                                        if (sensor["visual"] !== undefined) {
+                                            if (sensor["visual"]["children"] !== undefined) {
+                                                sensor["visual"]["children"].forEach(async (sensorVisualObject) => {
+                                                    objects.push({
+                                                        "name": sensorVisualObject["name"],
+                                                        "color": await this.getFailureColor(failure["severity"])
+                                                    });
+                                                });
+                                            } else {
                                                 objects.push({
-                                                    "name": sensorVisualObject["name"],
+                                                    "name": sensor["visual"]["name"],
                                                     "color": await this.getFailureColor(failure["severity"])
                                                 });
-                                            });
-                                        } else {
-                                            objects.push({
-                                                "name": sensor["visual"]["name"],
-                                                "color": await this.getFailureColor(failure["severity"])
-                                            });
+                                            }
                                         }
                                     }
-                                }
-                            })
-                        }
+                                })
+                            }
+                        })
                     })
-                })
+                });
             }
         })
 

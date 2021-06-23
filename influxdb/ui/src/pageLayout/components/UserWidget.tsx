@@ -137,6 +137,14 @@ const UserWidget: FC<Props> = ({
             )}
           />
         }
+        <TreeNav.UserItem
+          id="reports"
+          label="Reports"
+          testID="user-nav-item-reports"
+          linkElement={className => (
+            <Link className={className} to={`${orgPrefix}/reports`} />
+          )}
+        />
       </CloudExclude>
       <TreeNav.UserItem
         id="logout"

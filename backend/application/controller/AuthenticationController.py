@@ -12,11 +12,27 @@ import time
 from werkzeug.security import check_password_hash
 from core.logger.MongoLogger import MongoLogger
 import ldap
+import requests
+import base64
 
 auth = Blueprint("auth", __name__)
 
 model = AuthenticationModel()
 logger = MongoLogger()
+
+@auth.route("/loginWithInflux", methods = ["POST"])
+def loginWithInflux():
+    try:
+        username_password = f'{config.authentication["USER_NAME"]}:{config.authentication["USER_PASSWORD"]}'
+        encoded = base64.b64encode(username_password.encode('ascii'))
+        url = f'{config.url["CHRONOGRAPH"]}api/v2/signin'
+        headers = {'Authorization': f'Basic {encoded.decode("utf-8")}'}
+
+        response = requests.post(url, headers=headers)
+
+        return {"status": response.status_code}
+    except:
+        return {"message": "error"}
 
 @auth.route("/loginWithLDAP", methods = ["POST"])
 def loginWithLDAP():
@@ -43,6 +59,8 @@ def loginWithLDAP():
         if not result:
             raise Exception("User not found")
 
+        userInfo = {}
+
         for item in result:
             dn = item[0]
 
@@ -50,6 +68,10 @@ def loginWithLDAP():
                 splitted_att = att.split("=")
                 if splitted_att[0] == "ou":
                     role = splitted_att[1]
+
+            for att in item[1]:
+                if att != 'userPassword':
+                    userInfo[att] = item[1][att][0].decode('utf-8')
 
         con.simple_bind_s(dn, password)
 
@@ -59,9 +81,15 @@ def loginWithLDAP():
             "expiry_time": time.mktime((datetime.datetime.now() + datetime.timedelta(days=7)).timetuple())
         }, config.authentication["SECRET_KEY"])
 
+        response = {
+            'token': token.decode("UTF-8"), 
+            'role': role,
+            'userInfo': userInfo,
+        }
+
         message = "user_login_successfully"
         logger.add_log("INFO", request.remote_addr, username, request.method, request.url, request.json, message,  200)
-        return return_response(data = [{'token': token.decode("UTF-8"), 'role': role}], success = True, message = message, code = 200), 200
+        return return_response(data = [response], success = True, message = message, code = 200), 200
 
     except ldap.INVALID_CREDENTIALS:
         con.unbind()

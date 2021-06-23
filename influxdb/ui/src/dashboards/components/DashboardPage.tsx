@@ -63,7 +63,7 @@ class DashboardPage extends Component<Props> {
   }
 
   public render() {
-    const { autoRefresh, manualRefresh, onManualRefresh } = this.props
+    const { autoRefresh, manualRefresh, onManualRefresh, dashboard } = this.props
 
     return (
       <>
@@ -76,7 +76,7 @@ class DashboardPage extends Component<Props> {
               />
               <RateLimitAlert alertOnly={true} />
               <VariablesControlBar />
-              <DashboardComponent manualRefresh={manualRefresh} />
+              <DashboardComponent manualRefresh={manualRefresh} dashboard={dashboard} />
             </HoverTimeProvider>
           </LimitChecker>
         </Page>

@@ -16,10 +16,10 @@ class InfluxReader():
     
     def get_data_from_influxdb(self):
         query = """
-            from(bucket: "kafka-telegraf")
-            |> range(start: -1m)
-            |> filter(fn: (r) => r["_measurement"] == "cpu")
-            |> filter(fn: (r) => r["_field"] == "usage_idle" or r["_field"] == "used")
+            from(bucket: "system")
+            |> range(start: -1h)
+            |> filter(fn: (r) => r["_measurement"] == "Press31_DB1")
+            |> aggregateWindow(every: 1s, fn: mean, createEmpty: false)
             |> yield(name: "mean")
         """
 
@@ -38,6 +38,17 @@ class InfluxReader():
 reader = InfluxReader()
 
 
-while True:
-    reader.read_and_write_data_to_influxdb()
-    time.sleep(60)
+# while True:
+tic = time.perf_counter()
+values = reader.get_data_from_influxdb()
+toc = time.perf_counter()
+print(f"{toc - tic:0.4f} seconds")
+
+count = 0
+for table in values:
+    for record in table.records:
+        # print(f"{record.get_measurement()} {record.get_field()}={record.get_value()}")
+        count += 1
+
+print(count)
+    # time.sleep(60)

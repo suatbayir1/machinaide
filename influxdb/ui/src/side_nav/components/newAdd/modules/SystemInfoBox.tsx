@@ -8,11 +8,6 @@ import {
 } from '@influxdata/clockface'
 
 import {
-    AppState,
-    AutoRefresh,
-    AutoRefreshStatus,
-    Dashboard,
-    ResourceType,
     TimeRange,
 } from 'src/types'
 

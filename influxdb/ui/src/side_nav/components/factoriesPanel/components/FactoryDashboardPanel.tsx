@@ -37,7 +37,7 @@ interface State {
     properties: GaugeViewProperties
 }
 
-class FactoryDashboardPanel extends PureComponent<Props, State> {
+class ProductionLineDashboardPanel extends PureComponent<Props, State> {
     constructor(props) {
         super(props);
         this.state = {
@@ -350,7 +350,7 @@ class FactoryDashboardPanel extends PureComponent<Props, State> {
     }
 }
 
-export default FactoryDashboardPanel;
+export default ProductionLineDashboardPanel;
 
 
 

@@ -25,6 +25,7 @@ class DigitalTwinModel():
         data = self.db.find(self.collection)
         json_data = json.loads(dumps(list(data), indent = 2))
 
+        productionLineList = []
         machineList = []
         componentList = []
         sensorList = []
@@ -32,20 +33,24 @@ class DigitalTwinModel():
         for factory in json_data:
             factoryName = factory["factoryName"]
             factoryID = factory["factoryId"]
-            for machine in factory["machines"]:
-                machineList.append(machine['name'])
-                for component in machine["contents"]:
-                    if component["@type"] == "Component":
-                        componentList.append(component['name'])
-                        for sensor in component["sensors"]:
-                            sensorList.append(sensor['name'])
+            for productionLine in factory["productionLines"]:
+                productionLineList.append(productionLine["name"])
+                for machine in productionLine["machines"]:
+                    machineList.append(machine['name'])
+                    for component in machine["contents"]:
+                        if component["@type"] == "Component":
+                            componentList.append(component['name'])
+                            for sensor in component["sensors"]:
+                                sensorList.append(sensor['name'])
 
         response = {
+            'productionLineList': productionLineList,
             'machineList': machineList,
             'componentList': componentList,
             'sensorList': sensorList,
             "factoryID": factoryID,
             "factory": factoryName,
+            'productionLineCount': len(productionLineList),
             "machineCount": len(machineList),
             "componentCount": len(componentList),
             "sensorCount": len(sensorList)
@@ -61,7 +66,9 @@ class DigitalTwinModel():
         if not isExists:
             for factory in json_data:
                 del [factory['_id']]
-                factory["machines"].append(payload)      
+                for pl in factory["productionLines"]:
+                    if pl["name"] == payload["parent"]:
+                        pl["machines"].append(payload)      
 
             update_data = {
                 '$set': json_data[0]
@@ -83,9 +90,10 @@ class DigitalTwinModel():
         if not isExists:
             for factory in json_data:
                 del factory['_id']
-                for machine in factory['machines']:
-                    if machine['name'] == payload["parent"]:
-                        machine['contents'].append(payload)
+                for pl in factory["productionLines"]:
+                    for machine in pl['machines']:
+                        if machine['name'] == payload["parent"]:
+                            machine['contents'].append(payload)
 
             update_data = {
                 '$set': json_data[0]
@@ -107,10 +115,11 @@ class DigitalTwinModel():
         if not isExists:
             for factory in json_data:
                 del factory['_id']
-                for machine in factory['machines']:
-                    for component in machine['contents']:
-                        if component["@type"] == "Component" and component["name"] == payload["parent"]:
-                            component['sensors'].append(payload)
+                for pl in factory["productionLines"]:
+                    for machine in pl['machines']:
+                        for component in machine['contents']:
+                            if component["@type"] == "Component" and component["name"] == payload["parent"]:
+                                component['sensors'].append(payload)
 
 
             update_data = {
@@ -125,14 +134,90 @@ class DigitalTwinModel():
         else:
             return False
 
+    def add_relationship(self, payload):
+        try:
+            data = self.db.find(self.collection)
+            json_data = json.loads(dumps(list(data), indent = 2))
+            isExists = False
+
+            for factory in json_data:
+                del factory['_id']
+                for pl in factory["productionLines"]:
+                    for machine in pl['machines']:
+                        if machine["@id"] == payload["source"]:
+                            for component in machine['contents']:
+                                if component["@type"] == "Relationship":
+                                    isExists = True
+                            machine['contents'].append(payload)
+
+            if isExists:
+                return False
+
+            update_data = {
+                '$set': json_data[0]
+            }
+
+            where = {
+                "id": "Ermetal"
+            }
+
+            return self.db.update_one(self.collection, update_data, where)
+        except:
+            return False
+
+    def remove_relationship(self, payload):
+        try:
+            data = self.db.find(self.collection)
+            json_data = json.loads(dumps(list(data), indent = 2))
+
+            for factory in json_data:
+                del factory['_id']
+                for pl in factory["productionLines"]:
+                    for machine in pl['machines']:
+                        for component in machine['contents']:
+                            if component["@type"] == "Relationship" and component["name"] == payload["name"]:
+                                machine['contents'].remove(component)
+
+            update_data = {
+                '$set': json_data[0]
+            }
+
+            where = {
+                "id": "Ermetal"
+            }
+
+            return self.db.update_one(self.collection, update_data, where)
+        except:
+            return False
+
+    def delete_production_line(self, payload):
+        hierarchy = self.get_all()
+
+        for factory in hierarchy:
+            del factory['_id']
+            for pl in factory["productionLines"]:
+                if (pl["@id"] == payload["name"]):
+                    factory["productionLines"].remove(pl)
+        
+        update_data = {
+            '$set': hierarchy[0]
+        }
+
+        where = {
+            "id": "Ermetal"
+        }
+
+        return self.db.update_one(self.collection, update_data, where)
+
     def delete_machine(self, payload):
         hierarchy = self.get_all()
 
         for factory in hierarchy:
             del factory['_id']
-            for machine in factory["machines"]:
-                if machine["name"] == payload["name"]:
-                    factory["machines"].remove(machine)
+            for pl in factory["productionLines"]:
+                for machine in pl["machines"]:
+                    if machine["name"] == payload["name"]:
+                        pl["machines"].remove(machine)
         
         update_data = {
             '$set': hierarchy[0]
@@ -149,10 +234,11 @@ class DigitalTwinModel():
 
         for factory in hierarchy:
             del factory['_id']
-            for machine in factory["machines"]:
-                for component in machine["contents"]:
-                    if component["@type"] == "Component" and payload["name"] == component["name"]:
-                        machine["contents"].remove(component)
+            for pl in factory["productionLines"]:
+                for machine in pl["machines"]:
+                    for component in machine["contents"]:
+                        if component["@type"] == "Component" and payload["name"] == component["name"]:
+                            machine["contents"].remove(component)
         
         update_data = {
             '$set': hierarchy[0]
@@ -169,13 +255,14 @@ class DigitalTwinModel():
 
         for factory in hierarchy:
             del factory['_id']
-            for machine in factory["machines"]:
-                for component in machine["contents"]:
-                    if component["@type"] == "Component":
-                        for sensor in component["sensors"]:
-                            if sensor["name"] == payload["name"]:
-                                component["sensors"].remove(sensor)
-        
+            for pl in factory["productionLines"]:
+                for machine in pl["machines"]:
+                    for component in machine["contents"]:
+                        if component["@type"] == "Component":
+                            for sensor in component["sensors"]:
+                                if sensor["name"] == payload["name"]:
+                                    component["sensors"].remove(sensor)
+            
         update_data = {
             '$set': hierarchy[0]
         }
@@ -192,14 +279,15 @@ class DigitalTwinModel():
 
             for factory in hierarchy:
                 del factory["_id"]
-                for machine in factory["machines"]:
-                    for component in machine["contents"]:
-                        if component["@type"] == "Component":
-                            for sensor in component["sensors"]:
-                                if sensor["name"] == payload["name"]:
-                                    sensor["dataSource"] = payload["dataSource"]
-                                    sensor["minValue"] = payload["minValue"]
-                                    sensor["maxValue"] = payload["maxValue"]
+                for pl in factory["productionLines"]:
+                    for machine in pl["machines"]:
+                        for component in machine["contents"]:
+                            if component["@type"] == "Component":
+                                for sensor in component["sensors"]:
+                                    if sensor["name"] == payload["name"]:
+                                        sensor["dataSource"] = payload["dataSource"]
+                                        sensor["minValue"] = payload["minValue"]
+                                        sensor["maxValue"] = payload["maxValue"]
 
             update_data = { 
                 '$set': hierarchy[0]
@@ -219,19 +307,20 @@ class DigitalTwinModel():
         isExists = False
 
         for factory in json_data:
-            for machine in factory['machines']:
-                if machine["name"] == item:
-                    isExists = True
-                    break
-                for component in machine['contents']:
-                    if component['@type'] == 'Component':
-                        if component["name"] == item:
-                            isExists = True
-                            break
-                        for sensor in component['sensors']:
-                            if sensor['name'] == item:
+            for pl in factory["productionLines"]:
+                for machine in pl['machines']:
+                    if machine["name"] == item:
+                        isExists = True
+                        break
+                    for component in machine['contents']:
+                        if component['@type'] == 'Component':
+                            if component["name"] == item:
                                 isExists = True
                                 break
+                            for sensor in component['sensors']:
+                                if sensor['name'] == item:
+                                    isExists = True
+                                    break
         
         return isExists
 
@@ -239,689 +328,797 @@ class DigitalTwinModel():
     def update_dt(self):
         payload = {
             '$set' : {
-                "factoryId": "Ermetal",
-                "factoryName": "Ermetal Otomotiv A.Ş",
-                "zone": "Dumlupınar / Osmangazi, Bursa",
-                "description": "Ermetal A.Ş , sac parça şekillendirme ve montajı konusunda tecrübeli çalışanları ve yapmakta olduğu yeni yatırımlar ile Türk Otomotiv Sanayisinin öncü kuruluşlarından birisidir.",
-                "type": "Factory",
-                "name": "Ermetal",
-                "id": "Ermetal",
-                "machines": [
+                "id" : "Ermetal",
+                "description" : "Ermetal A.Ş , sac parça şekillendirme ve montajı konusunda tecrübeli çalışanları ve yapmakta olduğu yeni yatırımlar ile Türk Otomotiv Sanayisinin öncü kuruluşlarından birisidir.",
+                "factoryId" : "Ermetal",
+                "factoryName" : "Ermetal Otomotiv A.Ş",
+                "name" : "Ermetal",
+                "type" : "Factory",
+                "zone" : "Dumlupınar / Osmangazi, Bursa",
+                "bucket": "Ermetal",
+                "productionLines": [
                     {
-                        "@id": "Press030",
-                        "type": "Machine",
+                        "@id": "1600T_Press_Line",
+                        "type": "ProductionLine",
                         "parent": "Ermetal",
-                        "@type": "Interface",
-                        "displayName": "Press030",
-                        "description": "machine description",
-                        "name": "Press030",
-                        "contents": [
+                        "displayName": "1600T Press Line",
+                        "description": "description",
+                        "name": "1600T_Press_Line",
+                        "machines" : [ 
                             {
-                                "@id": "anaMotor",
-                                "@type": "Component",
-                                "name": "anaMotor",
-                                "displayName": "Ana Motor",
-                                "description": "<description>",
-                                "type": "Component",
-                                "parent": "Press030",
-                                "visual": [
+                                "@id" : "Press030",
+                                "type" : "Machine",
+                                "parent" : "1600T_Press_Line",
+                                "@type" : "Interface",
+                                "displayName" : "Press030",
+                                "description" : "machine description",
+                                "name" : "Press030",
+                                "measurements": [],
+                                "contents" : [ 
                                     {
-                                        "isRender": False,
-                                        "name": 'en_üst_çark',
-                                        "geometryType": "BoxGeometry",
-                                        "boxMeasure": {
-                                            "x": .8,
-                                            "y": .5,
-                                            "z": 1,
-                                        },
-                                        "position": {
-                                            "x": -1.1,
-                                            "y": 5.3,
-                                            "z": -1
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0x5cd65c,
-                                        "opacity": .7,
+                                        "@type" : "Relationship",
+                                        "name" : "Press030ToPress031",
+                                        "source" : "Press030",
+                                        "target" : "Press031"
                                     }
-                                ],
-                                "sensors": [],
-                            },
+                                ]
+                            }, 
                             {
-                                "@id": "yaglama",
-                                "@type": "Component",
-                                "name": "yaglama",
-                                "displayName": "Yağlama",
-                                "description": "<description>",
-                                "type": "Component",
-                                "parent": "Press030",
-                                "visual": [],
-                                "sensors": [],
-                            },
+                                "@id" : "Press031",
+                                "name" : "Press031",
+                                "type" : "Machine",
+                                "parent" : "1600T_Press_Line",
+                                "@type" : "Interface",
+                                "displayName" : "Press031",
+                                "description" : "machine description",
+                                "measurements": ["Press31_DB1", "Press31_DB2"],
+                                "contents" : [ 
+                                    {
+                                        "@id" : "anaMotor",
+                                        "@type" : "Component",
+                                        "name" : "anaMotor",
+                                        "displayName" : "Ana Motor",
+                                        "description" : "<description>",
+                                        "type" : "Component",
+                                        "parent" : "Press031",
+                                        "visual" : [ 
+                                            {
+                                                "isRender" : False,
+                                                "name" : "en_üst_çark",
+                                                "geometryType" : "BoxGeometry",
+                                                "boxMeasure" : {
+                                                    "x" : 0.8,
+                                                    "y" : 0.5,
+                                                    "z" : 1
+                                                },
+                                                "position" : {
+                                                    "x" : -1.1,
+                                                    "y" : 5.3,
+                                                    "z" : -1
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 6084188,
+                                                "opacity" : 0.7
+                                            }
+                                        ],
+                                        "sensors" : []
+                                    }, 
+                                    {
+                                        "@id" : "yaglama",
+                                        "@type" : "Component",
+                                        "name" : "yaglama",
+                                        "displayName" : "Yağlama",
+                                        "description" : "<description>",
+                                        "type" : "Component",
+                                        "parent" : "Press031",
+                                        "visual" : [],
+                                        "sensors" : []
+                                    }, 
+                                    {
+                                        "@id" : "volan",
+                                        "@type" : "Component",
+                                        "name" : "volan",
+                                        "displayName" : "Volan",
+                                        "description" : "<description>",
+                                        "type" : "Component",
+                                        "parent" : "Press031",
+                                        "visual" : [ 
+                                            {
+                                                "isRender" : False,
+                                                "geometryType" : "BoxGeometry",
+                                                "name" : "üst_silindirli_dikdörtgen",
+                                                "boxMeasure" : {
+                                                    "x" : 1.8,
+                                                    "y" : 1,
+                                                    "z" : 2.9
+                                                },
+                                                "position" : {
+                                                    "x" : -1.1,
+                                                    "y" : 4.6,
+                                                    "z" : -1
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 14803434,
+                                                "opacity" : 0.7
+                                            }
+                                        ],
+                                        "sensors" : []
+                                    }, 
+                                    {
+                                        "@id" : "dengeleme",
+                                        "@type" : "Component",
+                                        "name" : "dengeleme",
+                                        "displayName" : "Dengeleme",
+                                        "description" : "<description>",
+                                        "type" : "Component",
+                                        "parent" : "Press031",
+                                        "visual" : [ 
+                                            {
+                                                "isRender" : False,
+                                                "geometryType" : "BoxGeometry",
+                                                "name" : "sol_alt",
+                                                "boxMeasure" : {
+                                                    "x" : 2,
+                                                    "y" : 2,
+                                                    "z" : 0.2
+                                                },
+                                                "position" : {
+                                                    "x" : -1.1,
+                                                    "y" : 1,
+                                                    "z" : 0.4
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 6720767,
+                                                "opacity" : 0.7
+                                            }, 
+                                            {
+                                                "isRender" : False,
+                                                "geometryType" : "BoxGeometry",
+                                                "name" : "sag_alt",
+                                                "boxMeasure" : {
+                                                    "x" : 2,
+                                                    "y" : 2,
+                                                    "z" : 0.2
+                                                },
+                                                "position" : {
+                                                    "x" : -1.1,
+                                                    "y" : 1,
+                                                    "z" : -2.38
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 6720767,
+                                                "opacity" : 0.7
+                                            }, 
+                                            {
+                                                "isRender" : False,
+                                                "geometryType" : "BoxGeometry",
+                                                "name" : "sol_alt_küçük_dikdörtgen1",
+                                                "boxMeasure" : {
+                                                    "x" : 0.5,
+                                                    "y" : 0.5,
+                                                    "z" : 0.5
+                                                },
+                                                "position" : {
+                                                    "x" : -1.5,
+                                                    "y" : 0.6,
+                                                    "z" : 0.5
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 14803434,
+                                                "opacity" : 0.7
+                                            }, 
+                                            {
+                                                "isRender" : False,
+                                                "geometryType" : "BoxGeometry",
+                                                "name" : "sag_alt_küçük_dikdörtgen1",
+                                                "boxMeasure" : {
+                                                    "x" : 0.5,
+                                                    "y" : 0.5,
+                                                    "z" : 0.5
+                                                },
+                                                "position" : {
+                                                    "x" : -1.5,
+                                                    "y" : 0.6,
+                                                    "z" : -2.45
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 14803434,
+                                                "opacity" : 0.7
+                                            }, 
+                                            {
+                                                "isRender" : False,
+                                                "geometryType" : "BoxGeometry",
+                                                "name" : "sol_alt_küçük_dikdörtgen2",
+                                                "boxMeasure" : {
+                                                    "x" : 0.5,
+                                                    "y" : 0.5,
+                                                    "z" : 0.5
+                                                },
+                                                "position" : {
+                                                    "x" : -1.5,
+                                                    "y" : 1.4,
+                                                    "z" : 0.5
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 14803434,
+                                                "opacity" : 0.7
+                                            }, 
+                                            {
+                                                "isRender" : False,
+                                                "geometryType" : "BoxGeometry",
+                                                "name" : "sag_alt_küçük_dikdörtgen2",
+                                                "boxMeasure" : {
+                                                    "x" : 0.5,
+                                                    "y" : 0.5,
+                                                    "z" : 0.5
+                                                },
+                                                "position" : {
+                                                    "x" : -1.5,
+                                                    "y" : 1.4,
+                                                    "z" : -2.4
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 14803434,
+                                                "opacity" : 0.7
+                                            }, 
+                                            {
+                                                "isRender" : False,
+                                                "geometryType" : "BoxGeometry",
+                                                "name" : "sol_alt_küçük_dikdörtgen3",
+                                                "boxMeasure" : {
+                                                    "x" : 0.5,
+                                                    "y" : 0.5,
+                                                    "z" : 0.5
+                                                },
+                                                "position" : {
+                                                    "x" : -0.6,
+                                                    "y" : 1.4,
+                                                    "z" : 0.5
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 14803434,
+                                                "opacity" : 0.7
+                                            }, 
+                                            {
+                                                "isRender" : False,
+                                                "geometryType" : "BoxGeometry",
+                                                "name" : "sag_alt_küçük_dikdörtgen3",
+                                                "boxMeasure" : {
+                                                    "x" : 0.5,
+                                                    "y" : 0.5,
+                                                    "z" : 0.5
+                                                },
+                                                "position" : {
+                                                    "x" : -0.5,
+                                                    "y" : 1.4,
+                                                    "z" : -2.4
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 14803434,
+                                                "opacity" : 0.7
+                                            }, 
+                                            {
+                                                "isRender" : False,
+                                                "geometryType" : "BoxGeometry",
+                                                "name" : "sol_alt_küçük_dikdörtgen4",
+                                                "boxMeasure" : {
+                                                    "x" : 0.5,
+                                                    "y" : 0.5,
+                                                    "z" : 0.5
+                                                },
+                                                "position" : {
+                                                    "x" : -0.6,
+                                                    "y" : 0.6,
+                                                    "z" : 0.5
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 14803434,
+                                                "opacity" : 0.7
+                                            }, 
+                                            {
+                                                "isRender" : False,
+                                                "geometryType" : "BoxGeometry",
+                                                "name" : "sag_alt_küçük_dikdörtgen4",
+                                                "boxMeasure" : {
+                                                    "x" : 0.5,
+                                                    "y" : 0.5,
+                                                    "z" : 0.5
+                                                },
+                                                "position" : {
+                                                    "x" : -0.7,
+                                                    "y" : 0.6,
+                                                    "z" : -2.5
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 14803434,
+                                                "opacity" : 0.7
+                                            }, 
+                                            {
+                                                "isRender" : False,
+                                                "geometryType" : "BoxGeometry",
+                                                "name" : "orta_alt",
+                                                "boxMeasure" : {
+                                                    "x" : 1.5,
+                                                    "y" : 0.3,
+                                                    "z" : 2.6
+                                                },
+                                                "position" : {
+                                                    "x" : -1,
+                                                    "y" : 0.3,
+                                                    "z" : -1
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 16776960,
+                                                "opacity" : 0.7
+                                            }, 
+                                            {
+                                                "isRender" : False,
+                                                "geometryType" : "BoxGeometry",
+                                                "name" : "orta_üst",
+                                                "boxMeasure" : {
+                                                    "x" : 1.5,
+                                                    "y" : 0.3,
+                                                    "z" : 2.6
+                                                },
+                                                "position" : {
+                                                    "x" : -1,
+                                                    "y" : 1.5,
+                                                    "z" : -1
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 16776960,
+                                                "opacity" : 0.7
+                                            }
+                                        ],
+                                        "sensorGroups": [
+                                            {
+                                                "name": "Ana_Motor_Arka",
+                                                "fields": ["mean_AM_Arka_acc", "mean_AM_Arka_Balans", "mean_AM_Arka_Bosluk", "mean_AM_Arka_Eks_kac"]
+                                            },
+                                            {
+                                                "name": "Ana_Motor_On",
+                                                "fields": ["mean_AM_On_Acc", "mean_AM_On_Balans", "mean_AM_On_Bosluk", "mean_AM_On_Eks_kac"]
+                                            }
+                                        ],
+                                        "sensors" : [ 
+                                            {
+                                                "@type" : [ 
+                                                    "Telemetry", 
+                                                    "Temperature"
+                                                ],
+                                                "@id" : "presAnaHavaAkis",
+                                                "name" : "presAnaHavaAkis",
+                                                "schema" : "real",
+                                                "type" : "Sensor",
+                                                "parent" : "dengeleme",
+                                                "unit" : "double",
+                                                "displayName" : "Pres Ana Hava Akış",
+                                                "description" : "degreeCelcius",
+                                                "status" : "Working",
+                                                "dataSource" : "sensors_data",
+                                                "fields": ["mean_AM_Arka_Acc", "mean_AM_Arka_Balans"],
+                                                "minValue" : 10,
+                                                "maxValue" : 70,
+                                                "visual" : {
+                                                    "isRender" : False,
+                                                    "geometryType" : "BoxGeometry",
+                                                    "name" : "pres_ana_hava_akis",
+                                                    "boxMeasure" : {
+                                                        "x" : 0.2,
+                                                        "y" : 0.2,
+                                                        "z" : 0.2
+                                                    },
+                                                    "position" : {
+                                                        "x" : 0,
+                                                        "y" : 0.1,
+                                                        "z" : -2.4
+                                                    },
+                                                    "rotate" : {
+                                                        "x" : 0,
+                                                        "y" : 0,
+                                                        "z" : 0
+                                                    },
+                                                    "color" : 13369344,
+                                                    "opacity" : 0.7
+                                                }
+                                            }, 
+                                            {
+                                                "@type" : [ 
+                                                    "Telemetry", 
+                                                    "Temperature"
+                                                ],
+                                                "@id" : "sensor1",
+                                                "name" : "sensor1",
+                                                "schema" : "real",
+                                                "type" : "Sensor",
+                                                "parent" : "dengeleme",
+                                                "unit" : "double",
+                                                "displayName" : "sensor1",
+                                                "description" : "degreeCelcius",
+                                                "status" : "Working",
+                                                "dataSource" : "sensors_data",
+                                                "minValue" : 30,
+                                                "maxValue" : 60,
+                                                "fields": ["mean_AM_Arka_Acc", "mean_AM_Arka_Balans"],
+                                                "visual" : {
+                                                    "geometryType" : "BoxGeometry",
+                                                    "isRender" : False,
+                                                    "name" : "sensor1",
+                                                    "boxMeasure" : {
+                                                        "x" : 0.2,
+                                                        "y" : 0.2,
+                                                        "z" : 0.2
+                                                    },
+                                                    "position" : {
+                                                        "x" : 0,
+                                                        "y" : 1.1,
+                                                        "z" : -2.4
+                                                    },
+                                                    "rotate" : {
+                                                        "x" : 0,
+                                                        "y" : 0,
+                                                        "z" : 0
+                                                    },
+                                                    "color" : 13369344,
+                                                    "opacity" : 0.7
+                                                }
+                                            }, 
+                                            {
+                                                "@type" : [ 
+                                                    "Telemetry", 
+                                                    "Temperature"
+                                                ],
+                                                "@id" : "sensor2",
+                                                "name" : "sensor2",
+                                                "schema" : "real",
+                                                "type" : "Sensor",
+                                                "parent" : "dengeleme",
+                                                "unit" : "double",
+                                                "displayName" : "sensor2",
+                                                "description" : "degreeCelcius",
+                                                "status" : "Working",
+                                                "dataSource" : "sensors_data",
+                                                "fields": ["mean_AM_Arka_Acc", "mean_AM_Arka_Balans"],
+                                                "minValue" : -100,
+                                                "maxValue" : 100,
+                                                "visual" : {
+                                                    "geometryType" : "BoxGeometry",
+                                                    "isRender" : False,
+                                                    "name" : "sensor2",
+                                                    "boxMeasure" : {
+                                                        "x" : 0.2,
+                                                        "y" : 0.2,
+                                                        "z" : 0.2
+                                                    },
+                                                    "position" : {
+                                                        "x" : 0,
+                                                        "y" : 2.1,
+                                                        "z" : -2.35
+                                                    },
+                                                    "rotate" : {
+                                                        "x" : 0,
+                                                        "y" : 0,
+                                                        "z" : 0
+                                                    },
+                                                    "color" : 13369344,
+                                                    "opacity" : 0.7
+                                                }
+                                            }
+                                        ]
+                                    }, 
+                                    {
+                                        "@id" : "genelPres",
+                                        "@type" : "Component",
+                                        "name" : "genelPres",
+                                        "displayName" : "Genel Pres",
+                                        "description" : "<description>",
+                                        "type" : "Component",
+                                        "parent" : "Press031",
+                                        "visual" : [ 
+                                            {
+                                                "isRender" : False,
+                                                "geometryType" : "BoxGeometry",
+                                                "name" : "sol_üst",
+                                                "boxMeasure" : {
+                                                    "x" : 2,
+                                                    "y" : 2,
+                                                    "z" : 0.2
+                                                },
+                                                "position" : {
+                                                    "x" : -1.1,
+                                                    "y" : 3,
+                                                    "z" : 0.4
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 14803434,
+                                                "opacity" : 0.7
+                                            }, 
+                                            {
+                                                "isRender" : False,
+                                                "geometryType" : "BoxGeometry",
+                                                "name" : "sag_üst",
+                                                "boxMeasure" : {
+                                                    "x" : 2,
+                                                    "y" : 2,
+                                                    "z" : 0.2
+                                                },
+                                                "position" : {
+                                                    "x" : -1.1,
+                                                    "y" : 3,
+                                                    "z" : -2.35
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 14803434,
+                                                "opacity" : 0.7
+                                            }, 
+                                            {
+                                                "isRender" : False,
+                                                "geometryType" : "BoxGeometry",
+                                                "name" : "orta_üst_büyük",
+                                                "boxMeasure" : {
+                                                    "x" : 1.5,
+                                                    "y" : 1,
+                                                    "z" : 2.6
+                                                },
+                                                "position" : {
+                                                    "x" : -1,
+                                                    "y" : 2.2,
+                                                    "z" : -1
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 16777164,
+                                                "opacity" : 0.7
+                                            }, 
+                                            {
+                                                "isRender" : False,
+                                                "geometryType" : "BoxGeometry",
+                                                "name" : "orta_üst_kapak",
+                                                "boxMeasure" : {
+                                                    "x" : 1.8,
+                                                    "y" : 0.2,
+                                                    "z" : 2.9
+                                                },
+                                                "position" : {
+                                                    "x" : -1.1,
+                                                    "y" : 4,
+                                                    "z" : -1
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 14803434,
+                                                "opacity" : 0.7
+                                            }
+                                        ],
+                                        "sensors" : []
+                                    }, 
+                                    {
+                                        "@id" : "robot",
+                                        "@type" : "Component",
+                                        "name" : "robot",
+                                        "displayName" : "Robot",
+                                        "description" : "<description>",
+                                        "type" : "Component",
+                                        "parent" : "Press031",
+                                        "visual" : [],
+                                        "sensors" : []
+                                    }, 
+                                    {
+                                        "@type" : "Relationship",
+                                        "name" : "Press031ToPress032",
+                                        "source" : "Press031",
+                                        "target" : "Press032"
+                                    }
+                                ]
+                            }, 
                             {
-                                "@id": "volan",
-                                "@type": "Component",
-                                "name": "volan",
-                                "displayName": "Volan",
-                                "description": "<description>",
-                                "type": "Component",
-                                "parent": "Press030",
-                                "visual": [
+                                "@id" : "Press032",
+                                "name" : "Press032",
+                                "type" : "Machine",
+                                "parent" : "1600T_Press_Line",
+                                "@type" : "Interface",
+                                "displayName" : "Press032",
+                                "description" : "machine description",
+                                "measurements": [],
+                                "contents" : [ 
                                     {
-                                        "isRender": False,
-                                        "geometryType": "BoxGeometry",
-                                        "name": 'üst_silindirli_dikdörtgen',
-                                        "boxMeasure": {
-                                            "x": 1.8,
-                                            "y": 1,
-                                            "z": 2.9,
-                                        },
-                                        "position": {
-                                            "x": -1.1,
-                                            "y": 4.6,
-                                            "z": -1
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0xe1e1ea,
-                                        "opacity": .7,
-                                    },
-                                ],
-                                "sensors": [],
-                            },
+                                        "@type" : "Relationship",
+                                        "name" : "Press032ToPress033",
+                                        "source" : "Press032",
+                                        "target" : "Press033"
+                                    }
+                                ]
+                            }, 
                             {
-                                "@id": "dengeleme",
-                                "@type": "Component",
-                                "name": "dengeleme",
-                                "displayName": "Dengeleme",
-                                "description": "<description>",
-                                "type": "Component",
-                                "parent": "Press030",
-                                "visual": [
+                                "@id" : "Press033",
+                                "name" : "Press033",
+                                "type" : "Machine",
+                                "parent" : "1600T_Press_Line",
+                                "@type" : "Interface",
+                                "displayName" : "Press033",
+                                "description" : "machine description",
+                                "measurements": [],
+                                "contents" : [ 
                                     {
-                                        "isRender": False,
-                                        "geometryType": "BoxGeometry",
-                                        "name": 'sol_alt',
-                                        "boxMeasure": {
-                                            "x": 2,
-                                            "y": 2,
-                                            "z": 0.2,
-                                        },
-                                        "position": {
-                                            "x": -1.1,
-                                            "y": 1,
-                                            "z": 0.4
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0x668cff,
-                                        "opacity": .7,
-                                    },
-                                    {
-                                        "isRender": False,
-                                        "geometryType": "BoxGeometry",
-                                        "name": "sag_alt",
-                                        "boxMeasure": {
-                                            "x": 2,
-                                            "y": 2,
-                                            "z": 0.2,
-                                        },
-                                        "position": {
-                                            "x": -1.1,
-                                            "y": 1,
-                                            "z": -2.38,
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0x668cff,
-                                        "opacity": .7,
-                                    },
-                                    {
-                                        "isRender": False,
-                                        "geometryType": "BoxGeometry",
-                                        "name": 'sol_alt_küçük_dikdörtgen1',
-                                        "boxMeasure": {
-                                            "x": .5,
-                                            "y": .5,
-                                            "z": .5,
-                                        },
-                                        "position": {
-                                            "x": -1.5,
-                                            "y": 0.6,
-                                            "z": 0.5
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0xe1e1ea,
-                                        "opacity": .7,
-                                    },
-                                    {
-                                        "isRender": False,
-                                        "geometryType": "BoxGeometry",
-                                        "name": 'sag_alt_küçük_dikdörtgen1',
-                                        "boxMeasure": {
-                                            "x": .5,
-                                            "y": .5,
-                                            "z": .5,
-                                        },
-                                        "position": {
-                                            "x": -1.5,
-                                            "y": 0.6,
-                                            "z": -2.45
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0xe1e1ea,
-                                        "opacity": .7,
-                                    },
-                                    {
-                                        "isRender": False,
-                                        "geometryType": "BoxGeometry",
-                                        "name": 'sol_alt_küçük_dikdörtgen2',
-                                        "boxMeasure": {
-                                            "x": .5,
-                                            "y": .5,
-                                            "z": .5,
-                                        },
-                                        "position": {
-                                            "x": -1.5,
-                                            "y": 1.4,
-                                            "z": 0.5
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0xe1e1ea,
-                                        "opacity": .7,
-                                    },
-                                    {
-                                        "isRender": False,
-                                        "geometryType": "BoxGeometry",
-                                        "name": 'sag_alt_küçük_dikdörtgen2',
-                                        "boxMeasure": {
-                                            "x": .5,
-                                            "y": .5,
-                                            "z": .5,
-                                        },
-                                        "position": {
-                                            "x": -1.5,
-                                            "y": 1.4,
-                                            "z": -2.4
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0xe1e1ea,
-                                        "opacity": .7,
-                                    },
-                                    {
-                                        "isRender": False,
-                                        "geometryType": "BoxGeometry",
-                                        "name": 'sol_alt_küçük_dikdörtgen3',
-                                        "boxMeasure": {
-                                            "x": .5,
-                                            "y": .5,
-                                            "z": .5,
-                                        },
-                                        "position": {
-                                            "x": -0.6,
-                                            "y": 1.4,
-                                            "z": .5
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0xe1e1ea,
-                                        "opacity": .7,
-                                    },
-                                    {
-                                        "isRender": False,
-                                        "geometryType": "BoxGeometry",
-                                        "name": 'sag_alt_küçük_dikdörtgen3',
-                                        "boxMeasure": {
-                                            "x": .5,
-                                            "y": .5,
-                                            "z": .5,
-                                        },
-                                        "position": {
-                                            "x": -.5,
-                                            "y": 1.4,
-                                            "z": -2.4
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0xe1e1ea,
-                                        "opacity": .7,
-                                    },
-                                    {
-                                        "isRender": False,
-                                        "geometryType": "BoxGeometry",
-                                        "name": 'sol_alt_küçük_dikdörtgen4',
-                                        "boxMeasure": {
-                                            "x": .5,
-                                            "y": .5,
-                                            "z": .5,
-                                        },
-                                        "position": {
-                                            "x": -0.6,
-                                            "y": 0.6,
-                                            "z": .5
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0xe1e1ea,
-                                        "opacity": .7,
-                                    },
-                                    {
-                                        "isRender": False,
-                                        "geometryType": "BoxGeometry",
-                                        "name": 'sag_alt_küçük_dikdörtgen4',
-                                        "boxMeasure": {
-                                            "x": .5,
-                                            "y": .5,
-                                            "z": .5,
-                                        },
-                                        "position": {
-                                            "x": -.7,
-                                            "y": 0.6,
-                                            "z": -2.5
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0xe1e1ea,
-                                        "opacity": .7,
-                                    },
-                                    {
-                                        "isRender": False,
-                                        "geometryType": "BoxGeometry",
-                                        "name": "orta_alt",
-                                        "boxMeasure": {
-                                            "x": 1.5,
-                                            "y": 0.3,
-                                            "z": 2.6,
-                                        },
-                                        "position": {
-                                            "x": -1,
-                                            "y": 0.3,
-                                            "z": -1,
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0xffff00,
-                                        "opacity": .7,
-                                    },
-                                    {
-                                        "isRender": False,
-                                        "geometryType": "BoxGeometry",
-                                        "name": "orta_üst",
-                                        "boxMeasure": {
-                                            "x": 1.5,
-                                            "y": 0.3,
-                                            "z": 2.6,
-                                        },
-                                        "position": {
-                                            "x": -1,
-                                            "y": 1.5,
-                                            "z": -1,
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0xffff00,
-                                        "opacity": .7,
-                                    },
-                                ],
-                                "sensors": [
-                                    {
-                                        "@type": ["Telemetry", "Temperature"],
-                                        "@id": "presAnaHavaAkis",
-                                        "name": "presAnaHavaAkis",
-                                        "schema": "real",
-                                        "type": "Sensor",
-                                        "parent": "dengeleme",
-                                        "unit": "double",
-                                        "displayName": "Pres Ana Hava Akış",
-                                        "description": "degreeCelcius",
-                                        "status": "Working",
-                                        "dataSource": "sensors_data",
-                                        "minValue": 10,
-                                        "maxValue": 70,
-                                        "visual": {
-                                            "isRender": False,
-                                            "geometryType": "BoxGeometry",
-                                            "name": "pres_ana_hava_akis",
-                                            "boxMeasure": {
-                                                "x": 0.2,
-                                                "y": 0.2,
-                                                "z": 0.2,
-                                            },
-                                            "position": {
-                                                "x": 0,
-                                                "y": 0.1,
-                                                "z": -2.4,
-                                            },
-                                            "rotate": {
-                                                "x": 0,
-                                                "y": 0,
-                                                "z": 0
-                                            },
-                                            "color": 0xcc0000,
-                                            "opacity": 0.7,
-                                        },
-                                    },
-                                    {
-                                        "@type": ["Telemetry", "Temperature"],
-                                        "@id": "sensor1",
-                                        "name": "sensor1",
-                                        "schema": "real",
-                                        "type": "Sensor",
-                                        "parent": "dengeleme",
-                                        "unit": "double",
-                                        "displayName": "sensor1",
-                                        "description": "degreeCelcius",
-                                        "status": "Working",
-                                        "dataSource": "sensors_data",
-                                        "minValue": 30,
-                                        "maxValue": 60,
-                                        "visual": {
-                                            "geometryType": "BoxGeometry",
-                                            "isRender": False,
-                                            "name": "sensor1",
-                                            "boxMeasure": {
-                                                "x": 0.2,
-                                                "y": 0.2,
-                                                "z": 0.2,
-                                            },
-                                            "position": {
-                                                "x": 0,
-                                                "y": 1.1,
-                                                "z": -2.4,
-                                            },
-                                            "rotate": {
-                                                "x": 0,
-                                                "y": 0,
-                                                "z": 0
-                                            },
-                                            "color": 0xcc0000,
-                                            "opacity": 0.7,
-                                        },
-                                    },
-                                    {
-                                        "@type": ["Telemetry", "Temperature"],
-                                        "@id": "sensor2",
-                                        "name": "sensor2",
-                                        "schema": "real",
-                                        "type": "Sensor",
-                                        "parent": "dengeleme",
-                                        "unit": "double",
-                                        "displayName": "sensor2",
-                                        "description": "degreeCelcius",
-                                        "status": "Working",
-                                        "dataSource": "sensors_data",
-                                        "minValue": -100,
-                                        "maxValue": 100,
-                                        "visual": {
-                                            "geometryType": "BoxGeometry",
-                                            "isRender": False,
-                                            "name": "sensor2",
-                                            "boxMeasure": {
-                                                "x": 0.2,
-                                                "y": 0.2,
-                                                "z": 0.2,
-                                            },
-                                            "position": {
-                                                "x": 0,
-                                                "y": 2.1,
-                                                "z": -2.35,
-                                            },
-                                            "rotate": {
-                                                "x": 0,
-                                                "y": 0,
-                                                "z": 0
-                                            },
-                                            "color": 0xcc0000,
-                                            "opacity": 0.7,
-                                        },
-                                    },
-                                ],
-                            },
+                                        "@type" : "Relationship",
+                                        "name" : "Press033ToPress034",
+                                        "source" : "Press033",
+                                        "target" : "Press034"
+                                    }
+                                ]
+                            }, 
                             {
-                                "@id": "genelPres",
-                                "@type": "Component",
-                                "name": "genelPres",
-                                "displayName": "Genel Pres",
-                                "description": "<description>",
-                                "type": "Component",
-                                "parent": "Press030",
-                                "visual": [
-                                    {
-                                        "isRender": False,
-                                        "geometryType": "BoxGeometry",
-                                        "name": 'sol_üst',
-                                        "boxMeasure": {
-                                            "x": 2,
-                                            "y": 2,
-                                            "z": 0.2,
-                                        },
-                                        "position": {
-                                            "x": -1.1,
-                                            "y": 3,
-                                            "z": 0.4
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0xe1e1ea,
-                                        "opacity": .7,
-                                    },
-                                    {
-                                        "isRender": False,
-                                        "geometryType": "BoxGeometry",
-                                        "name": "sag_üst",
-                                        "boxMeasure": {
-                                            "x": 2,
-                                            "y": 2,
-                                            "z": 0.2,
-                                        },
-                                        "position": {
-                                            "x": -1.1,
-                                            "y": 3,
-                                            "z": -2.35,
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0xe1e1ea,
-                                        "opacity": .7,
-                                    },
-                                    {
-                                        "isRender": False,
-                                        "geometryType": "BoxGeometry",
-                                        "name": "orta_üst_büyük",
-                                        "boxMeasure": {
-                                            "x": 1.5,
-                                            "y": 1,
-                                            "z": 2.6,
-                                        },
-                                        "position": {
-                                            "x": -1,
-                                            "y": 2.2,
-                                            "z": -1,
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0xffffcc,
-                                        "opacity": .7,
-                                    },
-                                    {
-                                        "isRender": False,
-                                        "geometryType": "BoxGeometry",
-                                        "name": "orta_üst_kapak",
-                                        "boxMeasure": {
-                                            "x": 1.8,
-                                            "y": .2,
-                                            "z": 2.9,
-                                        },
-                                        "position": {
-                                            "x": -1.1,
-                                            "y": 4,
-                                            "z": -1,
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0xe1e1ea,
-                                        "opacity": .7,
-                                    },
-                                ],
-                                "sensors": [],
-                            },
+                                "@id" : "Press034",
+                                "name" : "Press034",
+                                "type" : "Machine",
+                                "parent" : "1600T_Press_Line",
+                                "@type" : "Interface",
+                                "displayName" : "Press034",
+                                "description" : "machine description",
+                                "measurements": [],
+                                "contents" : []
+                            }, 
                             {
-                                "@id": "robot",
-                                "@type": "Component",
-                                "name": "robot",
-                                "displayName": "Robot",
-                                "description": "<description>",
-                                "type": "Component",
-                                "parent": "Press030",
-                                "visual": [],
-                                "sensors": [],
-                            },
+                                "@id" : "Robot",
+                                "name" : "Robot",
+                                "type" : "Machine",
+                                "parent" : "1600T_Press_Line",
+                                "@type" : "Interface",
+                                "displayName" : "Robot",
+                                "description" : "machine description",
+                                "measurements": [],
+                                "contents" : [ 
+                                    {
+                                        "@id" : "robotPart1",
+                                        "@type" : "Component",
+                                        "name" : "robotPart1",
+                                        "displayName" : "Robot Part 1",
+                                        "description" : "<description>",
+                                        "type" : "Component",
+                                        "parent" : "Robot",
+                                        "visual" : [ 
+                                            {
+                                                "isRender" : False,
+                                                "name" : "collada_file",
+                                                "geometryType" : "ColladaFile",
+                                                "fileName" : "abb_irb52_7_120.dae",
+                                                "boxMeasure" : {
+                                                    "x" : 4,
+                                                    "y" : 4,
+                                                    "z" : 4
+                                                },
+                                                "position" : {
+                                                    "x" : 4,
+                                                    "y" : 0,
+                                                    "z" : -1.5
+                                                },
+                                                "rotate" : {
+                                                    "x" : 0,
+                                                    "y" : 0,
+                                                    "z" : 0
+                                                },
+                                                "color" : 6084188,
+                                                "opacity" : 0.7
+                                            }
+                                        ],
+                                        "sensors" : []
+                                    }, 
+                                    {
+                                        "@type" : "Relationship",
+                                        "name" : "RobotToPress030",
+                                        "source" : "Robot",
+                                        "target" : "Press030"
+                                    }
+                                ]
+                            }
                         ],
                     },
                     {
-                        "@id": "Press031",
-                        "name": "Press031",
-                        "type": "Machine",
+                        "@id": "ProductionLine1",
+                        "type": "ProductionLine",
                         "parent": "Ermetal",
-                        "@type": "Interface",
-                        "displayName": "Press031",
-                        "description": "machine description",
-                        "contents": []
+                        "displayName": "Production Line 1",
+                        "description": "description",
+                        "name": "ProductionLine1",
+                        "machines": []
                     },
                     {
-                        "@id": "Press032",
-                        "name": "Press032",
-                        "type": "Machine",
+                        "@id": "ProductionLine2",
+                        "type": "ProductionLine",
                         "parent": "Ermetal",
-                        "@type": "Interface",
-                        "displayName": "Press032",
-                        "description": "machine description",
-                        "contents": []
+                        "displayName": "Production Line 2",
+                        "description": "description",
+                        "name": "ProductionLine2",
+                        "machines": []
                     },
                     {
-                        "@id": "Press033",
-                        "name": "Press033",
-                        "type": "Machine",
+                        "@id": "ProductionLine3",
+                        "type": "ProductionLine",
                         "parent": "Ermetal",
-                        "@type": "Interface",
-                        "displayName": "Press033",
-                        "description": "machine description",
-                        "contents": []
+                        "displayName": "Production Line 3",
+                        "description": "description",
+                        "name": "ProductionLine3",
+                        "machines": []
                     },
                     {
-                        "@id": "Press034",
-                        "name": "Press034",
-                        "type": "Machine",
+                        "@id": "ProductionLine4",
+                        "type": "ProductionLine",
                         "parent": "Ermetal",
-                        "@type": "Interface",
-                        "displayName": "Press034",
-                        "description": "machine description",
-                        "contents": []                    
+                        "displayName": "Production Line 4",
+                        "description": "description",
+                        "name": "ProductionLine4",
+                        "machines": []
                     },
-                    {
-                        "@id": "Robot",
-                        "name": "Robot",
-                        "type": "Machine",
-                        "parent": "Ermetal",
-                        "@type": "Interface",
-                        "displayName": "Robot",
-                        "description": "machine description",
-                        "contents": [
-                            {
-                                "@id": "robotPart1",
-                                "@type": "Component",
-                                "name": "robotPart1",
-                                "displayName": "Robot Part 1",
-                                "description": "<description>",
-                                "type": "Component",
-                                "parent": "Robot",
-                                "visual": [
-                                    {
-                                        "isRender": False,
-                                        "name": 'collada_file',
-                                        "geometryType": "ColladaFile",
-                                        "fileName": "abb_irb52_7_120.dae",
-                                        "boxMeasure": {
-                                            "x": 4,
-                                            "y": 4,
-                                            "z": 4,
-                                        },
-                                        "position": {
-                                            "x": 4,
-                                            "y": 0,
-                                            "z": -1.5
-                                        },
-                                        "rotate": {
-                                            "x": 0,
-                                            "y": 0,
-                                            "z": 0
-                                        },
-                                        "color": 0x5cd65c,
-                                        "opacity": .7,
-                                    }
-                                ],
-                                "sensors": [],
-                            },
-                        ]                    
-                    }
                 ],
             }
         }

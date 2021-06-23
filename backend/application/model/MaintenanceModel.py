@@ -44,3 +44,14 @@ class MaintenanceModel():
 
     def is_maintenance_exist(self, payload):
         return cursor_to_json(self.db.find(self.collection, payload))
+
+    def get_maintenance_by_condition(self, payload, columns):
+        try:
+            where = {}
+
+            for cond in payload:
+                where[cond] = { '$regex': f".*{payload[cond]}.*"}
+
+            return self.db.find_by_columns(self.collection, where, columns)
+        except:
+            return False

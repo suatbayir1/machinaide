@@ -15,6 +15,7 @@ from application.controller.PredictionController import prediction
 from application.controller.LogController import log
 from application.controller.MaintenanceController import maintenance
 from application.controller.UserController import user
+from application.controller.GeneralController import general
 import time
 
 today = datetime.date.today()
@@ -33,6 +34,7 @@ app.register_blueprint(prediction, url_prefix = f"{app_prefix}/prediction")
 app.register_blueprint(log, url_prefix = f"{app_prefix}/log")
 app.register_blueprint(maintenance, url_prefix = f"{app_prefix}/maintenance")
 app.register_blueprint(user, url_prefix = f"{app_prefix}/user")
+app.register_blueprint(general, url_prefix = f"{app_prefix}/general")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 CORS(dt)
 CORS(app, supports_credentials = True, resources={r"*": {"origins": "*"}})

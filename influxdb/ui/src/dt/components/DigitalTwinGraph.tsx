@@ -122,9 +122,11 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
             graphWidth: document.querySelector("#graphDiv").clientWidth - 30
         })
         window.addEventListener('resize', () => {
-            this.setState({
-                graphWidth: document.querySelector("#graphDiv").clientWidth - 30
-            })
+            if (document.querySelector("#graphDiv") !== null) {
+                this.setState({
+                    graphWidth: document.querySelector("#graphDiv").clientWidth - 30
+                })
+            }
         });
     }
 
@@ -179,60 +181,140 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
         const nodes = [];
         const links = [];
 
-        Object.keys(graphInfo).forEach((factory) => {
+        console.log(graphInfo);
+
+        graphInfo.map(factory => {
             nodes.push(Object.assign({
-                id: graphInfo[factory].factoryName,
+                id: factory?.factoryName,
                 color: "blue",
                 size: 500,
                 src: "../../assets/images/graph/ermetal.png",
                 symbolType: "star",
-            }, graphInfo[factory]));
+            }, factory));
 
-            Object.keys(graphInfo[factory].machines).forEach((machine) => {
+            factory["productionLines"].map(pl => {
                 nodes.push(Object.assign({
-                    id: graphInfo[factory].machines[machine].displayName,
+                    id: pl?.name,
                     color: "red",
                     size: 400,
                     symbolType: "circle",
-                    src: "../../assets/images/graph/machine.jpg",
-                }, graphInfo[factory].machines[machine]));
+                    src: "../../assets/images/graph/pl.jpg",
+                }, pl));
 
                 links.push({
-                    source: graphInfo[factory].machines[machine].parent,
-                    target: graphInfo[factory].machines[machine].displayName
+                    source: pl?.parent,
+                    target: pl?.name
                 });
 
-                Object.keys(graphInfo[factory].machines[machine].contents).forEach((component) => {
+                pl["machines"].map(machine => {
                     nodes.push(Object.assign({
-                        id: graphInfo[factory].machines[machine].contents[component].name,
-                        color: "green",
-                        size: 300,
-                        symbolType: "square",
-                        src: "../../assets/images/graph/component.png",
-                    }, graphInfo[factory].machines[machine].contents[component]))
+                        id: machine?.displayName,
+                        color: "red",
+                        size: 400,
+                        symbolType: "circle",
+                        src: "../../assets/images/graph/machine.jpg",
+                    }, machine));
 
                     links.push({
-                        source: graphInfo[factory].machines[machine].contents[component].parent,
-                        target: graphInfo[factory].machines[machine].contents[component].name
-                    })
+                        source: machine?.parent,
+                        target: machine?.displayName
+                    });
 
-                    Object.keys(graphInfo[factory].machines[machine].contents[component].sensors).forEach((sensor) => {
+                    machine["contents"].map(component => {
+                        if (component["@type"] !== "Component") {
+                            return;
+                        }
+
                         nodes.push(Object.assign({
-                            id: graphInfo[factory].machines[machine].contents[component].sensors[sensor].displayName,
-                            color: "orange",
+                            id: component?.name,
+                            color: "green",
                             size: 300,
-                            symbolType: "triangle",
-                            src: "../../assets/images/graph/sensor.jpg",
-                        }, graphInfo[factory].machines[machine].contents[component].sensors[sensor]))
+                            symbolType: "square",
+                            src: "../../assets/images/graph/component.png",
+                        }, component))
 
                         links.push({
-                            source: graphInfo[factory].machines[machine].contents[component].sensors[sensor].parent,
-                            target: graphInfo[factory].machines[machine].contents[component].sensors[sensor].displayName
+                            source: component?.parent,
+                            target: component?.name
+                        })
+
+                        component["sensors"].map(sensor => {
+                            nodes.push(Object.assign({
+                                id: sensor?.displayName,
+                                color: "orange",
+                                size: 300,
+                                symbolType: "triangle",
+                                src: "../../assets/images/graph/sensor.jpg",
+                            }, sensor))
+
+                            links.push({
+                                source: sensor?.parent,
+                                target: sensor?.displayName
+                            })
                         })
                     })
                 })
             })
         })
+
+        // Object.keys(graphInfo).forEach((factory) => {
+        //     nodes.push(Object.assign({
+        //         id: graphInfo[factory].factoryName,
+        //         color: "blue",
+        //         size: 500,
+        //         src: "../../assets/images/graph/ermetal.png",
+        //         symbolType: "star",
+        //     }, graphInfo[factory]));
+
+        //     Object.keys(graphInfo[factory].machines).forEach((machine) => {
+        //         nodes.push(Object.assign({
+        //             id: graphInfo[factory].machines[machine].displayName,
+        //             color: "red",
+        //             size: 400,
+        //             symbolType: "circle",
+        //             src: "../../assets/images/graph/machine.jpg",
+        //         }, graphInfo[factory].machines[machine]));
+
+        //         links.push({
+        //             source: graphInfo[factory].machines[machine].parent,
+        //             target: graphInfo[factory].machines[machine].displayName
+        //         });
+
+        //         Object.keys(graphInfo[factory].machines[machine].contents).forEach((component) => {
+        //             if (graphInfo[factory].machines[machine].contents[component]["@type"] !== "Component") {
+        //                 return;
+        //             }
+
+        //             nodes.push(Object.assign({
+        //                 id: graphInfo[factory].machines[machine].contents[component].name,
+        //                 color: "green",
+        //                 size: 300,
+        //                 symbolType: "square",
+        //                 src: "../../assets/images/graph/component.png",
+        //             }, graphInfo[factory].machines[machine].contents[component]))
+
+        //             links.push({
+        //                 source: graphInfo[factory].machines[machine].contents[component].parent,
+        //                 target: graphInfo[factory].machines[machine].contents[component].name
+        //             })
+
+        //             Object.keys(graphInfo[factory].machines[machine].contents[component].sensors).forEach((sensor) => {
+        //                 nodes.push(Object.assign({
+        //                     id: graphInfo[factory].machines[machine].contents[component].sensors[sensor].displayName,
+        //                     color: "orange",
+        //                     size: 300,
+        //                     symbolType: "triangle",
+        //                     src: "../../assets/images/graph/sensor.jpg",
+        //                 }, graphInfo[factory].machines[machine].contents[component].sensors[sensor]))
+
+        //                 links.push({
+        //                     source: graphInfo[factory].machines[machine].contents[component].sensors[sensor].parent,
+        //                     target: graphInfo[factory].machines[machine].contents[component].sensors[sensor].displayName
+        //                 })
+        //             })
+        //         })
+        //     })
+        // })
 
         const returnData = {
             nodes,
@@ -262,7 +344,7 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
             spinnerLoading: RemoteDataState.Done
         })
 
-        this.graphRef.zoom(3, 1000);
+        this.graphRef.zoom(2.5, 1000);
         this.graphRef.d3Force('collide', d3.forceCollide(4))
     }
 
@@ -503,6 +585,14 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                                                 text="View Factory"
                                                 icon={IconFont.Pulse}
                                                 onClick={() => history.push(`/orgs/${this.props.orgID}/dt/factory-scene`)}
+                                                type={ButtonType.Button}
+                                                color={ComponentColor.Primary}
+                                            />
+
+                                            <Button
+                                                text="Data Flow"
+                                                icon={IconFont.Shuffle}
+                                                onClick={() => history.push(`/orgs/${this.props.orgID}/dt/data-flow-settings`)}
                                                 type={ButtonType.Button}
                                                 color={ComponentColor.Primary}
                                             />

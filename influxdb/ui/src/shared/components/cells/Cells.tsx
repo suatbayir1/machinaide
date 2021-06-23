@@ -1,8 +1,8 @@
 // Libraries
-import React, {Component} from 'react'
-import {connect, ConnectedProps} from 'react-redux'
-import ReactGridLayout, {WidthProvider, Layout} from 'react-grid-layout'
-import {get} from 'lodash'
+import React, { Component } from 'react'
+import { connect, ConnectedProps } from 'react-redux'
+import ReactGridLayout, { WidthProvider, Layout } from 'react-grid-layout'
+import { get } from 'lodash'
 
 // Components
 const Grid = WidthProvider(ReactGridLayout)
@@ -11,19 +11,19 @@ import GradientBorder from 'src/shared/components/cells/GradientBorder'
 import ScrollDetector from 'src/perf/components/ScrollDetector'
 
 // Actions
-import {updateCells} from 'src/cells/actions/thunks'
+import { updateCells } from 'src/cells/actions/thunks'
 
 // Utils
-import {fastMap} from 'src/utils/fast'
-import {getCells} from 'src/cells/selectors'
+import { fastMap } from 'src/utils/fast'
+import { getCells } from 'src/cells/selectors'
 
 // Constants
-import {LAYOUT_MARGIN, DASHBOARD_LAYOUT_ROW_HEIGHT} from 'src/shared/constants'
+import { LAYOUT_MARGIN, DASHBOARD_LAYOUT_ROW_HEIGHT } from 'src/shared/constants'
 
 // Types
-import {AppState, Cell, RemoteDataState} from 'src/types'
+import { AppState, Cell, RemoteDataState } from 'src/types'
 
-import {ErrorHandling} from 'src/shared/decorators/errors'
+import { ErrorHandling } from 'src/shared/decorators/errors'
 
 interface OwnProps {
   manualRefresh: number
@@ -35,7 +35,7 @@ type Props = OwnProps & ReduxProps
 @ErrorHandling
 class Cells extends Component<Props> {
   public render() {
-    const {views, cells, manualRefresh} = this.props
+    const { views, cells, manualRefresh } = this.props
 
     return (
       <>
@@ -68,7 +68,7 @@ class Cells extends Component<Props> {
   }
 
   private get cells(): Layout[] {
-    const {views} = this.props
+    const { views } = this.props
     return this.props.cells
       .filter(c => c.status === RemoteDataState.Done)
       .map(c => {
@@ -91,7 +91,7 @@ class Cells extends Component<Props> {
   }
 
   private handleLayoutChange = grid => {
-    const {cells} = this.props
+    const { cells } = this.props
 
     let changed = false
 
@@ -125,7 +125,7 @@ class Cells extends Component<Props> {
     }
   }
   private handlePositionChange = (cells: Cell[]) => {
-    const {dashboard, updateCells} = this.props
+    const { dashboard, updateCells } = this.props
     updateCells(dashboard, cells)
   }
 }

@@ -17,17 +17,10 @@ import { Link } from "react-router-dom";
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
 import HomeIcon from '@material-ui/icons/Home';
-// import Paper from '@material-ui/core/Paper';
-// import Table from '@material-ui/core/Table';
-// import TableBody from '@material-ui/core/TableBody';
-// import TableCell from '@material-ui/core/TableCell';
-// import TableContainer from '@material-ui/core/TableContainer';
-// import TableHead from '@material-ui/core/TableHead';
-// import TablePagination from '@material-ui/core/TablePagination';
-// import TableRow from '@material-ui/core/TableRow';
 import IconButton from '@material-ui/core/IconButton';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import FactoryService from 'src/shared/services/FactoryService';
+import DashboardIcon from '@material-ui/icons/Dashboard';
 
 interface State {
     columns: object[]
@@ -73,19 +66,19 @@ class SensorsTable extends PureComponent<Props, State> {
     }
 
     async componentDidMount() {
+        console.log(this.props);
         await this.getAllSensors();
     }
 
     getAllSensors = async () => {
         const payload = {
-            "factoryId": this.props.match.params.FID,
-            "machineId": this.props.match.params.MID,
-            "componentId": this.props.match.params.CID,
+            "factoryId": this.props["match"].params.FID,
+            "plId": this.props["match"].params.PLID,
+            "machineId": this.props["match"].params.MID,
+            "componentId": this.props["match"].params.CID,
         }
 
         const sensors = await FactoryService.getSensors(payload);
-
-        console.log(sensors);
 
         this.setState({
             rows: sensors,
@@ -95,7 +88,7 @@ class SensorsTable extends PureComponent<Props, State> {
         })
     }
 
-    handleChangePage = (event, newPage) => {
+    handleChangePage = (_, newPage) => {
         this.setState({ page: newPage })
     };
 
@@ -130,9 +123,8 @@ class SensorsTable extends PureComponent<Props, State> {
         }
     }
 
-
     render() {
-        const { columns, rows, filteredRows, page, rowsPerPage, spinnerLoading, isLoading } = this.state;
+        const { filteredRows, spinnerLoading, isLoading } = this.state;
 
         return (
             <Page>
@@ -154,13 +146,16 @@ class SensorsTable extends PureComponent<Props, State> {
                                 <Link color="inherit" to="/">
                                     <HomeIcon style={{ marginTop: '4px' }} />
                                 </Link>
-                                <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/allFactories`}>
+                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/allFactories`}>
                                     Factories
                                 </Link>
-                                <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/machines/${this.props.match.params.FID}`}>
+                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/production-line/${this.props["match"].params.FID}/${this.props["match"].params.PLID}`}>
+                                    Production Lines
+                                </Link>
+                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/${this.props["match"].params.FID}/${this.props["match"].params.PLID}`}>
                                     Machines
                                 </Link>
-                                <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/machines/${this.props.match.params.FID}/${this.props.match.params.MID}`}>
+                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/components/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${this.props["match"].params.MID}`}>
                                     Components
                                 </Link>
                                 <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Sensors</Typography>
@@ -243,12 +238,20 @@ class SensorsTable extends PureComponent<Props, State> {
                                                                                 <Table.Cell>0</Table.Cell>
                                                                                 <Table.Cell>0</Table.Cell>
                                                                                 <Table.Cell>
-                                                                                    <Link to={`/orgs/${this.props.match.params["orgID"]}/alerting`}>
+                                                                                    <Link to={`/orgs/${this.props["match"].params["orgID"]}/alerting`}>
                                                                                         <IconButton
                                                                                             aria-label="delete"
                                                                                             style={{ color: '#22ADF6', paddingTop: '0px', paddingBottom: '0px' }}
                                                                                         >
                                                                                             <AccessTimeIcon />
+                                                                                        </IconButton>
+                                                                                    </Link>
+                                                                                    <Link to={`/orgs/${this.props["match"].params["orgID"]}/dashboard-router/${row["id"]}`}>
+                                                                                        <IconButton
+                                                                                            aria-label="delete"
+                                                                                            style={{ color: '#22ADF6', paddingTop: '0px', paddingBottom: '0px' }}
+                                                                                        >
+                                                                                            <DashboardIcon />
                                                                                         </IconButton>
                                                                                     </Link>
                                                                                 </Table.Cell>
@@ -260,8 +263,8 @@ class SensorsTable extends PureComponent<Props, State> {
                                                         </Table>
                                                     </DapperScrollbars>
                                                 ) : (
-                                                        <h1>A sensor for the specified conditions was not found</h1>
-                                                    )
+                                                    <h1>A sensor for the specified conditions was not found</h1>
+                                                )
                                             }
                                         </Grid.Row>
                                     </Grid>

@@ -44,3 +44,16 @@ class FailureModel():
             return self.db.delete_one(self.collection, where)
         except:
             return False
+
+    def get_failures_by_condition(self, payload, columns):
+        try:
+            where = {}
+
+            for cond in payload:
+                where[cond] = { '$regex': f".*{payload[cond]}.*"}
+
+            
+
+            return self.db.find_by_columns(self.collection, where, columns)
+        except:
+            return False

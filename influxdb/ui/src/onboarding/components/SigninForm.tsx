@@ -4,8 +4,6 @@ import { withRouter, RouteComponentProps } from 'react-router-dom'
 import { connect, ConnectedProps } from 'react-redux'
 import { get } from 'lodash'
 
-import { BACKEND } from "src/config";
-
 // Components
 import { Form, Input, Button, Grid } from '@influxdata/clockface'
 
@@ -116,12 +114,12 @@ class SigninForm extends PureComponent<Props, State> {
     const { INFLUX_USERNAME, INFLUX_PASSWORD } = process.env;
 
     try {
-      // const resp = await postSignin({ auth: { username: username, password: password } })
       const resp = await postSignin({ auth: { username: INFLUX_USERNAME, password: INFLUX_PASSWORD } })
       const tokenResp = await LoginService.loginWithLDAP({ username, password });
 
       localStorage.setItem("userRole", tokenResp[0]["role"]);
       localStorage.setItem("token", tokenResp[0]["token"]);
+      localStorage.setItem("userInfo", JSON.stringify(tokenResp[0]["userInfo"]));
 
       if (resp.status !== 204) {
         throw new Error(resp.data.message)

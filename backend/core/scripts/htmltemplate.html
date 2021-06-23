@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link href="invoice.css" rel="stylesheet">
+    <title>Invoice</title>
+    <meta name="description" content="Invoice demo sample">
+    <meta name="author" content="Kozea">
+</head>
+
+<body>
+    <article id="cover">
+        <h1>Robot Hourly Report</h1>
+        <address>
+            Ermetal Otomotiv A.Ş.
+            Dumlupınar / Osmangazi, Bursa
+            Bursa, Turkey
+        </address>
+        <!-- <address>
+        community@kozea.fr
+        +33 4 78 84 19 28
+        https://community.kozea.fr
+      </address> -->
+    </article>
+    <header>
+        <div>
+            <img src="machinaide.png" id="logo">
+        </div>
+        <div>
+            <img src="ermetal.png" id="logocimtas">
+        </div>
+    </header>
+
+    <aside>
+        <address id="from">
+            Factory: Ermetal Otomotiv A.Ş.
+            Machine-Name: Robot
+            Component-Name: ALL
+        </address>
+
+        <address id="to">
+            Author: Ali Veli
+            Date: 2021-05-27
+        </address>
+    </aside>
+
+    <h2>Description</h2>
+    <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+
+</p>
+
+    <h2>Summary of Data</h2>
+    <address>
+        Total Number of Alerts: 7
+    </address>
+    <address>
+        Time interval the listed alerts encompass: 17-02-2021 => 05-03-2021
+    </address>
+    <address>
+        Total number of recorded failures: 1
+    </address>
+    <address>
+        Time interval the listed failures encompass: 23/02/2021 => 23/03/2021
+    </address>
+    <address>
+        Total number of maintenance records: 64
+    </address>
+    <address>
+        Time interval the listed maintenance reports encompass: 23/02/2021 => 23/03/2021
+    </address>
+
+    <br />
+    <h2>Alerts Pie Chart Distribution</h2>
+    <!--  -->
+
+    <h2>Alerts</h2>
+    <div class="container">
+        
+    </div>
+
+    <br />
+    <h2>Component Failures</h2>
+    <div class="container">
+        <table class="table table-striped">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>sourceName</th>
+      <th>severity</th>
+      <th>cost</th>
+      <th>startTime</th>
+      <th>endTime</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Robot.robotPart1</td>
+      <td>critical</td>
+      <td>None</td>
+      <td>2021-04-15T00:28</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+    </div>
+
+    <br />
+    <h2>Maintenance Reports Pie Chart Distribution</h2>
+    <img src="data:image/jpeg;base64,">
+    <h2>Machine Maintenance Records</h2>
+    <div class="container">
+        <table class="table table-striped">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+    </div>
+
+    <!-- <br/> -->
+    <h2>Component SnapShots</h2>
+    <!--  -->
+    <!-- <img src="fig1.jpeg" id="graph"> -->
+</body>
+
+</html>

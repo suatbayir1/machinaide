@@ -1,33 +1,18 @@
 // Libraries
 import React, { PureComponent } from 'react'
+
+// Components
 import {
-    Page,
-    Grid,
-    Columns,
-    Panel,
-    ComponentSize,
-    Form,
-    Input,
-    InputType,
-    FlexBox,
-    ColorPicker,
-    Button,
-    ButtonType,
-    IconFont,
-    ComponentColor,
-    ComponentStatus,
-    QuestionMarkTooltip,
-    FlexDirection,
-    DapperScrollbars,
-    List,
-    Gradients,
-    Notification,
-    Dropdown,
-    Overlay,
+    Page, Grid, Columns, Panel, ComponentSize, Form, Input, InputType,
+    FlexBox, ColorPicker, Button, ButtonType, IconFont, ComponentColor,
+    ComponentStatus, QuestionMarkTooltip, FlexDirection, DapperScrollbars,
+    List, Gradients, Notification, Dropdown, Overlay,
 } from '@influxdata/clockface'
 import { BACKEND } from "src/config";
 import TabbedPageTabs from 'src/shared/tabbedPage/TabbedPageTabs'
 import { TabbedPageTab } from 'src/shared/tabbedPage/TabbedPageTabs'
+
+// Utilities
 var THREE = require("three");
 var OrbitControls = require("three-orbit-controls")(THREE);
 var TransformControls = require("three-transform-controls")(THREE);
@@ -35,9 +20,7 @@ var initializeDomEvents = require('threex-domevents')
 var THREEx = {}
 initializeDomEvents(THREE, THREEx)
 var camera, controls, scene, renderer, domEvents, transformControl;
-// import GLTFLoader from "three-gltf-loader"
-// import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
-// import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader"
+
 
 interface Props { }
 interface State {
@@ -200,8 +183,6 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
             newObjects: tempNewObjects
         });
 
-        console.log(tempNewObjects);
-
         scene.children.forEach(async (child) => {
             if (child["name"] === this.state.objectName) {
                 transformControl.detach(child);
@@ -209,8 +190,6 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                 child.material = undefined;
                 scene.remove(child);
                 renderer.render(scene, camera);
-
-                // await this.removeObjectFromMongo(child);
 
                 this.setState({
                     notificationVisible: true,
@@ -231,11 +210,15 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
     }
 
     responsiveConfiguration = () => {
-        renderer.setSize(document.querySelector("#visualizeGraph").clientWidth - 30, 700);
-        renderer.render(scene, camera);
+        if (document.querySelector("#visualizeGraph") !== null) {
+            renderer.setSize(document.querySelector("#visualizeGraph").clientWidth - 30, 700);
+            renderer.render(scene, camera);
+        }
 
         window.addEventListener('resize', () => {
-            renderer.setSize(document.querySelector("#visualizeGraph").clientWidth - 30, 700);
+            if (document.querySelector("#visualizeGraph") !== null) {
+                renderer.setSize(document.querySelector("#visualizeGraph").clientWidth - 30, 700);
+            }
         });
     }
 
@@ -296,14 +279,21 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
 
             const dtList = [];
 
-            result["machines"].forEach(machine => {
-                dtList.push({ "text": machine["name"], "value": machine["name"] });
-            });
+            result["productionLines"].forEach(pl => {
+                pl["machines"].forEach(machine => {
+                    dtList.push({ "text": machine["name"], "value": machine["name"] });
+                })
+            })
+
+            let machines = [];
+            result["productionLines"].forEach(pl => {
+                machines = machines.concat(pl["machines"]);
+            })
 
             this.setState({
                 dtList,
                 selectedDT: dtList[0],
-                registeredDT: result["machines"],
+                registeredDT: machines,
             });
 
             await this.handleChangeDT(dtList[0]);
@@ -333,8 +323,6 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
 
             if (res.data.success !== true) return;
             const result = JSON.parse(res.data.data);
-
-            console.log(result);
 
             this.setState({
                 registeredObjectList: result,
@@ -878,13 +866,6 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         const formData = new FormData();
         formData.append('file', inputFile["files"][0]);
         formData.append('filename', this.state.textureFileName);
-
-        console.log(inputFile);
-        console.log(inputFile["files"]);
-        console.log(inputFile["files"][0]);
-
-        console.log(this.state.textureFileName);
-
 
         if (inputFile["files"][0] === undefined) {
             this.setState({

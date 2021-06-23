@@ -37,9 +37,6 @@ def get_sensor_names():
 
 sensorList = get_sensor_names()
 
-print(type(sensorList))
-
-
 def get_sensor_data():
     return {
         "name": sensorList[random.randint(0, len(sensorList) - 1)],

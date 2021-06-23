@@ -34,11 +34,18 @@ import FlowsIndex from 'src/notebooks/components/FlowsIndex'
 
 // My Added Components
 import DigitalTwinPage from 'src/dt/containers/DigitalTwinPage'
+import InteroperableDigitalTwin from 'src/dt/containers/InteroperableDigitalTwin'
 import FactorySceneOverlay from 'src/dt/components/FactorySceneOverlay'
 import ObjectCreatorPage from 'src/objectCreator/containers/ObjectCreatorPage'
+import ReportsContainer from 'src/reports/containers/ReportsContainer';
+import ReportViewContainer from 'src/reports/containers/ReportViewContainer';
+import DashboardRouter from 'src/dashboards/components/dashboard_index/DashboardRouter';
+import SnapshotRouter from 'src/dashboards/components/dashboard_index/SnapshotRouter';
+
 
 // Factory, Machine, Component, Sensor
 import AllFactories from 'src/side_nav/components/factoriesPanel/containers/AllFactories';
+import ProductionLineContainer from 'src/side_nav/components/productionLines/containers/ProductionLineContainer';
 import MachinesPanel from 'src/side_nav/components/newAdd/MachinesPanel';
 import ComponentsPanel from 'src/side_nav/components/newAdd/ComponentsPanel';
 import ComponentAlertHistoryTable from 'src/side_nav/components/newAdd/ComponentAlertHistoryTable';
@@ -150,6 +157,7 @@ const SetOrg: FC<Props> = ({
         {/* DT */}
         <PermittedRoute exact path={`${orgPath}/dt`} component={DigitalTwinPage} allowedRoles={["member", "admin", "editor"]} />
         <PermittedRoute exact path={`${orgPath}/dt/factory-scene`} component={FactorySceneOverlay} allowedRoles={["member", "admin", "editor"]} />
+        <PermittedRoute exact path={`${orgPath}/dt/data-flow-settings`} component={InteroperableDigitalTwin} allowedRoles={["member", "admin", "editor"]} />
 
 
         {/* ObjectCreator */}
@@ -157,10 +165,11 @@ const SetOrg: FC<Props> = ({
 
         {/* Factory/Machines/Components/Sensors Hierarchy */}
         <Route path={`${orgPath}/allFactories`} component={AllFactories} />
-        <Route exact path={`${orgPath}/machines/:FID`} component={MachinesPanel} />
-        <Route exact path={`${orgPath}/machines/:FID/:MID`} component={ComponentsPanel} />
+        <Route path={`${orgPath}/production-line/:FID/:PLID`} component={ProductionLineContainer} />
+        <Route exact path={`${orgPath}/machines/:FID/:PLID`} component={MachinesPanel} />
+        <Route exact path={`${orgPath}/components/:FID/:PLID/:MID`} component={ComponentsPanel} />
         <Route exact path={`${orgPath}/machines/:FID/:MID/:CID/history`} component={ComponentAlertHistoryTable} />
-        <Route exact path={`${orgPath}/machines/:FID/:MID/:CID/sensors`} component={SensorsTable} />
+        <Route exact path={`${orgPath}/sensors/:FID/:PLID/:MID/:CID`} component={SensorsTable} />
         <Route exact path={`${orgPath}/machines/:FID/:MID/actions`} component={MachineActionsPage} />
         <Route exact path={`${orgPath}/failures/:FID/:MID/:CID`} component={FailureTable} />
         <Route exact path={`${orgPath}/failures/:FID/:MID`} component={FailureTable} />
@@ -182,7 +191,6 @@ const SetOrg: FC<Props> = ({
         {/* LOGS PAGE */}
         <PermittedRoute exact path={`${orgPath}/logs`} component={LogsPage} allowedRoles={["admin"]} />
 
-
         {/* EXAMPLE */}
         <Route path={`${orgPath}/examples`} component={ExamplePage} />
 
@@ -197,6 +205,14 @@ const SetOrg: FC<Props> = ({
         <Route
           path={`${orgPath}/dashboards/:dashboardID`}
           component={DashboardContainer}
+        />
+        <Route
+          path={`${orgPath}/dashboard-router/:id`}
+          component={DashboardRouter}
+        />
+        <Route
+          path={`${orgPath}/snapshot-router/:id`}
+          component={SnapshotRouter}
         />
         <Route
           exact
@@ -275,6 +291,11 @@ const SetOrg: FC<Props> = ({
         {!CLOUD && (
           <PermittedRoute exact path={`${orgPath}/users`} component={UsersIndex} allowedRoles={["admin"]} />
         )}
+
+        {/* REPORTS */}
+        <Route exact path={`${orgPath}/reports`} component={ReportsContainer} />
+        <Route exact path={`${orgPath}/report-view/:id`} component={ReportViewContainer} />
+
 
         {/* About */}
         <Route path={`${orgPath}/about`} component={OrgProfilePage} />

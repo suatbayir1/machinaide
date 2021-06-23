@@ -1,21 +1,25 @@
+// Libraries
 import React, { PureComponent } from "react";
-import {
-    Page,
-    Grid,
-    Columns,
-    SpinnerContainer,
-    TechnoSpinner,
-    RemoteDataState,
-} from '@influxdata/clockface'
 import { Link } from "react-router-dom";
+
+// Components
+import {
+    Page, Grid, Columns, SpinnerContainer, TechnoSpinner, RemoteDataState,
+} from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
 import HomeIcon from '@material-ui/icons/Home';
-import FactoryService from 'src/shared/services/FactoryService';
-import FactoryDashboardPanel from 'src/side_nav/components/factoriesPanel/components/FactoryDashboardPanel';
 import FactoryCard from 'src/side_nav/components/factoriesPanel/components/FactoryCard';
+import ProductionLineCards from 'src/side_nav/components/factoriesPanel/components/ProductionLineCards';
+
+// Services
+import FactoryService from 'src/shared/services/FactoryService';
+// import DashboardService from 'src/shared/services/DashboardService';
+
+
 
 interface Props { }
+
 interface State {
     factory: object
     spinnerLoading: RemoteDataState
@@ -34,6 +38,7 @@ class AllFactories extends PureComponent<Props, State> {
 
     async componentDidMount() {
         await this.getAllFactories();
+        // await this.getDashboards();
     }
 
     getAllFactories = async () => {
@@ -45,8 +50,13 @@ class AllFactories extends PureComponent<Props, State> {
         });
     }
 
+    // getDashboards = async () => {
+    //     const dashboards = await DashboardService.getDashboards();
+    //     console.log(dashboards);
+    // }
+
     render() {
-        const { factory, spinnerLoading, isLoading } = this.state;
+        const { spinnerLoading, isLoading } = this.state;
 
         return (
             <Page>
@@ -76,8 +86,7 @@ class AllFactories extends PureComponent<Props, State> {
                                     <Grid.Row>
                                         <Grid.Column
                                             widthXS={Columns.Four}
-                                            key={factory["id"]}
-                                            style={{ borderRight: '1px solid white' }}
+                                            offsetXS={Columns.Two}
                                         >
                                             <FactoryCard
                                                 factory={this.state.factory}
@@ -86,9 +95,10 @@ class AllFactories extends PureComponent<Props, State> {
                                         </Grid.Column>
 
                                         <Grid.Column
-                                            widthXS={Columns.Eight}
+                                            widthXS={Columns.Four}
                                         >
-                                            <FactoryDashboardPanel
+                                            <ProductionLineCards
+                                                factory={this.state.factory}
                                                 orgID={this.props["match"].params.orgID}
                                             />
                                         </Grid.Column>

@@ -1020,6 +1020,13 @@ export const pleaseFillInTheFormCompletely = (
   message: `Please fill in the form completely: ${message}`,
 })
 
+export const generalErrorMessage = (
+  message: string
+): Notification => ({
+  ...defaultErrorNotification,
+  message,
+})
+
 // Machine Actions
 export const machineActionUpdatedSuccessfully = (): Notification => ({
   ...defaultSuccessNotification,
@@ -1059,4 +1066,41 @@ export const materialUpdatedSuccessfully = (): Notification => ({
 export const materialUpdatedFailure = (): Notification => ({
   ...defaultErrorNotification,
   message: `An error occured while updating a material record`,
+})
+
+// Reports
+export const newReportCreatedSuccessfully = (): Notification => ({
+  ...defaultSuccessNotification,
+  message: `New report record created successfully`,
+})
+
+export const newReportCreatedFailure = (): Notification => ({
+  ...defaultErrorNotification,
+  message: `An error occurred while creating a new report`,
+})
+
+export const reportDeletedSuccessfully = (): Notification => ({
+  ...defaultSuccessNotification,
+  message: `Report record deleted successfully`,
+})
+
+export const reportUpdatedSuccessfully = (): Notification => ({
+  ...defaultSuccessNotification,
+  message: `Report record updated successfully`,
+})
+
+// Data Flow
+export const addDataFlowSettingSuccessfully = (): Notification => ({
+  ...defaultSuccessNotification,
+  message: `Data flow setting created successfully`,
+})
+
+export const addDataFlowSettingFailure = (): Notification => ({
+  ...defaultErrorNotification,
+  message: `An error occurred while creating a data flow setting`,
+})
+
+export const deleteDataFlowSettingSuccessfully = (): Notification => ({
+  ...defaultErrorNotification,
+  message: `Data flow setting deleted successfully`,
 })
