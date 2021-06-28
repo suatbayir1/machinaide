@@ -18,11 +18,9 @@ class LoginService {
         try {
             const response = await request;
             const res = await response.json();
-
-            console.log(res);
             return res;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -49,7 +47,7 @@ class LoginService {
             const result = JSON.parse(res.data.data);
             return result;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 }

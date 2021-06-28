@@ -63,7 +63,6 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
 
     getGeneralInfo = async () => {
         const result = await DTService.getGeneralInfo();
-        console.log("result", result);
         this.setState({ machineList: result?.["machineList"] });
     }
 

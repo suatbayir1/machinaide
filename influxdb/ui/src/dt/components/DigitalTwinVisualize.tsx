@@ -369,10 +369,8 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
           vm.addObjectToScene(cube);
         },
         function () {
-          // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
         },
         function () {
-          // console.log('An error happened', xhr);
         }
       );
     } else {
@@ -453,10 +451,8 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
           vm.addObjectToScene(cube);
         },
         function () {
-          // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
         },
         function () {
-          // console.log('An error happened', xhr);
         }
       );
     } else {
@@ -728,8 +724,6 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
   filterSceneBySelectedNode = (payload) => {
     let cubeInfo = JSON.parse(JSON.stringify(this.state.constantJsonData[0]));
 
-    console.log(payload);
-
     switch (payload["type"]) {
       case "Factory":
         cubeInfo["productionLines"].forEach(pl => {
@@ -836,6 +830,25 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
           })
         })
         break;
+      case "Field":
+        cubeInfo["productionLines"].forEach(pl => {
+          pl["machines"].forEach(machine => {
+            machine["contents"].forEach(component => {
+              if (component["@type"] === "Component") {
+                component["sensors"].forEach(sensor => {
+                  sensor["fields"].forEach(field => {
+                    if (field["name"] === payload["name"]) {
+                      if (sensor["visual"] !== undefined) {
+                        sensor["visual"]["isRender"] = true;
+                      }
+                    }
+                  })
+                })
+              }
+            })
+          })
+        })
+        break;
     }
 
     return cubeInfo;
@@ -869,13 +882,9 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
       return;
     }
 
-    console.log(payload);
-
     if (payload.productionLines === undefined) {
       CubeInfo = payload[0];
     }
-
-    console.log(CubeInfo);
 
     CubeInfo["productionLines"].forEach(pl => {
       pl["machines"].forEach((machine) => {

@@ -73,7 +73,6 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
 
     async componentDidUpdate(prevProps) {
         if (this.props.isEdit && prevProps.updateData !== this.props.updateData) {
-            console.log("work");
             this.handleChangeEditRowData(this.props.updateData);
         }
     }

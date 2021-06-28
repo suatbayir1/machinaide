@@ -6,6 +6,7 @@ import { Page } from '@influxdata/clockface'
 import TabbedPageTabs from 'src/shared/tabbedPage/TabbedPageTabs'
 import NewReport from 'src/reports/components/NewReport'
 import ReportsList from 'src/reports/components/ReportsList'
+import Backup from 'src/reports/components/Backup';
 
 // Services
 import ReportsService from 'src/reports/services/ReportsService';
@@ -34,14 +35,10 @@ class ReportsContainer extends PureComponent<Props, State> {
     getReports = async () => {
         const userInfo = JSON.parse(localStorage.getItem("userInfo"));
         let reports = await ReportsService.getReports();
-        console.log("reports", reports);
 
         if (localStorage.getItem("userRole") !== "admin") {
-            console.log("not admin");
             reports = reports.filter(report => report.uid === userInfo.uid);
         }
-
-        console.log(reports);
 
         this.setState({ reports });
     }
@@ -66,6 +63,10 @@ class ReportsContainer extends PureComponent<Props, State> {
                                 text: 'REPORTS LIST',
                                 id: 'reports',
                             },
+                            {
+                                text: "BACKUP",
+                                id: "backup"
+                            }
                         ]}
                         activeTab={activeTab}
                         onTabClick={(e) => { this.setState({ activeTab: e }) }}
@@ -79,7 +80,7 @@ class ReportsContainer extends PureComponent<Props, State> {
                             getReports={this.getReports}
                         />
                     }
-
+                    {activeTab === "backup" && <Backup />}
                 </Page.Contents>
             </Page>
         )

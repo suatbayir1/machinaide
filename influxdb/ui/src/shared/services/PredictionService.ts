@@ -24,7 +24,7 @@ class PredictionService {
             const result = JSON.parse(res.data.data)
             return result;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -52,7 +52,7 @@ class PredictionService {
             const result = JSON.parse(res.data.data)
             return result;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -81,7 +81,7 @@ class PredictionService {
             const result = JSON.parse(res.data.data)
             return result;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 }

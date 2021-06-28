@@ -99,8 +99,8 @@ class PredictionPage extends PureComponent<Props, State> {
 
         const nextYear = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
         const previousYear = new Date(new Date().setFullYear(new Date().getFullYear() - 1));
-        const startLower = this.state.startTimeRange.lower === undefined ? previousYear : new Date(this.state.startTimeRange.lower);
-        const startUpper = this.state.startTimeRange.upper === undefined ? nextYear : new Date(this.state.startTimeRange.upper);
+        const startLower = this.state.startTimeRange["lower"] === undefined ? previousYear : new Date(this.state.startTimeRange["lower"]);
+        const startUpper = this.state.startTimeRange["upper"] === undefined ? nextYear : new Date(this.state.startTimeRange["upper"]);
 
         this.state.rows.map(row => {
             let rowStartTime = new Date(row["time"]);
@@ -133,7 +133,7 @@ class PredictionPage extends PureComponent<Props, State> {
         }, () => this.handleFilterData())
     }
 
-    handleChangePage = (event, newPage) => {
+    handleChangePage = (_, newPage) => {
         this.setState({ page: newPage })
     };
 
@@ -173,7 +173,7 @@ class PredictionPage extends PureComponent<Props, State> {
         try {
             download(csv, `predictions-${now}.csv`, 'text/plain')
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
@@ -192,7 +192,7 @@ class PredictionPage extends PureComponent<Props, State> {
         try {
             download(xlsx, `predictions-${now}.xlsx`, 'text/plain')
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
@@ -301,13 +301,13 @@ class PredictionPage extends PureComponent<Props, State> {
                                 <Link color="inherit" to="/">
                                     <HomeIcon style={{ marginTop: '4px' }} />
                                 </Link>
-                                <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/allFactories`}>
+                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/allFactories`}>
                                     Factories
                         </Link>
-                                <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/machines/<factoryID>`}>
+                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/<factoryID>`}>
                                     Machines
                         </Link>
-                                <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/machines/<factoryID>/<machineID>`}>
+                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/<factoryID>/<machineID>`}>
                                     Components
                         </Link>
                                 <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Predictions</Typography>
@@ -400,7 +400,7 @@ class PredictionPage extends PureComponent<Props, State> {
                                                                         <Table.Cell>{row["daysToFail"]} days</Table.Cell>
                                                                         <Table.Cell>
                                                                             <FlexBox margin={ComponentSize.Medium} >
-                                                                                <Link to={`/orgs/${this.props.match.params["orgID"]}/predictions/:SID/${row["modelID"]}`}>
+                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/predictions/:SID/${row["modelID"]}`}>
                                                                                     <IconButton
                                                                                         aria-label="delete"
                                                                                         style={{ color: '#22ADF6', paddingTop: '0px', paddingBottom: '0px' }}

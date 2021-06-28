@@ -27,7 +27,7 @@ class ReportsService {
 
             return res;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -57,7 +57,7 @@ class ReportsService {
 
             return res;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -87,7 +87,7 @@ class ReportsService {
 
             return res;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -113,7 +113,7 @@ class ReportsService {
             const result = JSON.parse(res.data.data)
             return result;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -140,7 +140,7 @@ class ReportsService {
             const result = JSON.parse(res.data.data)
             return result;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 

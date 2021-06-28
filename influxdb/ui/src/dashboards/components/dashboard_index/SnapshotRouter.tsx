@@ -55,6 +55,11 @@ class SnapshotRouter extends Component<Props, State> {
     }
 
     public async componentDidMount() {
+        if (!this.props["match"].params.id.includes("component-")) {
+            this.props["history"].push(`/orgs/${this.props["match"].params.orgID}/dashboards/${this.props["match"].params.id}`)
+            return;
+        }
+
         await this.props.getDashboards();
         this.createOrUpdateDashboard();
     }
@@ -108,7 +113,6 @@ class SnapshotRouter extends Component<Props, State> {
         let xAxisCounter;
         let totalWidth;
 
-
         switch (this.props["match"].params.id.split("-")[0]) {
             case "component":
                 xAxisCounter = 0;
@@ -118,7 +122,6 @@ class SnapshotRouter extends Component<Props, State> {
                     for (let machine of pl.machines) {
                         for (let comp of machine.contents) {
                             if (comp["@type"] === "Component" && comp["@id"] === this.props["match"].params.id.split("-")[1]) {
-
                                 let measurements = "";
 
                                 machine.measurements.map((m, idx) => {
@@ -133,21 +136,19 @@ class SnapshotRouter extends Component<Props, State> {
                                 for (let sensor of comp.sensors) {
                                     // iterate each field
                                     for (let field of sensor.fields) {
-                                        let cellName = field;
-
-                                        console.log("sensor field");
+                                        let cellName = field["name"];
 
                                         if (!existsCells.includes(cellName)) {
 
                                             let query;
                                             if (machine.measurements.length > 0) {
                                                 query = `from(bucket: \"${structure[0].bucket}\")\n  
-                                            |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  
-                                            ${measurements}
-                                            |> filter(fn: (r) => r[\"_field\"] == \"${field}\")\n
-                                            |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  
-                                            |> yield(name: \"mean\")
-                                        `
+                                                    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  
+                                                    ${measurements}
+                                                    |> filter(fn: (r) => r[\"_field\"] == \"${field["name"]}\")\n
+                                                    |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  
+                                                    |> yield(name: \"mean\")
+                                                `;
                                             } else {
                                                 query = "";
                                             }
@@ -164,8 +165,8 @@ class SnapshotRouter extends Component<Props, State> {
                                                 "bucket": structure[0].bucket,
                                                 "query": query,
                                                 "chartType": "gauge",
-                                                "minValue": sensor.minValue,
-                                                "maxValue": sensor.maxValue
+                                                "minValue": field.minValue,
+                                                "maxValue": field.maxValue
                                             }
 
                                             await this.createCell(params);
@@ -175,14 +176,10 @@ class SnapshotRouter extends Component<Props, State> {
                                     }
                                 }
 
-
                                 // iterate sensor groups
                                 if (comp.sensorGroups !== undefined) {
                                     for (let group of comp?.sensorGroups) {
                                         let cellName = group.name;
-
-                                        console.log("group");
-
 
                                         if (!existsCells.includes(cellName)) {
                                             // Iterate fields
@@ -195,7 +192,6 @@ class SnapshotRouter extends Component<Props, State> {
                                             })
                                             fields = group.fields.length > 0 ? `|> filter(fn: (r) => ${fields})\n` : ""
 
-
                                             let query;
                                             if (machine.measurements.length > 0) {
                                                 query = `from(bucket: \"${structure[0].bucket}\")\n  
@@ -207,22 +203,10 @@ class SnapshotRouter extends Component<Props, State> {
                                                         |> limit(n: 10)
                                                         |> drop(columns: ["host", "_measurement", "_start", "_stop"])
                                                         |> yield(name: \"mean\")
-                                                    `
-
-                                                // from(bucket: "Ermetal")
-                                                //     |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
-                                                //     |> filter(fn: (r) => r["_measurement"] == "Press31_DB1" or r["_measurement"] == "Press31_DB2")
-                                                //     |> filter(fn: (r) => r["_field"] == "mean_AM_Arka_Acc" or r["_field"] == "mean_AM_Arka_Balans" or r["_field"] == "mean_AM_Arka_Bosluk" or r["_field"] == "mean_AM_Arka_Eks_kac")
-                                                //     |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)
-                                                //     |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
-                                                //     |> limit(n: 5)
-                                                //     |> drop(columns: ["host", "_measurement", "_start", "_stop"])
-                                                //     |> yield(name: "mean")
+                                                    `;
                                             } else {
                                                 query = "";
                                             }
-
-                                            console.log("totalWidth", Math.floor(totalWidth / 12));
 
                                             let params = {
                                                 dashboardID,
@@ -274,45 +258,8 @@ class SnapshotRouter extends Component<Props, State> {
                 break;
         }
 
-        // const viewConfig = await viewConfiguration(params);
         await DashboardService.updateViewOfCell(viewConfig, params.dashboardID, createdCell?.id);
         return true;
-    }
-
-    getDashboardType = (structure) => {
-        let paramID = this.props["match"].params.id;
-
-        let dashboardType;
-        if (structure.id === paramID) {
-            dashboardType = structure.type
-        } else {
-            structure.productionLines.forEach(pl => {
-                if (pl.id === paramID) {
-                    dashboardType = pl.type;
-                    return;
-                }
-                pl.machines.forEach(machine => {
-                    if (machine.id === paramID) {
-                        dashboardType = machine.type;
-                        return;
-                    }
-                    machine.components.forEach(comp => {
-                        if (comp.id === paramID) {
-                            dashboardType = comp.type;
-                            return;
-                        }
-                        comp.sensors.forEach(sensor => {
-                            if (sensor.id === paramID) {
-                                dashboardType = sensor.type
-                                return;
-                            }
-                        })
-                    })
-                })
-            })
-        }
-
-        return dashboardType;
     }
 
     public render() {

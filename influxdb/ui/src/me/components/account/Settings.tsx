@@ -1,13 +1,13 @@
 // Libraries
-import React, {PureComponent, ChangeEvent} from 'react'
-import {connect} from 'react-redux'
+import React, { PureComponent, ChangeEvent } from 'react'
+import { connect } from 'react-redux'
 
 // Components
-import {Form, Input, Button, Panel, Grid} from '@influxdata/clockface'
+import { Form, Input, Button, Panel, Grid } from '@influxdata/clockface'
 
 // Types
-import {AppState} from 'src/types'
-import {Columns, ComponentSize, ComponentStatus} from '@influxdata/clockface'
+import { AppState } from 'src/types'
+import { Columns, ComponentSize, ComponentStatus } from '@influxdata/clockface'
 
 interface StateProps {
   me: AppState['me']
@@ -26,7 +26,7 @@ export class Settings extends PureComponent<StateProps, State> {
   }
 
   public render() {
-    const {me} = this.state
+    const { me } = this.state
 
     return (
       <Grid>
@@ -59,11 +59,10 @@ export class Settings extends PureComponent<StateProps, State> {
   }
 
   private handleChangeInput = (_: ChangeEvent<HTMLInputElement>): void => {
-    //  console.log('changing: ', e)
   }
 }
 
-const mstp = ({me}: AppState) => ({
+const mstp = ({ me }: AppState) => ({
   me,
 })
 

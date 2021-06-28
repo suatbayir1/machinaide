@@ -35,19 +35,11 @@ class CreatedReportsListOverlay extends PureComponent<Props, State> {
 
     getFileUrl = (item) => {
         const { createdReportsData } = this.props;
-
-        console.log(createdReportsData);
-        console.log(item);
-
         return `${createdReportsData["root_path"]}/${item}`;
     }
 
     redirectReportView = (report) => {
         const { selectedReport, history } = this.props;
-        console.log(report);
-        console.log(selectedReport);
-
-        console.log(this.props);
         history.push(`report-view/${selectedReport?.["_id"]?.["$oid"]}`);
     }
 

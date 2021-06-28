@@ -284,10 +284,11 @@ class DigitalTwinModel():
                         for component in machine["contents"]:
                             if component["@type"] == "Component":
                                 for sensor in component["sensors"]:
-                                    if sensor["name"] == payload["name"]:
-                                        sensor["dataSource"] = payload["dataSource"]
-                                        sensor["minValue"] = payload["minValue"]
-                                        sensor["maxValue"] = payload["maxValue"]
+                                    for field in sensor["fields"]:
+                                        if field["name"] == payload["name"]:
+                                            field["dataSource"] = payload["dataSource"]
+                                            field["minValue"] = payload["minValue"]
+                                            field["maxValue"] = payload["maxValue"]
 
             update_data = { 
                 '$set': hierarchy[0]
@@ -371,7 +372,7 @@ class DigitalTwinModel():
                                 "@type" : "Interface",
                                 "displayName" : "Press031",
                                 "description" : "machine description",
-                                "measurements": ["Press31_DB1", "Press31_DB2"],
+                                "measurements": ["Press031"],
                                 "contents" : [ 
                                     {
                                         "@id" : "anaMotor",
@@ -728,12 +729,12 @@ class DigitalTwinModel():
                                         ],
                                         "sensorGroups": [
                                             {
-                                                "name": "Ana_Motor_Arka",
-                                                "fields": ["mean_AM_Arka_acc", "mean_AM_Arka_Balans", "mean_AM_Arka_Bosluk", "mean_AM_Arka_Eks_kac"]
+                                                "name": "Robot",
+                                                "fields": ["Rob_ctr_sic_act", "Robot_hava_debi_act", "Robot_hava_sic_act"]
                                             },
                                             {
-                                                "name": "Ana_Motor_On",
-                                                "fields": ["mean_AM_On_Acc", "mean_AM_On_Balans", "mean_AM_On_Bosluk", "mean_AM_On_Eks_kac"]
+                                                "name": "Yaglama",
+                                                "fields": ["Yaglama_bas_act", "Yaglama_sic_act"]
                                             }
                                         ],
                                         "sensors" : [ 
@@ -751,8 +752,26 @@ class DigitalTwinModel():
                                                 "displayName" : "Pres Ana Hava Akış",
                                                 "description" : "degreeCelcius",
                                                 "status" : "Working",
-                                                "dataSource" : "sensors_data",
-                                                "fields": ["mean_AM_Arka_Acc", "mean_AM_Arka_Balans"],
+                                                "fields": [
+                                                    {
+                                                        "name": "Robot_hava_debi_act",
+                                                        "unit": "double",
+                                                        "minValue": 10,
+                                                        "maxValue": 20,
+                                                        "parent": "presAnaHavaAkis",
+                                                        "type": "Field",
+                                                        "dataSource" : "sensors_data",
+                                                    },
+                                                    {
+                                                        "name": "Robot_hava_sic_act",
+                                                        "unit": "double",
+                                                        "minValue": 5,
+                                                        "maxValue": 100,
+                                                        "parent": "presAnaHavaAkis",
+                                                        "type": "Field",
+                                                        "dataSource" : "sensors_data",
+                                                    }
+                                                ],
                                                 "minValue" : 10,
                                                 "maxValue" : 70,
                                                 "visual" : {
@@ -792,10 +811,28 @@ class DigitalTwinModel():
                                                 "displayName" : "sensor1",
                                                 "description" : "degreeCelcius",
                                                 "status" : "Working",
-                                                "dataSource" : "sensors_data",
                                                 "minValue" : 30,
                                                 "maxValue" : 60,
-                                                "fields": ["mean_AM_Arka_Acc", "mean_AM_Arka_Balans"],
+                                                "fields": [
+                                                    {
+                                                        "name": "Ana_hava_debi_act",
+                                                        "unit": "double",
+                                                        "minValue": 10,
+                                                        "maxValue": 20,
+                                                        "parent": "sensor1",
+                                                        "type": "Field",
+                                                        "dataSource" : "sensors_data"
+                                                    },
+                                                    {
+                                                        "name": "Ana_hava_sic_act",
+                                                        "unit": "double",
+                                                        "minValue": 5,
+                                                        "maxValue": 100,
+                                                        "parent": "sensor1",
+                                                        "type": "Field",
+                                                        "dataSource" : "sensors_data"
+                                                    }
+                                                ],
                                                 "visual" : {
                                                     "geometryType" : "BoxGeometry",
                                                     "isRender" : False,
@@ -833,8 +870,26 @@ class DigitalTwinModel():
                                                 "displayName" : "sensor2",
                                                 "description" : "degreeCelcius",
                                                 "status" : "Working",
-                                                "dataSource" : "sensors_data",
-                                                "fields": ["mean_AM_Arka_Acc", "mean_AM_Arka_Balans"],
+                                                "fields": [
+                                                    {
+                                                        "name": "Deng_hava_bas_act",
+                                                        "unit": "double",
+                                                        "minValue": 10,
+                                                        "maxValue": 20,
+                                                        "parent": "sensor2",
+                                                        "type": "Field",
+                                                        "dataSource" : "sensors_data"
+                                                    },
+                                                    {
+                                                        "name": "Deng_hava_debi_act",
+                                                        "unit": "double",
+                                                        "minValue": 5,
+                                                        "maxValue": 100,
+                                                        "parent": "sensor2",
+                                                        "type": "Field",
+                                                        "dataSource" : "sensors_data"
+                                                    }
+                                                ],
                                                 "minValue" : -100,
                                                 "maxValue" : 100,
                                                 "visual" : {

@@ -36,10 +36,6 @@ class ExportFile extends PureComponent<Props, State> {
         };
     }
 
-    componentDidMount() {
-        console.log(this.props.exportData);
-    }
-
     handleChangeExportType = (exportType) => {
         if (exportType === "csv") {
             this.createCSV();

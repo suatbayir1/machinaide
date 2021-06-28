@@ -150,7 +150,6 @@ class ImportMachineActionFile extends PureComponent<Props, State> {
             if (!isErrorLine) {
                 if (row["jobName"] !== "" && row["material"] !== "" && row["startTime"] !== "") {
                     let response = await FactoryService.isMachineActionExists(row);
-                    console.log(response);
                     if (response.data.summary.code === 409) {
                         let error = {
                             "type": "DUPLICATED",

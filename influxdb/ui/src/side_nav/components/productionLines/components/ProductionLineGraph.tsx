@@ -71,10 +71,6 @@ class ProductionLineGraph extends PureComponent<Props, State> {
         });
     }
 
-    handleNodeClick = (node) => {
-        console.log(node);
-    }
-
     createGraph = async () => {
         const graphInfo = await DTService.getAllDT();
         const nodes = [];
@@ -126,8 +122,6 @@ class ProductionLineGraph extends PureComponent<Props, State> {
                 "status": prevNode !== null ? false : true
             }
         })
-        console.log(node);
-        console.log(prevNode);
     }
 
     render() {
@@ -149,7 +143,6 @@ class ProductionLineGraph extends PureComponent<Props, State> {
                         />
                         <ForceGraph2D
                             ref={element => { this.graphRef = element }}
-                            onNodeClick={this.handleNodeClick}
                             linkColor={() => "rgb(6, 111, 197)"}
                             linkWidth={3}
                             width={this.state.graphWidth}

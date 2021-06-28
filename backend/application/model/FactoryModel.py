@@ -141,9 +141,12 @@ class FactoryModel():
     def get_all_machine_actions(self, payload):
         collection = "machine_actions"
 
-        where = {
-            "machineID": payload["machineID"]
-        }
+        if payload["machineID"] == "*":
+            where = {}
+        else:
+            where = {
+                "machineID": payload["machineID"]
+            }
 
         return self.db.find(collection, where)
 

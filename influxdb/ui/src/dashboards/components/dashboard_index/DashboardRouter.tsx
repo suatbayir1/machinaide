@@ -22,9 +22,10 @@ import { DashboardSortKey } from 'src/shared/components/resource_sort_dropdown/g
 
 // Services
 import DashboardService from 'src/shared/services/DashboardService';
+import DTService from 'src/shared/services/DTService';
 
 // Utilities
-import { cellConfiguration, viewConfiguration, databaseStructure } from 'src/dashboards/constants/cellConfigurations'
+import { cellConfiguration, viewConfiguration } from 'src/dashboards/constants/cellConfigurations'
 
 interface OwnProps {
     onFilterChange: (searchTerm: string) => void
@@ -91,7 +92,8 @@ class DashboardRouter extends Component<Props, State> {
 
     createCellsOfDashboard = async (dashboardID) => {
         const { dashboards } = this.props;
-        const structure = databaseStructure();
+        const structure = await DTService.getAllDT();
+
         const dashboard = dashboards.find(d => d.id === dashboardID);
 
         let existsCells: string[] = [];
@@ -109,110 +111,105 @@ class DashboardRouter extends Component<Props, State> {
             case "Factory":
                 xAxisCounter = 0;
 
-                for (let pl of structure.productionLines) {
+                for (let pl of structure[0].productionLines) {
                     for (let machine of pl.machines) {
-                        let cellName = `Production Line: ${pl["id"]}, Machine: ${machine["id"]}`
+                        let cellName = `Production Line: ${pl["name"]}, Machine: ${machine["name"]}`
 
-                        if (existsCells.includes(cellName)) {
-                            return;
-                        }
+                        if (!existsCells.includes(cellName)) {
+                            let measurements = "";
 
-                        let measurements = "";
+                            machine.measurements.map((m, idx) => {
+                                measurements += `r[\"_measurement\"] == \"${m}\"`;
+                                if (idx !== machine.measurements.length - 1) {
+                                    measurements += " or ";
+                                }
+                            })
 
-                        machine.measurements.map((m, idx) => {
-                            measurements += `r[\"_measurement\"] == \"${m}\"`;
-                            if (idx !== machine.measurements.length - 1) {
-                                measurements += " or ";
+                            measurements = machine.measurements.length > 0 ? `|> filter(fn: (r) => ${measurements})\n` : ""
+
+                            let query;
+                            if (machine.measurements.length > 0) {
+                                query = `from(bucket: \"${structure[0].bucket}\")\n  
+                                    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  
+                                    ${measurements}
+                                    |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  
+                                    |> yield(name: \"mean\")
+                                `
+                            } else {
+                                query = "";
                             }
-                        })
 
-                        measurements = machine.measurements.length > 0 ? `|> filter(fn: (r) => ${measurements})\n` : ""
+                            let params = {
+                                dashboardID,
+                                cellName,
+                                "xAxis": xAxisCounter % 2 === 0 ? 0 : 6,
+                                "bucket": structure.bucket,
+                                "query": query,
+                            }
 
-                        let query;
-                        if (machine.measurements.length > 0) {
-                            query = `from(bucket: \"${structure.bucket}\")\n  
-                                |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  
-                                ${measurements}
-                                |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  
-                                |> yield(name: \"mean\")
-                            `
-                        } else {
-                            query = "";
+                            await this.createCell(params);
+                            xAxisCounter++;
                         }
-
-
-                        // |> filter(fn: (r) => r[\"_field\"] == \"mean_Ana_hava_debi_act\")\n  
-
-                        let params = {
-                            dashboardID,
-                            cellName,
-                            "xAxis": xAxisCounter % 2 === 0 ? 0 : 6,
-                            "bucket": structure.bucket,
-                            "query": query,
-                        }
-
-                        await this.createCell(params);
-                        xAxisCounter++;
                     }
                 }
                 break;
             case "Machine":
                 xAxisCounter = 0;
 
-                for (let pl of structure.productionLines) {
+                for (let pl of structure[0].productionLines) {
                     for (let machine of pl.machines) {
-                        if (machine.id === this.props["match"].params.id) {
-                            for (let comp of machine.components) {
-                                for (let sensor of comp.sensors) {
-                                    let cellName = `Component: ${comp["id"]}, Sensor: ${sensor["id"]}`
+                        if (machine["@id"] === this.props["match"].params.id) {
+                            for (let comp of machine.contents) {
+                                if (comp["@type"] === "Component") {
+                                    for (let sensor of comp.sensors) {
+                                        let cellName = `Component: ${comp["name"]}, Sensor: ${sensor["name"]}`
 
-                                    if (existsCells.includes(cellName)) {
-                                        return;
-                                    }
+                                        if (!existsCells.includes(cellName)) {
+                                            // Iterate measurements
+                                            let measurements = "";
+                                            machine.measurements.map((m, idx) => {
+                                                measurements += `r[\"_measurement\"] == \"${m}\"`;
+                                                if (idx !== machine.measurements.length - 1) {
+                                                    measurements += " or ";
+                                                }
+                                            })
+                                            measurements = machine.measurements.length > 0 ? `|> filter(fn: (r) => ${measurements})\n` : ""
 
-                                    // Iterate measurements
-                                    let measurements = "";
-                                    machine.measurements.map((m, idx) => {
-                                        measurements += `r[\"_measurement\"] == \"${m}\"`;
-                                        if (idx !== machine.measurements.length - 1) {
-                                            measurements += " or ";
+                                            // Iterate fields
+                                            let fields = "";
+                                            sensor.fields.map((field, idx) => {
+                                                fields += `r[\"_field\"] == \"${field["name"]}\"`;
+                                                if (idx !== sensor.fields.length - 1) {
+                                                    fields += " or ";
+                                                }
+                                            })
+                                            fields = sensor.fields.length > 0 ? `|> filter(fn: (r) => ${fields})\n` : ""
+
+                                            let query;
+                                            if (machine.measurements.length > 0) {
+                                                query = `from(bucket: \"${structure[0].bucket}\")\n  
+                                                |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  
+                                                ${measurements}
+                                                ${fields} 
+                                                |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  
+                                                |> yield(name: \"mean\")
+                                            `
+                                            } else {
+                                                query = "";
+                                            }
+
+                                            let params = {
+                                                dashboardID,
+                                                cellName,
+                                                "xAxis": xAxisCounter % 2 === 0 ? 0 : 6,
+                                                "bucket": structure.bucket,
+                                                "query": query,
+                                            }
+
+                                            await this.createCell(params);
+                                            xAxisCounter++;
                                         }
-                                    })
-                                    measurements = machine.measurements.length > 0 ? `|> filter(fn: (r) => ${measurements})\n` : ""
-
-                                    // Iterate fields
-                                    let fields = "";
-                                    sensor.fields.map((field, idx) => {
-                                        fields += `r[\"_field\"] == \"${field}\"`;
-                                        if (idx !== sensor.fields.length - 1) {
-                                            fields += " or ";
-                                        }
-                                    })
-                                    fields = sensor.fields.length > 0 ? `|> filter(fn: (r) => ${fields})\n` : ""
-
-                                    let query;
-                                    if (machine.measurements.length > 0) {
-                                        query = `from(bucket: \"${structure.bucket}\")\n  
-                                            |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  
-                                            ${measurements}
-                                            ${fields} 
-                                            |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  
-                                            |> yield(name: \"mean\")
-                                        `
-                                    } else {
-                                        query = "";
                                     }
-
-                                    let params = {
-                                        dashboardID,
-                                        cellName,
-                                        "xAxis": xAxisCounter % 2 === 0 ? 0 : 6,
-                                        "bucket": structure.bucket,
-                                        "query": query,
-                                    }
-
-                                    await this.createCell(params);
-                                    xAxisCounter++;
                                 }
                             }
                         }
@@ -222,60 +219,60 @@ class DashboardRouter extends Component<Props, State> {
             case "Component":
                 xAxisCounter = 0;
 
-                for (let pl of structure.productionLines) {
+                for (let pl of structure[0].productionLines) {
                     for (let machine of pl.machines) {
-                        for (let comp of machine.components) {
-                            if (comp["id"] === this.props["match"].params.id) {
+                        for (let comp of machine.contents) {
+                            if (comp["@type"] === "Component" && comp["@id"] === this.props["match"].params.id) {
                                 for (let sensor of comp.sensors) {
-                                    let cellName = `Sensor: ${sensor["id"]}`
+                                    for (let field of sensor.fields) {
+                                        let cellName = `Sensor: ${sensor["name"]}, Field: ${field["name"]}`
 
-                                    if (existsCells.includes(cellName)) {
-                                        return;
-                                    }
+                                        if (!existsCells.includes(cellName)) {
+                                            // Iterate measurements
+                                            let measurements = "";
+                                            machine.measurements.map((m, idx) => {
+                                                measurements += `r[\"_measurement\"] == \"${m}\"`;
+                                                if (idx !== machine.measurements.length - 1) {
+                                                    measurements += " or ";
+                                                }
+                                            })
+                                            measurements = machine.measurements.length > 0 ? `|> filter(fn: (r) => ${measurements})\n` : ""
 
-                                    // Iterate measurements
-                                    let measurements = "";
-                                    machine.measurements.map((m, idx) => {
-                                        measurements += `r[\"_measurement\"] == \"${m}\"`;
-                                        if (idx !== machine.measurements.length - 1) {
-                                            measurements += " or ";
+                                            // Iterate fields
+                                            // let fields = "";
+                                            // sensor.fields.map((field, idx) => {
+                                            //     fields += `r[\"_field\"] == \"${field["name"]}\"`;
+                                            //     if (idx !== sensor.fields.length - 1) {
+                                            //         fields += " or ";
+                                            //     }
+                                            // })
+                                            // fields = sensor.fields.length > 0 ? `|> filter(fn: (r) => ${fields})\n` : ""
+
+                                            let query;
+                                            if (machine.measurements.length > 0) {
+                                                query = `from(bucket: \"${structure[0].bucket}\")\n  
+                                                    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  
+                                                    ${measurements}
+                                                    |> filter(fn: (r) => r[\"_field\"] == \"${field["name"]}\")\n
+                                                    |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  
+                                                    |> yield(name: \"mean\")
+                                                `
+                                            } else {
+                                                query = "";
+                                            }
+
+                                            let params = {
+                                                dashboardID,
+                                                cellName,
+                                                "xAxis": xAxisCounter % 2 === 0 ? 0 : 6,
+                                                "bucket": structure.bucket,
+                                                "query": query,
+                                            }
+
+                                            await this.createCell(params);
+                                            xAxisCounter++;
                                         }
-                                    })
-                                    measurements = machine.measurements.length > 0 ? `|> filter(fn: (r) => ${measurements})\n` : ""
-
-                                    // Iterate fields
-                                    let fields = "";
-                                    sensor.fields.map((field, idx) => {
-                                        fields += `r[\"_field\"] == \"${field}\"`;
-                                        if (idx !== sensor.fields.length - 1) {
-                                            fields += " or ";
-                                        }
-                                    })
-                                    fields = sensor.fields.length > 0 ? `|> filter(fn: (r) => ${fields})\n` : ""
-
-                                    let query;
-                                    if (machine.measurements.length > 0) {
-                                        query = `from(bucket: \"${structure.bucket}\")\n  
-                                                |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  
-                                                ${measurements}
-                                                ${fields} 
-                                                |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  
-                                                |> yield(name: \"mean\")
-                                            `
-                                    } else {
-                                        query = "";
                                     }
-
-                                    let params = {
-                                        dashboardID,
-                                        cellName,
-                                        "xAxis": xAxisCounter % 2 === 0 ? 0 : 6,
-                                        "bucket": structure.bucket,
-                                        "query": query,
-                                    }
-
-                                    await this.createCell(params);
-                                    xAxisCounter++;
                                 }
                             }
                         }
@@ -285,51 +282,51 @@ class DashboardRouter extends Component<Props, State> {
             case "Sensor":
                 xAxisCounter = 0;
 
-                for (let pl of structure.productionLines) {
+                for (let pl of structure[0].productionLines) {
                     for (let machine of pl.machines) {
-                        for (let comp of machine.components) {
-                            for (let sensor of comp.sensors) {
-                                if (sensor["id"] === this.props["match"].params.id) {
-                                    for (let field of sensor.fields) {
-                                        let cellName = `Field: ${field}`
+                        for (let comp of machine.contents) {
+                            if (comp["@type"] === "Component") {
+                                for (let sensor of comp.sensors) {
+                                    if (sensor["@id"] === this.props["match"].params.id) {
+                                        for (let field of sensor.fields) {
+                                            let cellName = `Field: ${field["name"]}`
 
-                                        if (existsCells.includes(cellName)) {
-                                            return;
-                                        }
+                                            if (!existsCells.includes(cellName)) {
+                                                // Iterate measurements
+                                                let measurements = "";
+                                                machine.measurements.map((m, idx) => {
+                                                    measurements += `r[\"_measurement\"] == \"${m}\"`;
+                                                    if (idx !== machine.measurements.length - 1) {
+                                                        measurements += " or ";
+                                                    }
+                                                })
+                                                measurements = machine.measurements.length > 0 ? `|> filter(fn: (r) => ${measurements})\n` : ""
 
-                                        // Iterate measurements
-                                        let measurements = "";
-                                        machine.measurements.map((m, idx) => {
-                                            measurements += `r[\"_measurement\"] == \"${m}\"`;
-                                            if (idx !== machine.measurements.length - 1) {
-                                                measurements += " or ";
+                                                let query;
+                                                if (machine.measurements.length > 0) {
+                                                    query = `from(bucket: \"${structure[0].bucket}\")\n  
+                                                            |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  
+                                                            ${measurements}
+                                                            |> filter(fn: (r) => r[\"_field\"] == \"${field["name"]}\")\n
+                                                            |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  
+                                                            |> yield(name: \"mean\")
+                                                        `
+                                                } else {
+                                                    query = "";
+                                                }
+
+                                                let params = {
+                                                    dashboardID,
+                                                    cellName,
+                                                    "xAxis": xAxisCounter % 2 === 0 ? 0 : 6,
+                                                    "bucket": structure.bucket,
+                                                    "query": query,
+                                                }
+
+                                                await this.createCell(params);
+                                                xAxisCounter++;
                                             }
-                                        })
-                                        measurements = machine.measurements.length > 0 ? `|> filter(fn: (r) => ${measurements})\n` : ""
-
-                                        let query;
-                                        if (machine.measurements.length > 0) {
-                                            query = `from(bucket: \"${structure.bucket}\")\n  
-                                                        |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  
-                                                        ${measurements}
-                                                        |> filter(fn: (r) => r[\"_field\"] == \"${field}\")\n
-                                                        |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  
-                                                        |> yield(name: \"mean\")
-                                                    `
-                                        } else {
-                                            query = "";
                                         }
-
-                                        let params = {
-                                            dashboardID,
-                                            cellName,
-                                            "xAxis": xAxisCounter % 2 === 0 ? 0 : 6,
-                                            "bucket": structure.bucket,
-                                            "query": query,
-                                        }
-
-                                        await this.createCell(params);
-                                        xAxisCounter++;
                                     }
                                 }
                             }
@@ -352,32 +349,34 @@ class DashboardRouter extends Component<Props, State> {
 
     getDashboardType = (structure) => {
         let paramID = this.props["match"].params.id;
-
         let dashboardType;
-        if (structure.id === paramID) {
-            dashboardType = structure.type
+
+        if (structure[0].id === paramID) {
+            dashboardType = structure[0].type
         } else {
-            structure.productionLines.forEach(pl => {
-                if (pl.id === paramID) {
+            structure[0].productionLines.forEach(pl => {
+                if (pl["@id"] === paramID) {
                     dashboardType = pl.type;
                     return;
                 }
                 pl.machines.forEach(machine => {
-                    if (machine.id === paramID) {
+                    if (machine["@id"] === paramID) {
                         dashboardType = machine.type;
                         return;
                     }
-                    machine.components.forEach(comp => {
-                        if (comp.id === paramID) {
-                            dashboardType = comp.type;
-                            return;
-                        }
-                        comp.sensors.forEach(sensor => {
-                            if (sensor.id === paramID) {
-                                dashboardType = sensor.type
+                    machine.contents.forEach(comp => {
+                        if (comp["@type"] === "Component") {
+                            if (comp["@id"] === paramID) {
+                                dashboardType = comp.type;
                                 return;
                             }
-                        })
+                            comp.sensors.forEach(sensor => {
+                                if (sensor["@id"] === paramID) {
+                                    dashboardType = sensor.type
+                                    return;
+                                }
+                            })
+                        }
                     })
                 })
             })

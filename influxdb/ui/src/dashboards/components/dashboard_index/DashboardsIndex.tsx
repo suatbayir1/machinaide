@@ -55,7 +55,6 @@ class DashboardIndex extends PureComponent<Props, State> {
   }
 
   componentDidMount() {
-    console.log(localStorage.getItem("userRole"));
     if (localStorage.getItem("userRole") !== "admin") {
       this.setState({
         dashboardType: "Organization's Dashboards",

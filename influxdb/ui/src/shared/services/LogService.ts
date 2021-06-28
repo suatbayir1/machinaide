@@ -31,7 +31,7 @@ class LogService {
             return { result, total_count };
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 }

@@ -1,21 +1,20 @@
+// Libraries
 import React, { PureComponent } from "react";
-import {
-    Page,
-    Grid,
-    Columns,
-    FlexBox,
-    ResourceCard,
-    ComponentSize,
-    FlexDirection,
-    SpinnerContainer,
-    TechnoSpinner,
-    RemoteDataState,
-} from '@influxdata/clockface'
 import { Link } from "react-router-dom";
+
+// Components
+import {
+    Page, Grid, Columns, FlexBox, ResourceCard, ComponentSize, FlexDirection,
+    SpinnerContainer, TechnoSpinner, RemoteDataState,
+} from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
 import HomeIcon from '@material-ui/icons/Home';
+
+// Services
 import FactoryService from 'src/shared/services/FactoryService';
+import DTService from 'src/shared/services/DTService';
+import DashboardService from 'src/shared/services/DashboardService';
 
 
 interface Props { }
@@ -48,6 +47,32 @@ class MachinesPanel extends PureComponent<Props, State> {
         };
 
         const machines = await FactoryService.getMachines(payload);
+        const structure = await DTService.getAllDT();
+        const dashboards = await DashboardService.getDTDashboards();
+
+        let snapshots = [];
+        machines.map(machine => {
+            snapshots = [];
+            // find component ids of all machines
+            structure[0].productionLines.map(structurePL => {
+                structurePL.machines.map(structureM => {
+                    if (structureM["@id"] === machine["id"]) {
+                        structureM.contents.map(structureC => {
+                            if (structureC["@type"] === "Component") {
+                                // find dashboard of component
+                                dashboards.map(dashboard => {
+                                    if (dashboard.dtID === `component-${structureC["@id"]}`) {
+                                        snapshots.push({ "dashboardID": dashboard.dashboardID, "dashboardName": dashboard.name });
+                                    }
+                                })
+                            }
+                        })
+                    }
+                })
+            })
+
+            machine["dashboards"] = snapshots;
+        })
 
         this.setState({
             machines: machines,
@@ -145,7 +170,7 @@ class MachinesPanel extends PureComponent<Props, State> {
                                                                                     <FlexBox direction={FlexDirection.Row}>
                                                                                         <ul
                                                                                             className="ComponentList"
-                                                                                            style={{ listStyleType: "none", marginTop: '10%', paddingLeft: '0px', fontSize: '0.800rem' }}
+                                                                                            style={{ listStyleType: "none", marginTop: '5%', paddingLeft: '0px', fontSize: '0.800rem' }}
                                                                                         >
                                                                                             <li className="links" style={{ marginBottom: '0px' }}>
                                                                                                 <Link to={`/orgs/${this.props["match"].params["orgID"]}/dashboard-router/${machine["id"]}`}>
@@ -157,6 +182,27 @@ class MachinesPanel extends PureComponent<Props, State> {
                                                                                                     </span>
                                                                                                 </Link>
                                                                                             </li>
+
+                                                                                            {
+                                                                                                machine?.["dashboards"].length > 0 &&
+                                                                                                <li className="links" style={{ marginBottom: '0px' }}>
+                                                                                                    <Link
+                                                                                                        to={{
+                                                                                                            pathname: `/orgs/${this.props["match"].params["orgID"]}/dashboards/${machine?.["dashboards"][0]["dashboardID"]}`
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+                                                                                                            <div><img src="../../../assets/icons/dashboards-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
+                                                                                                        </div>
+                                                                                                        <span>
+                                                                                                            Show Snapshots
+                                                                                                    </span>
+                                                                                                    </Link>
+                                                                                                </li>
+                                                                                            }
+
+
+
                                                                                             <li className="links" style={{ marginBottom: '0px' }}>
                                                                                                 <Link to={`/orgs/${this.props["match"].params["orgID"]}/dt`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>

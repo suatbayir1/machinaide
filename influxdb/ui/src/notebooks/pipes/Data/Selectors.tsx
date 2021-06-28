@@ -1,16 +1,15 @@
 // Libraries
-import React, {FC, useContext} from 'react'
+import React, { FC, useContext } from 'react'
 
 // Components
-import {InfluxColors, List} from '@influxdata/clockface'
+import { InfluxColors, List } from '@influxdata/clockface'
 import MeasurementSelectors from 'src/notebooks/pipes/Data/MeasurementSelectors'
 import FieldSelectors from 'src/notebooks/pipes/Data/FieldSelectors'
 import TagSelectors from 'src/notebooks/pipes/Data/TagSelectors'
-import {SchemaContext} from 'src/notebooks/context/schemaProvider'
+import { SchemaContext } from 'src/notebooks/context/schemaProvider'
 
 const Selectors: FC = () => {
-  const {fields, measurements, tags} = useContext(SchemaContext)
-  console.log(fields, measurements, tags)
+  const { fields, measurements, tags } = useContext(SchemaContext)
   // TODO(ariel): conditionally render results based on focus state of search bar
   return (
     <div className="data-source--block-results">
@@ -18,7 +17,7 @@ const Selectors: FC = () => {
         className="data-source--list"
         backgroundColor={InfluxColors.Obsidian}
         maxHeight="300px"
-        style={{height: '300px'}}
+        style={{ height: '300px' }}
       >
         <MeasurementSelectors measurements={measurements} />
         <FieldSelectors fields={fields} />

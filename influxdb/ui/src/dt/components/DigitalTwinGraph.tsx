@@ -1,29 +1,28 @@
+// Libraries
 import React, { PureComponent } from 'react'
-import AddNewNodeOverlay from "src/dt/components/AddNewNodeOverlay"
 import ForceGraph2D from "react-force-graph-2d"
-import NLPSearch from 'src/example/NLPSearch'
-import { BACKEND } from "src/config";
-import 'src/style/custom.css'
 import * as d3 from "d3";
 import { withSize } from "react-sizeme";
+
+// Components
+import AddNewNodeOverlay from "src/dt/components/AddNewNodeOverlay"
+import NLPSearch from 'src/example/NLPSearch'
+
+// Helpers
 import { history } from 'src/store/history'
+
+// Utilities
+import { BACKEND } from "src/config";
+
+// Css
+import 'src/style/custom.css'
+
+// Services
 import DTService from 'src/shared/services/DTService';
+
 import {
-    Panel,
-    ComponentSize,
-    Form,
-    Button,
-    Grid,
-    Columns,
-    ButtonType,
-    ComponentColor,
-    TechnoSpinner,
-    RemoteDataState,
-    SpinnerContainer,
-    Dropdown,
-    IconFont,
-    Notification,
-    Gradients,
+    Panel, ComponentSize, Form, Button, Grid, Columns, ButtonType, ComponentColor, TechnoSpinner,
+    RemoteDataState, SpinnerContainer, Dropdown, IconFont, Notification, Gradients,
 } from '@influxdata/clockface'
 
 interface Props {
@@ -151,8 +150,6 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
         eventSource.onmessage = e => {
             let currentData = JSON.parse(e.data);
 
-            console.log(currentData);
-
             let tempCurrentSensorValue = this.state.currentSensorValue;
 
             let found = false;
@@ -180,8 +177,6 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
 
         const nodes = [];
         const links = [];
-
-        console.log(graphInfo);
 
         graphInfo.map(factory => {
             nodes.push(Object.assign({
@@ -240,7 +235,7 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
 
                         component["sensors"].map(sensor => {
                             nodes.push(Object.assign({
-                                id: sensor?.displayName,
+                                id: sensor?.name,
                                 color: "orange",
                                 size: 300,
                                 symbolType: "triangle",
@@ -249,72 +244,28 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
 
                             links.push({
                                 source: sensor?.parent,
-                                target: sensor?.displayName
+                                target: sensor?.name
+                            })
+
+                            sensor["fields"].map(field => {
+                                nodes.push(Object.assign({
+                                    id: field?.["name"],
+                                    color: "orange",
+                                    size: 300,
+                                    symbolType: "triangle",
+                                    src: "../../assets/images/graph/measurement.jpg",
+                                }, field))
+
+                                links.push({
+                                    source: field?.parent,
+                                    target: field?.name
+                                })
                             })
                         })
                     })
                 })
             })
         })
-
-        // Object.keys(graphInfo).forEach((factory) => {
-        //     nodes.push(Object.assign({
-        //         id: graphInfo[factory].factoryName,
-        //         color: "blue",
-        //         size: 500,
-        //         src: "../../assets/images/graph/ermetal.png",
-        //         symbolType: "star",
-        //     }, graphInfo[factory]));
-
-        //     Object.keys(graphInfo[factory].machines).forEach((machine) => {
-        //         nodes.push(Object.assign({
-        //             id: graphInfo[factory].machines[machine].displayName,
-        //             color: "red",
-        //             size: 400,
-        //             symbolType: "circle",
-        //             src: "../../assets/images/graph/machine.jpg",
-        //         }, graphInfo[factory].machines[machine]));
-
-        //         links.push({
-        //             source: graphInfo[factory].machines[machine].parent,
-        //             target: graphInfo[factory].machines[machine].displayName
-        //         });
-
-        //         Object.keys(graphInfo[factory].machines[machine].contents).forEach((component) => {
-        //             if (graphInfo[factory].machines[machine].contents[component]["@type"] !== "Component") {
-        //                 return;
-        //             }
-
-        //             nodes.push(Object.assign({
-        //                 id: graphInfo[factory].machines[machine].contents[component].name,
-        //                 color: "green",
-        //                 size: 300,
-        //                 symbolType: "square",
-        //                 src: "../../assets/images/graph/component.png",
-        //             }, graphInfo[factory].machines[machine].contents[component]))
-
-        //             links.push({
-        //                 source: graphInfo[factory].machines[machine].contents[component].parent,
-        //                 target: graphInfo[factory].machines[machine].contents[component].name
-        //             })
-
-        //             Object.keys(graphInfo[factory].machines[machine].contents[component].sensors).forEach((sensor) => {
-        //                 nodes.push(Object.assign({
-        //                     id: graphInfo[factory].machines[machine].contents[component].sensors[sensor].displayName,
-        //                     color: "orange",
-        //                     size: 300,
-        //                     symbolType: "triangle",
-        //                     src: "../../assets/images/graph/sensor.jpg",
-        //                 }, graphInfo[factory].machines[machine].contents[component].sensors[sensor]))
-
-        //                 links.push({
-        //                     source: graphInfo[factory].machines[machine].contents[component].sensors[sensor].parent,
-        //                     target: graphInfo[factory].machines[machine].contents[component].sensors[sensor].displayName
-        //                 })
-        //             })
-        //         })
-        //     })
-        // })
 
         const returnData = {
             nodes,
@@ -344,8 +295,8 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
             spinnerLoading: RemoteDataState.Done
         })
 
-        this.graphRef.zoom(2.5, 1000);
-        this.graphRef.d3Force('collide', d3.forceCollide(4))
+        this.graphRef.zoom(2, 1000);
+        this.graphRef.d3Force('collide', d3.forceCollide(4));
     }
 
     onChangeInput = (e) => {

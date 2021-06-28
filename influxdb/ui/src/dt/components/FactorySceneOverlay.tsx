@@ -25,7 +25,6 @@ class FactorySceneOverlay extends PureComponent<Props, State> {
     }
 
     async componentDidMount(): Promise<void> {
-        console.log(document.getElementById("sceneArea"));
         setTimeout(async () => {
             await this.createScene();
             await this.renderGLTFModel();
@@ -54,21 +53,16 @@ class FactorySceneOverlay extends PureComponent<Props, State> {
 
             async function (gltf) {
                 gltf.scene.scale.set(0.01, 0.01, 0.01);
-                console.log(gltf.scene.position)
                 gltf.scene.position.set(0, 0, 0)
                 renderer.setClearColor(0xbfe3dd);
                 await scene.add(gltf.scene);
-
-                console.log(gltf.scene);
                 await renderer.render(scene, camera);
             },
 
             function (xhr) {
-                console.log((xhr.loaded / xhr.total * 100) + '% loaded');
             },
 
             function (error) {
-                console.log('An error happened', error);
             }
         );
         await renderer.render(scene, camera);

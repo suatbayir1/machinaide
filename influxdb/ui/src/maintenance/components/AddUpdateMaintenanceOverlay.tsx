@@ -112,8 +112,6 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
     }
 
     handleChangeEditRowData = (editRow) => {
-        console.log("editRow", editRow);
-
         this.setState({
             selectedPart: editRow.selectedPart,
             maintenanceTime: editRow.maintenanceTime,

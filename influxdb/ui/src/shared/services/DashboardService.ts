@@ -18,7 +18,7 @@ class DashboardService {
             return res;
         }
         catch (err) {
-            console.log("Error while executing query: ", err);
+            console.error("Error while executing query: ", err);
         }
     }
 
@@ -40,7 +40,7 @@ class DashboardService {
             return res;
         }
         catch (err) {
-            console.log("Error while executing query: ", err);
+            console.error("Error while executing query: ", err);
         }
     }
 
@@ -62,7 +62,7 @@ class DashboardService {
             return res;
         }
         catch (err) {
-            console.log("Error while executing query: ", err);
+            console.error("Error while executing query: ", err);
         }
     }
 
@@ -83,7 +83,7 @@ class DashboardService {
             return res;
         }
         catch (err) {
-            console.log("Error while executing query: ", err);
+            console.error("Error while executing query: ", err);
         }
     }
 
@@ -105,7 +105,7 @@ class DashboardService {
             return res;
         }
         catch (err) {
-            console.log("Error while executing query: ", err);
+            console.error("Error while executing query: ", err);
         }
     }
 
@@ -131,7 +131,7 @@ class DashboardService {
             return res;
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -157,7 +157,7 @@ class DashboardService {
             return res;
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -184,7 +184,7 @@ class DashboardService {
             const result = JSON.parse(res.data.data)
             return result;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -210,7 +210,7 @@ class DashboardService {
             return res;
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 

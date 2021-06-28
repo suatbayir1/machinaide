@@ -209,8 +209,6 @@ class MachineActionsPage extends PureComponent<Props, State> {
     }
 
     materialRecordEdit = (editRow) => {
-        console.log(editRow);
-
         this.setState({
             materialEditMode: true,
             materialUpdateData: editRow,
@@ -279,8 +277,6 @@ class MachineActionsPage extends PureComponent<Props, State> {
     }
 
     handleChangeExportType = (exportType) => {
-        console.log(this.state.filteredData);
-
         if (exportType === "csv") {
             this.createCSV();
         } else if (exportType === "xlsx") {

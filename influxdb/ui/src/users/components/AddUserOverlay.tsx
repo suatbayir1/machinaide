@@ -64,8 +64,6 @@ class AddUserOverlay extends PureComponent<Props, State> {
 
         const addResult = await UserService.addUser(addUserPayload);
 
-        console.log(addResult);
-
         if (addResult["code"] === "conflict") {
             this.props.handleChangeNotification("error", "This username already exists");
             return;

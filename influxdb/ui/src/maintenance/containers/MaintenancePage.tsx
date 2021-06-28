@@ -146,7 +146,6 @@ class MaintenancePage extends PureComponent<Props, State> {
 
     getAllMaintenance = async () => {
         const maintenance = await MaintenanceService.getAllMaintenance();
-        console.log(maintenance);
         this.setState({
             tableData: maintenance,
             filteredData: maintenance,

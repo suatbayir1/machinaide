@@ -153,7 +153,6 @@ class ImportDataForm extends PureComponent<Props, State> {
                             "color": "green",
                             "text": `In line: ${index + 1} DUPLICATED: This failure record already exists.`
                         }
-                        console.log(error);
                         this.setState({
                             errors: [...this.state.errors, error],
                         }, () => this.calculateGeneralIstatistics());
@@ -177,7 +176,6 @@ class ImportDataForm extends PureComponent<Props, State> {
     }
 
     private calculateGeneralIstatistics = () => {
-        console.log("state changed", this.state.errors);
         let occurences = this.state.errors.reduce(function (r, row) {
             r[row['type']] = ++r[row['type']] || 1;
             return r;
@@ -199,7 +197,6 @@ class ImportDataForm extends PureComponent<Props, State> {
 
     private downloadErrors = () => {
         // let errors = document.getElementById("errorText").innerText.replaceAll("\n\n", "\n")
-        // console.log(errors);
 
         let errors = "";
         this.state.errors.map(error => {
@@ -234,7 +231,6 @@ factoryID, sid, sourceName, severity, cost, startTime, endTime, description
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
-        console.log(str);
     }
 
     private handleWriteData = async () => {
@@ -393,7 +389,6 @@ factoryID, sid, sourceName, severity, cost, startTime, endTime, description
     }
 
     private handleFileClick = (e: any): void => {
-        console.log("handle file click");
         const file: File = e.currentTarget.files[0]
 
         if (!file) {

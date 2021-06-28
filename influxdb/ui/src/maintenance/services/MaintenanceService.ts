@@ -24,12 +24,11 @@ class MaintenanceService {
             const result = JSON.parse(res.data.data)
             return result;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
     addMaintenance = async (payload) => {
-        console.log("addMaintenance", payload);
         const url = `${BACKEND.API_URL}maintenance/addMaintenance`;
 
         const request = fetch(url, {
@@ -57,7 +56,7 @@ class MaintenanceService {
             return res;
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -89,7 +88,7 @@ class MaintenanceService {
             return res;
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -121,7 +120,7 @@ class MaintenanceService {
             return res;
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -153,7 +152,7 @@ class MaintenanceService {
             return res;
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 

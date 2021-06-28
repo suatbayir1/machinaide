@@ -106,8 +106,6 @@ class UsersIndex extends Component<Props, State> {
     getUsers = async () => {
         const userList = await UserService.getUsersFromMongo();
 
-        console.log("userList", userList);
-
         this.setState({
             userList,
             filteredUserList: userList,
@@ -115,7 +113,6 @@ class UsersIndex extends Component<Props, State> {
     }
 
     deleteUser = async (row) => {
-        console.log(row);
         const deleteResult = await UserService.deleteUser(row["userID"]);
 
         const payload = {

@@ -57,7 +57,6 @@ class MaterialsTable extends PureComponent<Props, State> {
         };
 
         const result = await FactoryService.deleteMaterial(payload);
-        console.log(result);
         if (result.data.summary.code !== 200) {
             alert("error");
             this.props.notify(materialDeletedFailure());

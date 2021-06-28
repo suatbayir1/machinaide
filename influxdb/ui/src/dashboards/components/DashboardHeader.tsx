@@ -12,6 +12,7 @@ import GraphTips from 'src/shared/components/graph_tips/GraphTips'
 import RenamablePageTitle from 'src/pageLayout/components/RenamablePageTitle'
 import TimeZoneDropdown from 'src/shared/components/TimeZoneDropdown'
 import { Button, IconFont, ComponentColor, Page } from '@influxdata/clockface'
+import SnapshotsGroupDropdown from 'src/dashboards/components/SnapshotsGroupDropdown';
 
 // Actions
 import { toggleShowVariablesControls as toggleShowVariablesControlsAction } from 'src/userSettings/actions'
@@ -58,6 +59,7 @@ import { INFLUX } from 'src/config'
 interface OwnProps {
   autoRefresh: AutoRefresh
   onManualRefresh: () => void
+  dashboard: object
 }
 
 type ReduxProps = ConnectedProps<typeof connector>
@@ -83,8 +85,6 @@ const DashboardHeader: FC<Props> = ({
   const [interval, setInterval] = React.useState(1500);
   const [allCellData, setAllCellData] = React.useState([]);
 
-
-
   useEffect(() => {
     if (dashboard && dashboard.name.includes("Monitor")) {
       queryResults(timeRange, autoRefresh);
@@ -101,6 +101,10 @@ const DashboardHeader: FC<Props> = ({
 
   const handleAddCell = () => {
     history.push(`/orgs/${org.id}/dashboards/${dashboard.id}/cells/new`)
+  }
+
+  const redirectToDashboard = (dashboardID) => {
+    history.push(`/orgs/${org.id}/snapshot-router/${dashboardID}`)
   }
 
   const handleSystemInfo = () => {
@@ -174,7 +178,7 @@ const DashboardHeader: FC<Props> = ({
       return res
     }
     catch (err) {
-      console.log("Error getting average: ", err);
+      console.error("Error getting average: ", err);
     }
   }
 
@@ -198,7 +202,7 @@ const DashboardHeader: FC<Props> = ({
       return res;
     }
     catch (err) {
-      console.log("Error while executing query: ", err);
+      console.error("Error while executing query: ", err);
     }
   }
 
@@ -208,8 +212,6 @@ const DashboardHeader: FC<Props> = ({
       "v.timeRangeStop": 'now()',
       "v.windowPeriod": interval.interval === 0 ? "5s" : (interval.interval / 1000).toString() + 's'
     }
-
-    console.log(tempVariables);
 
     for (let key in tempVariables) {
       if (query.includes(key)) {
@@ -311,6 +313,10 @@ const DashboardHeader: FC<Props> = ({
 
       <Page.ControlBar fullWidth={true}>
         <Page.ControlBarLeft>
+          {
+            dashboard.name.includes("snapshots") &&
+            <SnapshotsGroupDropdown dashboard={dashboard} orgID={org.id} redirectToDashboard={redirectToDashboard} />
+          }
           <Button
             icon={IconFont.AddCell}
             color={ComponentColor.Primary}

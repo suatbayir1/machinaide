@@ -112,7 +112,6 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
     }
 
     handleColorChange = (e) => {
-        console.log(e);
         this.setState({
             color: e
         })
@@ -132,10 +131,8 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                         renderer.render(scene, camera);
                     },
                     xhr => {
-                        console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
                     },
                     error => {
-                        console.log("an error occurred", error);
                     }
                 )
 
@@ -170,7 +167,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
             await response.json();
             return true;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -234,22 +231,17 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
 
     //         async function (gltf) {
     //             gltf.scene.scale.set(0.01, 0.01, 0.01);
-    //             console.log(gltf.scene.position)
     //             gltf.scene.position.set(0, 0, 0)
     //             renderer.setClearColor(0xbfe3dd);
     //             await scene.add(gltf.scene);
 
-    //             console.log(gltf.scene);
-    //             console.log(scene);
     //             await renderer.render(scene, camera);
     //         },
 
     //         function (xhr) {
-    //             console.log((xhr.loaded / xhr.total * 100) + '% loaded');
     //         },
 
     //         function (error) {
-    //             console.log('An error happened', error);
     //         }
     //     );
     //     await renderer.render(scene, camera);
@@ -298,7 +290,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
 
             await this.handleChangeDT(dtList[0]);
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -328,7 +320,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                 registeredObjectList: result,
             })
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -356,7 +348,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                 textures: result
             });
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -415,10 +407,8 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                         }
                     },
                     function (xhr) {
-                        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
                     },
                     function (xhr) {
-                        console.log('An error happened', xhr);
                     }
                 );
             } else { // if adding previously saved cube without texture
@@ -509,10 +499,8 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                         }
                     },
                     function (xhr) {
-                        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
                     },
                     function (xhr) {
-                        console.log('An error happened', xhr);
                     }
                 );
             } else { // if adding previously saved cube without texture
@@ -601,10 +589,8 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                         }
                     },
                     function (xhr) {
-                        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
                     },
                     function (xhr) {
-                        console.log('An error happened', xhr);
                     }
                 );
             } else { // if adding previously saved object without texture
@@ -694,10 +680,8 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                         }
                     },
                     function (xhr) {
-                        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
                     },
                     function (xhr) {
-                        console.log('An error happened', xhr);
                     }
                 );
             } else { // if adding previously saved object without texture
@@ -805,7 +789,6 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
 
         // watch camera transform 
         controls.addEventListener("change", () => {
-            console.log(camera);
             renderer.render(scene, camera);
         });
 
@@ -919,12 +902,11 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                 this.getTextureFiles();
             }
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
     handleClickTexture = (texture) => {
-        console.log(texture);
         this.setState({
             selectedTexture: texture
         })
@@ -1014,7 +996,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                 this.getObjectList();
             }
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -1109,7 +1091,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                 })
             }
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -1242,7 +1224,6 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
             let obj;
             for (var i = scene.children.length - 1; i >= 0; i--) {
                 if (newObjectsId.includes(scene.children[i]["uuid"])) {
-                    console.log("deleted", scene.children[i]);
                     obj = scene.children[i];
                     obj.material = undefined;
                     obj.geometry = undefined;

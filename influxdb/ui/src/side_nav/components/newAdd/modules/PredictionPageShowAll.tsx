@@ -89,7 +89,6 @@ class PredictionPageShowAll extends PureComponent<Props, State> {
                 predictionInfo: predictionInfo[0]
             })
         }
-        console.log(predictionInfo[0]);
     }
 
     getPredictionModel = async () => {
@@ -103,7 +102,6 @@ class PredictionPageShowAll extends PureComponent<Props, State> {
                 predictionModel: predictionModel[0]
             })
         }
-        console.log(predictionModel[0]);
     }
 
     handleChangePage = (event, newPage) => {

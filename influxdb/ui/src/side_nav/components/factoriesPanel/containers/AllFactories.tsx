@@ -52,7 +52,6 @@ class AllFactories extends PureComponent<Props, State> {
 
     // getDashboards = async () => {
     //     const dashboards = await DashboardService.getDashboards();
-    //     console.log(dashboards);
     // }
 
     render() {

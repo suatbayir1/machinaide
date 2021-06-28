@@ -21,7 +21,7 @@ class FactoryDashboardService {
             return res;
         }
         catch (err) {
-            console.log("Error while executing query: ", err);
+            console.error("Error while executing query: ", err);
         }
     }
 }

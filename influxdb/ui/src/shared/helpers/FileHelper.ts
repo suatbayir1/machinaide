@@ -18,7 +18,6 @@ export const csvToJSON = async (csv) => {
 }
 
 export const xlsxToJSON = async (xlsx) => {
-    console.log(xlsx);
     var lines = xlsx.split("\n");
     var result = [];
     var headers = lines[0].split(",");
@@ -148,7 +147,6 @@ export const fileAnalyzer = (headers, required, content, fileName) => {
         }
     });
 
-    console.log("helper", errors);
     if (errors.length === 0) {
         let info = {
             "type": "INFO",

@@ -66,7 +66,6 @@ class SensorsTable extends PureComponent<Props, State> {
     }
 
     async componentDidMount() {
-        console.log(this.props);
         await this.getAllSensors();
     }
 
@@ -107,7 +106,6 @@ class SensorsTable extends PureComponent<Props, State> {
                 && row["sensorType"].toLowerCase().includes(this.state.filterType.toLowerCase())
                 && row["sensorStatus"].toLowerCase().includes(this.state.filterSensorStatus.toLowerCase())
             ) {
-                console.log(row);
                 tempFilteredRows.push(row);
             }
         })

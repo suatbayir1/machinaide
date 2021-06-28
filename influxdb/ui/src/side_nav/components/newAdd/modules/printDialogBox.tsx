@@ -47,10 +47,6 @@ const FormDialog = (props) => {
             email: email,
             reportData: data,
         }
-
-        console.log(params)
-        console.log(JSON.stringify(params))
-
     }
 
     return (

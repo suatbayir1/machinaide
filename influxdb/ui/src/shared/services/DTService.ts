@@ -24,7 +24,7 @@ class DTService {
             const result = JSON.parse(res.data.data)
             return result;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -51,7 +51,7 @@ class DTService {
             const result = JSON.parse(res.data.data)
             return result;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -76,7 +76,7 @@ class DTService {
             const res = await response.json();
             return res;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -108,7 +108,7 @@ class DTService {
             return res;
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -139,7 +139,7 @@ class DTService {
             return res;
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -165,7 +165,7 @@ class DTService {
             return res;
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 }

@@ -85,9 +85,7 @@ class AddMemberOverlay extends PureComponent<Props, State> {
             "org": this.state.currentOrg
         }
 
-        const mongoResult = await MemberService.addMemberToOrganizationMongo(mongoPayload);
-
-        console.log(mongoResult);
+        await MemberService.addMemberToOrganizationMongo(mongoPayload);
 
         this.props.handleChangeNotification("success", "User successfully added to the production line");
         this.props.getMembers();

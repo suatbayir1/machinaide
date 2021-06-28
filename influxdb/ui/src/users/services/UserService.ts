@@ -11,7 +11,7 @@ class UserService {
             const res = await response.json();
             return res;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -38,7 +38,7 @@ class UserService {
             const result = JSON.parse(res.data.data);
             return result;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -55,7 +55,7 @@ class UserService {
             const res = await response.json();
             return res;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -71,13 +71,12 @@ class UserService {
             const response = await request;
             return response.status;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
     addUserToMongo = async (payload) => {
         const url = `${BACKEND.API_URL}auth/signup`;
-        console.log(window.localStorage.getItem("token"));
 
         const request = fetch(url, {
             method: 'POST',
@@ -104,7 +103,7 @@ class UserService {
             return res;
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -120,7 +119,7 @@ class UserService {
             // const res = await response.json();
             return response;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -152,7 +151,7 @@ class UserService {
             return res;
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -183,7 +182,7 @@ class UserService {
             return res;
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -214,7 +213,7 @@ class UserService {
             return res;
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -230,7 +229,7 @@ class UserService {
             const response = await request;
             return response;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 }

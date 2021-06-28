@@ -66,12 +66,11 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
     async componentDidUpdate(prevProps) {
         if (prevProps.selectedGraphNode !== this.props.selectedGraphNode) {
             await this.handleChangeSelectedGraphNode(this.props.selectedGraphNode);
-            console.log(this.props.selectedGraphNode);
         }
     }
 
     handleChangeSelectedGraphNode = async (node) => {
-        if (node["type"] === "Sensor") {
+        if (node["type"] === "Field") {
             this.setState({
                 sSelectedDataSource: node["dataSource"],
                 sMinValue: node["minValue"],
@@ -436,7 +435,7 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                             </Form.Element>
                         </Grid.Column>
                     </Grid.Row>
-                    <Grid.Row>
+                    {/* <Grid.Row>
                         <Grid.Column widthXS={Columns.Twelve}>
                             <Form.Element label="Data Source">
                                 <SelectDropdown
@@ -471,7 +470,7 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
+                    </Grid.Row> */}
                     <Grid.Row>
                         <Grid.Column widthXS={Columns.Twelve}>
                             <Form.Element label="Data Type">
@@ -514,11 +513,107 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
         ]
     }
 
+    private get fieldElements(): JSX.Element[] {
+        const { selectedGraphNode } = this.props;
+
+        return [
+            <Form key={selectedGraphNode["name"]}>
+                <Grid>
+                    <Grid.Row>
+                        <Grid.Column widthXS={Columns.Twelve}>
+                            <Form.Element label="Type">
+                                <Label
+                                    size={ComponentSize.Small}
+                                    name={selectedGraphNode["type"]}
+                                    description="Node type"
+                                    color={InfluxColors.Ocean}
+                                    id={selectedGraphNode["type"]}
+                                />
+                            </Form.Element>
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column widthXS={Columns.Twelve}>
+                            <Form.Element label="Name">
+                                <Label
+                                    size={ComponentSize.Small}
+                                    name={selectedGraphNode["name"]}
+                                    description="Name"
+                                    color={InfluxColors.Ocean}
+                                    id={selectedGraphNode["name"]}
+                                />
+                            </Form.Element>
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column widthXS={Columns.Twelve}>
+                            <Form.Element label="Parent">
+                                <Label
+                                    size={ComponentSize.Small}
+                                    name={selectedGraphNode["parent"]}
+                                    description="Parent"
+                                    color={InfluxColors.Ocean}
+                                    id={selectedGraphNode["parent"]}
+                                />
+                            </Form.Element>
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column widthXS={Columns.Twelve}>
+                            <Form.Element label="Data Source">
+                                <SelectDropdown
+                                    buttonStatus={["admin"].includes(localStorage.getItem("userRole")) ? ComponentStatus.Valid : ComponentStatus.Disabled}
+                                    options={["sensors_data"]}
+                                    selectedOption={this.state.sSelectedDataSource}
+                                    onSelect={(e) => this.setState({ sSelectedDataSource: e })}
+                                />
+                            </Form.Element>
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column widthXS={Columns.Six}>
+                            <Form.Element label="Min Value">
+                                <Input
+                                    name="sMinValue"
+                                    onChange={this.handleChangeInput}
+                                    value={this.state.sMinValue}
+                                    type={InputType.Number}
+                                    status={["admin"].includes(localStorage.getItem("userRole")) ? ComponentStatus.Default : ComponentStatus.Disabled}
+                                />
+                            </Form.Element>
+                        </Grid.Column>
+                        <Grid.Column widthXS={Columns.Six}>
+                            <Form.Element label="Max Value">
+                                <Input
+                                    name="sMaxValue"
+                                    onChange={this.handleChangeInput}
+                                    value={this.state.sMaxValue}
+                                    type={InputType.Number}
+                                    status={["admin"].includes(localStorage.getItem("userRole")) ? ComponentStatus.Default : ComponentStatus.Disabled}
+                                />
+                            </Form.Element>
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column widthXS={Columns.Twelve}>
+                            <Form.Element label="Unit">
+                                <Label
+                                    size={ComponentSize.Small}
+                                    name={selectedGraphNode["unit"]}
+                                    description="Unit"
+                                    color={InfluxColors.Ocean}
+                                    id={selectedGraphNode["unit"]}
+                                />
+                            </Form.Element>
+                        </Grid.Column>
+                    </Grid.Row>
+                </Grid>
+            </Form>
+        ]
+    }
+
     getComponentCount = (content) => {
         let components = content.filter(c => c?.["@type"] === "Component");
-
-        console.log(content.length);
-
         return components.length;
     }
 
@@ -691,12 +786,15 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                             this.props.selectedGraphNode["type"] === "Sensor" && this.sensorElements
                         }
 
+                        {
+                            this.props.selectedGraphNode["type"] === "Field" && this.fieldElements
+                        }
+
                         <Grid.Row>
                             <FlexBox margin={ComponentSize.Medium} style={{ float: 'right' }}>
-
                                 {
                                     Object.keys(selectedGraphNode).length !== 0 &&
-                                    selectedGraphNode["type"] === "Sensor" &&
+                                    selectedGraphNode["type"] === "Field" &&
                                     <div style={{ float: 'right' }}>
                                         {
                                             ["admin"].includes(localStorage.getItem("userRole")) &&

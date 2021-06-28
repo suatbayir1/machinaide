@@ -13,7 +13,7 @@ class OrganizationService {
             const res = await response.json();
             return res;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -27,7 +27,7 @@ class OrganizationService {
             const res = await response.json();
             return res;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -42,7 +42,7 @@ class OrganizationService {
             const response = await request;
             return response;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -67,7 +67,7 @@ class OrganizationService {
             const res = await response.json();
             return res;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 }

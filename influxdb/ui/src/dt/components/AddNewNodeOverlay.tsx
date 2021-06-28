@@ -1,13 +1,22 @@
+// Libraries
 import React, { PureComponent } from 'react'
+import ReactHover, { Trigger, Hover } from "react-hover";
+
+// Components
 import {
     Form, Input, Button, ButtonType, ComponentColor, Overlay,
     IconFont, Grid, Columns, SelectDropdown, TextArea,
     DapperScrollbars, ComponentSize, Table, BorderType, List,
     FlexDirection, Gradients, FlexBox, InputType,
 } from '@influxdata/clockface'
-import { BACKEND } from "src/config";
 import TabbedPageTabs from 'src/shared/tabbedPage/TabbedPageTabs'
 import { TabbedPageTab } from 'src/shared/tabbedPage/TabbedPageTabs'
+
+// Utilities
+import { BACKEND } from "src/config";
+
+// Services
+import DTService from 'src/shared/services/DTService';
 
 interface Props {
     visibleAddNodeOverlay: boolean
@@ -26,8 +35,8 @@ interface State {
     productionLine: string
     mMachineName: string
     mComponentName: string
-    mComponentDescription: string
-    mAddedComponentList: object[]
+    mDescription: string
+    sAddedFieldList: object[]
     cParent: string
     cComponentName: string
     cDescription: string
@@ -35,7 +44,6 @@ interface State {
     cSensorType: string
     cSensorUnit: string
     cSensorDescription: string
-    cAddedSensorList: object[]
     cComponentObject: object
     sParent: string
     sSensorName: string
@@ -50,6 +58,7 @@ interface State {
     sMinValue: number
     sMaxValue: number
     objectList: object[]
+    sFieldName: string
 }
 
 class AddNewNodeOverlay extends PureComponent<Props, State> {
@@ -64,8 +73,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
             productionLine: "",
             mMachineName: "",
             mComponentName: "",
-            mComponentDescription: "",
-            mAddedComponentList: [],
+            mDescription: "",
             cParent: "",
             cComponentName: "",
             cDescription: "",
@@ -73,7 +81,6 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
             cSensorType: "Temperature",
             cSensorUnit: "real",
             cSensorDescription: "",
-            cAddedSensorList: [],
             cComponentObject: {},
             sParent: "",
             sSensorName: "",
@@ -88,6 +95,8 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
             sMinValue: 0,
             sMaxValue: 0,
             objectList: [],
+            sFieldName: "",
+            sAddedFieldList: [],
         };
     }
 
@@ -122,7 +131,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                 objectList: result
             })
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -132,8 +141,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
             productionLine: "",
             mMachineName: "",
             mComponentName: "",
-            mComponentDescription: "",
-            mAddedComponentList: [],
+            mDescription: "",
             cParent: "",
             cComponentName: "",
             cDescription: "",
@@ -141,7 +149,6 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
             cSensorType: "Temperature",
             cSensorUnit: "real",
             cSensorDescription: "",
-            cAddedSensorList: [],
             sParent: "",
             sSensorName: "",
             sSensorType: "Temperature",
@@ -151,7 +158,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
     }
 
     setGeneralInfo = async () => {
-        let generalInfo = await this.getGeneralInfo();
+        let generalInfo = await DTService.getGeneralInfo();
 
         this.setState({
             productionLineList: generalInfo.productionLineList,
@@ -163,140 +170,54 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
         })
     }
 
-    getGeneralInfo = async () => {
-        const url = `${BACKEND.API_URL}dt/getGeneralInfo`;
-
-        const request = fetch(url, {
-            method: 'GET',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
-                'token': window.localStorage.getItem("token")
-            }
-        })
-
-        try {
-            const response = await request;
-            const res = await response.json();
-
-            if (res.data.success !== true) return;
-            const result = JSON.parse(res.data.data)
-
-            return result;
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
     handleChangeInput = (e): void => {
         if (Object.keys(this.state).includes(e.target.name)) {
             this.setState({ [e.target.name]: e.target.value } as Pick<State, keyof State>);
         }
     }
 
-    addComponentToMachine = () => {
-        if (this.handleValidation(this.state.mMachineName) !== null) {
-            this.props.handleChangeNotification('error', 'Machine Name cannot be empty');
+    addFieldToSensor = () => {
+        if (this.handleValidation(this.state.sFieldName) !== null) {
+            this.props.handleChangeNotification('error', 'Field Name cannot be empty');
             return;
         }
 
-        if (this.handleValidation(this.state.mComponentName) !== null) {
-            this.props.handleChangeNotification('error', 'Component Name cannot be empty');
-            return;
-        }
-
-        let isAlreadyExistsSensor = false;
-        this.state.mAddedComponentList.forEach(item => {
-            if (item['name'] === this.state.mComponentName) {
-                this.props.handleChangeNotification('error', 'This component has already been added');
-                isAlreadyExistsSensor = true;
+        let isAlreadyExistsField = false;
+        this.state.sAddedFieldList.forEach(item => {
+            if (item['name'] === this.state.sFieldName) {
+                this.props.handleChangeNotification('error', 'This field has already been added');
+                isAlreadyExistsField = true;
                 return;
             }
         })
 
-        if (isAlreadyExistsSensor) {
+        if (isAlreadyExistsField) {
             return;
         }
 
 
-        const component = {
-            "@id": this.state.mComponentName,
-            "@type": "Component",
-            "name": this.state.mComponentName,
-            "displayName": this.state.mComponentName,
-            "description": this.state.mComponentDescription,
-            "type": "Component",
-            "parent": this.state.mMachineName,
-            "sensors": [],
+        const field = {
+            "name": this.state.sFieldName,
+            "type": "Field",
+            "parent": this.state.sSensorName,
+            "minValue": this.state.sMinValue,
+            "maxValue": this.state.sMaxValue,
+            "unit": this.state.sSensorUnit,
+            "dataSource": this.state.sSelectedDataSource
         }
 
 
         this.setState({
-            mAddedComponentList: [...this.state.mAddedComponentList, component]
+            sAddedFieldList: [...this.state.sAddedFieldList, field]
         });
     }
 
-    removeComponentFromMachine = (component) => {
-        const tempComponentList = this.state.mAddedComponentList.filter(item =>
-            item['name'] !== component['name']
+    removeFieldFromSensor = (field) => {
+        const tempFieldList = this.state.sAddedFieldList.filter(item =>
+            item['name'] !== field['name']
         )
         this.setState({
-            mAddedComponentList: tempComponentList,
-        })
-    }
-
-    addSensorToComponent = () => {
-        if (this.handleValidation(this.state.cSensorName) !== null) {
-            this.props.handleChangeNotification('error', 'Sensor Name cannot be empty');
-            return;
-        }
-
-        if (this.handleValidation(this.state.cComponentName) !== null) {
-            this.props.handleChangeNotification('error', 'Component Name cannot be empty');
-            return;
-        }
-
-        let isAlreadyExistsSensor = false;
-        this.state.cAddedSensorList.forEach(item => {
-            if (item['name'] === this.state.cSensorName) {
-                this.props.handleChangeNotification('error', 'This sensor has already been added');
-                isAlreadyExistsSensor = true;
-                return;
-            }
-        })
-
-        if (isAlreadyExistsSensor) {
-            return;
-        }
-
-        const sensor = {
-            "@id": this.state.cSensorName,
-            "@type": ["Telemetry", this.state.cSensorType],
-            "name": this.state.cSensorName,
-            "schema": this.state.cSensorUnit,
-            "type": "Sensor",
-            "parent": this.state.cComponentName,
-            "unit": this.state.cSensorUnit,
-            "displayName": this.state.cSensorName,
-            "description": this.state.cSensorDescription,
-            "status": "Working"
-        }
-
-
-        this.setState({
-            cAddedSensorList: [...this.state.cAddedSensorList, sensor]
-        });
-    }
-
-    removeSensorFromComponent = (sensor) => {
-        const tempSensorList = this.state.cAddedSensorList.filter(item =>
-            item['name'] !== sensor['name']
-        )
-        this.setState({
-            cAddedSensorList: tempSensorList,
+            sAddedFieldList: tempFieldList,
         })
     }
 
@@ -305,17 +226,12 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
             <Grid key="machine">
                 <Grid.Row>
                     <Grid.Column widthSM={Columns.Six}>
-                        <Form.Element label="Factory Name">
+                        <Form.Element label="Production Line">
                             <SelectDropdown
                                 options={this.state.productionLineList}
                                 selectedOption={this.state.productionLine}
                                 onSelect={(e) => this.setState({ productionLine: e })}
                             />
-                            {/* <Input
-                                name="factoryName"
-                                value={this.state.mFactoryName}
-                                status={ComponentStatus.Disabled}
-                            /> */}
                         </Form.Element>
                     </Grid.Column>
                     <Grid.Column widthSM={Columns.Six}>
@@ -334,38 +250,11 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                     </Grid.Column>
                 </Grid.Row>
                 <Grid.Row>
-                    <Grid.Column widthSM={Columns.Four}>
-                        <Form.Element label="">
-                            <Button
-                                text="Add Component"
-                                icon={IconFont.Plus}
-                                onClick={this.addComponentToMachine}
-                                type={ButtonType.Button}
-                                color={ComponentColor.Primary}
-                            />
-                        </Form.Element>
-                    </Grid.Column>
-                </Grid.Row>
-                <Grid.Row>
-                    <Grid.Column widthSM={Columns.Six}>
-                        <Form.Element
-                            label="Component Name"
-                        >
-                            <Input
-                                name="mComponentName"
-                                placeholder="Component name.."
-                                onChange={this.handleChangeInput}
-                                value={this.state.mComponentName}
-                            />
-                        </Form.Element>
-                    </Grid.Column>
-                </Grid.Row>
-                <Grid.Row>
                     <Grid.Column widthSM={Columns.Twelve}>
                         <Form.Element label="Description">
                             <TextArea
-                                name="mComponentDescription"
-                                value={this.state.mComponentDescription}
+                                name="mDescription"
+                                value={this.state.mDescription}
                                 placeholder="Description.."
                                 onChange={this.handleChangeInput}
                                 rows={5}
@@ -373,55 +262,6 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                         </Form.Element>
                     </Grid.Column>
                 </Grid.Row>
-                <Grid.Row>
-                    {
-                        this.state.mAddedComponentList.length > 0 ? (
-                            <DapperScrollbars
-                                autoHide={false}
-                                autoSizeHeight={true}
-                                style={{ maxHeight: '150px' }}
-                                className="data-loading--scroll-content"
-                            >
-                                <Table
-                                    borders={BorderType.Vertical}
-                                    fontSize={ComponentSize.ExtraSmall}
-                                    cellPadding={ComponentSize.ExtraSmall}
-                                >
-                                    <Table.Header>
-                                        <Table.Row>
-                                            <Table.HeaderCell>Name</Table.HeaderCell>
-                                            <Table.HeaderCell>Description</Table.HeaderCell>
-                                            <Table.HeaderCell></Table.HeaderCell>
-                                        </Table.Row>
-                                    </Table.Header>
-                                    <Table.Body>
-                                        {
-                                            this.state.mAddedComponentList.map((component, index) => (
-                                                <Table.Row key={index}>
-                                                    <Table.Cell>{component["name"]}</Table.Cell>
-                                                    <Table.Cell>{component["description"]}</Table.Cell>
-                                                    <Table.Cell>
-                                                        <Button
-                                                            size={ComponentSize.ExtraSmall}
-                                                            icon={IconFont.Remove}
-                                                            color={ComponentColor.Danger}
-                                                            type={ButtonType.Submit}
-                                                            onClick={() => this.removeComponentFromMachine(component)}
-                                                        />
-                                                    </Table.Cell>
-                                                </Table.Row>
-                                            ))
-                                        }
-                                    </Table.Body>
-                                </Table>
-                            </DapperScrollbars>
-                        ) : (
-                            null
-                        )
-                    }
-                    <br />
-                </Grid.Row>
-
             </Grid>
 
         ]
@@ -509,117 +349,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                         </Form.Element>
                     </Grid.Column>
                 </Grid.Row>
-
-                <Grid.Row>
-                    <Grid.Column widthSM={Columns.Three}>
-                        <Form.Element label="">
-                            <Button
-                                text="Add Sensor"
-                                icon={IconFont.Plus}
-                                onClick={this.addSensorToComponent}
-                                type={ButtonType.Button}
-                                color={ComponentColor.Primary}
-                            />
-                        </Form.Element>
-                    </Grid.Column>
-                </Grid.Row>
-                <Grid.Row>
-                    <Grid.Column widthSM={Columns.Six}>
-                        <Form.Element
-                            label="Sensor Name"
-                        >
-                            <Input
-                                name="cSensorName"
-                                placeholder="Sensor name.."
-                                onChange={this.handleChangeInput}
-                                value={this.state.cSensorName}
-                            />
-                        </Form.Element>
-                    </Grid.Column>
-                    <Grid.Column widthSM={Columns.Three}>
-                        <Form.Element label="Type">
-                            <SelectDropdown
-                                options={this.state.sSensorTypeList}
-                                selectedOption={this.state.cSensorType}
-                                onSelect={(e) => this.setState({ cSensorType: e })}
-                            />
-                        </Form.Element>
-                    </Grid.Column>
-                    <Grid.Column widthSM={Columns.Three}>
-                        <Form.Element label="Unit">
-                            <SelectDropdown
-                                options={this.state.sSensorUnitList}
-                                selectedOption={this.state.cSensorUnit}
-                                onSelect={(e) => this.setState({ cSensorUnit: e })}
-                            />
-                        </Form.Element>
-                    </Grid.Column>
-                </Grid.Row>
-                <Grid.Row>
-                    <Grid.Column widthSM={Columns.Twelve}>
-                        <Form.Element label="Description">
-                            <TextArea
-                                name="cSensorDescription"
-                                value={this.state.cSensorDescription}
-                                placeholder="Description.."
-                                onChange={this.handleChangeInput}
-                                rows={5}
-                            />
-                        </Form.Element>
-                    </Grid.Column>
-                </Grid.Row>
-                <Grid.Row>
-                    {
-                        this.state.cAddedSensorList.length > 0 ? (
-                            <DapperScrollbars
-                                autoHide={false}
-                                autoSizeHeight={true}
-                                style={{ maxHeight: '150px' }}
-                                className="data-loading--scroll-content"
-                            >
-                                <Table
-                                    borders={BorderType.Vertical}
-                                    fontSize={ComponentSize.ExtraSmall}
-                                    cellPadding={ComponentSize.ExtraSmall}
-                                >
-                                    <Table.Header>
-                                        <Table.Row>
-                                            <Table.HeaderCell>Name</Table.HeaderCell>
-                                            <Table.HeaderCell>Type</Table.HeaderCell>
-                                            <Table.HeaderCell>Unit</Table.HeaderCell>
-                                            <Table.HeaderCell></Table.HeaderCell>
-                                        </Table.Row>
-                                    </Table.Header>
-                                    <Table.Body>
-                                        {
-                                            this.state.cAddedSensorList.map((sensor, index) => (
-                                                <Table.Row key={index}>
-                                                    <Table.Cell>{sensor["name"]}</Table.Cell>
-                                                    <Table.Cell>{sensor["@type"][1]}</Table.Cell>
-                                                    <Table.Cell>{sensor["unit"]}</Table.Cell>
-                                                    <Table.Cell>
-                                                        <Button
-                                                            size={ComponentSize.ExtraSmall}
-                                                            icon={IconFont.Remove}
-                                                            color={ComponentColor.Danger}
-                                                            type={ButtonType.Submit}
-                                                            onClick={() => this.removeSensorFromComponent(sensor)}
-                                                        />
-                                                    </Table.Cell>
-                                                </Table.Row>
-                                            ))
-                                        }
-                                    </Table.Body>
-                                </Table>
-                            </DapperScrollbars>
-                        ) : (
-                            null
-                        )
-                    }
-                    <br />
-                </Grid.Row>
             </Grid>
-
         ]
     }
 
@@ -652,7 +382,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                     </Grid.Column>
                 </Grid.Row>
                 <Grid.Row>
-                    <Grid.Column widthSM={Columns.Six}>
+                    <Grid.Column widthSM={Columns.Four}>
                         <Form.Element label="Type">
                             <SelectDropdown
                                 options={this.state.sSensorTypeList}
@@ -661,7 +391,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                             />
                         </Form.Element>
                     </Grid.Column>
-                    <Grid.Column widthSM={Columns.Six}>
+                    <Grid.Column widthSM={Columns.Four}>
                         <Form.Element label="Unit">
                             <SelectDropdown
                                 options={this.state.sSensorUnitList}
@@ -670,10 +400,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                             />
                         </Form.Element>
                     </Grid.Column>
-                </Grid.Row>
-
-                <Grid.Row>
-                    <Grid.Column widthSM={Columns.Six}>
+                    <Grid.Column widthSM={Columns.Four}>
                         <Form.Element label="Data Source">
                             <SelectDropdown
                                 options={this.state.sDataSourceList}
@@ -682,30 +409,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                             />
                         </Form.Element>
                     </Grid.Column>
-                    <Grid.Column widthSM={Columns.Three}>
-                        <Form.Element label="Min Value">
-                            <Input
-                                name="sMinValue"
-                                placeholder="0"
-                                onChange={this.handleChangeInput}
-                                value={this.state.sMinValue}
-                                type={InputType.Number}
-                            />
-                        </Form.Element>
-                    </Grid.Column>
-                    <Grid.Column widthSM={Columns.Three}>
-                        <Form.Element label="Max Value">
-                            <Input
-                                name="sMaxValue"
-                                placeholder="0"
-                                onChange={this.handleChangeInput}
-                                value={this.state.sMaxValue}
-                                type={InputType.Number}
-                            />
-                        </Form.Element>
-                    </Grid.Column>
                 </Grid.Row>
-
                 <Grid.Row>
                     <Grid.Column widthSM={Columns.Twelve}>
                         <Form.Element label="Visual">
@@ -756,10 +460,113 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                                 value={this.state.sDescription}
                                 placeholder="Description.."
                                 onChange={this.handleChangeInput}
-                                rows={5}
+                                rows={3}
                             />
                         </Form.Element>
                     </Grid.Column>
+                </Grid.Row>
+
+                <Grid.Row>
+                    <Grid.Column widthSM={Columns.Four}>
+                        <Form.Element label="">
+                            <Button
+                                text="Add Field"
+                                icon={IconFont.Plus}
+                                onClick={this.addFieldToSensor}
+                                type={ButtonType.Button}
+                                color={ComponentColor.Primary}
+                            />
+                        </Form.Element>
+                    </Grid.Column>
+                </Grid.Row>
+                <Grid.Row>
+                    <Grid.Column widthSM={Columns.Six}>
+                        <Form.Element
+                            label="Field Name"
+                            errorMessage={this.handleValidation(this.state.sFieldName)}
+                            required={true}
+                        >
+                            <Input
+                                name="sFieldName"
+                                placeholder="Field name.."
+                                onChange={this.handleChangeInput}
+                                value={this.state.sFieldName}
+                            />
+                        </Form.Element>
+                    </Grid.Column>
+                    <Grid.Column widthSM={Columns.Three}>
+                        <Form.Element label="Min Value">
+                            <Input
+                                name="sMinValue"
+                                placeholder="0"
+                                onChange={this.handleChangeInput}
+                                value={this.state.sMinValue}
+                                type={InputType.Number}
+                            />
+                        </Form.Element>
+                    </Grid.Column>
+                    <Grid.Column widthSM={Columns.Three}>
+                        <Form.Element label="Max Value">
+                            <Input
+                                name="sMaxValue"
+                                placeholder="0"
+                                onChange={this.handleChangeInput}
+                                value={this.state.sMaxValue}
+                                type={InputType.Number}
+                            />
+                        </Form.Element>
+                    </Grid.Column>
+                </Grid.Row>
+
+                <Grid.Row>
+                    {
+                        this.state.sAddedFieldList.length > 0 ? (
+                            <DapperScrollbars
+                                autoHide={false}
+                                autoSizeHeight={true}
+                                style={{ maxHeight: '150px' }}
+                                className="data-loading--scroll-content"
+                            >
+                                <Table
+                                    borders={BorderType.Vertical}
+                                    fontSize={ComponentSize.ExtraSmall}
+                                    cellPadding={ComponentSize.ExtraSmall}
+                                >
+                                    <Table.Header>
+                                        <Table.Row>
+                                            <Table.HeaderCell>Field Name</Table.HeaderCell>
+                                            <Table.HeaderCell>Min Value</Table.HeaderCell>
+                                            <Table.HeaderCell>Max Value</Table.HeaderCell>
+                                            <Table.HeaderCell></Table.HeaderCell>
+                                        </Table.Row>
+                                    </Table.Header>
+                                    <Table.Body>
+                                        {
+                                            this.state.sAddedFieldList.map((field, index) => (
+                                                <Table.Row key={index}>
+                                                    <Table.Cell>{field["name"]}</Table.Cell>
+                                                    <Table.Cell>{field["minValue"]}</Table.Cell>
+                                                    <Table.Cell>{field["maxValue"]}</Table.Cell>
+                                                    <Table.Cell>
+                                                        <Button
+                                                            size={ComponentSize.ExtraSmall}
+                                                            icon={IconFont.Remove}
+                                                            color={ComponentColor.Danger}
+                                                            type={ButtonType.Submit}
+                                                            onClick={() => this.removeFieldFromSensor(field)}
+                                                        />
+                                                    </Table.Cell>
+                                                </Table.Row>
+                                            ))
+                                        }
+                                    </Table.Body>
+                                </Table>
+                            </DapperScrollbars>
+                        ) : (
+                            null
+                        )
+                    }
+                    <br />
                 </Grid.Row>
             </Grid>
         ]
@@ -806,6 +613,9 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                 if (this.handleValidation(this.state.sSensorName) !== null) {
                     isCorrect = false;
                 }
+                if (this.state.sAddedFieldList.length < 1) {
+                    isCorrect = false;
+                }
                 break;
         }
         return isCorrect;
@@ -821,14 +631,6 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
         let payload;
         switch (this.state.activeTab) {
             case 'machine':
-                let componentList = this.state.mAddedComponentList;
-
-                if (componentList.length > 0) {
-                    componentList.forEach(component => {
-                        component['parent'] = this.state.mMachineName
-                    })
-                }
-
                 payload = {
                     "@id": this.state.mMachineName,
                     "type": "Machine",
@@ -836,19 +638,11 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                     "@type": "Interface",
                     "displayName": this.state.mMachineName,
                     "name": this.state.mMachineName,
-                    "contents": componentList,
-                    "description": "",
+                    "contents": [],
+                    "description": this.state.mDescription,
                 }
                 break;
             case 'component':
-                let sensorList = this.state.cAddedSensorList;
-
-                if (sensorList.length > 0) {
-                    sensorList.forEach(sensor => {
-                        sensor['parent'] = this.state.cComponentName
-                    })
-                }
-
                 payload = {
                     "@id": this.state.cComponentName,
                     "@type": "Component",
@@ -857,13 +651,21 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                     "description": this.state.cDescription,
                     "type": "Component",
                     "parent": this.state.cParent,
-                    "sensors": sensorList,
+                    "sensors": [],
                     "visual": this.state.cComponentObject["children"],
                 }
                 break;
             case 'sensor':
                 let sensorVisual = this.state.sSelectedObject;
                 delete sensorVisual["_id"];
+
+                let fieldList = this.state.sAddedFieldList;
+
+                if (fieldList.length > 0) {
+                    fieldList.forEach(field => {
+                        field['parent'] = this.state.sSensorName
+                    })
+                }
 
                 payload = {
                     "@id": this.state.sSensorName,
@@ -875,10 +677,9 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                     "unit": this.state.sSensorUnit,
                     "displayName": this.state.sSensorName,
                     "description": this.state.sDescription,
+                    "status": "Working",
                     "visual": sensorVisual,
-                    "minValue": Number(this.state.sMinValue),
-                    "maxValue": Number(this.state.sMaxValue),
-                    "dataSource": this.state.sSelectedDataSource
+                    "fields": fieldList,
                 }
         }
 
@@ -955,7 +756,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
             return res.data.message.text;
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -1016,6 +817,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                                 onTabClick={this.handleOnTabClick}
                             />
                             <br />
+
                             <Form>
                                 {renderElements}
 
@@ -1026,13 +828,26 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                                         onClick={handleDismissAddNode}
                                     />
 
-                                    <Button
-                                        text="Save"
-                                        icon={IconFont.Checkmark}
-                                        color={ComponentColor.Success}
-                                        type={ButtonType.Submit}
-                                        onClick={this.handleSaveAddNode}
-                                    />
+                                    <ReactHover options={{
+                                        followCursor: true,
+                                        shiftX: 50,
+                                        shiftY: 0
+                                    }}>
+                                        <Trigger type="trigger">
+                                            <Button
+                                                text="Save"
+                                                icon={IconFont.Checkmark}
+                                                color={ComponentColor.Success}
+                                                type={ButtonType.Submit}
+                                                onClick={this.handleSaveAddNode}
+                                            />
+                                        </Trigger>
+                                        <Hover type="hover">
+                                            <span>hello world</span>
+                                        </Hover>
+                                    </ReactHover>
+
+
                                 </Form.Footer>
                             </Form>
                         </Overlay.Body>

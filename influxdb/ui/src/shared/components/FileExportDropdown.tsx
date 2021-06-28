@@ -119,15 +119,10 @@ class FileExportDropdown extends PureComponent<StateProps, State> {
         const { files } = this.props;
         const csv = files.join('\n\n');
 
-        console.log(csv);
         let newCsv = csv.split('\n');
         let lastCsv = newCsv.splice(3, newCsv.length);
 
-        console.log(lastCsv);
-
         const json = await this.csvToJSON(lastCsv);
-
-        console.log(json);
 
         const now = moment().format('YYYY-MM-DD-HH-mm')
         const filename = `${now} Chronograf Data`

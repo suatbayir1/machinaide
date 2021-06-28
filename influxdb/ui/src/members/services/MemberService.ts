@@ -14,7 +14,7 @@ class MemberService {
             const res = await response.json();
             return res;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -39,7 +39,7 @@ class MemberService {
             const res = await response.json();
             return res;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -54,7 +54,7 @@ class MemberService {
             const response = await request;
             return response;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -79,7 +79,7 @@ class MemberService {
             const res = await response.json();
             return res;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 }

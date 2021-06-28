@@ -25,10 +25,6 @@ class LogsDetailDialog extends PureComponent<Props, State> {
         };
     }
 
-    componentDidUpdate() {
-        console.log(this.props.selectedRowData);
-    }
-
     render() {
         return (
             <>

@@ -24,7 +24,7 @@ class FailureService {
             const result = JSON.parse(res.data.data)
             return result;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -56,7 +56,7 @@ class FailureService {
             return res;
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -88,7 +88,7 @@ class FailureService {
             return res;
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -120,7 +120,7 @@ class FailureService {
             return res;
         } catch (err) {
             alert(err);
-            console.log(err);
+            console.error(err);
         }
     }
 
@@ -147,7 +147,7 @@ class FailureService {
             if (res.data.success !== true) return;
             return res;
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 }
