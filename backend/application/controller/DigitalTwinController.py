@@ -161,10 +161,13 @@ def get_file_info(token):
 @dt.route("/addRelationship", methods = ["POST"])
 @token_required(roles = ["admin"])
 def add_relationship(token):
+    print("add")
     try:
         if request.method == "POST":
             result = model.add_relationship(request.json)
             
+            print(result)
+
             if not result:
                 message = "Could not add relationship"
                 logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, request.json, message,  400)

@@ -6,6 +6,12 @@ import {
     DapperScrollbars, Popover, Appearance, PopoverPosition,
 } from '@influxdata/clockface'
 
+// Constants
+import {
+    tipStyle, failureTimerange,
+} from 'src/shared/constants/tips';
+
+
 interface Props {
     selectedObject: string
     failures: object[]
@@ -100,27 +106,29 @@ class FailureAlarmInformationBox extends PureComponent<Props, State> {
         const { objects, selectedObject } = this.props;
         let foundPart;
 
-        objects[0]["machines"].forEach(machine => {
-            machine["contents"].forEach(component => {
-                if (component["@type"] === "Component") {
-                    if (component["visual"] !== undefined) {
-                        component["visual"].forEach(async visual => {
-                            if (visual["name"] === selectedObject) {
-                                foundPart = `${machine["name"]}.${component["name"]}`;
-                                return;
+        objects[0]["productionLines"].forEach(pl => {
+            pl["machines"].forEach(machine => {
+                machine["contents"].forEach(component => {
+                    if (component["@type"] === "Component") {
+                        if (component["visual"] !== undefined) {
+                            component["visual"].forEach(async visual => {
+                                if (visual["name"] === selectedObject) {
+                                    foundPart = `${machine["name"]}.${component["name"]}`;
+                                    return;
+                                }
+                            })
+                        }
+
+                        component["sensors"].forEach(async sensor => {
+                            if (sensor["visual"] !== undefined) {
+                                if (sensor["visual"]["name"] === selectedObject) {
+                                    foundPart = `${machine["name"]}.${component["name"]}.${sensor["name"]}`;
+                                    return;
+                                }
                             }
                         })
                     }
-
-                    component["sensors"].forEach(async sensor => {
-                        if (sensor["visual"] !== undefined) {
-                            if (sensor["visual"]["name"] === selectedObject) {
-                                foundPart = `${machine["name"]}.${component["name"]}.${sensor["name"]}`;
-                                return;
-                            }
-                        }
-                    })
-                }
+                })
             })
         })
 
@@ -190,42 +198,56 @@ class FailureAlarmInformationBox extends PureComponent<Props, State> {
                         <Grid>
                             <Grid.Row>
                                 <Grid.Column widthXS={Columns.Twelve}>
-                                    <Form.Element label="Start Time">
-                                        <Popover
-                                            appearance={Appearance.Outline}
-                                            position={PopoverPosition.Below}
-                                            triggerRef={this.startDateTimeRangeRef}
-                                            visible={startEndTimeRangeOpen}
-                                            showEvent={PopoverInteraction.None}
-                                            hideEvent={PopoverInteraction.None}
-                                            distanceFromTrigger={8}
-                                            testID="timerange-popover"
-                                            enableDefaultStyles={false}
-                                            contents={() => (
-                                                <DateRangePicker
-                                                    timeRange={startEndTimeRange}
-                                                    onSetTimeRange={(e) => { this.props.handleChangeStartEndTimeRange(e) }}
-                                                    onClose={() => { this.props.handleOpenStartEndDateRange(false) }}
-                                                    position={
-                                                        { position: 'relative' }
-                                                    }
-                                                />
-                                            )}
-                                        />
-                                        <Button
-                                            ref={this.startDateTimeRangeRef}
-                                            text={
-                                                `
+                                    <FlexBox margin={ComponentSize.Medium}>
+                                        <Form.Element label="Time Range">
+                                            <Popover
+                                                appearance={Appearance.Outline}
+                                                position={PopoverPosition.Below}
+                                                triggerRef={this.startDateTimeRangeRef}
+                                                visible={startEndTimeRangeOpen}
+                                                showEvent={PopoverInteraction.None}
+                                                hideEvent={PopoverInteraction.None}
+                                                distanceFromTrigger={8}
+                                                testID="timerange-popover"
+                                                enableDefaultStyles={false}
+                                                contents={() => (
+                                                    <DateRangePicker
+                                                        timeRange={startEndTimeRange}
+                                                        onSetTimeRange={(e) => { this.props.handleChangeStartEndTimeRange(e) }}
+                                                        onClose={() => { this.props.handleOpenStartEndDateRange(false) }}
+                                                        position={
+                                                            { position: 'relative' }
+                                                        }
+                                                    />
+                                                )}
+                                            />
+                                            <Button
+                                                ref={this.startDateTimeRangeRef}
+                                                text={
+                                                    `
                                             ${new Date(startEndTimeRange["lower"]).toISOString().slice(0, 10)} | 
                                             ${new Date(startEndTimeRange["upper"]).toISOString().slice(0, 10)}
                                             `
-                                            }
-                                            onClick={() => { this.props.handleOpenStartEndDateRange(true) }}
-                                            type={ButtonType.Button}
-                                            icon={IconFont.Calendar}
-                                            color={ComponentColor.Default}
+                                                }
+                                                onClick={() => { this.props.handleOpenStartEndDateRange(true) }}
+                                                type={ButtonType.Button}
+                                                icon={IconFont.Calendar}
+                                                color={ComponentColor.Default}
+                                            />
+                                        </Form.Element>
+                                        <QuestionMarkTooltip
+                                            style={{ marginTop: '8px' }}
+                                            diameter={20}
+                                            tooltipStyle={{ width: '400px' }}
+                                            color={ComponentColor.Secondary}
+                                            tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                                <div style={{ color: InfluxColors.Star }}>{"Time range:"}
+                                                    <hr style={tipStyle} />
+                                                </div>
+                                                {failureTimerange}
+                                            </div>}
                                         />
-                                    </Form.Element>
+                                    </FlexBox>
                                 </Grid.Column>
                             </Grid.Row>
 

@@ -1,21 +1,24 @@
+// Libraries
 import React, { PureComponent } from "react";
-import {
-    Page,
-    Grid,
-    Columns,
-    ResourceCard,
-    ComponentSize,
-    FlexBox,
-    FlexDirection,
-    SpinnerContainer,
-    TechnoSpinner,
-    RemoteDataState,
-} from '@influxdata/clockface'
 import { Link } from "react-router-dom";
+
+// Components
+import {
+    Page, QuestionMarkTooltip, InfluxColors, Grid, ComponentColor, Columns, ResourceCard,
+    ComponentSize, FlexBox, FlexDirection, SpinnerContainer, TechnoSpinner, RemoteDataState,
+} from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
 import HomeIcon from '@material-ui/icons/Home';
+
+// Services
 import FactoryService from 'src/shared/services/FactoryService';
+
+// Constants
+import {
+    tipStyle, componentsPanel,
+} from 'src/shared/constants/tips';
+
 
 interface State {
     components: object[],
@@ -25,7 +28,6 @@ interface State {
 }
 
 interface OwnProps {
-
 }
 
 interface StateProps {
@@ -96,6 +98,17 @@ class ComponentsPanel extends PureComponent<Props, State> {
                         <React.Fragment>
                             <Page.Header fullWidth={true}>
                                 <Page.Title title={"Components"} />
+                                <QuestionMarkTooltip
+                                    diameter={30}
+                                    tooltipStyle={{ width: '400px' }}
+                                    color={ComponentColor.Secondary}
+                                    tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                        <div style={{ color: InfluxColors.Star }}>{"About the Components Panel:"}
+                                            <hr style={tipStyle} />
+                                        </div>
+                                        {componentsPanel}
+                                    </div>}
+                                />
                             </Page.Header>
 
                             <Breadcrumbs separator="/" aria-label="breadcrumb" style={{ color: '#ffffff', marginLeft: '28px', marginTop: '-10px' }}>

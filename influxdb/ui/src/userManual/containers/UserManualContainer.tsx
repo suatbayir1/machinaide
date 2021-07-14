@@ -1,15 +1,13 @@
+// Libraries
 import React, { PureComponent } from "react";
+import { Link } from "react-router-dom"
+
+// Components
 import {
-    Page,
-    SpinnerContainer,
-    TechnoSpinner,
-    RemoteDataState,
-    Grid,
-    Columns,
+    Page, SpinnerContainer, TechnoSpinner, RemoteDataState, Grid, Columns, IconFont,
 } from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
-import { Link } from "react-router-dom"
 import HomeIcon from '@material-ui/icons/Home';
 import RightSideBar from 'src/userManual/components/RightSideBar';
 import MaintenancePageUserManual from 'src/userManual/components/MaintenancePageUserManual';
@@ -20,6 +18,8 @@ interface State {
     spinnerLoading: RemoteDataState
     activePage: string
     activePageName: string
+    linkList: object[]
+    selectedLink: string
 }
 
 class UserManualContainer extends PureComponent<Props, State> {
@@ -29,13 +29,35 @@ class UserManualContainer extends PureComponent<Props, State> {
             spinnerLoading: RemoteDataState.Loading,
             activePage: 'maintenancePage',
             activePageName: 'Maintenance',
+            linkList: [
+                { id: 'maintenancePage', name: 'Maintenance', icon: IconFont.TextBlock },
+                { id: 'failurePage', name: 'Failure', icon: IconFont.Capacitor },
+                { id: 'deneme1', name: 'Deneme 1', icon: IconFont.Duplicate },
+                { id: 'deneme2', name: 'Deneme 2', icon: IconFont.Erlenmeyer },
+                { id: 'deneme3', name: 'Deneme 3', icon: IconFont.BarChart },
+                { id: 'deneme4', name: 'Deneme 4', icon: IconFont.Bell },
+            ],
+            selectedLink: "Maintenance",
         };
     }
 
     componentDidMount() {
         this.setState({
-            spinnerLoading: RemoteDataState.Done
+            activePage: this.props["match"].params.page !== undefined ? this.props["match"].params.page : 'maintenancePage',
+            spinnerLoading: RemoteDataState.Done,
+        }, () => {
+            for (let link of this.state.linkList) {
+                if (link["id"] === this.state.activePage) {
+                    console.log(link);
+                    this.setState({ activePageName: link["name"], selectedLink: link["name"] })
+                }
+            }
         })
+    }
+
+    handleChangeListItem = (item) => {
+        this.changeActivePage(item);
+        this.setState({ selectedLink: item["name"] });
     }
 
     changeActivePage = (page) => {
@@ -76,7 +98,7 @@ class UserManualContainer extends PureComponent<Props, State> {
 
                                 {
                                     this.state.activePageName !== '' &&
-                                    <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/user-manual`}>
+                                    <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/user-manual`}>
                                         User Manual
                                     </Link>
                                 }
@@ -98,8 +120,11 @@ class UserManualContainer extends PureComponent<Props, State> {
 
                                 <Grid.Column widthXS={Columns.Two}>
                                     <RightSideBar
-                                        orgID={this.props.match.params.orgID}
+                                        orgID={this.props["match"].params.orgID}
                                         changeActivePage={this.changeActivePage}
+                                        linkList={this.state.linkList}
+                                        selectedLink={this.state.selectedLink}
+                                        handleChangeListItem={this.handleChangeListItem}
                                     />
                                 </Grid.Column>
                             </Page.Contents>

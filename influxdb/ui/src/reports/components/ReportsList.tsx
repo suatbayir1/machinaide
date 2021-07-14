@@ -7,7 +7,7 @@ import { RouteComponentProps } from 'react-router-dom'
 import {
     Grid, DapperScrollbars, Table, BorderType, ComponentSize, Appearance, Panel,
     FlexBox, Button, IconFont, ComponentColor, ButtonType, ConfirmationButton,
-    SlideToggle, Columns, Input,
+    SlideToggle, Columns, Input, QuestionMarkTooltip, InfluxColors,
 } from '@influxdata/clockface'
 import CreatedReportsListOverlay from 'src/reports/components/CreatedReportsListOverlay';
 
@@ -22,6 +22,9 @@ import {
     reportDeletedSuccessfully,
     reportUpdatedSuccessfully,
 } from 'src/shared/copy/notifications'
+import {
+    tipStyle, reportEnable,
+} from 'src/shared/constants/tips';
 
 
 interface OwnProps {
@@ -205,6 +208,17 @@ class ReportsList extends PureComponent<Props, State> {
                                                                         size={ComponentSize.Small}
                                                                         color={ComponentColor.Success}
                                                                         onChange={() => { this.handleChangeReportEnable(row) }}
+                                                                    />
+                                                                    <QuestionMarkTooltip
+                                                                        diameter={20}
+                                                                        tooltipStyle={{ width: '400px' }}
+                                                                        color={ComponentColor.Secondary}
+                                                                        tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                                                            <div style={{ color: InfluxColors.Star }}>{"Enable:"}
+                                                                                <hr style={tipStyle} />
+                                                                            </div>
+                                                                            {reportEnable}
+                                                                        </div>}
                                                                     />
                                                                 </FlexBox>
                                                             </Table.Cell>

@@ -1,15 +1,11 @@
+// Libraries
 import React, { PureComponent } from "react";
 import { Document, Page, pdfjs } from 'react-pdf';
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
+
+// Components
 import {
-    Grid,
-    ComponentSize,
-    DapperScrollbars,
-    FlexBox,
-    ComponentColor,
-    ButtonType,
-    IconFont,
-    Button,
+    Grid, ComponentSize, DapperScrollbars, FlexBox, ComponentColor, ButtonType, IconFont, Button,
 } from '@influxdata/clockface'
 
 
@@ -40,6 +36,7 @@ class FailurePageUserManual extends PureComponent<Props, State> {
         for (let page = 1; page <= this.state.numPages; page++) {
             pageList.push(
                 <Page
+                    key={page}
                     pageNumber={page}
                     width={window.innerWidth - 450}
                     height={800}

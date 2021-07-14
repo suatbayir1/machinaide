@@ -1,32 +1,24 @@
+// Libraries
 import React, { PureComponent } from 'react'
+
+// Components
 import {
-    Panel,
-    Form,
-    ComponentSize,
-    Grid,
-    Columns,
-    Label,
-    InfluxColors,
-    List,
-    Gradients,
-    SpinnerContainer,
-    TechnoSpinner,
-    RemoteDataState,
-    FlexBox,
-    SlideToggle,
-    DapperScrollbars,
-    ComponentColor,
-    ConfirmationButton,
-    IconFont,
-    Appearance,
-    Notification,
-    SelectDropdown,
-    Input,
-    InputType,
-    ComponentStatus,
+    Panel, Form, ComponentSize, Grid, Columns, Label, InfluxColors, List, Gradients,
+    SpinnerContainer, TechnoSpinner, RemoteDataState, FlexBox, SlideToggle,
+    DapperScrollbars, ComponentColor, ConfirmationButton, IconFont, Appearance,
+    Notification, SelectDropdown, Input, InputType, ComponentStatus, QuestionMarkTooltip,
 } from '@influxdata/clockface'
+
+// Styles
 import "src/style/custom.css"
+
+// Services
 import DTService from "src/shared/services/DTService";
+
+// Constants
+import {
+    tipStyle, showAllSensorValues, updateSensor,
+} from 'src/shared/constants/tips';
 
 
 interface Props {
@@ -760,6 +752,17 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                             color={ComponentColor.Success}
                                             onChange={this.props.changeShowAllSensorValues}
                                         />
+                                        <QuestionMarkTooltip
+                                            diameter={20}
+                                            tooltipStyle={{ width: '400px' }}
+                                            color={ComponentColor.Secondary}
+                                            tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                                <div style={{ color: InfluxColors.Star }}>{"Show all sensor values:"}
+                                                    <hr style={tipStyle} />
+                                                </div>
+                                                {showAllSensorValues}
+                                            </div>}
+                                        />
                                     </FlexBox>
                                 </Grid.Column>
                             </Grid.Row>
@@ -795,22 +798,35 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 {
                                     Object.keys(selectedGraphNode).length !== 0 &&
                                     selectedGraphNode["type"] === "Field" &&
-                                    <div style={{ float: 'right' }}>
-                                        {
-                                            ["admin"].includes(localStorage.getItem("userRole")) &&
-                                            <ConfirmationButton
-                                                icon={IconFont.Checkmark}
-                                                onConfirm={this.handleUpdateSensor}
-                                                text={"Update"}
-                                                popoverColor={ComponentColor.Success}
-                                                popoverAppearance={Appearance.Outline}
-                                                color={ComponentColor.Success}
-                                                confirmationLabel="Do you want to update ?"
-                                                confirmationButtonColor={ComponentColor.Success}
-                                                confirmationButtonText="Yes"
-                                            />
-                                        }
-                                    </div>
+                                    <>
+                                        <QuestionMarkTooltip
+                                            diameter={20}
+                                            tooltipStyle={{ width: '400px' }}
+                                            color={ComponentColor.Secondary}
+                                            tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                                <div style={{ color: InfluxColors.Star }}>{"Update sensor:"}
+                                                    <hr style={tipStyle} />
+                                                </div>
+                                                {updateSensor}
+                                            </div>}
+                                        />
+                                        <div style={{ float: 'right' }}>
+                                            {
+                                                ["admin"].includes(localStorage.getItem("userRole")) &&
+                                                <ConfirmationButton
+                                                    icon={IconFont.Checkmark}
+                                                    onConfirm={this.handleUpdateSensor}
+                                                    text={"Update"}
+                                                    popoverColor={ComponentColor.Success}
+                                                    popoverAppearance={Appearance.Outline}
+                                                    color={ComponentColor.Success}
+                                                    confirmationLabel="Do you want to update ?"
+                                                    confirmationButtonColor={ComponentColor.Success}
+                                                    confirmationButtonText="Yes"
+                                                />
+                                            }
+                                        </div>
+                                    </>
                                 }
 
                                 {

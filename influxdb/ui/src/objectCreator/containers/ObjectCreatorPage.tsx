@@ -6,11 +6,18 @@ import {
     Page, Grid, Columns, Panel, ComponentSize, Form, Input, InputType,
     FlexBox, ColorPicker, Button, ButtonType, IconFont, ComponentColor,
     ComponentStatus, QuestionMarkTooltip, FlexDirection, DapperScrollbars,
-    List, Gradients, Notification, Dropdown, Overlay,
+    List, Gradients, Notification, Dropdown, Overlay, InfluxColors,
 } from '@influxdata/clockface'
-import { BACKEND } from "src/config";
 import TabbedPageTabs from 'src/shared/tabbedPage/TabbedPageTabs'
 import { TabbedPageTab } from 'src/shared/tabbedPage/TabbedPageTabs'
+
+// Constants
+import {
+    tipStyle, dtManagementPage, objectOpacity, objectTexture, objectUpdateRemove, objectSelectDT,
+    addTexture, objectImportComponent, objectSaveAndSaveAs,
+} from 'src/shared/constants/tips';
+import { BACKEND } from "src/config";
+
 
 // Utilities
 var THREE = require("three");
@@ -130,9 +137,9 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                         child.texture = this.state.selectedTexture;
                         renderer.render(scene, camera);
                     },
-                    xhr => {
+                    _ => {
                     },
-                    error => {
+                    _ => {
                     }
                 )
 
@@ -406,9 +413,9 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                             renderer.render(scene, camera);
                         }
                     },
-                    function (xhr) {
+                    function (_) {
                     },
-                    function (xhr) {
+                    function (_) {
                     }
                 );
             } else { // if adding previously saved cube without texture
@@ -498,9 +505,9 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                             renderer.render(scene, camera);
                         }
                     },
-                    function (xhr) {
+                    function (_) {
                     },
-                    function (xhr) {
+                    function (_) {
                     }
                 );
             } else { // if adding previously saved cube without texture
@@ -588,9 +595,9 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                             renderer.render(scene, camera);
                         }
                     },
-                    function (xhr) {
+                    function (_) {
                     },
-                    function (xhr) {
+                    function (_) {
                     }
                 );
             } else { // if adding previously saved object without texture
@@ -679,9 +686,9 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                             renderer.render(scene, camera);
                         }
                     },
-                    function (xhr) {
+                    function (_) {
                     },
-                    function (xhr) {
+                    function (_) {
                     }
                 );
             } else { // if adding previously saved object without texture
@@ -1354,6 +1361,22 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         }
     }
 
+    private get headerChildren(): JSX.Element[] {
+        return [
+            <QuestionMarkTooltip
+                diameter={20}
+                tooltipStyle={{ width: '400px' }}
+                color={ComponentColor.Secondary}
+                tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                    <div style={{ color: InfluxColors.Star }}>{"How to add texture:"}
+                        <hr style={tipStyle} />
+                    </div>
+                    {addTexture}
+                </div>}
+            />
+        ]
+    }
+
     public render(): JSX.Element {
         const dtList = this.state.dtList.map(item => {
             return (
@@ -1410,6 +1433,18 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
             <Page>
                 <Page.Header fullWidth={true}>
                     <Page.Title title={"Digital Twin Management"}></Page.Title>
+                    <QuestionMarkTooltip
+                        style={{ marginBottom: '8px' }}
+                        diameter={30}
+                        tooltipStyle={{ width: '400px' }}
+                        color={ComponentColor.Secondary}
+                        tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                            <div style={{ color: InfluxColors.Star }}>{"About the Digital Twin Monitor Page:"}
+                                <hr style={tipStyle} />
+                            </div>
+                            {dtManagementPage}
+                        </div>}
+                    />
                 </Page.Header>
                 <Page.Contents fullWidth={true} scrollable={true}>
                     <Grid>
@@ -1557,36 +1592,50 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
 
                                             <Grid.Row>
                                                 <Grid.Column>
-                                                    <Form.Element label="Texture">
-                                                        <Dropdown
-                                                            button={(active, onClick) => (
-                                                                <Dropdown.Button
-                                                                    active={active}
-                                                                    onClick={onClick}
-                                                                    color={ComponentColor.Secondary}
-                                                                >
-                                                                    {
-                                                                        Object.keys(this.state.selectedTexture).length === 0
-                                                                            ? 'No texture selected'
-                                                                            : this.state.selectedTexture['filename']
-                                                                    }
-                                                                </Dropdown.Button>
-                                                            )}
-                                                            menu={onCollapse => (
-                                                                <Dropdown.Menu onCollapse={onCollapse}>
-                                                                    <DapperScrollbars
-                                                                        autoHide={false}
-                                                                        autoSizeHeight={true} style={{ maxHeight: '150px' }}
-                                                                        className="data-loading--scroll-content"
+                                                    <FlexBox margin={ComponentSize.Medium}>
+                                                        <Form.Element label="Texture">
+                                                            <Dropdown
+                                                                button={(active, onClick) => (
+                                                                    <Dropdown.Button
+                                                                        active={active}
+                                                                        onClick={onClick}
+                                                                        color={ComponentColor.Secondary}
                                                                     >
                                                                         {
-                                                                            textureList
+                                                                            Object.keys(this.state.selectedTexture).length === 0
+                                                                                ? 'No texture selected'
+                                                                                : this.state.selectedTexture['filename']
                                                                         }
-                                                                    </DapperScrollbars>
-                                                                </Dropdown.Menu>
-                                                            )}
+                                                                    </Dropdown.Button>
+                                                                )}
+                                                                menu={onCollapse => (
+                                                                    <Dropdown.Menu onCollapse={onCollapse}>
+                                                                        <DapperScrollbars
+                                                                            autoHide={false}
+                                                                            autoSizeHeight={true} style={{ maxHeight: '150px' }}
+                                                                            className="data-loading--scroll-content"
+                                                                        >
+                                                                            {
+                                                                                textureList
+                                                                            }
+                                                                        </DapperScrollbars>
+                                                                    </Dropdown.Menu>
+                                                                )}
+                                                            />
+                                                        </Form.Element>
+                                                        <QuestionMarkTooltip
+                                                            style={{ marginTop: '8px' }}
+                                                            diameter={20}
+                                                            tooltipStyle={{ width: '400px' }}
+                                                            color={ComponentColor.Secondary}
+                                                            tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                                                <div style={{ color: InfluxColors.Star }}>{"Texture:"}
+                                                                    <hr style={tipStyle} />
+                                                                </div>
+                                                                {objectTexture}
+                                                            </div>}
                                                         />
-                                                    </Form.Element>
+                                                    </FlexBox>
                                                 </Grid.Column>
                                             </Grid.Row>
 
@@ -1611,9 +1660,13 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                                                             <QuestionMarkTooltip
                                                                 diameter={20}
                                                                 tooltipStyle={{ width: '400px' }}
-                                                                color={ComponentColor.Primary}
-                                                                tooltipContents="Float in the range of 0.0 - 1.0 indicating how transparent the material is. 
-                                                                A value of 0.0 indicates fully transparent, 1.0 is fully opaque."
+                                                                color={ComponentColor.Secondary}
+                                                                tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                                                    <div style={{ color: InfluxColors.Star }}>{"Opacity:"}
+                                                                        <hr style={tipStyle} />
+                                                                    </div>
+                                                                    {objectOpacity}
+                                                                </div>}
                                                             />
                                                         </FlexBox>
                                                     </Form.Element>
@@ -1625,8 +1678,20 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                                     <Panel.Body size={ComponentSize.ExtraSmall}>
                                         <Grid.Row>
                                             <div style={{ float: 'right' }}>
+                                                <QuestionMarkTooltip
+                                                    diameter={20}
+                                                    style={{ marginRight: '10px' }}
+                                                    tooltipStyle={{ width: '400px' }}
+                                                    color={ComponentColor.Secondary}
+                                                    tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                                        <div style={{ color: InfluxColors.Star }}>{"Update - Remove:"}
+                                                            <hr style={tipStyle} />
+                                                        </div>
+                                                        {objectUpdateRemove}
+                                                    </div>}
+                                                />
                                                 <Button
-                                                    text="Remove Object"
+                                                    text="Remove"
                                                     onClick={this.removeObjectFromScene}
                                                     type={ButtonType.Button}
                                                     icon={IconFont.Remove}
@@ -1634,7 +1699,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                                                     style={{ marginRight: '10px', marginBottom: '20px' }}
                                                 />
                                                 <Button
-                                                    text="Update Object"
+                                                    text="Update"
                                                     onClick={this.changeObjectProperties}
                                                     type={ButtonType.Button}
                                                     icon={IconFont.Checkmark}
@@ -1706,31 +1771,39 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                                                     />
 
                                                     <div className="tabbed-page--header-right">
-                                                        <Grid.Column widthSM={Columns.Three}>
-                                                            <Dropdown
-                                                                testID="dropdown--gen-token"
-                                                                style={{ maxWidth: '150px', width: '150px' }}
-                                                                button={(active, onClick) => (
-                                                                    <Dropdown.Button
-                                                                        active={active}
-                                                                        onClick={onClick}
-                                                                        color={ComponentColor.Primary}
-                                                                    >
-                                                                        {this.state.selectedDT['text']}
-                                                                    </Dropdown.Button>
-                                                                )}
-                                                                menu={onCollapse => (
-                                                                    <Dropdown.Menu
-                                                                        style={{ maxWidth: '150px' }}
-                                                                        onCollapse={onCollapse}
-                                                                    >
-                                                                        {
-                                                                            dtList
-                                                                        }
-                                                                    </Dropdown.Menu>
-                                                                )}
-                                                            />
-                                                        </Grid.Column>
+                                                        <QuestionMarkTooltip
+                                                            diameter={20}
+                                                            tooltipStyle={{ width: '400px' }}
+                                                            color={ComponentColor.Secondary}
+                                                            tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                                                <div style={{ color: InfluxColors.Star }}>{"Select Digital Twin:"}
+                                                                    <hr style={tipStyle} />
+                                                                </div>
+                                                                {objectSelectDT}
+                                                            </div>}
+                                                        />
+                                                        <Dropdown
+                                                            style={{ width: '150px' }}
+                                                            button={(active, onClick) => (
+                                                                <Dropdown.Button
+                                                                    active={active}
+                                                                    onClick={onClick}
+                                                                    color={ComponentColor.Primary}
+                                                                >
+                                                                    {this.state.selectedDT['text']}
+                                                                </Dropdown.Button>
+                                                            )}
+                                                            menu={onCollapse => (
+                                                                <Dropdown.Menu
+                                                                    style={{ width: '150px' }}
+                                                                    onCollapse={onCollapse}
+                                                                >
+                                                                    {
+                                                                        dtList
+                                                                    }
+                                                                </Dropdown.Menu>
+                                                            )}
+                                                        />
                                                     </div>
                                                 </FlexBox>
                                             </Grid.Row>
@@ -1773,6 +1846,17 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                                 <Overlay.Header
                                     title="Import Component"
                                     onDismiss={this.handleDismissImportComponent}
+                                    children={<QuestionMarkTooltip
+                                        diameter={20}
+                                        tooltipStyle={{ width: '400px' }}
+                                        color={ComponentColor.Secondary}
+                                        tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                            <div style={{ color: InfluxColors.Star }}>{"Import Component:"}
+                                                <hr style={tipStyle} />
+                                            </div>
+                                            {objectImportComponent}
+                                        </div>}
+                                    />}
                                 />
 
                                 <Overlay.Body>
@@ -1844,6 +1928,19 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                                 <Overlay.Header
                                     title="Save Component"
                                     onDismiss={this.handleDismissSaveComponent}
+                                    children={
+                                        <QuestionMarkTooltip
+                                            diameter={20}
+                                            tooltipStyle={{ width: '400px' }}
+                                            color={ComponentColor.Secondary}
+                                            tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                                <div style={{ color: InfluxColors.Star }}>{"Save Component:"}
+                                                    <hr style={tipStyle} />
+                                                </div>
+                                                {objectSaveAndSaveAs}
+                                            </div>}
+                                        />
+                                    }
                                 />
 
                                 <Overlay.Body>
@@ -1912,6 +2009,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                                 <Overlay.Header
                                     title="Texture Upload"
                                     onDismiss={this.handleDismissFileUpload}
+                                    children={this.headerChildren}
                                 />
 
                                 <Overlay.Body>

@@ -59,6 +59,6 @@
     "cats_macro_auc_per_type":0.0,
     "cats_score":1.0,
     "tok2vec_loss":0.0,
-    "textcat_loss":0.0128040904
+    "textcat_loss":0.0215757372
   }
 }

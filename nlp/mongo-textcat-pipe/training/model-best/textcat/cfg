@@ -3,7 +3,8 @@
     "maintenance",
     "failure",
     "maintenancecount",
-    "failurecount"
+    "failurecount",
+    "completed_job"
   ],
   "threshold":0.5,
   "positive_label":null

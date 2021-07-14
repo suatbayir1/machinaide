@@ -127,7 +127,6 @@ def format_date(date):
 # format flux query based on detected entities
 
 def createQuery(doc, matcher, stat_matcher):
-
     textcat = nlp.get_pipe("textcat")
     scores = textcat.predict([doc])
     # nlp.set_annotations(doc, scores)
@@ -625,7 +624,6 @@ def category_parse(cat):
     elif(cat == "Metadata"):
         return "mongodb"
         
-
 def template_parse(temp):
     if(temp == "Maintenance"):
         return "maintenance"
@@ -640,6 +638,7 @@ def template_parse(temp):
 def post_question():
     # check if any comparison symbols are used
     question = request.json["question"]
+
     for symbol in math_symbols:
         if(symbol in question):
             # print(symbol)
@@ -658,6 +657,7 @@ def post_question():
         else:
             score = process.extract(misspelled_word, COMP_NAMES, limit=1)
             if(len(score)>0 and score[0][1]>threshold):
+                # TODO: correct the misspelled word in the question
                 misspelled.remove(misspelled_word)
     print("misspelled after: ", misspelled)
 
@@ -702,6 +702,7 @@ def post_question():
         mongo_template = result["mongoTextcat"]
         graph_overlay = result["graphOverlay"]
         print("from nlp-----> ", query_result)
+        
     if(textcat_labels[0] == "influxdb"):
         # payload = "{\"query\": \"from(bucket: \\\"nlp_sample\\\")|> range(start: 2021-03-04T13:42:06Z)|> filter(fn: (r) =>  r._measurement == \\\"sampleComp1\\\" )|> filter(fn: (r) =>  r._value > 4 and r._value < 77 )\",\"type\": \"flux\"}"
         payload2 = "{\"query\": \"" + query_result + "\",\"type\": \"flux\"}"

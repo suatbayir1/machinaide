@@ -1,25 +1,15 @@
+// Libraries
 import React, { PureComponent } from 'react'
+
+// Components
 import {
-    Form,
-    Input,
-    Button,
-    ButtonType,
-    ComponentColor,
-    Overlay,
-    IconFont,
-    Grid,
-    Columns,
-    SelectDropdown,
-    TextArea,
-    ComponentSize,
-    Gradients,
-    Dropdown,
-    InputType,
-    Notification,
+    Form, Input, Button, ButtonType, ComponentColor, Overlay, IconFont, Grid, Columns,
+    SelectDropdown, TextArea, ComponentSize, Gradients, Dropdown, InputType, Notification,
 } from '@influxdata/clockface'
+
+// Services
 import DTService from 'src/shared/services/DTService';
 import MaintenanceService from 'src/maintenance/services/MaintenanceService';
-
 
 interface Props {
     visibleAddUpdateMaintenance: boolean
@@ -129,24 +119,23 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
         const allDT = await DTService.getAllDT();
 
         allDT.forEach(factory => {
-            if (factory["id"] === this.props.factoryID) {
-                const machines = factory["machines"];
-                const parts = [];
+            const parts = [];
 
-                machines.map(machine => {
+            factory.productionLines.map(pl => {
+                pl.machines.map(machine => {
                     parts.push({ id: machine["@id"], text: machine["name"] });
-                    let components = machine["contents"];
-                    components.map(component => {
-                        parts.push({ id: component["@id"], text: `${machine["name"]}.${component["name"]}` });
-                        let sensors = component["sensors"];
-                        sensors.map(sensor => {
-                            parts.push({ id: sensor["@id"], text: `${machine["name"]}.${component["name"]}.${sensor["name"]}` });
-                        })
+                    machine.contents.map(component => {
+                        if (component["@type"] === "Component") {
+                            parts.push({ id: component["@id"], text: `${machine["name"]}.${component["name"]}` });
+                            component.sensors.map(sensor => {
+                                parts.push({ id: sensor["@id"], text: `${machine["name"]}.${component["name"]}.${sensor["name"]}` });
+                            })
+                        }
                     })
                 })
+            })
 
-                this.setState({ allParts: parts });
-            }
+            this.setState({ allParts: parts });
         })
     }
 

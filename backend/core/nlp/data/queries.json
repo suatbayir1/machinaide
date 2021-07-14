@@ -1,0 +1,58 @@
+[
+    {
+        "text": "Show me all sensors of component Dengeleme",
+        "category": "show-sensor"
+    },
+    {
+        "text": "Show me all sensors of machine Press030",
+        "category": "show-sensor"
+    },
+    {
+        "text": "Show me sensor Sensor1",
+        "category": "show-sensor"
+    },
+    {
+        "text": "How many sensors are in the factory",
+        "category": "sensor-count"
+    },
+    {
+        "text": "How many sensors does machine Press031 have",
+        "category": "sensor-count"
+    },
+    {
+        "text": "How many sensors does in the Dengeleme component",
+        "category": "sensor-count"
+    },
+    {
+        "text": "How many materials did Press031 produce last month",
+        "category": "completed-job"
+    },
+    {
+        "text": "How many tasks did Press031 complete last year?",
+        "category": "completed-job"
+    },
+    {
+        "text": "How many hours did Press031 work last month ?",
+        "category": "working-time"
+    },
+    {
+        "text": "How much maintenance cost was spent on Press031 last week ?",
+        "category": "maintenance-cost"
+    },
+    {
+        "text": "How many hours was Press031 out of use last 2 month?",
+        "category": "out-of-use"
+    },
+    {
+        "text": "How many alerts from Press031 last 2 day ?",
+        "category": "alert-count"
+    },
+    {
+        "text": "How much electricity did press031 consume last month ?",
+        "category": "electricity-consumption"
+    },
+    {
+        "text": "What is the production rate of press031 compared to the previous year",
+        "category": "production-comparison"
+    }
+]

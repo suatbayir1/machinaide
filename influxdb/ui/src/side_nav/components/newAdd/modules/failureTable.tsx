@@ -1,46 +1,32 @@
+// Libraries
 import React, { PureComponent, createRef } from "react";
+import { Link } from "react-router-dom"
+
+// Components
 import {
-    Page,
-    Grid,
-    IconFont, Icon,
-    ComponentColor,
-    ComponentSize,
-    Button,
-    ButtonType,
-    Table,
-    DapperScrollbars,
-    BorderType,
-    Popover,
-    Appearance,
-    PopoverPosition,
-    PopoverInteraction,
-    DateRangePicker,
-    Form,
-    Columns,
-    FlexBox,
-    MultiSelectDropdown,
-    SelectDropdown,
-    SquareButton,
-    Notification,
-    Gradients,
-    SpinnerContainer,
-    TechnoSpinner,
-    RemoteDataState,
-    ConfirmationButton,
+    Page, Grid, IconFont, Icon, ComponentColor, ComponentSize, Button, ButtonType, Table,
+    DapperScrollbars, BorderType, Popover, Appearance, PopoverPosition, PopoverInteraction,
+    DateRangePicker, Form, Columns, FlexBox, MultiSelectDropdown, SelectDropdown, SquareButton,
+    Notification, Gradients, SpinnerContainer, TechnoSpinner, RemoteDataState, ConfirmationButton,
     Dropdown,
 } from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
-import { Link } from "react-router-dom"
 import HomeIcon from '@material-ui/icons/Home';
-import 'src/side_nav/components/newAdd/customCss/general.css';
 import ImportDataForm from 'src/side_nav/components/newAdd/modules/ImportDataForm';
+import AddUpdateFailureOverlay from 'src/side_nav/components/newAdd/modules/AddUpdateFailureOverlay';
+import FailureAlarmScene from 'src/failures/components/FailureAlarmScene';
+
+// Styles
+import 'src/side_nav/components/newAdd/customCss/general.css';
+
+// Services
 import FactoryService from 'src/shared/services/FactoryService';
 import FailureService from 'src/shared/services/FailureService';
-import AddUpdateFailureOverlay from 'src/side_nav/components/newAdd/modules/AddUpdateFailureOverlay';
+
+// Helpers
 import { dataToCSV, dataToXLSX } from 'src/shared/parsing/dataToCsv';
 import download from 'src/external/download.js';
-import FailureAlarmScene from 'src/failures/components/FailureAlarmScene';
 
 interface Props { }
 interface State {
@@ -326,7 +312,8 @@ class FailureTable extends PureComponent<Props, State> {
 
     getAllMachines = async (factoryId) => {
         const payload = {
-            "factoryId": factoryId
+            "factoryId": factoryId,
+            "plId": "all"
         }
 
         const machines = await FactoryService.getMachines(payload);
@@ -808,7 +795,7 @@ class FailureTable extends PureComponent<Props, State> {
                                                         <tr>
                                                             <Table.HeaderCell style={{ width: "30px" }}></Table.HeaderCell>
                                                             <Table.HeaderCell style={{ width: "300px" }}>Machine/Component/Sensor Name</Table.HeaderCell>
-                                                            <Table.HeaderCell style={{ width: "100px" }}>Severity</Table.HeaderCell>
+                                                            {/* <Table.HeaderCell style={{ width: "100px" }}>Severity</Table.HeaderCell> */}
                                                             <Table.HeaderCell style={{ width: "200px" }}>Start Time</Table.HeaderCell>
                                                             <Table.HeaderCell style={{ width: "200px" }}>End Time</Table.HeaderCell>
                                                             <Table.HeaderCell style={{ width: "50px" }}></Table.HeaderCell>
@@ -824,12 +811,13 @@ class FailureTable extends PureComponent<Props, State> {
                                                                         className="not-first"
                                                                     >
                                                                         <td
+                                                                            title={row["severity"]}
                                                                             style={this.getBackgroundColor(row["severity"])}
                                                                         >
                                                                             {this.failureIcon(row["severity"])}
                                                                         </td>
                                                                         <td>{row["sourceName"]}</td>
-                                                                        <td>{row["severity"]}</td>
+                                                                        {/* <td>{row["severity"]}</td> */}
                                                                         <td>{row["startTime"]}</td>
                                                                         <td>{row["endTime"]}</td>
                                                                         <td>
@@ -991,6 +979,7 @@ class FailureTable extends PureComponent<Props, State> {
                                     getAllFailures={this.getAllFailures}
                                     setNotificationData={this.setNotificationData}
                                     fileTypesToAccept=".csv, .xlsx"
+                                    orgID={this.props["match"].params["orgID"]}
                                 />
 
                                 <AddUpdateFailureOverlay

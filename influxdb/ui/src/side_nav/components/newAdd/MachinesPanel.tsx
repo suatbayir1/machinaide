@@ -4,8 +4,8 @@ import { Link } from "react-router-dom";
 
 // Components
 import {
-    Page, Grid, Columns, FlexBox, ResourceCard, ComponentSize, FlexDirection,
-    SpinnerContainer, TechnoSpinner, RemoteDataState,
+    Page, Grid, Columns, FlexBox, ResourceCard, ComponentSize, FlexDirection, InfluxColors,
+    SpinnerContainer, TechnoSpinner, RemoteDataState, QuestionMarkTooltip, ComponentColor,
 } from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
@@ -16,6 +16,10 @@ import FactoryService from 'src/shared/services/FactoryService';
 import DTService from 'src/shared/services/DTService';
 import DashboardService from 'src/shared/services/DashboardService';
 
+// Constants
+import {
+    tipStyle, machinesPanel,
+} from 'src/shared/constants/tips';
 
 interface Props { }
 interface State {
@@ -110,6 +114,17 @@ class MachinesPanel extends PureComponent<Props, State> {
                         <React.Fragment>
                             <Page.Header fullWidth={true}>
                                 <Page.Title title={"Machines Panel"} />
+                                <QuestionMarkTooltip
+                                    diameter={30}
+                                    tooltipStyle={{ width: '400px' }}
+                                    color={ComponentColor.Secondary}
+                                    tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                        <div style={{ color: InfluxColors.Star }}>{"About the Machines Panel:"}
+                                            <hr style={tipStyle} />
+                                        </div>
+                                        {machinesPanel}
+                                    </div>}
+                                />
                             </Page.Header>
 
                             <Breadcrumbs separator="/" aria-label="breadcrumb" style={{ color: '#ffffff', marginLeft: '28px', marginTop: '-10px' }}>

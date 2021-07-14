@@ -1,11 +1,7 @@
 import React, { PureComponent } from "react";
 import {
-    Page,
-    Grid,
-    Columns,
-    SpinnerContainer,
-    TechnoSpinner,
-    RemoteDataState,
+    Page, QuestionMarkTooltip, ComponentColor, InfluxColors, Grid, Columns,
+    SpinnerContainer, TechnoSpinner, RemoteDataState,
 } from '@influxdata/clockface'
 import { Link } from "react-router-dom";
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
@@ -15,6 +11,8 @@ import FactoryService from 'src/shared/services/FactoryService';
 import ProductionLineCard from 'src/side_nav/components/productionLines/components/ProductionLineCard';
 import ProductionLineDashboardPanel from 'src/side_nav/components/productionLines/components/ProductionLineDashboardPanel';
 
+// Constants
+import { tipStyle, productionLinePage } from 'src/shared/constants/tips'
 
 interface Props { }
 interface State {
@@ -75,6 +73,18 @@ class ProductionLine extends PureComponent<Props, State> {
                         <React.Fragment>
                             <Page.Header fullWidth={true}>
                                 <Page.Title title={"Production Line"} />
+                                <QuestionMarkTooltip
+                                    style={{ marginBottom: '8px' }}
+                                    diameter={30}
+                                    tooltipStyle={{ width: '400px' }}
+                                    color={ComponentColor.Secondary}
+                                    tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                        <div style={{ color: InfluxColors.Star }}>{"About the Production Line:"}
+                                            <hr style={tipStyle} />
+                                        </div>
+                                        {productionLinePage}
+                                    </div>}
+                                />
                             </Page.Header>
 
                             <Breadcrumbs separator="/" aria-label="breadcrumb" style={{ color: '#ffffff', marginLeft: '28px', marginTop: '-10px' }}>

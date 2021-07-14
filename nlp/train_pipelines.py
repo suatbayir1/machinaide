@@ -60,8 +60,8 @@ def train_model():
     
 schedule.every().day.at("03:00").do(train_model)
 
-while True:
-    schedule.run_pending()
-    time.sleep(60) # wait one minute
+# while True:
+#     schedule.run_pending()
+#     time.sleep(60) # wait one minute
 
-# train_model()
+train_model()

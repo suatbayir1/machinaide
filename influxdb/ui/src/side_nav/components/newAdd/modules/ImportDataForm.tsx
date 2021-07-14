@@ -1,27 +1,23 @@
+// Libraries
 import React, { PureComponent } from "react";
-import {
-    Form,
-    Button,
-    ButtonType,
-    ComponentColor,
-    Overlay,
-    IconFont,
-    ComponentSize,
-    ConfirmationButton,
-    Appearance,
-    DapperScrollbars,
-    Grid,
-    SpinnerContainer,
-    TechnoSpinner,
-    RemoteDataState,
-    WaitingText,
-} from '@influxdata/clockface'
+import { Link } from "react-router-dom"
 import classnames from 'classnames'
+
+// Components
+import {
+    Form, Button, ButtonType, ComponentColor, Overlay, IconFont, ComponentSize, ConfirmationButton,
+    Appearance, DapperScrollbars, Grid, SpinnerContainer, TechnoSpinner, RemoteDataState, WaitingText,
+} from '@influxdata/clockface'
+
+// Helpers
 import { csvToJSON, xlsxToJSON, fileAnalyzer } from 'src/shared/helpers/FileHelper';
+
+// Services
 import FailureService from 'src/shared/services/FailureService';
 
 
 interface Props {
+    orgID: string
     fileTypesToAccept?: string
     containerClass?: string
     submitText: string
@@ -216,23 +212,6 @@ class ImportDataForm extends PureComponent<Props, State> {
         document.body.removeChild(element);
     }
 
-    private downloadExample = () => {
-        let str =
-            `
-factoryID, sid, sourceName, severity, cost, startTime, endTime, description
-<facotryID>,<sid>,<sourceName>,<severity>,<cost>,<startTime>,<endTime>,<description>
-<facotryID>,<sid>,<sourceName>,<severity>,<cost>,<startTime>,<endTime>,<description>
-`
-        let fileTitle = "example.csv";
-        var element = document.createElement('a');
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(str));
-        element.setAttribute('download', fileTitle);
-        element.style.display = 'none';
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
-    }
-
     private handleWriteData = async () => {
         const { uploadContent } = this.state;
         let result;
@@ -266,18 +245,9 @@ factoryID, sid, sourceName, severity, cost, startTime, endTime, description
 
 
         this.props.getAllFailures();
-        // this.props.onClose();
         this.setState({
             showDownloadReport: true
         })
-
-        // if (errorLines.length > 0) {
-        //     this.props.setNotificationData("error", `${errorLines} error occurred while adding these lines`);
-        // } else {
-        //     this.props.getAllFailures();
-        //     this.props.setNotificationData("success", "All fault records have been successfully recorded");
-        //     this.props.onClose();
-        // }
     }
 
     private handleWindowDragOver = (event: DragEvent) => {
@@ -628,7 +598,7 @@ factoryID, sid, sourceName, severity, cost, startTime, endTime, description
                                         ) : null
                                     }
 
-                                    {
+                                    {/* {
                                         this.state.uploadContent === "" &&
                                         <Button
                                             color={ComponentColor.Primary}
@@ -639,6 +609,21 @@ factoryID, sid, sourceName, severity, cost, startTime, endTime, description
                                             style={{ 'float': 'right', marginTop: '20px' }}
                                             onClick={() => { this.downloadExample() }}
                                         />
+                                    } */}
+
+                                    {
+                                        this.state.uploadContent === "" &&
+                                        <Link color="inherit" to={`/orgs/${this.props.orgID}/user-manual/failurePage`}>
+                                            <Button
+                                                color={ComponentColor.Primary}
+                                                text="User Manual"
+                                                size={ComponentSize.Small}
+                                                type={ButtonType.Button}
+                                                icon={IconFont.Download}
+                                                style={{ 'float': 'right', marginTop: '20px' }}
+                                            />
+                                        </Link>
+
                                     }
                                 </Grid.Row>
 

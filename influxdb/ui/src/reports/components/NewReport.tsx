@@ -7,7 +7,7 @@ import { RouteComponentProps } from 'react-router-dom'
 import {
     Panel, ComponentSize, Grid, Columns, Form, Input, FlexBox, SlideToggle,
     Button, IconFont, ButtonType, ComponentColor, SelectDropdown, TextArea,
-    ComponentStatus,
+    ComponentStatus, QuestionMarkTooltip, InfluxColors,
 } from '@influxdata/clockface'
 import { ReactMultiEmail, isEmail } from 'react-multi-email';
 
@@ -24,6 +24,10 @@ import {
     newReportCreatedFailure,
     pleaseFillInTheFormCompletely,
 } from 'src/shared/copy/notifications'
+import {
+    tipStyle, reportDetails, selectTargetAndOptions, emailConfiguration, selectEmailTo, cloudConfiguration,
+} from 'src/shared/constants/tips';
+
 
 interface OwnProps {
     getReports: () => void
@@ -143,7 +147,8 @@ class NewReport extends PureComponent<Props, State> {
 
     getAllMachines = async (factoryId) => {
         const payload = {
-            "factoryId": factoryId
+            "factoryId": factoryId,
+            "plId": "all",
         }
 
         const machines = await FactoryService.getMachines(payload);
@@ -270,7 +275,24 @@ class NewReport extends PureComponent<Props, State> {
                                 {/* FIRST LEFT SIDE */}
                                 <Grid.Column widthXS={Columns.Six}>
                                     <Panel style={{ backgroundColor: '#292933', padding: '10px' }}>
-                                        <h2 style={{ marginBottom: '20px', color: '#B1B6FF' }}>Report Details</h2>
+                                        <FlexBox
+                                            style={{ marginBottom: '20px' }}
+                                            margin={ComponentSize.Medium}
+                                        >
+                                            <h2 style={{ color: '#B1B6FF' }}>Report Details</h2>
+                                            <QuestionMarkTooltip
+                                                diameter={20}
+                                                tooltipStyle={{ width: '400px' }}
+                                                color={ComponentColor.Secondary}
+                                                tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                                    <div style={{ color: InfluxColors.Star }}>{"Report details:"}
+                                                        <hr style={tipStyle} />
+                                                    </div>
+                                                    {reportDetails}
+                                                </div>}
+                                            />
+                                        </FlexBox>
+
                                         <Grid.Row>
                                             <Grid.Column widthXS={Columns.Six}>
                                                 <Form.Element
@@ -335,7 +357,24 @@ class NewReport extends PureComponent<Props, State> {
                                 {/* FIRST RIGHT SIDE */}
                                 <Grid.Column widthXS={Columns.Six}>
                                     <Panel style={{ backgroundColor: '#292933', padding: '10px' }}>
-                                        <h2 style={{ marginBottom: '20px', color: '#B1B6FF' }}>Select Targets and Options</h2>
+                                        <FlexBox
+                                            style={{ marginBottom: '20px' }}
+                                            margin={ComponentSize.Medium}
+                                        >
+                                            <h2 style={{ color: '#B1B6FF' }}>Select Targets and Options</h2>
+                                            <QuestionMarkTooltip
+                                                diameter={20}
+                                                tooltipStyle={{ width: '400px' }}
+                                                color={ComponentColor.Secondary}
+                                                tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                                    <div style={{ color: InfluxColors.Star }}>{"Select target and options:"}
+                                                        <hr style={tipStyle} />
+                                                    </div>
+                                                    {selectTargetAndOptions}
+                                                </div>}
+                                            />
+                                        </FlexBox>
+
                                         <Grid.Row>
                                             <Grid.Column widthXS={Columns.Four}>
                                                 <Form.Element
@@ -435,7 +474,24 @@ class NewReport extends PureComponent<Props, State> {
                                     sendReportAsEmail &&
                                     <Grid.Column widthXS={Columns.Six}>
                                         <Panel style={{ backgroundColor: '#292933', padding: '10px' }}>
-                                            <h2 style={{ marginBottom: '20px', color: '#B1B6FF' }}>Email Configuration (Optional)</h2>
+                                            <FlexBox
+                                                style={{ marginBottom: '20px' }}
+                                                margin={ComponentSize.Medium}
+                                            >
+                                                <h2 style={{ color: '#B1B6FF' }}>Email Configuration (Optional)</h2>
+                                                <QuestionMarkTooltip
+                                                    diameter={20}
+                                                    tooltipStyle={{ width: '400px' }}
+                                                    color={ComponentColor.Secondary}
+                                                    tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                                        <div style={{ color: InfluxColors.Star }}>{"Email configuration:"}
+                                                            <hr style={tipStyle} />
+                                                        </div>
+                                                        {emailConfiguration}
+                                                    </div>}
+                                                />
+                                            </FlexBox>
+
                                             <Grid.Row>
                                                 <Grid.Column widthXS={Columns.Six}>
                                                     <Form.Element
@@ -469,40 +525,57 @@ class NewReport extends PureComponent<Props, State> {
 
                                             <Grid.Row>
                                                 <Grid.Column widthXS={Columns.Six}>
-                                                    <Form.Element
-                                                        label="Select Email To"
-                                                        required={true}
+                                                    <FlexBox
+                                                        style={{ marginBottom: '20px' }}
+                                                        margin={ComponentSize.Medium}
                                                     >
-                                                        <ReactMultiEmail
-                                                            style={{
-                                                                backgroundColor: '#383846',
-                                                                cursor: sendReportAsEmail ? 'auto' : 'none',
-                                                                pointerEvents: sendReportAsEmail ? 'auto' : 'none',
-                                                            }}
-                                                            placeholder="Enter your email address"
-                                                            emails={emails}
-                                                            onChange={(_emails: string[]) => {
-                                                                this.setState({ emails: _emails });
-                                                            }}
-                                                            validateEmail={email => {
-                                                                return isEmail(email);
-                                                            }}
-                                                            getLabel={(
-                                                                email: string,
-                                                                index: number,
-                                                                removeEmail: (index: number) => void,
-                                                            ) => {
-                                                                return (
-                                                                    <div data-tag key={index}>
-                                                                        {email}
-                                                                        <span data-tag-handle onClick={() => removeEmail(index)}>
-                                                                            ×
+                                                        <Form.Element
+                                                            label="Select Email To"
+                                                            required={true}
+                                                        >
+                                                            <ReactMultiEmail
+                                                                style={{
+                                                                    backgroundColor: '#383846',
+                                                                    cursor: sendReportAsEmail ? 'auto' : 'none',
+                                                                    pointerEvents: sendReportAsEmail ? 'auto' : 'none',
+                                                                }}
+                                                                placeholder="Enter your email address"
+                                                                emails={emails}
+                                                                onChange={(_emails: string[]) => {
+                                                                    this.setState({ emails: _emails });
+                                                                }}
+                                                                validateEmail={email => {
+                                                                    return isEmail(email);
+                                                                }}
+                                                                getLabel={(
+                                                                    email: string,
+                                                                    index: number,
+                                                                    removeEmail: (index: number) => void,
+                                                                ) => {
+                                                                    return (
+                                                                        <div data-tag key={index}>
+                                                                            {email}
+                                                                            <span data-tag-handle onClick={() => removeEmail(index)}>
+                                                                                ×
                                                                     </span>
-                                                                    </div>
-                                                                );
-                                                            }}
+                                                                        </div>
+                                                                    );
+                                                                }}
+                                                            />
+                                                        </Form.Element>
+                                                        <QuestionMarkTooltip
+                                                            style={{ marginTop: '8px' }}
+                                                            diameter={20}
+                                                            tooltipStyle={{ width: '400px' }}
+                                                            color={ComponentColor.Secondary}
+                                                            tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                                                <div style={{ color: InfluxColors.Star }}>{"Report details:"}
+                                                                    <hr style={tipStyle} />
+                                                                </div>
+                                                                {selectEmailTo}
+                                                            </div>}
                                                         />
-                                                    </Form.Element>
+                                                    </FlexBox>
                                                 </Grid.Column>
                                             </Grid.Row>
                                         </Panel>
@@ -514,7 +587,25 @@ class NewReport extends PureComponent<Props, State> {
                                     saveToCloud &&
                                     <Grid.Column widthXS={Columns.Six}>
                                         <Panel style={{ backgroundColor: '#292933', padding: '10px' }}>
-                                            <h2 style={{ marginBottom: '20px', color: '#B1B6FF' }}>Cloud Configuration (Optional)</h2>
+                                            <FlexBox
+                                                style={{ marginBottom: '20px' }}
+                                                margin={ComponentSize.Medium}
+                                            >
+                                                <h2 style={{ color: '#B1B6FF' }}>Cloud Configuration (Optional)</h2>
+
+                                                <QuestionMarkTooltip
+                                                    diameter={20}
+                                                    tooltipStyle={{ width: '400px' }}
+                                                    color={ComponentColor.Secondary}
+                                                    tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                                        <div style={{ color: InfluxColors.Star }}>{"Cloud configuration:"}
+                                                            <hr style={tipStyle} />
+                                                        </div>
+                                                        {cloudConfiguration}
+                                                    </div>}
+                                                />
+                                            </FlexBox>
+
                                             <Grid.Row>
                                                 <Grid.Column widthXS={Columns.Six}>
                                                     <Form.Element

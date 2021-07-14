@@ -1,28 +1,44 @@
-import React, { PureComponent, createRef, RefObject } from 'react'
-import {
-    Input, InputType,
-    Button, ButtonType, ButtonShape, Orientation,
-    ComponentColor, Appearance, ComponentSize,
-    Popover, PopoverInteraction, PopoverPosition, ButtonRef,
-    Grid, QuestionMarkTooltip, Tabs, Overlay, Columns, DapperScrollbars,
-    Icon, IconFont, Bullet, TextArea, SelectDropdown, InfluxColors, Label,
-} from '@influxdata/clockface'
-import { BACKEND } from "src/config";
+// Libraries
+import React, { PureComponent } from 'react'
 import { TextAnnotator } from 'react-text-annotate'
+import { withRouter, RouteComponentProps } from 'react-router-dom'
+
+// Components
+import {
+    Button, ButtonType, FlexBox, ComponentColor, ComponentSize, Grid, QuestionMarkTooltip,
+    Overlay, Columns, Icon, IconFont, TextArea, SelectDropdown, InfluxColors,
+} from '@influxdata/clockface'
+import Microphone from 'src/dt/components/Microphone';
 import GaugeChart from 'src/shared/components/GaugeChart'
 import SingleStat from 'src/shared/components/SingleStat';
+import SpeechRecognitionAlternativeList from 'src/dt/components/SpeechRecognitionAlternativeList';
+
+// Utilities
+import { BACKEND } from "src/config";
+
+// Types
+import { Color } from 'src/types'
 import { GaugeViewProperties } from 'src/types/dashboards'
+import { RemoteDataState } from 'src/types'
+
+// Helpers
+import { defaultViewQuery } from 'src/views/helpers'
+import { csvToJSON } from 'src/shared/helpers/FileHelper';
+
+// Services
+import FactoryDashboardService from 'src/side_nav/components/factoriesPanel/services/FactoryDashboardService';
+import NLPService from 'src/shared/services/NLPService';
+
+// Constants
+import {
+    tipStyle, textToQuery,
+} from 'src/shared/constants/tips';
 import {
     DEFAULT_GAUGE_COLORS,
 } from 'src/shared/constants/thresholds'
-import { Color } from 'src/types'
-import { defaultViewQuery, defaultView } from 'src/views/helpers'
-import FactoryDashboardService from 'src/side_nav/components/factoriesPanel/services/FactoryDashboardService';
-import { csvToJSON } from 'src/shared/helpers/FileHelper';
-import { RemoteDataState } from 'src/types'
-import { withRouter, RouteComponentProps } from 'react-router-dom'
-import { Context } from 'src/clockface'
-import SearchWidget from 'src/shared/components/search_widget/SearchWidget'
+
+
+var speech = window.speechSynthesis
 
 type Props = RouteComponentProps<{ orgID: string }>
 
@@ -49,17 +65,12 @@ interface State {
     fluxResults: Object
     fluxQueries: Object[]
     intervalId: number
-}
-
-const styles = {
-    addIcon: {
-        cursor: "pointer", position: "relative",
-        bottom: "3px", color: "#181820", backgroundColor: "#7ceb6a",
-    },
-    deleteIcon: {
-        color: "#181820", backgroundColor: "#f95f53",
-        cursor: "pointer", position: "relative",
-    }
+    resultText: string
+    queryResult: object
+    mongoTextcat: string
+    speaking: boolean
+    speechRecognitionAlternatives: object[]
+    visibleSpeechRecognitionAlternativesOverlay: boolean
 }
 
 const colors = {
@@ -91,7 +102,8 @@ const templates = [
     'Maintenance',
     'Maintenance Count',
     'Failure',
-    'Failure Count'
+    'Failure Count',
+    'Completed Job',
 ]
 
 const tagInfo = ` - Select the tag from dropdown. \n - Click and highlight the text you want to annotate. 
@@ -191,19 +203,22 @@ class NLPSearch extends PureComponent<Props, State>{
             }
         }],
         intervalId: 0,
+        resultText: "",
+        queryResult: {},
+        mongoTextcat: "",
+        speaking: false,
+        speechRecognitionAlternatives: [],
+        visibleSpeechRecognitionAlternativesOverlay: false,
     }
 
     async componentDidMount() {
         await this.generateChartValues();
-
         let intervalId = window.setInterval(this.generateChartValues, 5000);
         this.setState({ intervalId });
-
-        //console.log("nlp comp is mounted ", this.props)
     }
 
     async postQuestion(): Promise<void> {
-        const fetchPromise = fetch(BACKEND.NLP_URL + '/postQuestion', {
+        const fetchPromise = fetch(BACKEND.NLP_MODULE_URL + '/postQuestion', {
             method: 'POST',
             mode: 'cors',
             body: JSON.stringify({ "question": this.state.question }),
@@ -224,7 +239,7 @@ class NLPSearch extends PureComponent<Props, State>{
     };
 
     postTrainData = async (data) => {
-        const fetchPromise = fetch(BACKEND.NLP_URL + '/postTrainData', {
+        const fetchPromise = fetch(BACKEND.NLP_MODULE_URL + '/postTrainData', {
             method: 'PUT',
             mode: 'cors',
             body: JSON.stringify(data),
@@ -242,6 +257,60 @@ class NLPSearch extends PureComponent<Props, State>{
         catch (err) {
             return err;
         }
+    }
+
+    speak = (text) => {
+        // window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+        console.log(text);
+        speech.speak(new SpeechSynthesisUtterance(text))
+        this.setState({ speaking: true })
+    }
+
+    cancel = () => {
+        speech.cancel();
+        this.setState({ speaking: false })
+    }
+
+    getSpeechRecognitionAlternatives = async (alternatives) => {
+        const wordFrequency = await NLPService.getWordFrequency();
+        const new_alternatives = [];
+
+        Object.keys(alternatives).map(alternative => {
+            let splitted_alternative = alternatives[alternative].transcript.split(" ");
+            splitted_alternative = [...new Set(splitted_alternative)];
+            let alternative_score = 0;
+
+            splitted_alternative.forEach(word => {
+                if (Object.keys(wordFrequency.result.word_frequency).includes(String(word).toLowerCase())) {
+                    alternative_score += wordFrequency.result.word_frequency[word];
+                }
+            })
+
+            console.log(alternatives[alternative].transcript, alternative_score);
+
+            new_alternatives.push({
+                transcript: alternatives[alternative].transcript,
+                score: (alternative_score / wordFrequency.result.total_word).toFixed(2),
+            })
+        })
+
+        console.log(new_alternatives);
+
+        new_alternatives.sort(function (l, r) {
+            return r.score - l.score;
+        });
+
+        console.log(new_alternatives);
+
+
+        this.setState({
+            speechRecognitionAlternatives: new_alternatives,
+            visibleSpeechRecognitionAlternativesOverlay: true,
+        })
+    }
+
+    dismissSpeechRecognitionAlternativesOverlay = () => {
+        this.setState({ visibleSpeechRecognitionAlternativesOverlay: false })
     }
 
     onChange = (e) => {
@@ -262,10 +331,9 @@ class NLPSearch extends PureComponent<Props, State>{
     }
 
     handleSearch = () => {
-        console.log(this.state.question)
         this.postQuestion().then(res => {
-            console.log("*-", res)
             if (res["error"]) {
+                console.log("error");
                 this.setState({
                     errorMessage: res["error"], errorHappened: true, resultArrived: false, feedbackArrived: false,
                     entities: res["entities"],
@@ -278,7 +346,9 @@ class NLPSearch extends PureComponent<Props, State>{
                 let query = res["query"].replaceAll("|>", "\n\t|>")
                 let q2 = query.replaceAll("\\", "")
                 this.setState({
+                    queryResult: res,
                     data: res["data"],
+                    category: res["data"] === "mongo-data" ? "Metadata" : "Sensor data",
                     query: query,
                     entities: res["entities"],
                     fixedQuestion: res["fixedQuestion"],
@@ -287,10 +357,13 @@ class NLPSearch extends PureComponent<Props, State>{
                     resultArrived: true,
                     feedbackArrived: false,
                     overlayVisible: false,
-                    graphOverlay: res["graphOverlay"],
+                    mongoTextcat: res["mongoTextcat"],
+                    resultText: res["resultText"],
+                    // graphOverlay: res["graphOverlay"],
+                    graphOverlay: true,
                     value: [], textcatLabels: res['textcatLabels'], mongoTemplate: res['mongoTextcat'],
                     fluxQueries: [res["graphOverlay"] ? (res['textcatLabels'] === 'mongodb' ? { ...this.state.fluxQueries[0], type: 'single-stat' } : { ...this.state.fluxQueries[0], query: q2 }) : { ...this.state.fluxQueries[0] }]
-                })
+                }, () => { this.speak(res["resultText"]) })
             }
             else {
                 this.setState({
@@ -305,7 +378,12 @@ class NLPSearch extends PureComponent<Props, State>{
     }
 
     addTrainData = () => {
-        let data = { question: this.state.fixedQuestion, entities: this.state.entities, cat: this.state.category, mongoTextcat: this.state.mongoTemplate }
+        let data = {
+            question: this.state.fixedQuestion,
+            entities: this.state.entities,
+            cat: this.state.category,
+            mongoTextcat: this.state.mongoTemplate
+        }
         console.log("yes-->", data)
         this.postTrainData(data).then(res => {
             console.log(res)
@@ -505,31 +583,90 @@ class NLPSearch extends PureComponent<Props, State>{
                     <Overlay.Body>
                         <Grid>
                             <Grid.Row>
-                                <div style={{ textAlign: 'center' }}>{this.state.question}</div>
+                                <div style={{ textAlign: 'center' }}>Question: {this.state.question}</div>
+                                <div style={{ textAlign: 'center', marginTop: '10px' }}>Answer: {this.state.resultText}</div>
+                            </Grid.Row>
+                            <Grid.Row>
+                                <div style={{
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    display: 'flex',
+                                    // textAlign: 'center', 
+                                    marginTop: '40px'
+                                }}>
+                                    <FlexBox margin={ComponentSize.Medium}>
+                                        <Button
+                                            text="Say Again"
+                                            onClick={() => { this.speak(this.state.queryResult["resultText"]) }}
+                                            type={ButtonType.Button}
+                                            icon={IconFont.Play}
+                                            color={ComponentColor.Success}
+                                        />
+                                        <Button
+                                            text="Cancel"
+                                            onClick={this.cancel}
+                                            type={ButtonType.Button}
+                                            icon={IconFont.Pause}
+                                            color={ComponentColor.Danger}
+                                        />
+                                        {/* <Button
+                                            text="Say last record"
+                                            onClick={this.recognition}
+                                            type={ButtonType.Button}
+                                            icon={IconFont.Search}
+                                            color={ComponentColor.Primary}
+                                        /> */}
+                                    </FlexBox>
+                                </div>
                             </Grid.Row>
                             <Grid.Row>
                                 <Grid.Column widthXS={Columns.Three} />
                                 <Grid.Column widthXS={Columns.Six}>
                                     <div style={{ width: 'auto', height: '250px' }}>
-                                        {this.state.fluxQueries.map(query => {
-                                            switch (this.state.textcatLabels[0]) {
-                                                case 'influxdb':
+                                        {
+                                            this.state.textcatLabels.length > 0 && this.state.fluxQueries.map((query, idx) => {
+                                                if (this.state.textcatLabels[0] === 'influxdb') {
                                                     return (
                                                         <GaugeChart
+                                                            key={idx}
                                                             value={this.state.textcatLabels[0] === 'influxdb' ? (this.state.fluxResults[query["key"]] !== undefined ? this.state.fluxResults[query["key"]] : 0) : parseInt(this.state.query)}
                                                             properties={this.state.properties}
                                                             theme={'dark'}
                                                         />)
-                                                case 'mongodb':
-                                                    return (
-                                                        <SingleStat
-                                                            stat={parseInt(this.state.query) ? parseInt(this.state.query) : 0}
-                                                            properties={query["properties"]}
-                                                            theme={'dark'}
-                                                        />
-                                                    )
-                                            }
-                                        })}
+                                                } else {
+                                                    switch (this.state.mongoTextcat) {
+                                                        case 'maintenancecount':
+                                                        case 'failurecount':
+                                                            return (
+                                                                <SingleStat
+                                                                    key={idx}
+                                                                    stat={parseInt(this.state.query) ? parseInt(this.state.query) : 0}
+                                                                    properties={query["properties"]}
+                                                                    theme={'dark'}
+                                                                />
+                                                            )
+                                                    }
+                                                }
+                                                // switch (this.state.textcatLabels[0]) {
+                                                //     case 'influxdb':
+                                                //         return (
+                                                //             <GaugeChart
+                                                //                 key={idx}
+                                                //                 value={this.state.textcatLabels[0] === 'influxdb' ? (this.state.fluxResults[query["key"]] !== undefined ? this.state.fluxResults[query["key"]] : 0) : parseInt(this.state.query)}
+                                                //                 properties={this.state.properties}
+                                                //                 theme={'dark'}
+                                                //             />)
+                                                //     case 'mongodb':
+                                                //         return (
+                                                //             <SingleStat
+                                                //                 key={idx}
+                                                //                 stat={parseInt(this.state.query) ? parseInt(this.state.query) : 0}
+                                                //                 properties={query["properties"]}
+                                                //                 theme={'dark'}
+                                                //             />
+                                                //         )
+                                                // }
+                                            })}
                                     </div>
                                 </Grid.Column>
                                 <Grid.Column widthXS={Columns.Three} />
@@ -567,9 +704,25 @@ class NLPSearch extends PureComponent<Props, State>{
         }
     }
 
+    getTextQuery = (text) => {
+        this.setState({
+            question: text
+        })
+    }
+
+    handleSelectAlternative = (alternative) => {
+        this.setState({ question: alternative, visibleSpeechRecognitionAlternativesOverlay: false })
+    }
+
     render() {
         return (
             <Grid>
+                <SpeechRecognitionAlternativeList
+                    visible={this.state.visibleSpeechRecognitionAlternativesOverlay}
+                    dismiss={this.dismissSpeechRecognitionAlternativesOverlay}
+                    speechRecognitionAlternatives={this.state.speechRecognitionAlternatives}
+                    handleSelectAlternative={this.handleSelectAlternative}
+                />
                 <Grid.Row>
                     <div className="tabbed-page--header-left">
                         {/* <Input
@@ -592,6 +745,23 @@ class NLPSearch extends PureComponent<Props, State>{
                             type={ButtonType.Button}
                             icon={IconFont.Search}
                             color={ComponentColor.Primary}
+                        />
+
+                        <Microphone
+                            getTextQuery={this.getTextQuery}
+                            getSpeechRecognitionAlternatives={this.getSpeechRecognitionAlternatives}
+                        />
+
+                        <QuestionMarkTooltip
+                            diameter={25}
+                            tooltipStyle={{ width: '400px' }}
+                            color={ComponentColor.Secondary}
+                            tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                <div style={{ color: InfluxColors.Star }}>{"Text to query:"}
+                                    <hr style={tipStyle} />
+                                </div>
+                                {textToQuery}
+                            </div>}
                         />
                         {/* <Button
                             text=""

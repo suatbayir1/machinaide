@@ -68,19 +68,23 @@ def create_mongo_texcat_train_data():
     train_data = []
     questions = mongo.machinaide.nlp_questions.find()
     
+    print("create_mongo_text_cat")
+
     # turn mongodb train data into jsonl format
     for question in questions:
         obj = {}
         obj["text"] = question["question"]
         if(question["cat"] == "Metadata"):
-            if(question["mongoTextcat"] == "Maintenance"):
-                obj["cats"] = {"maintenance": 1.0, "failure": 0.0, "maintenancecount": 0.0, "failurecount": 0.0}
-            elif(question["mongoTextcat"] == "Maintenance Count"):
-                obj["cats"] = {"maintenance": 0.0, "failure": 0.0, "maintenancecount": 1.0, "failurecount": 0.0}
-            elif(question["mongoTextcat"] == "Failure"):
-                obj["cats"] = {"maintenance": 0.0, "failure": 1.0, "maintenancecount": 0.0, "failurecount": 0.0}
-            elif(question["mongoTextcat"] == "Failure Count"):
-                obj["cats"] = {"maintenance": 0.0, "failure": 0.0, "maintenancecount": 0.0, "failurecount": 1.0}
+            if(question["mongoTextcat"] == "Maintenance" or question["mongoTextcat"] == "maintenance"):
+                obj["cats"] = {"maintenance": 1.0, "failure": 0.0, "maintenancecount": 0.0, "failurecount": 0.0, "completed_job": 0.0}
+            elif(question["mongoTextcat"] == "Maintenance Count" or question["mongoTextcat"] == "maintenancecount"):
+                obj["cats"] = {"maintenance": 0.0, "failure": 0.0, "maintenancecount": 1.0, "failurecount": 0.0, "completed_job": 0.0}
+            elif(question["mongoTextcat"] == "Failure" or question["mongoTextcat"] == "failure"):
+                obj["cats"] = {"maintenance": 0.0, "failure": 1.0, "maintenancecount": 0.0, "failurecount": 0.0, "completed_job": 0.0}
+            elif(question["mongoTextcat"] == "Failure Count" or question["mongoTextcat"] == "failurecount"):
+                obj["cats"] = {"maintenance": 0.0, "failure": 0.0, "maintenancecount": 0.0, "failurecount": 1.0, "completed_job": 0.0}
+            elif(question["mongoTextcat"] == "Completed Job"):
+                obj["cats"] = {"maintenance": 0.0, "failure": 0.0, "maintenancecount": 0.0, "failurecount": 1.0, "completed_job": 1.0}
             if("cats" in obj.keys()):
                 train_data.append(obj)
         

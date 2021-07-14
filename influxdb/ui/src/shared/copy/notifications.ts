@@ -1097,7 +1097,7 @@ export const addDataFlowSettingSuccessfully = (): Notification => ({
 
 export const addDataFlowSettingFailure = (): Notification => ({
   ...defaultErrorNotification,
-  message: `An error occurred while creating a data flow setting`,
+  message: `This dataflow setting already exists`,
 })
 
 export const deleteDataFlowSettingSuccessfully = (): Notification => ({

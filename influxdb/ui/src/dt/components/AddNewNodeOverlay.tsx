@@ -5,9 +5,9 @@ import ReactHover, { Trigger, Hover } from "react-hover";
 // Components
 import {
     Form, Input, Button, ButtonType, ComponentColor, Overlay,
-    IconFont, Grid, Columns, SelectDropdown, TextArea,
+    IconFont, Grid, Columns, SelectDropdown, TextArea, InfluxColors,
     DapperScrollbars, ComponentSize, Table, BorderType, List,
-    FlexDirection, Gradients, FlexBox, InputType,
+    FlexDirection, Gradients, FlexBox, InputType, QuestionMarkTooltip,
 } from '@influxdata/clockface'
 import TabbedPageTabs from 'src/shared/tabbedPage/TabbedPageTabs'
 import { TabbedPageTab } from 'src/shared/tabbedPage/TabbedPageTabs'
@@ -17,6 +17,12 @@ import { BACKEND } from "src/config";
 
 // Services
 import DTService from 'src/shared/services/DTService';
+
+// Constants
+import {
+    tipStyle, addNewNodeHeader, addNewMachine, addNewComponent, addNewSensor,
+    sensorType, sensorUnit, sensorDataSource, addFieldToSensor,
+} from 'src/shared/constants/tips';
 
 interface Props {
     visibleAddNodeOverlay: boolean
@@ -226,13 +232,27 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
             <Grid key="machine">
                 <Grid.Row>
                     <Grid.Column widthSM={Columns.Six}>
-                        <Form.Element label="Production Line">
-                            <SelectDropdown
-                                options={this.state.productionLineList}
-                                selectedOption={this.state.productionLine}
-                                onSelect={(e) => this.setState({ productionLine: e })}
+                        <FlexBox margin={ComponentSize.Small}>
+                            <Form.Element label="Production Line">
+                                <SelectDropdown
+                                    options={this.state.productionLineList}
+                                    selectedOption={this.state.productionLine}
+                                    onSelect={(e) => this.setState({ productionLine: e })}
+                                />
+                            </Form.Element>
+                            <QuestionMarkTooltip
+                                style={{ marginTop: '5px' }}
+                                diameter={20}
+                                tooltipStyle={{ width: '400px' }}
+                                color={ComponentColor.Secondary}
+                                tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                    <div style={{ color: InfluxColors.Star }}>{"How to add new machine:"}
+                                        <hr style={tipStyle} />
+                                    </div>
+                                    {addNewMachine}
+                                </div>}
                             />
-                        </Form.Element>
+                        </FlexBox>
                     </Grid.Column>
                     <Grid.Column widthSM={Columns.Six}>
                         <Form.Element
@@ -272,13 +292,27 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
             <Grid key="component">
                 <Grid.Row>
                     <Grid.Column widthSM={Columns.Six}>
-                        <Form.Element label="Parent">
-                            <SelectDropdown
-                                options={this.state.machineList}
-                                selectedOption={this.state.cParent}
-                                onSelect={(e) => this.setState({ cParent: e })}
+                        <FlexBox margin={ComponentSize.Small}>
+                            <Form.Element label="Parent">
+                                <SelectDropdown
+                                    options={this.state.machineList}
+                                    selectedOption={this.state.cParent}
+                                    onSelect={(e) => this.setState({ cParent: e })}
+                                />
+                            </Form.Element>
+                            <QuestionMarkTooltip
+                                style={{ marginTop: '7px' }}
+                                diameter={20}
+                                tooltipStyle={{ width: '400px' }}
+                                color={ComponentColor.Secondary}
+                                tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                    <div style={{ color: InfluxColors.Star }}>{"How to add new component:"}
+                                        <hr style={tipStyle} />
+                                    </div>
+                                    {addNewComponent}
+                                </div>}
                             />
-                        </Form.Element>
+                        </FlexBox>
                     </Grid.Column>
                     <Grid.Column widthSM={Columns.Six}>
                         <Form.Element
@@ -358,13 +392,29 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
             <Grid key="sensor">
                 <Grid.Row>
                     <Grid.Column widthSM={Columns.Six}>
-                        <Form.Element label="Parent">
-                            <SelectDropdown
-                                options={this.state.componentList}
-                                selectedOption={this.state.sParent}
-                                onSelect={(e) => this.setState({ sParent: e })}
+                        <FlexBox margin={ComponentSize.Small}>
+                            <Form.Element label="Parent">
+                                <SelectDropdown
+                                    options={this.state.componentList}
+                                    selectedOption={this.state.sParent}
+                                    onSelect={(e) => this.setState({ sParent: e })}
+                                />
+                            </Form.Element>
+
+                            <QuestionMarkTooltip
+                                style={{ marginTop: '7px' }}
+                                diameter={20}
+                                tooltipStyle={{ width: '400px' }}
+                                color={ComponentColor.Secondary}
+                                tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                    <div style={{ color: InfluxColors.Star }}>{"How to add new sensor:"}
+                                        <hr style={tipStyle} />
+                                    </div>
+                                    {addNewSensor}
+                                </div>}
                             />
-                        </Form.Element>
+                        </FlexBox>
+
                     </Grid.Column>
                     <Grid.Column widthSM={Columns.Six}>
                         <Form.Element
@@ -383,31 +433,76 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                 </Grid.Row>
                 <Grid.Row>
                     <Grid.Column widthSM={Columns.Four}>
-                        <Form.Element label="Type">
-                            <SelectDropdown
-                                options={this.state.sSensorTypeList}
-                                selectedOption={this.state.sSensorType}
-                                onSelect={(e) => this.setState({ sSensorType: e })}
+                        <FlexBox margin={ComponentSize.Small}>
+                            <Form.Element label="Type">
+                                <SelectDropdown
+                                    options={this.state.sSensorTypeList}
+                                    selectedOption={this.state.sSensorType}
+                                    onSelect={(e) => this.setState({ sSensorType: e })}
+                                />
+                            </Form.Element>
+
+                            <QuestionMarkTooltip
+                                style={{ marginTop: '7px' }}
+                                diameter={20}
+                                tooltipStyle={{ width: '400px' }}
+                                color={ComponentColor.Secondary}
+                                tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                    <div style={{ color: InfluxColors.Star }}>{"Sensor measurement type:"}
+                                        <hr style={tipStyle} />
+                                    </div>
+                                    {sensorType}
+                                </div>}
                             />
-                        </Form.Element>
+                        </FlexBox>
                     </Grid.Column>
                     <Grid.Column widthSM={Columns.Four}>
-                        <Form.Element label="Unit">
-                            <SelectDropdown
-                                options={this.state.sSensorUnitList}
-                                selectedOption={this.state.sSensorUnit}
-                                onSelect={(e) => this.setState({ sSensorUnit: e })}
+                        <FlexBox margin={ComponentSize.Small}>
+                            <Form.Element label="Unit">
+                                <SelectDropdown
+                                    options={this.state.sSensorUnitList}
+                                    selectedOption={this.state.sSensorUnit}
+                                    onSelect={(e) => this.setState({ sSensorUnit: e })}
+                                />
+                            </Form.Element>
+
+                            <QuestionMarkTooltip
+                                style={{ marginTop: '7px' }}
+                                diameter={20}
+                                tooltipStyle={{ width: '400px' }}
+                                color={ComponentColor.Secondary}
+                                tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                    <div style={{ color: InfluxColors.Star }}>{"Sensor data type:"}
+                                        <hr style={tipStyle} />
+                                    </div>
+                                    {sensorUnit}
+                                </div>}
                             />
-                        </Form.Element>
+                        </FlexBox>
                     </Grid.Column>
                     <Grid.Column widthSM={Columns.Four}>
-                        <Form.Element label="Data Source">
-                            <SelectDropdown
-                                options={this.state.sDataSourceList}
-                                selectedOption={this.state.sSelectedDataSource}
-                                onSelect={(e) => this.setState({ sSelectedDataSource: e })}
+                        <FlexBox margin={ComponentSize.Small}>
+                            <Form.Element label="Data Source">
+                                <SelectDropdown
+                                    options={this.state.sDataSourceList}
+                                    selectedOption={this.state.sSelectedDataSource}
+                                    onSelect={(e) => this.setState({ sSelectedDataSource: e })}
+                                />
+                            </Form.Element>
+
+                            <QuestionMarkTooltip
+                                style={{ marginTop: '7px' }}
+                                diameter={20}
+                                tooltipStyle={{ width: '400px' }}
+                                color={ComponentColor.Secondary}
+                                tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                    <div style={{ color: InfluxColors.Star }}>{"Sensor data source:"}
+                                        <hr style={tipStyle} />
+                                    </div>
+                                    {sensorDataSource}
+                                </div>}
                             />
-                        </Form.Element>
+                        </FlexBox>
                     </Grid.Column>
                 </Grid.Row>
                 <Grid.Row>
@@ -468,15 +563,30 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
 
                 <Grid.Row>
                     <Grid.Column widthSM={Columns.Four}>
-                        <Form.Element label="">
-                            <Button
-                                text="Add Field"
-                                icon={IconFont.Plus}
-                                onClick={this.addFieldToSensor}
-                                type={ButtonType.Button}
-                                color={ComponentColor.Primary}
+                        <FlexBox margin={ComponentSize.Small}>
+                            <Form.Element label="">
+                                <Button
+                                    text="Add Field"
+                                    icon={IconFont.Plus}
+                                    onClick={this.addFieldToSensor}
+                                    type={ButtonType.Button}
+                                    color={ComponentColor.Primary}
+                                />
+                            </Form.Element>
+
+                            <QuestionMarkTooltip
+                                style={{ marginBottom: '8px' }}
+                                diameter={20}
+                                tooltipStyle={{ width: '400px' }}
+                                color={ComponentColor.Secondary}
+                                tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                    <div style={{ color: InfluxColors.Star }}>{"Add field to sensor:"}
+                                        <hr style={tipStyle} />
+                                    </div>
+                                    {addFieldToSensor}
+                                </div>}
                             />
-                        </Form.Element>
+                        </FlexBox>
                     </Grid.Column>
                 </Grid.Row>
                 <Grid.Row>
@@ -766,6 +876,22 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
         })
     }
 
+    private get headerChildren(): JSX.Element[] {
+        return [
+            <QuestionMarkTooltip
+                diameter={20}
+                tooltipStyle={{ width: '400px' }}
+                color={ComponentColor.Secondary}
+                tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                    <div style={{ color: InfluxColors.Star }}>{"How to add DT object:"}
+                        <hr style={tipStyle} />
+                    </div>
+                    {addNewNodeHeader}
+                </div>}
+            />
+        ]
+    }
+
     render() {
         const { activeTab } = this.state;
         const { visibleAddNodeOverlay, handleDismissAddNode } = this.props;
@@ -800,7 +926,6 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                 console.error('Error active tab', activeTab)
         }
 
-
         return (
             <>
                 <Overlay visible={visibleAddNodeOverlay}>
@@ -808,6 +933,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                         <Overlay.Header
                             title="Add New Node"
                             onDismiss={handleDismissAddNode}
+                            children={this.headerChildren}
                         />
 
                         <Overlay.Body>

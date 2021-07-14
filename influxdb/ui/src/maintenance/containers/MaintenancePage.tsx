@@ -1,45 +1,31 @@
+// Libraries
 import React, { PureComponent, createRef } from "react";
+import { Link } from "react-router-dom"
+
+// Components
 import {
-    Page,
-    Grid,
-    IconFont,
-    ComponentColor,
-    ComponentSize,
-    Button,
-    ButtonType,
-    Table,
-    DapperScrollbars,
-    BorderType,
-    Popover,
-    Appearance,
-    PopoverPosition,
-    PopoverInteraction,
-    DateRangePicker,
-    Form,
-    Columns,
-    FlexBox,
-    SelectDropdown,
-    SquareButton,
-    Notification,
-    Gradients,
-    SpinnerContainer,
-    TechnoSpinner,
-    RemoteDataState,
-    ConfirmationButton,
-    Dropdown,
+    Page, Grid, IconFont, ComponentColor, ComponentSize, Button, ButtonType, Table, DapperScrollbars,
+    BorderType, Popover, Appearance, PopoverPosition, PopoverInteraction, DateRangePicker, Form,
+    Columns, FlexBox, SelectDropdown, SquareButton, Notification, Gradients, SpinnerContainer,
+    TechnoSpinner, RemoteDataState, ConfirmationButton, Dropdown,
 } from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
-import { Link } from "react-router-dom"
 import HomeIcon from '@material-ui/icons/Home';
-import 'src/side_nav/components/newAdd/customCss/general.css';
-import FactoryService from 'src/shared/services/FactoryService';
-import MaintenanceService from 'src/maintenance/services/MaintenanceService';
 import AddUpdateMaintenanceOverlay from 'src/maintenance/components/AddUpdateMaintenanceOverlay';
-import { dataToCSV, dataToXLSX } from 'src/shared/parsing/dataToCsv';
-import download from 'src/external/download.js';
 import ImportMaintenanceFile from 'src/maintenance/components/ImportMaintenanceFile';
 import MaintenanceDetailOverlay from 'src/maintenance/components/MaintenanceDetailOverlay';
+
+// Styles
+import 'src/side_nav/components/newAdd/customCss/general.css';
+
+// Services
+import FactoryService from 'src/shared/services/FactoryService';
+import MaintenanceService from 'src/maintenance/services/MaintenanceService';
+
+// Helpers
+import { dataToCSV, dataToXLSX } from 'src/shared/parsing/dataToCsv';
+import download from 'src/external/download.js';
 
 interface Props { }
 interface State {
@@ -312,7 +298,8 @@ class MaintenancePage extends PureComponent<Props, State> {
 
     getAllMachines = async (factoryId) => {
         const payload = {
-            "factoryId": factoryId
+            "factoryId": factoryId,
+            "plId": "all"
         }
 
         const machines = await FactoryService.getMachines(payload);

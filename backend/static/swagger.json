@@ -47,6 +47,10 @@
         {
             "name": "Prediction",
             "description": "Operations such as a list of existing machine learning models, adding a new machine learning model and searching are collected in this class."
+        },
+        {
+            "name": "General",
+            "description": "General operations such as creating reports and sending e-mails are grouped under this class."
         }
     ],
     "schemes": [
@@ -229,17 +233,52 @@
                         "name": "payload",
                         "description": "",
                         "required": true,
-                        "properties": {
-                            "type": {
-                                "type": "string",
-                                "example": "Component",
-                                "description": "This field must be Machine, Component or Sensor"
-                            },
-                            "name": {
-                                "type": "string",
-                                "example": "robot",
-                                "description": "Is the unique name of the record to be deleted"
-                            }
+                        "schema": {
+                            "$ref": "#/definitions/DTDelete"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/dt/updateSensor": {
+            "put": {
+                "tags": [
+                    "Digital Twin"
+                ],
+                "summary": "This method is used to update a sensor information.",
+                "description": "Allows you to change the upper and lower limits of an area where the sensor is measuring.",
+                "operationId": "updateSensor",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateSensor"
                         }
                     }
                 ],
@@ -331,6 +370,94 @@
                     },
                     "409": {
                         "description": "Data already exists"
+                    }
+                }
+            }
+        },
+        "/dt/addRelationship": {
+            "post": {
+                "tags": [
+                    "Digital Twin"
+                ],
+                "summary": "This method is used to add a new data flow setting",
+                "description": "This method is used to add the data stream from one machine to another machine.",
+                "operationId": "addRelationship",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AddRelationship"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/dt/removeRelationship": {
+            "delete": {
+                "tags": [
+                    "Digital Twin"
+                ],
+                "summary": "This method is used to remove the data flow setting",
+                "description": "Simply send the unique name of the setting to be deleted",
+                "operationId": "removeRelationship",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/RemoveRelationship"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
                     }
                 }
             }
@@ -603,6 +730,50 @@
                 }
             }
         },
+        "/factory/getProductionLines": {
+            "post": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "This method contains a list of existing production lines and some information about each production line.",
+                "description": "This method contains a list of existing production lines and some information about each production line.",
+                "operationId": "getProductionLines",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "ID of the desired factory.",
+                        "required": true,
+                        "properties": {
+                            "factoryId": {
+                                "type": "string",
+                                "example": "Ermetal"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
         "/factory/getMachines": {
             "post": {
                 "tags": [
@@ -630,12 +801,16 @@
                     {
                         "in": "body",
                         "name": "payload",
-                        "description": "ID of the desired factory.",
+                        "description": "ID of the desired factory and production line",
                         "required": true,
                         "properties": {
                             "factoryId": {
                                 "type": "string",
                                 "example": "Ermetal"
+                            },
+                            "plId": {
+                                "type": "string",
+                                "example": "1600T_Press_Line"
                             }
                         }
                     }
@@ -682,10 +857,15 @@
                                 "example": "Ermetal",
                                 "description": "ID of the desired factory."
                             },
+                            "plId": {
+                                "type": "string",
+                                "example": "1600T_Press_Line",
+                                "description": "ID of the desired production line"
+                            },
                             "machineId": {
                                 "type": "string",
                                 "example": "Press030",
-                                "description": "The ID of the desired machine."
+                                "description": "ID of the desired machine."
                             }
                         }
                     }
@@ -731,6 +911,11 @@
                                 "type": "string",
                                 "example": "Ermetal",
                                 "description": "ID of the desired factory."
+                            },
+                            "plId": {
+                                "type": "string",
+                                "example": "1600T_Press_Line",
+                                "description": "ID of the desired production line"
                             },
                             "machineId": {
                                 "type": "string",
@@ -1005,6 +1190,378 @@
                     },
                     "409": {
                         "description": "Record already exists"
+                    }
+                }
+            }
+        },
+        "/factory/addMaterial": {
+            "post": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "This method is used to add a new material record.",
+                "description": "This method is used to add a new material record.",
+                "operationId": "addMaterial",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AddMaterial"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/factory/getMaterials": {
+            "get": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "This method contains a list of existing materials and some information about each material.",
+                "description": "This method contains a list of existing materials and some information about each material.",
+                "operationId": "getMaterials",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/factory/deleteMaterial": {
+            "delete": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "This method is used to remove the material record",
+                "description": "Simply send the unique id of the material record to be deleted",
+                "operationId": "deleteMaterial",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/DeleteMaterial"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/factory/updateMaterial": {
+            "put": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "This method is used to update material record.",
+                "description": "This method is used to update material record.",
+                "operationId": "updateMaterial",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateMaterial"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/factory/isMaterialExists": {
+            "post": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "This method is used to inquire whether the material record, which comes as a parameter, exists in the system.",
+                "description": "This method is used to inquire whether the material record, which comes as a parameter, exists in the system.",
+                "operationId": "isMaterialExists",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AdMaterial"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/factory/createDashboard": {
+            "post": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "This method is used to add a new dashboard.",
+                "description": "This method is used to add a new dashboard.",
+                "operationId": "createDashboard",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateDashboard"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/factory/deleteDashboard": {
+            "delete": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "This method is used to delete a dashboard.",
+                "description": "This method is used to delete a dashboard.",
+                "operationId": "deleteDashboard",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/DeleteDashboard"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/factory/getDashboards": {
+            "get": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "This method contains a list of existing dashboards and some information about each dashboard.",
+                "description": "This method contains a list of existing dashboards and some information about each dashboard.",
+                "operationId": "getDashboards",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/factory/isDashboardExists": {
+            "post": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "This method is used to inquire whether the dashboard, which comes as a parameter, exists in the system.",
+                "description": "This method is used to inquire whether the dashboard, which comes as a parameter, exists in the system.",
+                "operationId": "isDashboardExists",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/DashboardExist"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
                     }
                 }
             }
@@ -1753,6 +2310,202 @@
                     }
                 }
             }
+        },
+        "/general/newReport": {
+            "post": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "This method is used to add a new report.",
+                "description": "This method is used to add a new report.",
+                "operationId": "newReport",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/NewReport"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "409": {
+                        "description": "Data already exists"
+                    }
+                }
+            }
+        },
+        "/general/getReports": {
+            "get": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "This method returns a list of all report records available in the system.",
+                "description": "This method returns a list of all report records available in the system.",
+                "operationId": "getReports",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/general/getCreatedReports": {
+            "get": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "This method returns a list of all created report records available in the system.",
+                "description": "This method returns a list of all created report records available in the system.",
+                "operationId": "getCreatedReports",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/general/deleteReport": {
+            "delete": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "This method is used to remove the report record",
+                "description": "Simply send the unique id of the report record to be deleted",
+                "operationId": "deleteReport",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/DeleteReport"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/general/updateReport": {
+            "put": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "This method is used to update the report record",
+                "description": "This method is used to update the report record",
+                "operationId": "updateReport",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateReport"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
         }
     },
     "securityDefinitions": {
@@ -1793,6 +2546,191 @@
                     "type": "string",
                     "example": "john123",
                     "description": "The password you will use to log into the system."
+                }
+            }
+        },
+        "DTDelete": {
+            "type": "object",
+            "required": [
+                "type",
+                "name"
+            ],
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "example": "Component",
+                    "description": "This field must be ProductionLine, Machine, Component or Sensor"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "robot",
+                    "description": "Is the unique name of the record to be deleted"
+                }
+            }
+        },
+        "AddRelationship": {
+            "type": "object",
+            "required": [
+                "@type",
+                "name",
+                "source",
+                "target"
+            ],
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "example": "Relationship",
+                    "description": "This field must be Relationship."
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Press030ToPress031",
+                    "description": "Specifies which kafka topic the data stream will flow through."
+                },
+                "source": {
+                    "type": "string",
+                    "example": "Press030",
+                    "description": "Unique id of the machine where the data will come from."
+                },
+                "target": {
+                    "type": "string",
+                    "example": "Press031",
+                    "description": "Unique id of the machine to which the data will be sent."
+                }
+            }
+        },
+        "AddMaterial": {
+            "type": "object",
+            "required": [
+                "materialName",
+                "height",
+                "thickness",
+                "width"
+            ],
+            "properties": {
+                "materialName": {
+                    "type": "string",
+                    "example": "Material 1",
+                    "description": "This is the field that indicates the name of the material."
+                },
+                "height": {
+                    "type": "integer",
+                    "example": 70,
+                    "description": "This field indicates the material height."
+                },
+                "width": {
+                    "type": "integer",
+                    "example": 80,
+                    "description": "This field indicates the material width."
+                },
+                "thickness": {
+                    "type": "integer",
+                    "example": 5,
+                    "description": "This field indicates the material thickness."
+                },
+                "materialDescription": {
+                    "type": "string",
+                    "example": "Material description",
+                    "description": "This field indicates the material description."
+                }
+            }
+        },
+        "UpdateMaterial": {
+            "type": "object",
+            "required": [
+                "recordId",
+                "materialName",
+                "height",
+                "thickness",
+                "width"
+            ],
+            "properties": {
+                "recordId": {
+                    "type": "string",
+                    "example": "60d56a7deda45f7e95244928",
+                    "description": "This is the field that indicates the unique id of the material."
+                },
+                "materialName": {
+                    "type": "string",
+                    "example": "Material 1",
+                    "description": "This is the field that indicates the name of the material."
+                },
+                "height": {
+                    "type": "integer",
+                    "example": 70,
+                    "description": "This field indicates the material height."
+                },
+                "width": {
+                    "type": "integer",
+                    "example": 80,
+                    "description": "This field indicates the material width."
+                },
+                "thickness": {
+                    "type": "integer",
+                    "example": 5,
+                    "description": "This field indicates the material thickness."
+                },
+                "materialDescription": {
+                    "type": "string",
+                    "example": "Material description",
+                    "description": "This field indicates the material description."
+                }
+            }
+        },
+        "RemoveRelationship": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "Press030ToPress031",
+                    "description": "Specifies which kafka topic the data stream will flow through."
+                }
+            }
+        },
+        "UpdateSensor": {
+            "type": "object",
+            "required": [
+                "minValue",
+                "maxValue",
+                "name",
+                "dataSource"
+            ],
+            "properties": {
+                "minValue": {
+                    "type": "integer",
+                    "example": 10,
+                    "description": "The minimum value of the measured field"
+                },
+                "maxValue": {
+                    "type": "integer",
+                    "example": 100,
+                    "description": "The maximum value of the measured field"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Ana_hava_debi_act",
+                    "description": "Unique name of the measured field"
+                },
+                "dataSource": {
+                    "type": "string",
+                    "example": "sensors_data",
+                    "description": "Indicates which channel the measurements are coming from"
+                }
+            }
+        },
+        "DeleteMaterial": {
+            "type": "object",
+            "required": [
+                "recordId"
+            ],
+            "properties": {
+                "recordId": {
+                    "type": "string",
+                    "example": "60d56a7deda45f7e95244928",
+                    "description": "Unique id of the material record to be deleted"
                 }
             }
         },
@@ -2009,7 +2947,7 @@
                 "description": {
                     "type": "string",
                     "example": "This sensor measures the temperature information of the part number A",
-                    "description": "This field contains explanation information about the added item. (component, sensor)"
+                    "description": "This field contains explanation information about the added item. (machine, component, sensor)"
                 },
                 "sensors": {
                     "type": "list",
@@ -2055,6 +2993,178 @@
                 },
                 "message": {
                     "type": "string"
+                }
+            }
+        },
+        "CreateDashboard": {
+            "type": "object",
+            "required": [
+                "dashboardID",
+                "dtID",
+                "name"
+            ],
+            "properties": {
+                "dashboardID": {
+                    "type": "string",
+                    "example": "07c714140c9ff000",
+                    "description": "Unique id of dashboard in chronograph"
+                },
+                "dtID": {
+                    "type": "string",
+                    "example": "Press031",
+                    "description": "Unique id of the digital twin."
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Press031",
+                    "description": "Unique name of the dashboard"
+                }
+            }
+        },
+        "DeleteDashboard": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "dashboardID": {
+                    "type": "string",
+                    "example": "07c714140c9ff000",
+                    "description": "Unique id of dashboard in chronograph"
+                }
+            }
+        },
+        "DeleteReport": {
+            "type": "object",
+            "required": [
+                "recordId"
+            ],
+            "properties": {
+                "recordId": {
+                    "type": "string",
+                    "example": "07c714140c9ff000",
+                    "description": "Unique id of report record"
+                }
+            }
+        },
+        "UpdateReport": {
+            "type": "object",
+            "required": [
+                "recordId",
+                "enabled"
+            ],
+            "properties": {
+                "recordId": {
+                    "type": "string",
+                    "example": "07c714140c9ff000",
+                    "description": "Unique id of report record"
+                },
+                "enabled": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Control statement specifying whether the report will be produced"
+                }
+            }
+        },
+        "DashboardExist": {
+            "type": "object",
+            "required": [
+                "dashboardID"
+            ],
+            "properties": {
+                "dashboardID": {
+                    "type": "string",
+                    "example": "07c714140c9ff000",
+                    "description": "Unique id of dashboard in chronograph"
+                }
+            }
+        },
+        "NewReport": {
+            "type": "object",
+            "required": [
+                "Author",
+                "CheckBox",
+                "Component",
+                "Email"
+            ],
+            "properties": {
+                "Author": {
+                    "type": "string",
+                    "example": "John Doe",
+                    "description": "The name of the person who created report."
+                },
+                "CheckBox": {
+                    "type": "object",
+                    "example": {
+                        "cloud": true,
+                        "sendEmail": true
+                    },
+                    "description": "Keeps whether the report will be sent as e-mail and saved to the cloud."
+                },
+                "Cloud": {
+                    "type": "object",
+                    "example": {
+                        "bucket": "bucket_name",
+                        "object": "object_name",
+                        "provider": "Google"
+                    },
+                    "description": "Keeps information about the cloud."
+                },
+                "Component": {
+                    "type": "string",
+                    "example": "Dengeleme",
+                    "description": "The information of which component the report will be created with data is kept."
+                },
+                "Email": {
+                    "type": "object",
+                    "example": {
+                        "message": "Email message",
+                        "subject": "Email Title"
+                    },
+                    "description": "Keeps information about the email."
+                },
+                "Factory": {
+                    "type": "string",
+                    "example": "Ermetal",
+                    "description": "Unique id of the factory"
+                },
+                "Machine": {
+                    "type": "string",
+                    "example": "Press031",
+                    "description": "Unique id of the machine"
+                },
+                "Receivers": {
+                    "type": "list",
+                    "example": [
+                        "johndoe@gmail.com",
+                        "doejohn@hotmail.com"
+                    ],
+                    "description": "This fields keeps the list of email"
+                },
+                "ReportConfig": {
+                    "type": "object",
+                    "example": {
+                        "description": "Report description",
+                        "schedule": "Monthly",
+                        "time": 1625318100000,
+                        "title": "Report Title 1"
+                    },
+                    "description": "This field contains explanation information about report detail."
+                },
+                "enabled": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Specifies whether to send the report"
+                },
+                "isCreatedBefore": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Indicates whether the report has already been generated"
+                },
+                "uid": {
+                    "type": "string",
+                    "example": "johndoe",
+                    "description": "Unique id of the user who created report"
                 }
             }
         }

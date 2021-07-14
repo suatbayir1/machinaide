@@ -6,8 +6,8 @@ import JSZip from 'jszip'
 
 // Components
 import {
-    Panel, ComponentSize, Grid, Columns, Form, FlexBox, SlideToggle,
-    Button, IconFont, ButtonType, ComponentColor,
+    Panel, ComponentSize, Grid, Columns, Form, FlexBox, SlideToggle, InfluxColors,
+    Button, IconFont, ButtonType, ComponentColor, QuestionMarkTooltip,
 } from '@influxdata/clockface'
 
 // Services 
@@ -22,6 +22,10 @@ import { notify as notifyAction } from 'src/shared/actions/notifications'
 import {
     pleaseFillInTheFormCompletely,
 } from 'src/shared/copy/notifications'
+import {
+    tipStyle, backup,
+} from 'src/shared/constants/tips';
+
 
 // Helpers
 import { dataToCSV } from 'src/shared/parsing/dataToCsv';
@@ -170,7 +174,26 @@ class Backup extends PureComponent<Props, State> {
                                     offsetXS={Columns.Three}
                                 >
                                     <Panel style={{ backgroundColor: '#292933', padding: '10px' }}>
-                                        <h2 style={{ marginBottom: '20px', color: '#B1B6FF' }}>Backup Details</h2>
+                                        <FlexBox
+                                            style={{ marginBottom: '20px' }}
+                                            margin={ComponentSize.Medium}
+                                        >
+                                            <h2 style={{ color: '#B1B6FF' }}>Backup Details</h2>
+
+                                            <QuestionMarkTooltip
+                                                diameter={20}
+                                                tooltipStyle={{ width: '400px' }}
+                                                color={ComponentColor.Secondary}
+                                                tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                                    <div style={{ color: InfluxColors.Star }}>{"Export backup:"}
+                                                        <hr style={tipStyle} />
+                                                    </div>
+                                                    {backup}
+                                                </div>}
+                                            />
+                                        </FlexBox>
+
+
                                         <Grid.Row>
                                             <Grid.Column widthXS={Columns.Six}>
                                                 <Form.Element

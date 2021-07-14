@@ -204,6 +204,7 @@
     "react-router-dom": "^5.2.0",
     "react-scrollbars-custom": "^4.0.0-alpha.8",
     "react-sizeme": "^3.0.1",
+    "react-speech-recognition": "^3.8.2",
     "react-text-annotate": "^0.3.0",
     "react-tooltip": "^4.2.19",
     "react-virtualized": "^9.18.5",

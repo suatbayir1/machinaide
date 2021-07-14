@@ -1,29 +1,29 @@
+// Libraries
 import React, { PureComponent } from "react";
-import {
-    Page,
-    Grid,
-    Columns,
-    IconFont,
-    Input,
-    SpinnerContainer,
-    TechnoSpinner,
-    RemoteDataState,
-    Table,
-    DapperScrollbars,
-    BorderType,
-    ComponentSize,
-} from '@influxdata/clockface'
 import { Link } from "react-router-dom";
+
+// Components
+import {
+    Page, Grid, Columns, IconFont, Input, SpinnerContainer, TechnoSpinner, RemoteDataState, InfluxColors,
+    Table, DapperScrollbars, BorderType, ComponentSize, QuestionMarkTooltip, ComponentColor,
+} from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
 import HomeIcon from '@material-ui/icons/Home';
 import IconButton from '@material-ui/core/IconButton';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
-import FactoryService from 'src/shared/services/FactoryService';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 
+// Services
+import FactoryService from 'src/shared/services/FactoryService';
+
+// Constants
+import {
+    tipStyle, sensors,
+} from 'src/shared/constants/tips';
+
+
 interface State {
-    columns: object[]
     rows: object[]
     filteredRows: object[]
     page: number
@@ -41,18 +41,6 @@ class SensorsTable extends PureComponent<Props, State> {
     constructor(props) {
         super(props);
         this.state = {
-            columns: [
-                { id: 'id', label: 'Id', minWidth: 170 },
-                { id: 'displayName', label: 'Display Name', minWidth: 100 },
-                { id: 'type', label: 'Type', minWidth: 100 },
-                { id: 'sensorType', label: 'Sensor Type', minWidth: 100 },
-                { id: 'unit', label: 'Unit', minWidth: 100 },
-                { id: 'sensorStatus', label: 'Sensor Status', minWidth: 100 },
-                { id: 'last24h', label: 'last 24h', minWidth: 100 },
-                { id: 'last7d', label: 'last 7d', minWidth: 100 },
-                { id: 'last30d', label: 'last 30d', minWidth: 100 },
-                { id: 'showAll', label: 'Show All', minWidth: 100 },
-            ],
             rows: [],
             filteredRows: [],
             page: 0,
@@ -138,6 +126,17 @@ class SensorsTable extends PureComponent<Props, State> {
                         <React.Fragment>
                             <Page.Header fullWidth={true}>
                                 <Page.Title title={"Sensors"} />
+                                <QuestionMarkTooltip
+                                    diameter={30}
+                                    tooltipStyle={{ width: '400px' }}
+                                    color={ComponentColor.Secondary}
+                                    tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                        <div style={{ color: InfluxColors.Star }}>{"About the Sensors:"}
+                                            <hr style={tipStyle} />
+                                        </div>
+                                        {sensors}
+                                    </div>}
+                                />
                             </Page.Header>
 
                             <Breadcrumbs separator="/" aria-label="breadcrumb" style={{ color: '#ffffff', marginLeft: '28px', marginTop: '-10px' }}>

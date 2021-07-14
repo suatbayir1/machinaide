@@ -4,7 +4,7 @@ import React, { PureComponent } from "react";
 // Components
 import {
     RemoteDataState, Columns, Overlay, Grid, ComponentColor,
-    Dropdown,
+    Dropdown, QuestionMarkTooltip, InfluxColors,
 } from '@influxdata/clockface'
 import { ColladaLoader } from "three/examples/jsm/loaders/ColladaLoader";
 import FailureAlarmInformationBox from 'src/failures/components/FailureAlarmInformationBox';
@@ -12,7 +12,7 @@ import FailureAlarmInformationBox from 'src/failures/components/FailureAlarmInfo
 // Services
 import DTService from "src/shared/services/DTService";
 
-// Constants
+// Helpers
 var THREE = require("three");
 var OrbitControls = require("three-orbit-controls")(THREE);
 var TransformControls = require("three-transform-controls")(THREE);
@@ -24,6 +24,11 @@ var dae, kinematics, kinematicsTween;
 var greenColor = "#29a329";
 const tweenParameters = {};
 const TWEEN = require("@tweenjs/tween.js");
+
+// Constants
+import {
+    tipStyle, failureAlarmScene,
+} from 'src/shared/constants/tips';
 
 interface Props {
     handleDismissFailureAlarmScene: () => void
@@ -130,7 +135,7 @@ class FailureAlarmScene extends PureComponent<Props, State> {
         this.setState({
             cubeInfo: renderedCubeInfo,
             constantJsonData: cubeInfo,
-            currentMachine: cubeInfo[0]["machines"][0],
+            currentMachine: cubeInfo[0]["productionLines"][0]["machines"][0],
         })
         this.createSceneAndCamera();
         this.addLightsToScene();
@@ -379,7 +384,7 @@ class FailureAlarmScene extends PureComponent<Props, State> {
             return;
         }
 
-        if (payload.machines === undefined) {
+        if (payload.productionLines === undefined) {
             CubeInfo = payload[0];
         }
 
@@ -1119,7 +1124,7 @@ class FailureAlarmScene extends PureComponent<Props, State> {
         return [
             < Dropdown
                 key="changeMachineDropdown"
-                style={{ width: '150px' }}
+                style={{ width: '150px', marginRight: '10px' }}
                 button={(active, onClick) => (
                     <Dropdown.Button
                         active={active}
@@ -1134,18 +1139,35 @@ class FailureAlarmScene extends PureComponent<Props, State> {
                         onCollapse={onCollapse}
                     >
                         {
-                            constantJsonData[0]["machines"].map((machine, idx) =>
-                                <Dropdown.Item
-                                    key={idx}
-                                    value={machine}
-                                    onClick={this.handleChangeMachine}
-                                >
-                                    {machine["name"]}
-                                </Dropdown.Item>
-                            )
+                            constantJsonData[0]["productionLines"].map(pl => {
+                                return (
+                                    pl["machines"].map((machine, idx) =>
+                                        <Dropdown.Item
+                                            key={idx}
+                                            value={machine}
+                                            onClick={this.handleChangeMachine}
+                                        >
+                                            {machine["name"]}
+                                        </Dropdown.Item>
+                                    )
+                                )
+
+                            })
+
                         }
                     </Dropdown.Menu>
                 )}
+            />,
+            <QuestionMarkTooltip
+                diameter={20}
+                tooltipStyle={{ width: '400px' }}
+                color={ComponentColor.Secondary}
+                tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                    <div style={{ color: InfluxColors.Star }}>{"About the Failure Alarm Scene:"}
+                        <hr style={tipStyle} />
+                    </div>
+                    {failureAlarmScene}
+                </div>}
             />
         ]
     }

@@ -10,11 +10,9 @@ import ListItemText from "@material-ui/core/ListItemText";
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import IconButton from '@material-ui/core/IconButton';
-import { Link } from "react-router-dom";
 import {
     Grid,
     Icon,
-    IconFont,
 } from '@influxdata/clockface'
 
 const drawerWidth = 300;
@@ -101,13 +99,15 @@ const styles = theme => ({
 interface Props {
     orgID: string
     changeActivePage: (item) => void
+    handleChangeListItem: (item) => void
+    linkList: object[]
+    selectedLink: string
 }
 interface State {
     open: boolean
-    anchorEl: string
+    // anchorEl: string
     openCollapse: boolean
-    selectedLink: string
-    linkList: object[]
+    // selectedLink: string
 }
 
 class RightSideBar extends PureComponent<Props, State> {
@@ -115,17 +115,9 @@ class RightSideBar extends PureComponent<Props, State> {
         super(props);
         this.state = {
             open: true,
-            anchorEl: null,
+            // anchorEl: null,
             openCollapse: false,
-            selectedLink: "Maintenance",
-            linkList: [
-                { id: 'maintenancePage', name: 'Maintenance', icon: IconFont.TextBlock },
-                { id: 'failurePage', name: 'Failure', icon: IconFont.Capacitor },
-                { id: 'deneme1', name: 'Deneme 1', icon: IconFont.Duplicate },
-                { id: 'deneme2', name: 'Deneme 2', icon: IconFont.Erlenmeyer },
-                { id: 'deneme3', name: 'Deneme 3', icon: IconFont.BarChart },
-                { id: 'deneme4', name: 'Deneme 4', icon: IconFont.Bell },
-            ],
+            // selectedLink: "Maintenance",
         };
     }
 
@@ -135,15 +127,15 @@ class RightSideBar extends PureComponent<Props, State> {
         })
     }
 
-    handleChangeListItem = (item) => {
-        this.props.changeActivePage(item);
-        this.setState({ selectedLink: item["name"] });
-    }
+    // handleChangeListItem = (item) => {
+    //     this.props.changeActivePage(item);
+    //     this.setState({ selectedLink: item["name"] });
+    // }
 
     render() {
-        const { classes, theme } = this.props;
-        const { anchorEl } = this.state;
-        const open = Boolean(anchorEl);
+        const { classes } = this.props;
+        // const { anchorEl } = this.state;
+        // const open = Boolean(anchorEl);
 
         return (
             <Grid>
@@ -170,22 +162,22 @@ class RightSideBar extends PureComponent<Props, State> {
                     </div>
                     <List>
                         {
-                            this.state.linkList.map(item => (
+                            this.props.linkList.map((item, idx) => (
                                 <>
                                     <ListItem
-                                        key={item["name"]}
+                                        key={idx}
                                         style={{
-                                            color: this.state.selectedLink === item["name"] ? "#FFFFFF" : '#a4a8b6',
-                                            backgroundColor: this.state.selectedLink === item["name"] ? "#066FC5" : "#202028"
+                                            color: this.props.selectedLink === item["name"] ? "#FFFFFF" : '#a4a8b6',
+                                            backgroundColor: this.props.selectedLink === item["name"] ? "#066FC5" : "#202028"
                                         }}
                                         button
-                                        onClick={() => { this.handleChangeListItem(item) }}
+                                        onClick={() => { this.props.handleChangeListItem(item) }}
                                         classes={{ selected: 'red' }}
                                     >
                                         <ListItemIcon>
                                             <Icon style={{
                                                 fontSize: '20px',
-                                                color: this.state.selectedLink === item["name"] ? "#FFFFFF" : '#a4a8b6',
+                                                color: this.props.selectedLink === item["name"] ? "#FFFFFF" : '#a4a8b6',
                                             }} glyph={item["icon"]} />
                                         </ListItemIcon>
                                         <ListItemText primary={item["name"]} />

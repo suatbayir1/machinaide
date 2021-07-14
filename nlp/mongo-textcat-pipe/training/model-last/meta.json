@@ -23,7 +23,8 @@
       "maintenance",
       "failure",
       "maintenancecount",
-      "failurecount"
+      "failurecount",
+      "completed_job"
     ]
   },
   "pipeline":[
@@ -40,12 +41,12 @@
   "performance":{
     "cats_score_desc":"macro F",
     "cats_micro_p":1.0,
-    "cats_micro_r":1.0,
-    "cats_micro_f":1.0,
-    "cats_macro_p":1.0,
-    "cats_macro_r":1.0,
-    "cats_macro_f":1.0,
-    "cats_macro_auc":1.0,
+    "cats_micro_r":0.8888888889,
+    "cats_micro_f":0.9411764706,
+    "cats_macro_p":0.8,
+    "cats_macro_r":0.8,
+    "cats_macro_f":0.8,
+    "cats_macro_auc":0.85625,
     "cats_f_per_type":{
       "maintenance":{
         "p":1.0,
@@ -66,11 +67,16 @@
         "p":1.0,
         "r":1.0,
         "f":1.0
+      },
+      "completed_job":{
+        "p":0.0,
+        "r":0.0,
+        "f":0.0
       }
     },
     "cats_macro_auc_per_type":0.0,
-    "cats_score":1.0,
+    "cats_score":0.8,
     "tok2vec_loss":0.0,
-    "textcat_loss":0.2371842896
+    "textcat_loss":0.1747035873
   }
 }

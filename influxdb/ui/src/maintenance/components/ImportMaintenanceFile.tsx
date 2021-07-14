@@ -1,25 +1,19 @@
+// Libraries
 import React, { PureComponent } from "react";
-import {
-    Form,
-    Button,
-    ButtonType,
-    ComponentColor,
-    Overlay,
-    IconFont,
-    ComponentSize,
-    ConfirmationButton,
-    Appearance,
-    DapperScrollbars,
-    Grid,
-    SpinnerContainer,
-    TechnoSpinner,
-    RemoteDataState,
-    WaitingText,
-} from '@influxdata/clockface'
 import classnames from 'classnames'
-import { csvToJSON, xlsxToJSON, fileAnalyzer } from 'src/shared/helpers/FileHelper';
-import MaintenanceService from 'src/maintenance/services/MaintenanceService';
 import { Link } from "react-router-dom"
+
+// Components
+import {
+    Form, Button, ButtonType, ComponentColor, Overlay, IconFont, ComponentSize, ConfirmationButton,
+    Appearance, DapperScrollbars, Grid, SpinnerContainer, TechnoSpinner, RemoteDataState, WaitingText,
+} from '@influxdata/clockface'
+
+// Helpers
+import { csvToJSON, xlsxToJSON, fileAnalyzer } from 'src/shared/helpers/FileHelper';
+
+// Services
+import MaintenanceService from 'src/maintenance/services/MaintenanceService';
 
 
 interface Props {

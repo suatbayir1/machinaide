@@ -4,7 +4,8 @@ import { Link } from "react-router-dom";
 
 // Components
 import {
-    Page, Grid, Columns, SpinnerContainer, TechnoSpinner, RemoteDataState,
+    Page, Grid, Columns, SpinnerContainer, TechnoSpinner, RemoteDataState, QuestionMarkTooltip,
+    InfluxColors, ComponentColor,
 } from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
@@ -14,9 +15,10 @@ import ProductionLineCards from 'src/side_nav/components/factoriesPanel/componen
 
 // Services
 import FactoryService from 'src/shared/services/FactoryService';
-// import DashboardService from 'src/shared/services/DashboardService';
 
 
+// Constants
+import { tipStyle, factoryPage } from 'src/shared/constants/tips'
 
 interface Props { }
 
@@ -38,7 +40,6 @@ class AllFactories extends PureComponent<Props, State> {
 
     async componentDidMount() {
         await this.getAllFactories();
-        // await this.getDashboards();
     }
 
     getAllFactories = async () => {
@@ -49,10 +50,6 @@ class AllFactories extends PureComponent<Props, State> {
             isLoading: true,
         });
     }
-
-    // getDashboards = async () => {
-    //     const dashboards = await DashboardService.getDashboards();
-    // }
 
     render() {
         const { spinnerLoading, isLoading } = this.state;
@@ -71,6 +68,18 @@ class AllFactories extends PureComponent<Props, State> {
                         <React.Fragment>
                             <Page.Header fullWidth={true}>
                                 <Page.Title title={"Factories Panel"} />
+                                <QuestionMarkTooltip
+                                    style={{ marginBottom: '8px' }}
+                                    diameter={30}
+                                    tooltipStyle={{ width: '400px' }}
+                                    color={ComponentColor.Secondary}
+                                    tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                        <div style={{ color: InfluxColors.Star }}>{"About the Factory Page:"}
+                                            <hr style={tipStyle} />
+                                        </div>
+                                        {factoryPage}
+                                    </div>}
+                                />
                             </Page.Header>
 
                             <Breadcrumbs separator="/" aria-label="breadcrumb" style={{ color: '#ffffff', marginLeft: '28px', marginTop: '-10px' }}>
