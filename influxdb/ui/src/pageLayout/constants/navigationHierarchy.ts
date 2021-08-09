@@ -278,5 +278,17 @@ export const generateNavItems = (orgID: string): NavItem[] => {
       activeKeywords: ['userManual'],
       permitted: ["admin", "editor", "member"],
     },
+    {
+      id: 'ml',
+      testID: 'nav-item-ml',
+      icon: IconFont.Alerts,
+      label: 'ML',
+      link: {
+        type: 'link',
+        location: `${orgPrefix}/ml`,
+      },
+      activeKeywords: ['ml'],
+      permitted: ["admin", "editor", "member"],
+    },
   ]
 }

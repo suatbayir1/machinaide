@@ -12,6 +12,16 @@ from core.logger.MongoLogger import MongoLogger
 
 logger = MongoLogger()
 
+def request_validation(payload, required_keys):
+    confirm = True
+    missed_keys = ""
+
+    for key in required_keys:
+        if key not in payload or str(payload[key]).strip() == "":
+            confirm = False
+            missed_keys += f"{key}, "
+    
+    return missed_keys[:-2], confirm
 
 def return_response(data = [], success = True, message = "success", total_count = 0, code = 0):
     return {

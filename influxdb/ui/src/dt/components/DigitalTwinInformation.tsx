@@ -3,8 +3,8 @@ import React, { PureComponent } from 'react'
 
 // Components
 import {
-    Panel, Form, ComponentSize, Grid, Columns, Label, InfluxColors, List, Gradients,
-    SpinnerContainer, TechnoSpinner, RemoteDataState, FlexBox, SlideToggle,
+    Panel, Form, ComponentSize, Grid, Columns, Label, InfluxColors, List, Gradients, Button,
+    SpinnerContainer, TechnoSpinner, RemoteDataState, FlexBox, SlideToggle, ButtonType,
     DapperScrollbars, ComponentColor, ConfirmationButton, IconFont, Appearance,
     Notification, SelectDropdown, Input, InputType, ComponentStatus, QuestionMarkTooltip,
 } from '@influxdata/clockface'
@@ -20,6 +20,8 @@ import {
     tipStyle, showAllSensorValues, updateSensor,
 } from 'src/shared/constants/tips';
 
+// Overlays
+import AddBrandsAndModels from "src/shared/overlays/AddBrandsAndModels";
 
 interface Props {
     selectedGraphNode: object
@@ -38,6 +40,7 @@ interface State {
     sSelectedDataSource: string
     sMinValue: number
     sMaxValue: number
+    visibleAddBrandsAndModels: boolean
 }
 
 class DigitalTwinInformation extends PureComponent<Props, State> {
@@ -52,6 +55,7 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
             sSelectedDataSource: "",
             sMinValue: 0,
             sMaxValue: 0,
+            visibleAddBrandsAndModels: false,
         }
     }
 
@@ -664,9 +668,16 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
 
     public render() {
         const { selectedGraphNode, generalInfo, spinnerLoading } = this.props;
+        const { visibleAddBrandsAndModels } = this.state;
 
         return (
             <>
+                <AddBrandsAndModels
+                    visible={visibleAddBrandsAndModels}
+                    onDismiss={() => { this.setState({ visibleAddBrandsAndModels: false }) }}
+                    selectedPart={selectedGraphNode}
+                />
+
                 <Panel>
                     <Notification
                         key={"id"}
@@ -827,6 +838,22 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                             }
                                         </div>
                                     </>
+                                }
+
+                                {
+                                    Object.keys(selectedGraphNode).length !== 0 &&
+                                    ["Component", "Sensor"].includes(selectedGraphNode["type"]) &&
+                                    <div style={{ float: 'right' }}>
+                                        {
+                                            <Button
+                                                text="Brands & Models"
+                                                icon={IconFont.Plus}
+                                                onClick={() => { this.setState({ visibleAddBrandsAndModels: true }) }}
+                                                type={ButtonType.Button}
+                                                color={ComponentColor.Secondary}
+                                            />
+                                        }
+                                    </div>
                                 }
 
                                 {

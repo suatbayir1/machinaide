@@ -57,6 +57,9 @@ import AlertsPage from 'src/side_nav/components/newAdd/modules/AlertsPage';
 import MaintenancePage from 'src/maintenance/containers/MaintenancePage';
 import MachineActionsPage from 'src/side_nav/components/machineActions/containers/MachineActionsPage';
 
+// ML
+import MLContainer from "src/ml/containers/MLContainer";
+
 import PermittedRoute from 'src/shared/middleware/PermittedRoute';
 
 // Errors Page
@@ -180,6 +183,11 @@ const SetOrg: FC<Props> = ({
         <Route exact path={`${orgPath}/predictions/:SID/:PID`} component={PredictionPageShowAll} />
         <Route exact path={`${orgPath}/alerts`} component={AlertsPage} />
         <Route exact path={`${orgPath}/alerts/:hardwareName`} component={AlertsPage} />
+
+        {/* ML */}
+        <Route exact path={`${orgPath}/ml`} component={MLContainer} />
+
+
 
         {/* User Manual */}
         <PermittedRoute exact path={`${orgPath}/user-manual`} component={UserManualContainer} allowedRoles={["member", "admin", "editor"]} />

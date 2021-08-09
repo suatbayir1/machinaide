@@ -1104,3 +1104,14 @@ export const deleteDataFlowSettingSuccessfully = (): Notification => ({
   ...defaultErrorNotification,
   message: `Data flow setting deleted successfully`,
 })
+
+// BRAND & MODEL
+export const addBrandSuccessfully = (message: string): Notification => ({
+  ...defaultSuccessNotification,
+  message,
+})
+
+export const addBrandFailure = (message: string): Notification => ({
+  ...defaultErrorNotification,
+  message,
+})
