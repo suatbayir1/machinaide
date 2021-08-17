@@ -1020,10 +1020,13 @@ export const pleaseFillInTheFormCompletely = (
   message: `Please fill in the form completely: ${message}`,
 })
 
-export const generalErrorMessage = (
-  message: string
-): Notification => ({
+export const generalErrorMessage = (message: string): Notification => ({
   ...defaultErrorNotification,
+  message,
+})
+
+export const generalSuccessMessage = (message: string): Notification => ({
+  ...defaultSuccessNotification,
   message,
 })
 
@@ -1114,4 +1117,36 @@ export const addBrandSuccessfully = (message: string): Notification => ({
 export const addBrandFailure = (message: string): Notification => ({
   ...defaultErrorNotification,
   message,
+})
+
+export const deleteBrandSuccessfully = (message: string): Notification => ({
+  ...defaultSuccessNotification,
+  message,
+})
+
+export const deleteBrandFailure = (message: string): Notification => ({
+  ...defaultErrorNotification,
+  message,
+})
+
+// FAILURE
+export const deleteFailureSuccessfully = (): Notification => ({
+  ...defaultSuccessNotification,
+  message: "Failure record deleted successfully",
+})
+
+export const deleteFailureFailure = (): Notification => ({
+  ...defaultErrorNotification,
+  message: "An error occurred while deleting a failure record",
+})
+
+// MAINTENANCE
+export const deleteMaintenanceSuccessfully = (): Notification => ({
+  ...defaultSuccessNotification,
+  message: "Maintenance record deleted successfully",
+})
+
+export const deleteMaintenanceFailure = (): Notification => ({
+  ...defaultErrorNotification,
+  message: "An error occurred while deleting a maintenance record",
 })

@@ -1,4 +1,5 @@
 import { BACKEND } from 'src/config';
+import axios from "axios";
 
 class DTService {
     async getAllDT() {
@@ -167,6 +168,52 @@ class DTService {
             alert(err);
             console.error(err);
         }
+    }
+
+    update = async (payload) => {
+        let url = `${BACKEND.API_URL}dt/update`;
+
+        return await axios
+            .put(url, payload, { headers: { 'token': window.localStorage.getItem("token") } })
+            .then(response => {
+                if (response.status === 200) {
+                    return response.data.data;
+                }
+            })
+            .catch(err => {
+                return err.response.data.data;
+            })
+    }
+
+    retire = async (payload) => {
+        let url = `${BACKEND.API_URL}dt/retire`;
+
+        return await axios
+            .post(url, payload, { headers: { 'token': window.localStorage.getItem("token") } })
+            .then(response => {
+                if (response.status === 200) {
+                    return response.data.data;
+                }
+            })
+            .catch(err => {
+                return err.response.data.data;
+            })
+    }
+
+    getRetired = async (payload) => {
+        let url = `${BACKEND.API_URL}dt/getRetired`;
+
+        return await axios
+            .post(url, payload, { headers: { 'token': window.localStorage.getItem("token") } })
+            .then(response => {
+                console.log(response);
+                if (response.status === 200) {
+                    return JSON.parse(response.data.data.data);
+                }
+            })
+            .catch(err => {
+                return err.response.data.data;
+            })
     }
 }
 

@@ -4,7 +4,7 @@ import React, { PureComponent } from 'react'
 // Components
 import {
     Form, Input, Button, ButtonType, ComponentColor, Overlay, IconFont, Grid, Columns,
-    SelectDropdown, TextArea, ComponentSize, Gradients, Dropdown, InputType, Notification,
+    SelectDropdown, TextArea, ComponentSize, Gradients, Dropdown, InputType, Notification, ComponentStatus,
 } from '@influxdata/clockface'
 
 // Services
@@ -19,6 +19,9 @@ interface Props {
     isEdit: boolean
     factoryID: string
     updateData: object
+    addBySelectedPart: boolean
+    propsPart: object
+    isDetail: boolean
 }
 
 interface State {
@@ -47,7 +50,7 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
             allParts: [],
             selectedPart: {},
             selectedSeverity: "acceptable",
-            costToFix: null,
+            costToFix: 0,
             description: "",
             startTime: "",
             endTime: "",
@@ -64,7 +67,14 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
 
     async componentDidUpdate(prevProps) {
         if (this.props.isEdit && prevProps.updateData !== this.props.updateData) {
+            console.log("update");
             this.handleChangeEditRowData(this.props.updateData);
+        }
+
+        if (this.props.addBySelectedPart && prevProps.propsPart !== this.props.propsPart) {
+            this.setState({
+                selectedPart: this.state.allParts.find(p => p["id"] === this.props.propsPart["name"])
+            })
         }
     }
 
@@ -72,7 +82,7 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
         this.setState({
             selectedPart: {},
             selectedSeverity: "acceptable",
-            costToFix: null,
+            costToFix: 0,
             description: "",
             startTime: "",
             endTime: "",
@@ -81,6 +91,7 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
     }
 
     handleChangeEditRowData = (editRow) => {
+        console.log("editRow", editRow)
         this.setState({
             costToFix: editRow.costToFix,
             description: editRow.description,
@@ -147,6 +158,7 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
             "endTime": this.state.endTime,
         }
 
+
         if (this.props.isEdit) {
             this.updateFailure(payload);
         } else {
@@ -177,7 +189,7 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                 notificationVisible: true,
                 notificationType: "success",
                 notificationMessage: "Fault record created successfully",
-                costToFix: null,
+                costToFix: 0,
                 description: "",
                 endTime: "",
                 startTime: "",
@@ -196,7 +208,7 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
     }
 
     render() {
-        const { visibleAddUpdateFailure } = this.props;
+        const { visibleAddUpdateFailure, addBySelectedPart, isEdit, isDetail } = this.props;
 
         const allParts = this.state.allParts.map(item => {
             return (
@@ -238,7 +250,11 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                 <Overlay visible={visibleAddUpdateFailure}>
                     <Overlay.Container maxWidth={800}>
                         <Overlay.Header
-                            title={this.props.isEdit ? "Update Failure Record" : "Add Failure Record"}
+                            title={
+                                isDetail ? "Detail Failure Record" : (
+                                    isEdit ? "Update Failure Record" : "Add Failure Record"
+                                )
+                            }
                             onDismiss={this.closeOverlay}
                         />
 
@@ -252,6 +268,11 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                                                     <Dropdown
                                                         button={(active, onClick) => (
                                                             <Dropdown.Button
+                                                                status={
+                                                                    addBySelectedPart || isEdit || isDetail
+                                                                        ? ComponentStatus.Disabled
+                                                                        : ComponentStatus.Default
+                                                                }
                                                                 active={active}
                                                                 onClick={onClick}
                                                                 color={ComponentColor.Default}
@@ -276,6 +297,11 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                                                         options={["acceptable", "major", "critical"]}
                                                         selectedOption={this.state.selectedSeverity}
                                                         onSelect={(e) => this.setState({ selectedSeverity: e })}
+                                                        buttonStatus={
+                                                            isDetail
+                                                                ? ComponentStatus.Disabled
+                                                                : ComponentStatus.Default
+                                                        }
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
@@ -288,6 +314,11 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                                                         type={InputType.Number}
                                                         value={this.state.costToFix}
                                                         onChange={(e) => this.setState({ costToFix: Number(e.target.value) })}
+                                                        status={
+                                                            isDetail
+                                                                ? ComponentStatus.Disabled
+                                                                : ComponentStatus.Default
+                                                        }
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
@@ -302,6 +333,11 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                                                         value={this.state.startTime}
                                                         onChange={this.handleChangeFailureTime}
                                                         style={{ background: '#383846', color: '#ffffff' }}
+                                                        disabled={
+                                                            isDetail
+                                                                ? true
+                                                                : false
+                                                        }
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
@@ -314,6 +350,11 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                                                         value={this.state.endTime}
                                                         onChange={this.handleChangeFailureTime}
                                                         style={{ background: '#383846', color: '#ffffff' }}
+                                                        disabled={
+                                                            isDetail
+                                                                ? true
+                                                                : false
+                                                        }
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
@@ -327,6 +368,11 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                                                         rows={5}
                                                         value={this.state.description}
                                                         onChange={(e) => this.setState({ description: e.target.value })}
+                                                        status={
+                                                            isDetail
+                                                                ? ComponentStatus.Disabled
+                                                                : ComponentStatus.Default
+                                                        }
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
@@ -340,6 +386,11 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                                         icon={IconFont.Remove}
                                         onClick={this.closeOverlay}
                                         color={ComponentColor.Danger}
+                                        status={
+                                            isDetail
+                                                ? ComponentStatus.Disabled
+                                                : ComponentStatus.Default
+                                        }
                                     />
 
                                     <Button
@@ -348,6 +399,11 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                                         color={ComponentColor.Success}
                                         type={ButtonType.Submit}
                                         onClick={this.handleClickSave}
+                                        status={
+                                            isDetail
+                                                ? ComponentStatus.Disabled
+                                                : ComponentStatus.Default
+                                        }
                                     />
                                 </Form.Footer>
                             </Form>

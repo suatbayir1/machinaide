@@ -7,7 +7,7 @@ import { RouteComponentProps } from 'react-router-dom'
 import {
     Form, Input, Button, ButtonType, ComponentColor, Overlay, IconFont, Grid, Columns,
     SelectDropdown, DapperScrollbars, Table, BorderType, ComponentSize, ConfirmationButton,
-    FlexBox, Appearance,
+    FlexBox, Appearance, Panel,
 } from '@influxdata/clockface'
 
 // Actions
@@ -18,6 +18,8 @@ import {
     pleaseFillInTheFormCompletely,
     addBrandSuccessfully,
     addBrandFailure,
+    deleteBrandSuccessfully,
+    deleteBrandFailure,
 } from 'src/shared/copy/notifications'
 
 // Services
@@ -27,6 +29,8 @@ interface OwnProps {
     visible: boolean
     onDismiss: () => void
     selectedPart: object
+    brands: object[]
+    getBrands: () => void
 }
 
 interface State {
@@ -67,15 +71,6 @@ class AddBrandsAndModels extends PureComponent<Props, State> {
         };
     }
 
-
-    componentDidUpdate = async () => {
-        const { selectedPart, visible } = this.props;
-
-        if (selectedPart["type"] !== undefined && visible) {
-            await this.get();
-        }
-    }
-
     validate = () => {
         const { brandName, modelName, price, country } = this.state;
 
@@ -89,7 +84,7 @@ class AddBrandsAndModels extends PureComponent<Props, State> {
 
     add = async () => {
         const { brandName, modelName, price, country } = this.state;
-        const { selectedPart } = this.props;
+        const { selectedPart, getBrands } = this.props;
 
         if (this.validate()) {
             const payload = {
@@ -104,26 +99,32 @@ class AddBrandsAndModels extends PureComponent<Props, State> {
 
             if (result.success) {
                 this.props.notify(addBrandSuccessfully(result.message.text));
+                getBrands();
             } else {
                 this.props.notify(addBrandFailure(result.message.text));
             }
         }
     }
 
-    get = async () => {
-        const { selectedPart } = this.props;
+    delete = async (brand) => {
+        const { notify, getBrands } = this.props;
 
         const payload = {
-            "type": selectedPart["type"]
+            "brandId": brand
         }
 
-        const brands = await BrandService.get(payload);
+        const result = await BrandService.delete(payload);
 
-        console.log("brands", brands);
+        if (result.success) {
+            notify(deleteBrandSuccessfully(result.message.text));
+            getBrands();
+        } else {
+            notify(deleteBrandFailure(result.message.text));
+        }
     }
 
     render() {
-        const { visible, onDismiss } = this.props;
+        const { visible, onDismiss, brands } = this.props;
         const { brandName, modelName, price, country, countryList } = this.state;
 
         return (
@@ -192,73 +193,68 @@ class AddBrandsAndModels extends PureComponent<Props, State> {
                                 </Grid.Row>
 
                                 <Grid.Row>
-                                    <DapperScrollbars
-                                        autoHide={false}
-                                        autoSizeHeight={true}
-                                        style={{ maxHeight: '400px' }}
-                                        className="data-loading--scroll-content"
-                                    >
-                                        <Table
-                                            borders={BorderType.Vertical}
-                                            fontSize={ComponentSize.ExtraSmall}
-                                            cellPadding={ComponentSize.ExtraSmall}
-                                        >
-                                            <Table.Header>
-                                                <Table.Row>
-                                                    <Table.HeaderCell style={{ width: "300px" }}>Asset</Table.HeaderCell>
-                                                    <Table.HeaderCell style={{ width: "100px" }}>Maintenance Date</Table.HeaderCell>
-                                                    <Table.HeaderCell style={{ width: "200px" }}>Fault Type</Table.HeaderCell>
-                                                    <Table.HeaderCell style={{ width: "200px" }}>Maintenance Type</Table.HeaderCell>
-                                                    <Table.HeaderCell style={{ width: "100px" }}>Reason</Table.HeaderCell>
-                                                    <Table.HeaderCell style={{ width: "100px" }}>Unoperational Duration</Table.HeaderCell>
-                                                    <Table.HeaderCell style={{ width: "100px" }}></Table.HeaderCell>
-                                                </Table.Row>
-                                            </Table.Header>
-                                            <Table.Body>
-                                                {/* {
-                                                    this.state.filteredData.map(row => {
-                                                        let recordId = row["_id"]["$oid"];
-                                                        return (
-                                                            <Table.Row key={recordId}>
-                                                                <Table.Cell>{row["asset"]}</Table.Cell>
-                                                                <Table.Cell>{row["date"]}</Table.Cell>
-                                                                <Table.Cell>{row["faultType"]}</Table.Cell>
-                                                                <Table.Cell>{row["maintenanceType"]}</Table.Cell>
-                                                                <Table.Cell>{row["reason"]}</Table.Cell>
-                                                                <Table.Cell>{row["duration"]}</Table.Cell>
-                                                                <Table.Cell>
-                                                                    <FlexBox margin={ComponentSize.Medium} >
-                                                                        <Button
-                                                                            size={ComponentSize.ExtraSmall}
-                                                                            icon={IconFont.TextBlock}
-                                                                            color={ComponentColor.Success}
-                                                                            type={ButtonType.Submit}
-                                                                        // onClick={() => { this.handleDetailSelectedRow(row) }}
-                                                                        />
-                                                                        {
-                                                                            ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
-                                                                            <ConfirmationButton
-                                                                                icon={IconFont.Remove}
-                                                                                onConfirm={() => { }}
-                                                                                text={""}
-                                                                                size={ComponentSize.ExtraSmall}
-                                                                                popoverColor={ComponentColor.Danger}
-                                                                                popoverAppearance={Appearance.Outline}
-                                                                                color={ComponentColor.Danger}
-                                                                                confirmationLabel="Do you want to delete ?"
-                                                                                confirmationButtonColor={ComponentColor.Danger}
-                                                                                confirmationButtonText="Yes"
-                                                                            />
-                                                                        }
-                                                                    </FlexBox>
-                                                                </Table.Cell>
+                                    <h6>Brands & Models</h6>
+                                    {
+                                        brands.length > 0 ? (
+                                            <Panel>
+                                                <DapperScrollbars
+                                                    autoHide={false}
+                                                    autoSizeHeight={true}
+                                                    style={{ maxHeight: '300px' }}
+                                                    className="data-loading--scroll-content"
+                                                >
+                                                    <Table
+                                                        borders={BorderType.Vertical}
+                                                        fontSize={ComponentSize.ExtraSmall}
+                                                        cellPadding={ComponentSize.ExtraSmall}
+                                                    >
+                                                        <Table.Header>
+                                                            <Table.Row>
+                                                                <Table.HeaderCell style={{ width: "200px" }}>Brand Name</Table.HeaderCell>
+                                                                <Table.HeaderCell style={{ width: "200px" }}>Model Name</Table.HeaderCell>
+                                                                <Table.HeaderCell style={{ width: "200px" }}>Country</Table.HeaderCell>
+                                                                <Table.HeaderCell style={{ width: "200px" }}>Price</Table.HeaderCell>
+                                                                <Table.HeaderCell style={{ width: "100px" }}></Table.HeaderCell>
                                                             </Table.Row>
-                                                        )
-                                                    })
-                                                } */}
-                                            </Table.Body>
-                                        </Table>
-                                    </DapperScrollbars>
+                                                        </Table.Header>
+                                                        <Table.Body>
+                                                            {
+                                                                brands.map(row => {
+                                                                    let recordId = row["_id"]["$oid"];
+                                                                    return (
+                                                                        <Table.Row key={recordId}>
+                                                                            <Table.Cell>{row["brandName"]}</Table.Cell>
+                                                                            <Table.Cell>{row["modelName"]}</Table.Cell>
+                                                                            <Table.Cell>{row["country"]}</Table.Cell>
+                                                                            <Table.Cell>{row["price"]}</Table.Cell>
+                                                                            <Table.Cell>
+                                                                                <FlexBox margin={ComponentSize.Medium} >
+                                                                                    <ConfirmationButton
+                                                                                        icon={IconFont.Remove}
+                                                                                        onConfirm={() => { this.delete(recordId) }}
+                                                                                        text={""}
+                                                                                        size={ComponentSize.ExtraSmall}
+                                                                                        popoverColor={ComponentColor.Danger}
+                                                                                        popoverAppearance={Appearance.Outline}
+                                                                                        color={ComponentColor.Danger}
+                                                                                        confirmationLabel="Do you want to delete ?"
+                                                                                        confirmationButtonColor={ComponentColor.Danger}
+                                                                                        confirmationButtonText="Yes"
+                                                                                    />
+                                                                                </FlexBox>
+                                                                            </Table.Cell>
+                                                                        </Table.Row>
+                                                                    )
+                                                                })
+                                                            }
+                                                        </Table.Body>
+                                                    </Table>
+                                                </DapperScrollbars>
+                                            </Panel>
+                                        ) : (
+                                            <p>No previously created brand and model records found.</p>
+                                        )
+                                    }
                                 </Grid.Row>
                             </Form>
                         </Overlay.Body>

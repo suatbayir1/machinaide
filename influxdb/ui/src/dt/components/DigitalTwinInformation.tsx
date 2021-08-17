@@ -12,9 +12,6 @@ import {
 // Styles
 import "src/style/custom.css"
 
-// Services
-import DTService from "src/shared/services/DTService";
-
 // Constants
 import {
     tipStyle, showAllSensorValues, updateSensor,
@@ -22,6 +19,14 @@ import {
 
 // Overlays
 import AddBrandsAndModels from "src/shared/overlays/AddBrandsAndModels";
+import BMFInformation from "src/shared/overlays/BMFInformation";
+
+// Services
+import BrandService from "src/shared/services/BrandService";
+import MaintenanceService from 'src/maintenance/services/MaintenanceService';
+import FailureService from "src/shared/services/FailureService";
+import DTService from "src/shared/services/DTService";
+
 
 interface Props {
     selectedGraphNode: object
@@ -41,6 +46,11 @@ interface State {
     sMinValue: number
     sMaxValue: number
     visibleAddBrandsAndModels: boolean
+    brands: object[]
+    visibleBMFInformation: boolean
+    maintenances: object[]
+    failures: object[]
+    oldParts: object[]
 }
 
 class DigitalTwinInformation extends PureComponent<Props, State> {
@@ -56,6 +66,11 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
             sMinValue: 0,
             sMaxValue: 0,
             visibleAddBrandsAndModels: false,
+            brands: [],
+            visibleBMFInformation: false,
+            maintenances: [],
+            failures: [],
+            oldParts: [],
         }
     }
 
@@ -666,9 +681,84 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
         }
     }
 
+    clickBrands = async () => {
+        await this.getBrands();
+
+        this.setState({ visibleAddBrandsAndModels: true });
+    }
+
+    getBrands = async () => {
+        const { selectedGraphNode } = this.props;
+
+        const payload = {
+            "type": selectedGraphNode["type"]
+        }
+
+        const brands = await BrandService.get(payload);
+
+        console.log(brands);
+
+        this.setState({ brands, });
+    }
+
+    getMaintenances = async () => {
+        const { selectedGraphNode } = this.props;
+
+        const payload = {
+            "regex": [
+                { "asset": selectedGraphNode["name"] }
+            ],
+            "exists": [
+                { "retired": false }
+            ]
+        };
+
+        const maintenances = await MaintenanceService.getByCondition(payload);
+
+        console.log("maintenances", maintenances)
+
+        this.setState({ maintenances })
+    }
+
+    getFailures = async () => {
+        const { selectedGraphNode } = this.props;
+
+        const payload = {
+            "regex": [
+                { "sourceName": selectedGraphNode["name"] }
+            ],
+            "exists": [
+                { "retired": false }
+            ]
+        };
+
+        const failures = await FailureService.getByCondition(payload);
+
+        console.log("failures", failures)
+        this.setState({ failures })
+    }
+
+    getOldParts = async () => {
+        const { selectedGraphNode } = this.props;
+        const oldParts = await DTService.getRetired({ "name": selectedGraphNode["name"] });
+
+        console.log(oldParts);
+
+        this.setState({ oldParts });
+    }
+
+    clickPartDetail = async () => {
+        await this.getMaintenances();
+        await this.getFailures();
+        await this.getBrands();
+        await this.getOldParts();
+
+        this.setState({ visibleBMFInformation: true, });
+    }
+
     public render() {
         const { selectedGraphNode, generalInfo, spinnerLoading } = this.props;
-        const { visibleAddBrandsAndModels } = this.state;
+        const { visibleAddBrandsAndModels, brands, visibleBMFInformation, maintenances, failures, oldParts } = this.state;
 
         return (
             <>
@@ -676,6 +766,23 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                     visible={visibleAddBrandsAndModels}
                     onDismiss={() => { this.setState({ visibleAddBrandsAndModels: false }) }}
                     selectedPart={selectedGraphNode}
+                    brands={brands}
+                    getBrands={this.clickBrands}
+                />
+
+                <BMFInformation
+                    visible={visibleBMFInformation}
+                    onDismiss={() => { this.setState({ visibleBMFInformation: false }) }}
+                    maintenances={maintenances}
+                    failures={failures}
+                    selectedPart={selectedGraphNode}
+                    getMaintenances={this.getMaintenances}
+                    getFailures={this.getFailures}
+                    generalInfo={generalInfo}
+                    brands={brands}
+                    refreshGraph={this.props.refreshGraph}
+                    oldParts={oldParts}
+                    getOldParts={this.getOldParts}
                 />
 
                 <Panel>
@@ -842,16 +949,26 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
 
                                 {
                                     Object.keys(selectedGraphNode).length !== 0 &&
-                                    ["Component", "Sensor"].includes(selectedGraphNode["type"]) &&
+                                    ["Machine", "Component", "Sensor"].includes(selectedGraphNode["type"]) &&
                                     <div style={{ float: 'right' }}>
                                         {
-                                            <Button
-                                                text="Brands & Models"
-                                                icon={IconFont.Plus}
-                                                onClick={() => { this.setState({ visibleAddBrandsAndModels: true }) }}
-                                                type={ButtonType.Button}
-                                                color={ComponentColor.Secondary}
-                                            />
+                                            <FlexBox margin={ComponentSize.Medium}>
+                                                <Button
+                                                    text=""
+                                                    icon={IconFont.CogThick}
+                                                    onClick={this.clickPartDetail}
+                                                    type={ButtonType.Button}
+                                                    color={ComponentColor.Primary}
+                                                />
+
+                                                <Button
+                                                    text="Brands & Models"
+                                                    icon={IconFont.Plus}
+                                                    onClick={this.clickBrands}
+                                                    type={ButtonType.Button}
+                                                    color={ComponentColor.Secondary}
+                                                />
+                                            </FlexBox>
                                         }
                                     </div>
                                 }

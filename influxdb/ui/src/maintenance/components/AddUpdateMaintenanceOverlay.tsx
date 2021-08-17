@@ -4,12 +4,16 @@ import React, { PureComponent } from 'react'
 // Components
 import {
     Form, Input, Button, ButtonType, ComponentColor, Overlay, IconFont, Grid, Columns,
-    SelectDropdown, TextArea, ComponentSize, Gradients, Dropdown, InputType, Notification,
+    TextArea, ComponentSize, Gradients, Dropdown, InputType, Notification,
+    ComponentStatus, DapperScrollbars, BorderType, Table, FlexBox, Panel, QuestionMarkTooltip,
 } from '@influxdata/clockface'
+import TabbedPageTabs from 'src/shared/tabbedPage/TabbedPageTabs'
+import Checkbox from 'src/shared/components/Checkbox'
 
 // Services
 import DTService from 'src/shared/services/DTService';
 import MaintenanceService from 'src/maintenance/services/MaintenanceService';
+import FailureService from 'src/shared/services/FailureService';
 
 interface Props {
     visibleAddUpdateMaintenance: boolean
@@ -18,6 +22,9 @@ interface Props {
     isEdit: boolean
     factoryID: string
     updateData: object
+    addBySelectedPart: boolean
+    propsPart: object
+    isDetail: boolean
 }
 
 interface State {
@@ -41,6 +48,18 @@ interface State {
     unoperationalDuration: number
     request: string
     jobDescription: string
+    activeTab: string
+    failures: object[]
+    selectedFailure: object
+
+
+    maintenanceReason: string
+    maintenanceRequest: string
+    maintenanceInfo: string
+    maintenanceDownTime: string
+    maintenanceType: string
+    maintenanceCost: string
+    personResponsible: string
 }
 
 class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
@@ -68,16 +87,39 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
             unoperationalDuration: 0,
             jobDescription: "",
             request: "",
+            activeTab: "periodic",
+            failures: [],
+            selectedFailure: {},
+
+
+            maintenanceReason: "",
+            maintenanceRequest: "",
+            maintenanceInfo: "",
+            maintenanceDownTime: "",
+            maintenanceType: "",
+            maintenanceCost: "",
+            personResponsible: "",
         };
     }
 
     async componentDidMount(): Promise<void> {
         await this.getCombinationAllHierarchy();
+        const failures = await FailureService.getAllFailures();
+        console.log(failures);
+        this.setState({
+            failures,
+        });
     }
 
     async componentDidUpdate(prevProps) {
         if (this.props.isEdit && prevProps.updateData !== this.props.updateData) {
             this.handleChangeEditRowData(this.props.updateData);
+        }
+
+        if (this.props.addBySelectedPart && prevProps.propsPart !== this.props.propsPart) {
+            this.setState({
+                selectedPart: this.state.allParts.find(p => p["id"] === this.props.propsPart["name"])
+            })
         }
     }
 
@@ -89,29 +131,43 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
 
     clearForm = () => {
         this.setState({
+            maintenanceReason: "",
+            maintenanceRequest: "",
+            maintenanceInfo: "",
+            maintenanceDownTime: "",
+            maintenanceType: "",
+            maintenanceCost: "",
+            personResponsible: "",
             selectedPart: {},
             maintenanceTime: "",
-            selectedFaultType: "",
-            selectedMaintenanceType: "",
-            faultReason: "",
-            unoperationalDuration: 0,
-            jobDescription: "",
-            request: "",
             editRowId: "",
         });
     }
 
     handleChangeEditRowData = (editRow) => {
+        console.log("editorRow", editRow);
+        const { failures } = this.state;
+
+        console.log(failures);
+
+        if (editRow.failure !== null && editRow.failure !== undefined) {
+            this.setState({
+                activeTab: "related",
+                selectedFailure: failures.find(f => f["_id"]["$oid"] === editRow.failure)
+            })
+        }
+
         this.setState({
             selectedPart: editRow.selectedPart,
             maintenanceTime: editRow.maintenanceTime,
-            unoperationalDuration: editRow.unoperationalDuration,
-            selectedFaultType: editRow.selectedFaultType,
-            jobDescription: editRow.jobDescription,
-            selectedMaintenanceType: editRow.selectedMaintenanceType,
-            faultReason: editRow.faultReason,
-            request: editRow.request,
-            editRowId: editRow.editRowId
+            maintenanceReason: editRow.maintenanceReason,
+            maintenanceRequest: editRow.maintenanceRequest,
+            maintenanceInfo: editRow.maintenanceInfo,
+            maintenanceDownTime: editRow.maintenanceDownTime,
+            maintenanceType: editRow.maintenanceType,
+            maintenanceCost: editRow.maintenanceCost,
+            personResponsible: editRow.personResponsible,
+            editRowId: editRow.editRowId,
         });
     }
 
@@ -150,32 +206,47 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
     }
 
     handleClickSave = async () => {
-        if (this.state.selectedPart["text"] === ""
-            || this.state.maintenanceTime === ""
-            || this.state.selectedMaintenanceType === ""
-            || this.state.selectedFaultType === ""
-        ) {
-            this.setState({
-                notificationVisible: true,
-                notificationType: "error",
-                notificationMessage: "Please fill in the form completely",
-            })
-            return;
+        const { selectedPart, selectedFailure, activeTab, maintenanceTime, maintenanceReason,
+            maintenanceRequest, maintenanceInfo, maintenanceDownTime, maintenanceType, maintenanceCost,
+            personResponsible, } = this.state;
+
+        if (activeTab === "periodic") {
+            if (Object.keys(selectedPart).length === 0 || maintenanceTime === "") {
+                this.setState({
+                    notificationVisible: true,
+                    notificationType: "error",
+                    notificationMessage: "Please fill in the form completely",
+                })
+                return;
+            }
+        } else if (activeTab === "related") {
+            if (Object.keys(selectedFailure).length === 0 || maintenanceTime === "") {
+                this.setState({
+                    notificationVisible: true,
+                    notificationType: "error",
+                    notificationMessage: "Please fill in the form completely",
+                })
+                return;
+            }
         }
+
+        console.log(selectedFailure);
+        console.log(selectedPart);
 
         const payload = {
-            "asset": this.state.selectedPart["text"],
-            "sid": this.state.selectedPart["id"],
-            "date": this.state.maintenanceTime,
-            "duration": this.state.unoperationalDuration,
+            "asset": activeTab === "periodic" ? selectedPart["text"] : selectedFailure["sourceName"],
+            "sid": activeTab === "periodic" ? selectedPart["id"] : selectedFailure["sid"],
+            maintenanceTime,
+            maintenanceReason,
+            maintenanceRequest,
+            maintenanceInfo,
+            maintenanceDownTime,
+            maintenanceType,
+            maintenanceCost,
+            personResponsible,
             "factoryID": this.props.factoryID,
-            "faultType": this.state.selectedFaultType,
-            "jobDescription": this.state.jobDescription,
-            "maintenanceType": this.state.selectedMaintenanceType,
-            "reason": this.state.faultReason,
-            "request": this.state.request
+            "failure": activeTab === "related" ? selectedFailure["_id"]["$oid"] : null
         }
-
 
         if (this.props.isEdit) {
             this.updateMaintenance(payload);
@@ -208,14 +279,15 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
                 notificationVisible: true,
                 notificationType: "success",
                 notificationMessage: "Maintenance record created successfully",
+                maintenanceReason: "",
+                maintenanceRequest: "",
+                maintenanceInfo: "",
+                maintenanceDownTime: "",
+                maintenanceType: "",
+                maintenanceCost: "",
+                personResponsible: "",
                 selectedPart: {},
                 maintenanceTime: "",
-                selectedFaultType: "",
-                selectedMaintenanceType: "",
-                faultReason: "",
-                unoperationalDuration: 0,
-                jobDescription: "",
-                request: "",
                 formMode: false,
             })
             this.props.getAllMaintenance();
@@ -231,7 +303,11 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
     }
 
     render() {
-        const { visibleAddUpdateMaintenance } = this.props;
+        const { visibleAddUpdateMaintenance, addBySelectedPart, isEdit, isDetail } = this.props;
+        const {
+            activeTab, failures, selectedFailure, maintenanceReason, maintenanceRequest,
+            maintenanceInfo, maintenanceDownTime, maintenanceType, maintenanceCost, personResponsible,
+        } = this.state;
 
         const allParts = this.state.allParts.map(item => {
             return (
@@ -273,7 +349,11 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
                 <Overlay visible={visibleAddUpdateMaintenance}>
                     <Overlay.Container maxWidth={800}>
                         <Overlay.Header
-                            title={this.props.isEdit ? "Update Maintenance Record" : "Add Maintenance Record"}
+                            title={
+                                isDetail ? "Detail Maintenance Record" : (
+                                    isEdit ? "Update Maintenance Record" : "Add Maintenance Record"
+                                )
+                            }
                             onDismiss={this.closeOverlay}
                         />
 
@@ -281,38 +361,142 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
                             <Form>
                                 <Grid.Row >
                                     <Grid.Column widthXS={Columns.Twelve}>
+                                        <TabbedPageTabs
+                                            tabs={[
+                                                {
+                                                    text: 'Periodic Maintenance',
+                                                    id: 'periodic',
+                                                },
+                                                {
+                                                    text: 'Failure Related',
+                                                    id: 'related',
+                                                },
+                                            ]}
+                                            activeTab={activeTab}
+                                            onTabClick={(e) => { this.setState({ activeTab: e }) }}
+                                        />
+
+                                        {
+                                            activeTab === "periodic" &&
+                                            <Grid.Row style={{ marginTop: '20px' }}>
+                                                <Grid.Column widthXS={Columns.Twelve}>
+                                                    <Form.Element label="Asset" required={true}>
+                                                        <Dropdown
+                                                            button={(active, onClick) => (
+                                                                <Dropdown.Button
+                                                                    status={
+                                                                        addBySelectedPart || isEdit || isDetail
+                                                                            ? ComponentStatus.Disabled
+                                                                            : ComponentStatus.Default
+                                                                    }
+                                                                    active={active}
+                                                                    onClick={onClick}
+                                                                    color={ComponentColor.Default}
+                                                                >
+                                                                    {this.state.selectedPart['text']}
+                                                                </Dropdown.Button>
+                                                            )}
+                                                            menu={onCollapse => (
+                                                                <Dropdown.Menu onCollapse={onCollapse}>
+                                                                    {
+                                                                        allParts
+                                                                    }
+                                                                </Dropdown.Menu>
+                                                            )}
+                                                        />
+                                                    </Form.Element>
+                                                </Grid.Column>
+                                            </Grid.Row>
+                                        }
+
+                                        {
+                                            activeTab === "related" &&
+                                            <Grid.Row style={{ marginTop: '20px', marginBottom: '10px' }}>
+                                                <Grid.Column widthXS={Columns.Twelve}>
+                                                    <Form.Element label="Asset" required={true}>
+                                                        <Panel style={{ minHeight: '200px' }}>
+                                                            <DapperScrollbars
+                                                                autoHide={false}
+                                                                autoSizeHeight={true}
+                                                                style={{ maxHeight: '200px' }}
+                                                                className="data-loading--scroll-content"
+                                                            >
+                                                                <Table
+                                                                    borders={BorderType.Vertical}
+                                                                    fontSize={ComponentSize.ExtraSmall}
+                                                                    cellPadding={ComponentSize.ExtraSmall}
+                                                                >
+                                                                    <Table.Header>
+                                                                        <Table.Row>
+                                                                            <Table.HeaderCell style={{ width: "400px" }}>Asset Name</Table.HeaderCell>
+                                                                            <Table.HeaderCell style={{ width: "200px" }}>Start Time</Table.HeaderCell>
+                                                                            <Table.HeaderCell style={{ width: "200px" }}>Severity</Table.HeaderCell>
+                                                                            <Table.HeaderCell style={{ width: "50px" }}></Table.HeaderCell>
+                                                                        </Table.Row>
+                                                                    </Table.Header>
+                                                                    <Table.Body>
+                                                                        {
+                                                                            failures.map(row => {
+                                                                                let recordId = row["_id"]["$oid"];
+                                                                                return (
+                                                                                    <Table.Row key={recordId}>
+                                                                                        <Table.Cell>{row["sourceName"]}</Table.Cell>
+                                                                                        <Table.Cell>{row["startTime"]}</Table.Cell>
+                                                                                        <Table.Cell>{row["severity"]}</Table.Cell>
+                                                                                        <Table.Cell>
+                                                                                            <FlexBox margin={ComponentSize.Medium} >
+                                                                                                <QuestionMarkTooltip
+                                                                                                    diameter={14}
+                                                                                                    color={ComponentColor.Primary}
+                                                                                                    tooltipContents={row["description"]}
+                                                                                                />
+                                                                                                <Checkbox
+                                                                                                    label=""
+                                                                                                    checked={selectedFailure === row}
+                                                                                                    onSetChecked={() => { this.setState({ selectedFailure: row }) }}
+                                                                                                />
+                                                                                            </FlexBox>
+                                                                                        </Table.Cell>
+                                                                                    </Table.Row>
+                                                                                )
+                                                                            })
+                                                                        }
+                                                                    </Table.Body>
+                                                                </Table>
+                                                            </DapperScrollbars>
+                                                        </Panel>
+                                                    </Form.Element>
+                                                </Grid.Column>
+                                            </Grid.Row>
+                                        }
+
                                         <Grid.Row>
                                             <Grid.Column widthXS={Columns.Six}>
-                                                <Form.Element label="Asset">
-                                                    <Dropdown
-                                                        button={(active, onClick) => (
-                                                            <Dropdown.Button
-                                                                active={active}
-                                                                onClick={onClick}
-                                                                color={ComponentColor.Default}
-                                                            >
-                                                                {this.state.selectedPart['text']}
-                                                            </Dropdown.Button>
-                                                        )}
-                                                        menu={onCollapse => (
-                                                            <Dropdown.Menu onCollapse={onCollapse}>
-                                                                {
-                                                                    allParts
-                                                                }
-                                                            </Dropdown.Menu>
-                                                        )}
+                                                <Form.Element label="Maintenance Date" required={true}>
+                                                    <input
+                                                        type='datetime-local'
+                                                        value={this.state.maintenanceTime}
+                                                        onChange={(e) => { this.setState({ maintenanceTime: e.target.value }) }}
+                                                        style={{ background: '#383846', color: '#ffffff' }}
+                                                        disabled={
+                                                            isDetail
+                                                                ? true
+                                                                : false
+                                                        }
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
 
                                             <Grid.Column widthXS={Columns.Six}>
-                                                <Form.Element label="Maintenance Date">
-                                                    <input
-                                                        name='maintenanceTime'
-                                                        type='datetime-local'
-                                                        value={this.state.maintenanceTime}
-                                                        onChange={this.handleChangeMaintenanceTime}
-                                                        style={{ background: '#383846', color: '#ffffff' }}
+                                                <Form.Element label="Maintenance Reason">
+                                                    <Input
+                                                        onChange={(e) => { this.setState({ maintenanceReason: e.target.value }) }}
+                                                        value={maintenanceReason}
+                                                        status={
+                                                            isDetail
+                                                                ? ComponentStatus.Disabled
+                                                                : ComponentStatus.Default
+                                                        }
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
@@ -320,21 +504,62 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
 
                                         <Grid.Row>
                                             <Grid.Column widthXS={Columns.Six}>
-                                                <Form.Element label="Fault Type">
-                                                    <SelectDropdown
-                                                        options={["Fault 1", "Fault 2", "Fault 3"]}
-                                                        selectedOption={this.state.selectedFaultType}
-                                                        onSelect={(e) => this.setState({ selectedFaultType: e })}
+                                                <Form.Element label="Maintenance Request">
+                                                    <TextArea
+                                                        rows={5}
+                                                        value={maintenanceRequest}
+                                                        onChange={(e) => this.setState({ maintenanceRequest: e.target.value })}
+                                                        status={
+                                                            isDetail
+                                                                ? ComponentStatus.Disabled
+                                                                : ComponentStatus.Default
+                                                        }
+                                                    />
+                                                </Form.Element>
+                                            </Grid.Column>
+
+                                            <Grid.Column widthXS={Columns.Six}>
+                                                <Form.Element label="Maintenance Info">
+                                                    <TextArea
+                                                        rows={5}
+                                                        value={maintenanceInfo}
+                                                        onChange={(e) => this.setState({ maintenanceInfo: e.target.value })}
+                                                        status={
+                                                            isDetail
+                                                                ? ComponentStatus.Disabled
+                                                                : ComponentStatus.Default
+                                                        }
+                                                    />
+                                                </Form.Element>
+                                            </Grid.Column>
+                                        </Grid.Row>
+
+                                        <Grid.Row>
+                                            <Grid.Column widthXS={Columns.Six}>
+                                                <Form.Element label="Maintenance Down Time">
+                                                    <Input
+                                                        onChange={(e) => { this.setState({ maintenanceDownTime: e.target.value }) }}
+                                                        type={InputType.Number}
+                                                        value={maintenanceDownTime}
+                                                        status={
+                                                            isDetail
+                                                                ? ComponentStatus.Disabled
+                                                                : ComponentStatus.Default
+                                                        }
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
 
                                             <Grid.Column widthXS={Columns.Six}>
                                                 <Form.Element label="Maintenance Type">
-                                                    <SelectDropdown
-                                                        options={["Maintenance 1", "Maintenance 2", "Maintenance 3"]}
-                                                        selectedOption={this.state.selectedMaintenanceType}
-                                                        onSelect={(e) => this.setState({ selectedMaintenanceType: e })}
+                                                    <Input
+                                                        onChange={(e) => { this.setState({ maintenanceType: e.target.value }) }}
+                                                        value={maintenanceType}
+                                                        status={
+                                                            isDetail
+                                                                ? ComponentStatus.Disabled
+                                                                : ComponentStatus.Default
+                                                        }
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
@@ -342,45 +567,30 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
 
                                         <Grid.Row>
                                             <Grid.Column widthXS={Columns.Six}>
-                                                <Form.Element label="Fault Reason">
+                                                <Form.Element label="Maintenance Cost">
                                                     <Input
-                                                        name="faultReason"
-                                                        onChange={this.handleChangeInput}
-                                                        value={this.state.faultReason}
-                                                    />
-                                                </Form.Element>
-                                            </Grid.Column>
-
-                                            <Grid.Column widthXS={Columns.Six}>
-                                                <Form.Element label="Unoperational Duration">
-                                                    <Input
-                                                        name="unoperationalDuration"
-                                                        onChange={this.handleChangeInput}
+                                                        onChange={(e) => { this.setState({ maintenanceCost: e.target.value }) }}
                                                         type={InputType.Number}
-                                                        value={this.state.unoperationalDuration}
-                                                    />
-                                                </Form.Element>
-                                            </Grid.Column>
-                                        </Grid.Row>
-
-
-                                        <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Six}>
-                                                <Form.Element label="Job Description">
-                                                    <TextArea
-                                                        rows={5}
-                                                        value={this.state.jobDescription}
-                                                        onChange={(e) => this.setState({ jobDescription: e.target.value })}
+                                                        value={maintenanceCost}
+                                                        status={
+                                                            isDetail
+                                                                ? ComponentStatus.Disabled
+                                                                : ComponentStatus.Default
+                                                        }
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
 
                                             <Grid.Column widthXS={Columns.Six}>
-                                                <Form.Element label="Request">
-                                                    <TextArea
-                                                        rows={5}
-                                                        value={this.state.request}
-                                                        onChange={(e) => this.setState({ request: e.target.value })}
+                                                <Form.Element label="Person Responsible for Maintenance">
+                                                    <Input
+                                                        onChange={(e) => { this.setState({ personResponsible: e.target.value }) }}
+                                                        value={personResponsible}
+                                                        status={
+                                                            isDetail
+                                                                ? ComponentStatus.Disabled
+                                                                : ComponentStatus.Default
+                                                        }
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
@@ -394,6 +604,11 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
                                         icon={IconFont.Remove}
                                         onClick={this.closeOverlay}
                                         color={ComponentColor.Danger}
+                                        status={
+                                            isDetail
+                                                ? ComponentStatus.Disabled
+                                                : ComponentStatus.Default
+                                        }
                                     />
 
                                     <Button
@@ -402,6 +617,11 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
                                         color={ComponentColor.Success}
                                         type={ButtonType.Submit}
                                         onClick={this.handleClickSave}
+                                        status={
+                                            isDetail
+                                                ? ComponentStatus.Disabled
+                                                : ComponentStatus.Default
+                                        }
                                     />
                                 </Form.Footer>
                             </Form>

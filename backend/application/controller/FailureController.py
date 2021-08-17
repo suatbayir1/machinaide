@@ -66,3 +66,41 @@ def remove_failure(token):
         message = "removed_failure"
         logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, request.json, message,  200)
         return return_response(success = True, message = message), 200
+
+@failure.route("/getByCondition", methods = ["POST"])
+@token_required(roles = ["admin", "editor", "member"])
+def get_by_condition(token):
+    try:
+        if not request.json:
+            message = "Payload cannot be empty"
+            log_type = "ERROR"
+            return return_response(success = False, message = message), 400
+
+        payload = {}
+
+        if "regex" in request.json:
+            for item in request.json["regex"]:
+                for key, value in item.items():
+                    payload[key] = { '$regex': f"{value}$"}
+
+        if "exists" in request.json:
+            for item in request.json["exists"]:
+                for key, value in item.items():
+                    payload[key] = { '$exists': value}
+
+        if "match" in request.json:
+            for item in request.json["match"]:
+                for key, value in item.items():
+                    payload[key] = value
+
+        result = model.get_by_condition(payload)
+
+        message = "Failure records were successfully fetched"
+        log_type = "INFO"
+        return return_response(data = result, success = True, message = message), 200
+    except:
+        message = "An expected error has occurred"
+        log_type = "ERROR"
+        return return_response(success = False, message = message), 400
+    finally:
+        logger.add_log(log_type, request.remote_addr, token["username"], request.method, request.url, "", message,  200)

@@ -989,6 +989,8 @@ class FailureTable extends PureComponent<Props, State> {
                                     isEdit={this.state.editMode}
                                     factoryID={this.props["match"].params.FID}
                                     updateData={this.state.updateData}
+                                    addBySelectedPart={false}
+                                    isDetail={false}
                                 />
 
                                 <FailureAlarmScene

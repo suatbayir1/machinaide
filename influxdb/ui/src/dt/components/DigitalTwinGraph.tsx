@@ -26,7 +26,7 @@ import {
 } from '@influxdata/clockface'
 
 interface Props {
-    handleNodeClick: () => void
+    handleNodeClick: (node) => void
     refreshGeneralInfo: () => void
     refreshVisualizePage: () => void
     changeResultQuery: (payload) => void
@@ -132,6 +132,17 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
     async componentDidUpdate(prevProps) {
         if (prevProps.refreshGraph !== this.props.refreshGraph) {
             await this.createGraph();
+
+            if (Object.keys(this.props.selectedGraphNode).length > 0) {
+                console.log("selected", this.props.selectedGraphNode);
+                console.log("prunedTree", this.state.prunedTree);
+                this.state.prunedTree["nodes"].map(n => {
+                    if (n["id"] === this.props.selectedGraphNode["id"]) {
+                        this.props.handleNodeClick(n);
+                        console.log("triggered")
+                    }
+                })
+            }
         }
 
         if (prevProps.showAllSensorValues !== this.props.showAllSensorValues) {

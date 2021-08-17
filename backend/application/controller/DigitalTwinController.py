@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify
 from flask_cors import CORS, cross_origin
 from application.model.DigitalTwinModel import DigitalTwinModel
+from application.model.MaintenanceModel import MaintenanceModel
+from application.model.FailureModel import FailureModel
 import json
 from werkzeug.utils import secure_filename
 import os
-from application.helpers.Helper import return_response, token_required
+from application.helpers.Helper import return_response, token_required, request_validation
 from core.logger.MongoLogger import MongoLogger
 
 UPLOAD_FOLDER =  "/home/machinaide/influxdb/ui/assets/images"
@@ -12,6 +14,8 @@ UPLOAD_FOLDER =  "/home/machinaide/influxdb/ui/assets/images"
 dt = Blueprint("dt", __name__)
 
 model = DigitalTwinModel()
+maintenanceModel = MaintenanceModel()
+failureModel = FailureModel()
 logger = MongoLogger()
 
 
@@ -94,11 +98,52 @@ def delete(token):
     else:
         return return_response(success = False, message = "Type must be Machine, Component or Sensor"), 400
 
+@dt.route("/update", methods = ["POST", "PUT"])
+@token_required(roles = ["admin", "editor"])
+def update(token):
+    try:
+        missed_keys, confirm = request_validation(request.json, ["type", "name"])
+
+        if not confirm:
+            message = f"{missed_keys} field(s) cannot be empty or undefined"
+            log_type = "ERROR"
+            status_code = 200
+            return return_response(success = False, message = message), 400
+
+        name = request.json["name"]
+        keys = ["deploymentTime", "brand"]
+        payload = {}
+
+        for item in keys:
+            if item in request.json:
+                payload[item] = request.json[item]
+
+        result = model.update(name, request.json["type"], payload)
+        
+        if not result:
+            message = f"An error occurred while updating a {request.json['type']}"
+            log_type = "ERROR"
+            status_code = 400
+            return return_response(success = False, message = message), 400
+
+        message = f"{request.json['type']} has been successfully updated"
+        status_code = 200
+        log_type = "INFO"
+        return return_response(success = True, message = message), 200
+    except:
+        message = "An expected error has occurred"
+        log_type = "ERROR"
+        status_code = 400
+        return return_response(success = False, message = message), 400
+    finally:
+        logger.add_log(log_type, request.remote_addr, token["username"], request.method, request.url, "", message,  status_code)
+
+
 @dt.route("/updateSensor", methods = ["POST", "PUT"])
 @token_required(roles = ["admin"])
-def update_sensor(token):
+def update_sensor_bounds(token):
     try:
-        result = model.update_sensor(request.json)
+        result = model.update_sensor_bounds(request.json)
 
         if not result:
             message = "An error occurred while updating a sensor"
@@ -203,7 +248,90 @@ def remove_relationship(token):
     except:
         return return_response(success = False, message = message), 400
 
+@dt.route("/retire", methods = ["POST"])
+@token_required(roles = ["admin", "editor"])
+def retire(token):
+    try:
+        missed_keys, confirm = request_validation(request.json, ["type", "name"])
 
+        if not confirm:
+            message = f"{missed_keys} field(s) cannot be empty or undefined"
+            log_type = "ERROR"
+            status_code = 200
+            return return_response(success = False, message = message), 400
+
+        retired_id = model.retire(request.json)
+
+        where_maintenance = { 
+            "asset": { '$regex': f"{request.json['name']}$"},
+            "retired": {'$exists': False} 
+        }
+        where_failure = { 
+            "sourceName": { '$regex': f"{request.json['name']}$"},
+            "retired": {'$exists': False}
+        }
+        
+        updateData = {
+            '$set': { 'retired': str(retired_id) }
+        }
+
+        maintenance_result = maintenanceModel.update_many_maintenance(where_maintenance, updateData)
+        failure_result = failureModel.update_many_failure(where_failure, updateData)
+        update_result = model.update(request.json["name"], request.json["type"], {"brand": {}, "deploymentTime": ""})
+
+        if not maintenance_result or not failure_result or not update_result:
+            message = "An error occurred while adding a retire record"
+            log_type = "ERROR"
+            status_code = 400
+            return return_response(success = False, message = message), 400
+
+        message = "Retire record added successfully"
+        log_type = "INFO"
+        status_code = 200
+        return return_response(success = True, message = message), 200
+    except:
+        message = "An expected error has occurred"
+        log_type = "ERROR"
+        status_code = 400
+        return return_response(success = False, message = message), 400
+    finally:
+        logger.add_log(log_type, request.remote_addr, token["username"], request.method, request.url, "", message,  status_code)
+
+@dt.route("/getRetired", methods = ["POST"])
+@token_required(roles = ["admin", "editor"])
+def get_retired(token):
+    try:
+        missed_keys, confirm = request_validation(request.json, ["name"])
+
+        if not confirm:
+            message = f"{missed_keys} field(s) cannot be empty or undefined"
+            log_type = "ERROR"
+            status_code = 200
+            return return_response(success = False, message = message), 400
+
+        where = {
+            "name": request.json["name"]
+        }
+
+        result = model.get_retired(where)
+
+        if result == 500:
+            message = "An error occurred while fetching a retired records"
+            log_type = "ERROR"
+            status_code = 500
+            return return_response(success = False, message = message), 500
+
+        message = "Retired records has been fetched successfully"
+        log_type = "INFO"
+        status_code = 200
+        return return_response(data = result, success = True, message = message), 200
+    except:
+        message = "An expected error has occurred"
+        log_type = "ERROR"
+        status_code = 400
+        return return_response(success = False, message = message), 400
+    finally:
+        logger.add_log(log_type, request.remote_addr, token["username"], request.method, request.url, "", message,  status_code)
 
 @dt.route("updateAll", methods = ["POST"])
 def update_all_dt():

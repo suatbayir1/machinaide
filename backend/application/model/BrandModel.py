@@ -38,3 +38,13 @@ class BrandModel():
             return self.db.find(self.collection, where)
         except:
             return False
+
+    def delete(self, payload):
+        try:
+            where = {
+                "_id": ObjectId(payload["brandId"])
+            }
+
+            return self.db.delete_one(self.collection, where)
+        except:
+            return False

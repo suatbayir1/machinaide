@@ -1,4 +1,5 @@
 import { BACKEND } from 'src/config';
+import axios from "axios";
 
 class FailureService {
     getAllFailures = async () => {
@@ -149,6 +150,22 @@ class FailureService {
         } catch (err) {
             console.error(err);
         }
+    }
+
+    getByCondition = async (payload) => {
+        const url = `${BACKEND.API_URL}failure/getByCondition`;
+
+        return await axios
+            .post(url, payload, { headers: { 'token': window.localStorage.getItem("token") } })
+            .then(response => {
+                if (response.status === 200) {
+                    const result = JSON.parse(response.data.data.data);
+                    return result;
+                }
+            })
+            .catch(err => {
+                return err.response.data.data;
+            })
     }
 }
 

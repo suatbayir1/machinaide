@@ -747,10 +747,10 @@ class NLPSearch extends PureComponent<Props, State>{
                             color={ComponentColor.Primary}
                         />
 
-                        <Microphone
+                        {/* <Microphone
                             getTextQuery={this.getTextQuery}
                             getSpeechRecognitionAlternatives={this.getSpeechRecognitionAlternatives}
-                        />
+                        /> */}
 
                         <QuestionMarkTooltip
                             diameter={25}

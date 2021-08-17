@@ -72,3 +72,32 @@ def get(token):
         return return_response(success = False, message = message), 400
     finally:
         logger.add_log(log_type, request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+
+
+@brand.route("/delete", methods = ["DELETE"])
+@token_required(roles = ["admin", "editor", "member"])
+def delete(token):
+    try:
+        missed_keys, confirm = request_validation(request.json, ["brandId"])
+
+        if not confirm:
+            message = f"{missed_keys} field(s) cannot be empty or undefined"
+            log_type = "ERROR"
+            return return_response(success = False, message = message), 400
+
+        result = model.delete(request.json)
+
+        if not result:
+            message = "An error occurred while deleting brand record"
+            log_type = "ERROR"
+            return return_response(success = False, message = message), 400
+
+        message = "Brand record deleted successfully"
+        log_type = "INFO"
+        return return_response(success = True, message = message), 200
+    except:
+        message = "An expected error has occurred"
+        log_type = "ERROR"
+        return return_response(success = False, message = message), 400
+    finally:
+        logger.add_log(log_type, request.remote_addr, token["username"], request.method, request.url, "", message,  200)

@@ -75,7 +75,7 @@ class DigitalTwinModel():
             }              
 
             where = {
-                "id": "Ermetal"
+                "id": factory["id"]
             }
 
             return self.db.update_one(self.collection, update_data, where)
@@ -100,7 +100,7 @@ class DigitalTwinModel():
             }
 
             where = {
-                "id": "Ermetal"
+                "id": factory["id"]
             }
 
             return self.db.update_one(self.collection, update_data, where)
@@ -127,7 +127,7 @@ class DigitalTwinModel():
             }
 
             where = {
-               "id": "Ermetal"
+               "id": factory["id"]
             }
 
             return self.db.update_one(self.collection, update_data, where)
@@ -158,7 +158,7 @@ class DigitalTwinModel():
             }
 
             where = {
-                "id": "Ermetal"
+                "id": factory["id"]
             }
 
             return self.db.update_one(self.collection, update_data, where)
@@ -183,7 +183,7 @@ class DigitalTwinModel():
             }
 
             where = {
-                "id": "Ermetal"
+                "id": factory["id"]
             }
 
             return self.db.update_one(self.collection, update_data, where)
@@ -204,7 +204,7 @@ class DigitalTwinModel():
         }
 
         where = {
-            "id": "Ermetal"
+            "id": factory["id"]
         }
 
         return self.db.update_one(self.collection, update_data, where)
@@ -224,7 +224,7 @@ class DigitalTwinModel():
         }
 
         where = {
-            "id": "Ermetal"
+            "id": factory["id"]
         }
 
         return self.db.update_one(self.collection, update_data, where)
@@ -245,7 +245,7 @@ class DigitalTwinModel():
         }
 
         where = {
-            "id": "Ermetal"
+            "id": factory["id"]
         }
 
         return self.db.update_one(self.collection, update_data, where)
@@ -268,12 +268,42 @@ class DigitalTwinModel():
         }
 
         where = {
-            "id": "Ermetal"
+            "id": factory["id"]
         }
 
         return self.db.update_one(self.collection, update_data, where)
 
-    def update_sensor(self, payload):
+    def update(self, name, type, payload):
+        try:
+            hierarchy = self.get_all()
+
+            for factory in hierarchy:
+                del factory['_id']
+                for pl in factory["productionLines"]:
+                    for machine in pl["machines"]:
+                        if machine["name"] == name and type == "Machine":
+                            machine.update(payload)
+                        for component in machine["contents"]:
+                            if component["@type"] == "Component":
+                                if component["name"] == name and type == "Component":
+                                    component.update(payload)
+                                for sensor in component["sensors"]:
+                                    if sensor["name"] == name and type == "Sensor":
+                                        sensor.update(payload)
+
+            update_data = {
+                '$set': hierarchy[0]
+            }
+
+            where = {
+                "id": factory["id"]
+            }
+
+            return self.db.update_one(self.collection, update_data, where)
+        except:
+            return False
+
+    def update_sensor_bounds(self, payload):
         try:
             hierarchy = self.get_all()
 
@@ -295,7 +325,7 @@ class DigitalTwinModel():
             }
 
             where = {
-                "id": "Ermetal"
+                "id": factory["id"]
             }
 
             return self.db.update_one(self.collection, update_data, where)
@@ -324,6 +354,18 @@ class DigitalTwinModel():
                                     break
         
         return isExists
+
+    def retire(self, payload):
+        try:
+            return self.db.insert_one("retired", payload).inserted_id
+        except:
+            return False
+
+    def get_retired(self, where):
+        try:
+            return self.db.find("retired", where)
+        except:
+            return 500
 
 
     def update_dt(self):

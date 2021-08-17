@@ -126,8 +126,8 @@ class ImportMaintenanceFile extends PureComponent<Props, State> {
         this.setState({
             totalRecordCount: result.length === 0 ? 0 : result.length - 1,
         })
-        let headers = ["asset", "sid", "date", "faultType", "maintenanceType", "request", "reason", "jobDescription", "duration"];
-        let required = ["asset", "sid", "date", "faultType", "maintenanceType"];
+        let headers = ["asset", "sid", "factoryID", "failure", "maintenanceTime", "maintenanceCost", "maintenanceDownTime", "maintenanceInfo", "maintenanceReason", "maintenanceRequest", "maintenanceType", "personResponsible"];
+        let required = ["asset", "sid", "factoryID", "maintenanceTime"];
 
         const { isFatalError, errors } = await fileAnalyzer(headers, required, result, this.state.fileName);
 
@@ -142,7 +142,7 @@ class ImportMaintenanceFile extends PureComponent<Props, State> {
             });
 
             if (!isErrorLine) {
-                if (row["asset"] !== "" && row["sid"] !== "" && row["date"] !== "" && row["faultType"] !== "" && row["maintenanceType"] !== "") {
+                if (row["asset"] !== "" && row["sid"] !== "" && row["factoryID"] !== "" && row["maintenanceTime"] !== "") {
                     let response = await MaintenanceService.isMaintenanceExist(row);
                     if (response.data.summary.code === 409) {
                         let error = {
@@ -223,7 +223,7 @@ class ImportMaintenanceFile extends PureComponent<Props, State> {
         }
 
         const errorLines = [];
-        const requiredList = ["asset", "sid", "date", "faultType", "maintenanceType"];
+        const requiredList = ["asset", "sid", "factoryID", "maintenanceTime"];
 
         result.forEach(async (row, index) => {
             let isErrorLine = false;
@@ -236,7 +236,7 @@ class ImportMaintenanceFile extends PureComponent<Props, State> {
             if (isErrorLine) {
                 errorLines.push(index);
             } else {
-                if (row["asset"] !== "" && row["sid"] !== "" && row["date"] !== "" && row["faultType"] !== "" && row["maintenanceType"] !== "") {
+                if (row["asset"] !== "" && row["sid"] !== "" && row["factoryID"] !== "" && row["maintenanceTime"] !== "") {
                     await MaintenanceService.addMaintenance(row);
                 }
             }

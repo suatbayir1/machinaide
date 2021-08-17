@@ -57,3 +57,15 @@ class FailureModel():
             return self.db.find_by_columns(self.collection, where, columns)
         except:
             return False
+
+    def get_by_condition(self, payload):
+        try:
+            return cursor_to_json(self.db.find(self.collection, payload))
+        except:
+            return False
+
+    def update_many_failure(self, where, updateData):
+        try:
+            return self.db.update_many(self.collection, updateData, where, False)
+        except:
+            return False

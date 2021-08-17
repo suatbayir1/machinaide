@@ -358,14 +358,16 @@ class MaintenancePage extends PureComponent<Props, State> {
     handleClickEditRow = (editRow) => {
         const updateData = {
             "selectedPart": { id: editRow.sid !== null ? editRow.sid : "", text: editRow.asset },
-            "maintenanceTime": editRow.date,
-            "unoperationalDuration": editRow.duration,
-            "selectedFaultType": editRow.faultType,
-            "jobDescription": editRow.jobDescription,
-            "selectedMaintenanceType": editRow.maintenanceType,
-            "faultReason": editRow.reason,
-            "request": editRow.request,
+            "maintenanceTime": editRow.maintenanceTime,
+            "maintenanceReason": editRow.maintenanceReason,
+            "maintenanceRequest": editRow.maintenanceRequest,
+            "maintenanceInfo": editRow.maintenanceInfo,
+            "maintenanceDownTime": editRow.maintenanceDownTime,
+            "maintenanceType": editRow.maintenanceType,
+            "maintenanceCost": editRow.maintenanceCost,
+            "personResponsible": editRow.personResponsible,
             "editRowId": editRow._id.$oid,
+            "failure": editRow.failure,
         }
 
         this.setState({
@@ -469,12 +471,26 @@ class MaintenancePage extends PureComponent<Props, State> {
     }
 
     createCSV = () => {
+        console.log("filteredData", this.state.filteredData)
+
         const { filteredData } = this.state;
         let now = new Date().toISOString();
-        let headers = ["Asset,Date,Fault Type,Maintenance Type,Request,Reason,Job Description,Unoperational Duration"]
+        let headers = ["Asset,Failure,Date,Cost,Down Time,Info,Reason,Request,Type,Person Responsible,Source ID"]
 
         let data = filteredData.map(item => {
-            return [item['asset'], item['date'], item["faultType"], item["maintenanceType"], item['request'], item['reason'], item["jobDescription"], item["duration"]];
+            return [
+                item['asset'],
+                item['failure'],
+                item["maintenanceTime"],
+                item["maintenanceCost"],
+                item['maintenanceDownTime'],
+                item['maintenanceInfo'],
+                item["maintenanceReason"],
+                item["maintenanceRequest"],
+                item["maintenanceType"],
+                item["personResponsible"],
+                item["sid"]
+            ];
         });
 
         let csv = dataToCSV([headers, ...data]);
@@ -493,11 +509,23 @@ class MaintenancePage extends PureComponent<Props, State> {
     createXLSX = () => {
         const { filteredData } = this.state;
         let now = new Date().toISOString();
-        let headers = ["Asset,Date,Fault Type,Maintenance Type,Request,Reason,Job Description,Unoperational Duration"]
+        let headers = ["Asset,Failure,Date,Cost,Down Time,Info,Reason,Request,Type,Person Responsible, Source ID"]
 
         let data = filteredData.map(item => {
-            return [item['asset'], item['date'], item["faultType"], item["maintenanceType"], item['request'], item['reason'], item["jobDescription"], item["duration"]];
-        })
+            return [
+                item['asset'],
+                item['failure'],
+                item["maintenanceTime"],
+                item["maintenanceCost"],
+                item['maintenanceDownTime'],
+                item['maintenanceInfo'],
+                item["maintenanceReason"],
+                item["maintenanceRequest"],
+                item["maintenanceType"],
+                item["personResponsible"],
+                item["sid"]
+            ];
+        });
 
         let xlsx = dataToXLSX([headers, ...data]);
 
@@ -515,13 +543,14 @@ class MaintenancePage extends PureComponent<Props, State> {
     handleDetailSelectedRow = (row) => {
         const updateData = {
             "selectedPart": { id: row.sid !== null ? row.sid : "", text: row.asset },
-            "maintenanceTime": row.date,
-            "unoperationalDuration": row.duration,
-            "selectedFaultType": row.faultType,
-            "jobDescription": row.jobDescription,
-            "selectedMaintenanceType": row.maintenanceType,
-            "faultReason": row.reason,
-            "request": row.request,
+            "maintenanceTime": row.maintenanceTime,
+            "maintenanceReason": row.maintenanceReason,
+            "maintenanceRequest": row.maintenanceRequest,
+            "maintenanceInfo": row.maintenanceInfo,
+            "maintenanceDownTime": row.maintenanceDownTime,
+            "maintenanceType": row.maintenanceType,
+            "maintenanceCost": row.maintenanceCost,
+            "personResponsible": row.personResponsible,
             "editRowId": row._id.$oid,
         }
 
@@ -715,10 +744,9 @@ class MaintenancePage extends PureComponent<Props, State> {
                                                         <Table.Row>
                                                             <Table.HeaderCell style={{ width: "300px" }}>Asset</Table.HeaderCell>
                                                             <Table.HeaderCell style={{ width: "100px" }}>Maintenance Date</Table.HeaderCell>
-                                                            <Table.HeaderCell style={{ width: "200px" }}>Fault Type</Table.HeaderCell>
                                                             <Table.HeaderCell style={{ width: "200px" }}>Maintenance Type</Table.HeaderCell>
                                                             <Table.HeaderCell style={{ width: "100px" }}>Reason</Table.HeaderCell>
-                                                            <Table.HeaderCell style={{ width: "100px" }}>Unoperational Duration</Table.HeaderCell>
+                                                            <Table.HeaderCell style={{ width: "100px" }}>Down Time</Table.HeaderCell>
                                                             <Table.HeaderCell style={{ width: "100px" }}></Table.HeaderCell>
                                                         </Table.Row>
                                                     </Table.Header>
@@ -729,11 +757,10 @@ class MaintenancePage extends PureComponent<Props, State> {
                                                                 return (
                                                                     <Table.Row key={recordId}>
                                                                         <Table.Cell>{row["asset"]}</Table.Cell>
-                                                                        <Table.Cell>{row["date"]}</Table.Cell>
-                                                                        <Table.Cell>{row["faultType"]}</Table.Cell>
+                                                                        <Table.Cell>{row["maintenanceTime"]}</Table.Cell>
                                                                         <Table.Cell>{row["maintenanceType"]}</Table.Cell>
-                                                                        <Table.Cell>{row["reason"]}</Table.Cell>
-                                                                        <Table.Cell>{row["duration"]}</Table.Cell>
+                                                                        <Table.Cell>{row["maintenanceReason"]}</Table.Cell>
+                                                                        <Table.Cell>{row["maintenanceDownTime"]}</Table.Cell>
                                                                         <Table.Cell>
                                                                             <FlexBox margin={ComponentSize.Medium} >
                                                                                 <Button
@@ -828,7 +855,7 @@ class MaintenancePage extends PureComponent<Props, State> {
                                                         distanceFromTrigger={8}
                                                         enableDefaultStyles={false}
                                                         contents={() => (
-                                                            <p>Import in this order: asset, sid, date, faultType, maintenanceType, request, reason, jobDescription, duration</p>
+                                                            <p>Import in this order: Asset,Failure,Factory ID,Date,Cost,Down Time,Info,Reason,Request,Type,Person Responsible</p>
                                                         )}
                                                     />
                                                     {
