@@ -1,0 +1,13 @@
+ * Serving Flask app "main" (lazy loading)
+ * Environment: production
+   WARNING: This is a development server. Do not use it in a production deployment.
+   Use a production WSGI server instead.
+ * Debug mode: on
+Traceback (most recent call last):
+  File "main.py", line 80, in <module>
+    app.run(debug = True, port = 9632)
+  File "/usr/local/lib/python3.8/dist-packages/flask/app.py", line 990, in run
+    run_simple(host, port, self, **options)
+  File "/usr/local/lib/python3.8/dist-packages/werkzeug/serving.py", line 990, in run_simple
+    s.bind(server_address)
+OSError: [Errno 98] Address already in use

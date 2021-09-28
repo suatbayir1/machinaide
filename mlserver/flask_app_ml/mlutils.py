@@ -1,5 +1,13 @@
 from datetime import datetime, timedelta
+from dateutil import parser, relativedelta
+from mlconstants import (
+    CELL_URL,
+    GET_FAILURE_URL,
+    POST_TRAINING_INSERT_URL,
+    UPDATE_CELL_URL
+)
 from influxdb import InfluxDBClient
+from influxdb_client import InfluxDBClient as idbc
 # from influxdb_client.client.write_api import SYNCHRONOUS
 from sklearn.preprocessing import MinMaxScaler
 import pandas as pd
@@ -64,6 +72,18 @@ def root_mean_squared_error(sequence_length):
     return loss
 
 
+# class POFQueryHelper:
+#     def __init__(self, settings):
+#         self.host = settings['host']
+#         self.port = settings['port']
+#         self.database = settings['database']
+#         self.client = InfluxDBClient(host= self.host, port=self.port, database=self.database) 
+    
+#     def queryDB(self, query):
+#         res = self.client.query(query)
+#         return res
+
+
 class QueryHelper:
     def __init__(self, settings):
         self.host = settings['host']
@@ -108,6 +128,83 @@ class QueryHelper:
         return queries
 
 
+    # def _build_influx20_queries(
+    #     self,
+    #     measurement_to_sensors,
+    #     startTime,
+    #     endTime
+    # ):
+    #     queries = ''
+    #     for measurement, sensors in measurement_to_sensors.items():
+    #         for sensor in sensors:
+    #             query = 'from(bucket: "{}")\
+    #             |> range(start: {}, stop: {})\
+    #             |> filter(fn: (r) => r._measurement == "{}")\
+    #             |> filter(fn: (r) => r._field == "{}")'
+    #             queries += query
+    #     print(queries, "uuu")
+    #     return queries
+
+
+    def _build_influx_2_weibull_queries(
+        self,
+        # measurement,
+        # sensor,
+        measurement_to_sensor,
+        startTime,
+        endTime,
+        groupWith
+    ):
+        # fn_string = ''
+        query_list = list()
+        for measurement, sensors in measurement_to_sensor.items():
+            query = 'from(bucket: "{}")\
+                |> range(start:{}, stop:{})\
+                |> filter(fn: (r) => r._measurement == "{}")\
+                |> filter(fn: (r) => '.format(
+                    self.db_name,
+                    startTime,
+                    endTime,
+                    measurement
+                )
+            for i, sensor in enumerate(sensors):
+                if i != len(sensors) - 1:
+                    query += 'r._field == "{}" or '.format(sensor)
+                else:
+                    query += 'r._field == "{}")'.format(sensor)
+            query_list.append(query)
+        # query = 'from(bucket: "{}")\
+        # |> range(start:{}, stop:{})\
+        # {}\
+        # |> aggregateWindow(every: 1h, fn: {})'.format(
+        #     self.db_name,
+        #     startTime,
+        #     endTime,
+        #     fn_string,
+        #     # measurement,
+        #     # sensor,
+        #     groupWith
+        # )
+
+        return query_list
+
+
+    def _build_influx_weibull_queries(
+        self,
+        measurement,
+        sensor,
+        startTime,
+        endTime,
+        groupWith
+    ):
+        query = 'SELECT {}("{}")\
+            AS "{}_{}" FROM "{}"."autogen"."{}" WHERE time > \'{}\' AND time < \'{}\'\
+                GROUP BY time(1h)'.format(groupWith, sensor, groupWith, sensor, 
+            self.db_name, measurement, startTime, endTime)
+
+        return query
+
+
     def _build_influx_queries(
         self,
         measurement_to_sensors,
@@ -126,7 +223,6 @@ class QueryHelper:
                     endTime
                 )
                 queries += query
-        print(queries, "uuu")
         return queries
 
 
@@ -216,17 +312,22 @@ class QueryHelper:
     @property
     def influxdb(self):
         if self._influxdb is None:
-            self._influxdb = InfluxDBClient(
-                host=self.host,
-                port=self.port,
-                database=self.db_name,
-                #username=self.dbuser,
-                #password=self.dbuser_password,
-                #ssl=self.use_ssl,
-                #verify_ssl = self.verify_ssl
-            )
+            # self._influxdb = InfluxDBClient(
+            #     host=self.host,
+            #     port=self.port,
+            #     database=self.db_name,
+            #     #username=self.dbuser,
+            #     #password=self.dbuser_password,
+            #     #ssl=self.use_ssl,
+            #     #verify_ssl = self.verify_ssl
+            # )
+            org = "machinaide"
+            token = "-Y8yuCS19k6ZD0FLiVvpY-zcEK4VhbBe6HC7WPKR7Z5X2bkm-Ag2iMJUSDSBOugpG6klF2XEddhCMkHRuJPbsQ=="
 
-        return self._influxdb
+            self._influxdb = idbc(url="http://localhost:8080", token=token, org=org)
+
+
+        return self._influxdb.query_api()
 
     @property
     def alertClient(self):
@@ -245,6 +346,246 @@ class QueryHelper:
         return self._alertClient
 
 
+class MongoHelper:
+    def get_failures(self, part_name):
+        res = requests.get(url=GET_FAILURE_URL + part_name).json()
+        failures = []
+        for failure in res:
+            failure["failureStartTime"] = parser.parse(failure["failureStartTime"])
+            failures.append(failure)
+
+        failures.sort(key=lambda r: r["failureStartTime"])
+        return failures
+
+
+    def update_cell_data(self, cell_data):
+        res = requests.post(url=UPDATE_CELL_URL, json=cell_data)
+
+
+    def post_cell_data(self, cell_data):
+        res = requests.post(url=CELL_URL, json=cell_data)
+
+
+    def post_training_data(self, post_training_data):
+        res = requests.post(url=POST_TRAINING_INSERT_URL, json=post_training_data)
+
+
+class Influx2QueryHelper:
+    def __init__(self, settings):
+        self.host = settings['host']
+        self.port = settings['port']
+        self.db_name = settings['db']
+        #self.create_database = settings['create_database']
+        #self.dbuser = settings['dbuser']
+        #self.dbuser_password = settings['dbuser_password']
+        self.retention_policy = settings['rp']
+
+        if 'use_ssl' in settings.keys():
+            self.use_ssl = settings['use_ssl']
+        else:
+            self.use_ssl = False
+        
+        if 'verify_ssl' in settings.keys():
+            self.verify_ssl = settings['verify_ssl']
+        else:
+            self.verify_ssl = False
+        
+        self._influxdb = None
+        self._alertClient = None
+
+
+    def _build_influx_weibull_queries(
+        self,
+        measurement_to_sensor,
+        startTime,
+        endTime,
+        groupWith
+    ):
+        query_list = list()
+        for measurement, sensors in measurement_to_sensor.items():
+            query = 'from(bucket: "{}")\
+                |> range(start:{}, stop:{})\
+                |> filter(fn: (r) => r._measurement == "{}")\
+                |> filter(fn: (r) => '.format(
+                    self.db_name,
+                    startTime,
+                    endTime,
+                    measurement
+                )
+            for i, sensor in enumerate(sensors):
+                if i != len(sensors) - 1:
+                    query += 'r._field == "{}" or '.format(sensor)
+                else:
+                    query += 'r._field == "{}")'.format(sensor)
+            query += '|> aggregateWindow(every: 1h, fn: {})'.format(
+                groupWith
+            )
+            query_list.append(query)
+
+        return query_list
+
+    def _build_influx_queries(
+        self,
+        measurement_to_sensors,
+        startTime,
+        endTime
+    ):
+        query_list = list()
+        for measurement, sensors in measurement_to_sensors.items():
+            query = 'from(bucket: "{}")\
+                |> range(start:{}, stop:{})\
+                |> filter(fn: (r) => r._measurement == "{}")\
+                |> filter(fn: (r) => '.format(
+                    self.db_name,
+                    startTime,
+                    endTime,
+                    measurement
+                )
+            for i, sensor in enumerate(sensors):
+                if i != len(sensors) - 1:
+                    query += 'r._field == "{}" or '.format(sensor)
+                else:
+                    query += 'r._field == "{}")'.format(sensor)
+
+        return query_list
+
+
+    def query_weibull(self, measurement_to_sensor, startTime, endTime, groupWith):
+        query_list = self._build_influx_weibull_queries(measurement_to_sensor, startTime, endTime, groupWith)
+        final_results = list()
+        for query in query_list:
+            results = self.influxdb.query(query=query)
+            try:
+                results = self.influxdb.query(query)
+            except Exception as e:
+                print(e, "aaaa")
+                exit()
+            for table in results:
+                for j, record in enumerate(table.records):
+                    timeval = record.get_time()
+                    val = record.get_value()
+                    if j < len(final_results):
+                        final = final_results[j]
+                    else:
+                        final = {
+                            'time': timeval,
+                            #'mod': int(str_to_ts(timeval)) % group_by,
+                            'values': {},
+                        }
+                        final_results.append(final)
+
+                    final['values'][record.get_field()] = val
+
+        return final_results
+
+    def query(self, measurement_to_sensor, startTime, endTime):
+        query_list = self._build_influx_queries(measurement_to_sensor, startTime, endTime)
+        final_results = list()
+        for query in query_list:
+            results = self.influxdb.query(query=query)
+            try:
+                results = self.influxdb.query(query)
+            except Exception as e:
+                print(e, "aaaa")
+                exit()
+            for table in results:
+                for j, record in enumerate(table.records):
+                    timeval = record.get_time()
+                    val = record.get_value()
+                    if j < len(final_results):
+                        final = final_results[j]
+                    else:
+                        final = {
+                            'time': timeval,
+                            #'mod': int(str_to_ts(timeval)) % group_by,
+                            'values': {},
+                        }
+                        final_results.append(final)
+
+                    final['values'][record.get_field()] = val
+
+        sensor_names = []
+        for measurement, sensors in measurement_to_sensor.items():
+            for sensor in sensors:
+                sensor_names.append(sensor)
+
+        return final_results, sensor_names
+
+    
+    def get_measurements_on_db(self):
+        query = 'import "influxdata/influxdb/schema"\n\nschema.measurements(bucket: "{}")'.format(self.db_name)
+        tables = self.influxdb.query(query=query)
+        measurements = list()
+        for table in tables:
+            for record in table.records:
+                for measurement in record.values:
+                    measurements.append(measurement)
+
+        return measurements
+
+    
+    def get_fields_on_measurement(self, measurement):
+        query = 'import "influxdata/influxdb/schema"\n\nschema.measurementFieldKeys(bucket: "{}", measurement: "{}")'.format(
+            self.db_name,
+            measurement
+        )
+        tables = self.influxdb.query(query=query)
+        fields = list()
+        for table in tables:
+            for record in table.records:
+                for field in record.values:
+                    fields.append(field)
+
+        return fields
+
+    
+    def query_measurement_values(self, measurement, startTime, endTime):
+        query = 'from(bucket: "{}")\
+                |> range(start:{}, stop:{})\
+                |> filter(fn: (r) => r._measurement == "{}")'.format(
+                    self.db_name,
+                    startTime,
+                    endTime,
+                    measurement
+                )
+        results = self.influxdb.query(query=query)
+        final_results = list()
+        try:
+            results = self.influxdb.query(query)
+        except Exception as e:
+            print(e, "aaaa")
+            exit()
+        for table in results:
+            for j, record in enumerate(table.records):
+                timeval = record.get_time()
+                val = record.get_value()
+                if j < len(final_results):
+                    final = final_results[j]
+                else:
+                    final = {
+                        'time': timeval,
+                        #'mod': int(str_to_ts(timeval)) % group_by,
+                        'values': {},
+                    }
+                    final_results.append(final)
+
+                final['values'][record.get_field()] = val
+
+        return final_results
+
+
+
+    @property
+    def influxdb(self):
+        if self._influxdb is None:
+            org = "machinaide"
+            token = "-Y8yuCS19k6ZD0FLiVvpY-zcEK4VhbBe6HC7WPKR7Z5X2bkm-Ag2iMJUSDSBOugpG6klF2XEddhCMkHRuJPbsQ=="
+
+            self._influxdb = idbc(url="http://localhost:8080", token=token, org=org)
+
+
+        return self._influxdb.query_api()
+
 class MLPreprocessor:
     def __init__(self, raw_data):
         self.raw_data = raw_data
@@ -255,7 +596,7 @@ class MLPreprocessor:
         for _, point in enumerate(self.raw_data):
             row = {"time": point['time']}
             if "cycle" in cols:
-                row["cycle"] = _ + 1
+                row["cycle"] = _
             for val in point['values']:
                 row[val] = point['values'][val]
             df = df.append(row, ignore_index=True)
@@ -270,7 +611,7 @@ class MLPreprocessor:
         df = df.fillna(method ='pad')
         return df
 
-    
+
     def _iqr(self, df):
         for col in df:
             if col == "time":
@@ -348,9 +689,29 @@ class WindowSeperator:
         return windows
                 
 
+def merge_machine_data(data):
+        one_merged = pd.DataFrame(data[0])
+        for i in range(1,len(data)):
+            one_merged = pd.merge(one_merged, pd.DataFrame(data[i]), on="time")
+        cycle = 0
+        for i in range(len(one_merged["time"])):
+            one_merged["time"][i] = cycle
+            cycle += 1
+
+        return one_merged.to_dict("records")
 
 
+def list_to_dataframe(arr):
+    df = pd.DataFrame(arr)
+    if df.empty:
+        print('DataFrame is empty!')
 
+        return None
+    else:
+        df = df.fillna(0)
+        print("nan", df.isnull().sum())
+        print("inf", np.isinf(df).values.sum())
 
+        return df
 
             

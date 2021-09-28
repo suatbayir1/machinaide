@@ -1,11 +1,24 @@
 from flask import Flask, request, jsonify
 from flask_pymongo import PyMongo
+import datetime
+from bson import ObjectId
 import os
+from flask_cors import CORS
+import json
 
 
 app = Flask(__name__)
-app.config["MONGO_URI"] = "mongodb://machinaide:erste2020@localhost:27017/machineLearning"
+app.config["MONGO_URI"] = "mongodb://machinaide:erste2020@localhost:27017/machineLearning?authSource=admin"
 mongo = PyMongo(app)
+CORS(app)
+
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        if isinstance(o, (datetime.date, datetime.datetime)):
+            return o.isoformat()
+        return json.JSONEncoder.default(self, o)
 
 @app.route('/insertPostTrainingData', methods=['POST'])
 def insert_post_training_data():
@@ -15,6 +28,20 @@ def insert_post_training_data():
     return "CREATED", 201
 
 
+@app.route('/getSessions', methods=['GET'])
+def get_sessions():
+    sessions = mongo.db.ml_sessions.find({})
+
+    return json.dumps(list(sessions), cls=JSONEncoder)
+
+
+@app.route('/postSession', methods=['POST'])
+def post_session():
+    session = request.json
+    mongo.db.ml_sessions.insert_one(session)
+
+    return "CREATED", 201
+
 
 @app.route('/postModelData', methods=['POST'])
 def post_model_data():
@@ -22,6 +49,13 @@ def post_model_data():
     mongo.db.model_data.insert_one(model_data)
 
     return "CREATED", 201
+
+
+@app.route('/getModelData/<session_id>', methods=['GET'])
+def get_model_data(session_id):
+    model_data = mongo.db.model_data.find({"sessionID": session_id})
+
+    return json.dumps(list(model_data), cls=JSONEncoder)
 
 
 @app.route('/updateModelData', methods=['POST'])

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PROJECT_FOLDER=/home/suat/Desktop/machinaide
+PROJECT_FOLDER=/home/machinaide
 
 
 # start API

@@ -73,3 +73,7 @@
 2021-04-08T17:34:08.432+0200 I STORAGE  [signalProcessingThread] shutdown: removing fs lock...
 2021-04-08T17:34:08.432+0200 I CONTROL  [signalProcessingThread] now exiting
 2021-04-08T17:34:08.432+0200 I CONTROL  [signalProcessingThread] shutting down with code:0
+ts=2021-09-26T16:00:56.859267Z lvl=info msg="Welcome to InfluxDB" log_id=0WpiFf6W000 version=dev commit=bac5515a0a build_date=2021-09-26T16:00:50Z
+ts=2021-09-26T16:00:57.813360Z lvl=error msg="Failed opening bolt" log_id=0WpiFf6W000 error="unable to open boltdb; is there a chronograf already running?  timeout"
+Error: unable to open boltdb; is there a chronograf already running?  timeout
+See 'influxd -h' for help

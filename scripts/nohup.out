@@ -1,0 +1,4 @@
+python3: can't open file 'main.py': [Errno 2] No such file or directory
+yarn run v1.22.5
+error Couldn't find a package.json file in "/home/machinaide/scripts"
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.

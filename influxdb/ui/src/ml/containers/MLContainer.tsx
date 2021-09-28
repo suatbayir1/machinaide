@@ -14,9 +14,18 @@ import { Page,
     ButtonType,
     Panel,
     Input,
-    Table
+    Table,
+    FlexBox,
+    Popover,
+    Appearance,
+    DateRangePicker,
+    IconFont,
+    PopoverInteraction,
+    PopoverPosition,
+    SquareButton
 } from '@influxdata/clockface'
 import ModelTable from 'src/ml/components/MLTable'
+import { Link } from 'react-router-dom'
 
 interface Props { }
 
@@ -26,53 +35,56 @@ interface State {
     modelName: string,
     database: string,
     task: string,
-    component: string
+    component: string,
+    aggregateFunction: string,
+    extraDropdown: boolean
 }
 
 
-let placeHolderModels = [{
-    modelID: "2345236",
-    hardware: "jcopress",
-    modelName: "AnomalyModel1",
-    algorithm: "Anomaly Detection",
-    status: "idle"
-}, {
-    modelID: "45645745",
-    hardware: "jcopress",
-    modelName: "AnomalyModel2",
-    algorithm: "Anomaly Detection",
-    status: "train"
-}, {
-    modelID: "32536",
-    hardware: "jcopress",
-    modelName: "PrognosticModel1",
-    algorithm: "RUL",
-    status: "idle"
-}, {
-    modelID: "346212345",
-    hardware: "jcopress",
-    modelName: "AnomalyModel3",
-    algorithm: "Anomaly Detection",
-    status: "idle"
-}, {
-    modelID: "6325432",
-    hardware: "jcopress",
-    modelName: "PrognosticModel2",
-    algorithm: "RUL",
-    status: "train"
-}, {
-    modelID: "4567",
-    hardware: "jcopress",
-    modelName: "PrognosticModel3",
-    algorithm: "RUL",
-    status: "running"
-}, {
-    modelID: "3253435246",
-    hardware: "jcopress",
-    modelName: "PrognosticModel4",
-    algorithm: "RUL",
-    status: "running"
-},]
+// let placeHolderModels = [{
+//     modelID: "2345236",
+//     hardware: "jcopress",
+//     modelName: "AnomalyModel1",
+//     algorithm: "Anomaly Detection",
+//     status: "idle"
+// }, {
+//     modelID: "45645745",
+//     hardware: "jcopress",
+//     modelName: "AnomalyModel2",
+//     algorithm: "Anomaly Detection",
+//     status: "train"
+// }, {
+//     modelID: "32536",
+//     hardware: "jcopress",
+//     modelName: "PrognosticModel1",
+//     algorithm: "RUL",
+//     status: "idle"
+// }, {
+//     modelID: "346212345",
+//     hardware: "jcopress",
+//     modelName: "AnomalyModel3",
+//     algorithm: "Anomaly Detection",
+//     status: "idle"
+// }, {
+//     modelID: "6325432",
+//     hardware: "jcopress",
+//     modelName: "PrognosticModel2",
+//     algorithm: "RUL",
+//     status: "train"
+// }, {
+//     modelID: "4567",
+//     hardware: "jcopress",
+//     modelName: "PrognosticModel3",
+//     algorithm: "RUL",
+//     status: "running"
+// }, {
+//     modelID: "3253435246",
+//     hardware: "jcopress",
+//     modelName: "PrognosticModel4",
+//     algorithm: "RUL",
+//     status: "running"
+// },]
+let placeHolderModels = []
 
 
 class MLPage extends PureComponent<Props, State> {
@@ -85,12 +97,26 @@ class MLPage extends PureComponent<Props, State> {
             modelName: "",
             database: "",
             component: "",
-            task: ""
+            task: "",
+            aggregateFunction: "",
+            extraDropdown: false
         }
     }
 
-    onChange = (e) => {
-        console.log(e)
+    onTaskChange = (e) => {
+        this.setState({task: e, extraDropdown: (e === "Learn the probability of failure")})
+    }
+
+    onDatabaseChange = (e) => {
+        this.setState({database: e})
+    }
+
+    onComponentChange = (e) => {
+        this.setState({component: e})
+    }
+
+    onAggregateChange = (e) => {
+        this.setState({aggregateFunction: e})
     }
 
     private get jobItems(): JSX.Element[] {
@@ -100,7 +126,7 @@ class MLPage extends PureComponent<Props, State> {
             id={"option1"}
             key={"option1"}
             value={"Perform anomaly detection"}
-            onClick={this.onChange}
+            onClick={this.onTaskChange}
           >
             Perform anomaly detection
               </Dropdown.Item>,
@@ -109,7 +135,7 @@ class MLPage extends PureComponent<Props, State> {
             id={"option2"}
             key={"option2"}
             value={"Learn the remaining useful lifetime"}
-            onClick={this.onChange}
+            onClick={this.onTaskChange}
           >
             Learn the remaining useful lifetime
               </Dropdown.Item>,
@@ -118,7 +144,7 @@ class MLPage extends PureComponent<Props, State> {
             id={"option3"}
             key={"option3"}
             value={"Learn the probability of failure"}
-            onClick={this.onChange}
+            onClick={this.onTaskChange}
         >
             Learn the probability of failure
             </Dropdown.Item>,
@@ -131,7 +157,7 @@ class MLPage extends PureComponent<Props, State> {
             id={"database1"}
             key={"database1"}
             value={"JCOPress"}
-            onClick={this.onChange}
+            onClick={this.onDatabaseChange}
             >
             JCOPress
                 </Dropdown.Item>
@@ -144,7 +170,7 @@ class MLPage extends PureComponent<Props, State> {
             id={"component1"}
             key={"component1"}
             value={"component1"}
-            onClick={this.onChange}
+            onClick={this.onComponentChange}
             >
             Component1
                 </Dropdown.Item>,
@@ -153,11 +179,56 @@ class MLPage extends PureComponent<Props, State> {
             id={"component2"}
             key={"component2"}
             value={"component2"}
-            onClick={this.onChange}
+            onClick={this.onComponentChange}
             >
             Component2
                 </Dropdown.Item>
         ]
+    }
+
+    private get optionsComponents(): JSX.Element {
+        return (
+            <React.Fragment>
+                <FlexBox margin={ComponentSize.Small} style={{ marginRight: '10%' }}>
+                    <Link to={`/orgs/${this.props["match"].params["orgID"]}/advanced-ml`}>
+                        <Button
+                            text="Advanced ML"
+                            onClick={() => { console.log("Advanced") }}
+                            type={ButtonType.Button}
+                            icon={IconFont.Search}
+                            color={ComponentColor.Primary}
+                        />
+                    </Link>
+                </FlexBox>
+            </React.Fragment>
+        )
+    }
+
+    private get extraItems(): JSX.Element[] {
+        return [
+            <Dropdown.Item
+            testID="dropdown-item generate-token--read-write"
+            id={"max"}
+            key={"max"}
+            value={"max"}
+            onClick={this.onAggregateChange}
+            >
+            Max
+                </Dropdown.Item>,
+            <Dropdown.Item
+            testID="dropdown-item generate-token--read-write"
+            id={"mean"}
+            key={"mean"}
+            value={"mean"}
+            onClick={this.onAggregateChange}
+            >
+            Mean
+                </Dropdown.Item>
+        ]
+    }
+
+    onGoClicked = () => {
+        
     }
 
     public render(): JSX.Element {
@@ -165,12 +236,16 @@ class MLPage extends PureComponent<Props, State> {
         const dropdownItems = [
             this.jobItems,
             this.databaseItems,
-            this.componentItems
+            this.componentItems,
+            this.extraItems
         ]
         return (
             <Page>
                 <Page.Header fullWidth={true}>
                     <Page.Title title={"Machine Learning"} />
+                    {
+                        this.optionsComponents
+                    }
                 </Page.Header>
 
                 <Page.Contents fullWidth={true} scrollable={true}>
@@ -213,6 +288,9 @@ class MLPage extends PureComponent<Props, State> {
                                                     color={ComponentColor.Primary}
                                                     testID="dropdown-button--gen-token"
                                                 >
+                                                    {header === "I want to..." ? (this.state.task):(
+                                                        header === "Database" ? (this.state.database) : (this.state.component)
+                                                    )}
                                                 </Dropdown.Button>
                                                 )}
                                                 menu={onCollapse => (
@@ -237,6 +315,32 @@ class MLPage extends PureComponent<Props, State> {
                                                 />
                                             </Table.Cell>
                                         </Table.Row>
+                                        {this.state.extraDropdown ? (
+                                            <Table.Row key={"Aggregate Function"}>
+                                                <Table.Cell>{"Aggregate Function"}</Table.Cell>
+                                                <Table.Cell>
+                                                <Dropdown
+                                                    testID="dropdown--gen-token"
+                                                    style={{ width: '160px' }}
+                                                    button={(active, onClick) => (
+                                                    <Dropdown.Button
+                                                        active={active}
+                                                        onClick={onClick}
+                                                        color={ComponentColor.Primary}
+                                                        testID="dropdown-button--gen-token"
+                                                    >
+                                                        {this.state.aggregateFunction}
+                                                    </Dropdown.Button>
+                                                    )}
+                                                    menu={onCollapse => (
+                                                    <Dropdown.Menu onCollapse={onCollapse}>
+                                                        {dropdownItems[3]}
+                                                    </Dropdown.Menu>
+                                                    )}
+                                                    />
+                                                </Table.Cell>
+                                            </Table.Row>
+                                        ):(null)}
                                     </Table.Body>
                                 </Table>
                                 <br/>

@@ -38,10 +38,10 @@ class MLLSTM:
         self.session_id = session_id
         self.model_id = model_id
 
-        self.vector_length = int(parameters[0])
-        self.epochs = int(parameters[1])
-        self.s_min = int(parameters[2])
-        self.s_max = int(parameters[3])
+        self.vector_length = int(parameters["Input Vector Size"]["Value"])
+        self.epochs = int(parameters["Epochs"]["Value"])
+        self.s_min = int(parameters["Scaling-Min"]["Value"])
+        self.s_max = int(parameters["Scaling-Max"]["Value"])
         self.input_dim = len(input_columns)
         self.output_dim = len(output_columns)
 

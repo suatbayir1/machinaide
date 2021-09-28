@@ -1,5 +1,8 @@
+from mlweibull import MLWeibull
 import time
 import datetime
+from numpy import Inf
+from dateutil import relativedelta
 import requests
 import os
 import uuid
@@ -19,8 +22,20 @@ from mlconstants import (
     AUTOML_VECTOR_LENGTH,
     POST_TRAINING_INSERT_URL,
     MODELDIR,
+    ML_INFLUX_VERSION
 )
-from mlutils import QueryHelper, MLPreprocessor
+from mlutils import (
+    QueryHelper,
+    MongoHelper,
+    Influx2QueryHelper,
+    MLPreprocessor,
+    list_to_dataframe,
+    merge_machine_data, 
+    to_sequences, 
+    root_mean_squared_error, 
+    inverse_transform_output, 
+    transform_value
+)
 # from mlarima import MLARIMA
 # from mlkmeans import MLKMEANS
 # from mliforest import MLIFOREST
@@ -31,25 +46,30 @@ from mlauto import MyBayesianOptimization, MyHyperband, MyModelBuilder, MyRandom
 from multiprocessing import Process
 from pebble import concurrent
 from cnn import CNN
-from mlutils import to_sequences, root_mean_squared_error, inverse_transform_output, transform_value
 
 
 # hyper_manager = KerasHyperManager()
 # hyper_manager.start()
 
 class MLSession(Process):
-    def __init__(self, session_id, creator, db_settings, start_time, end_time, measurement_sensor_dict, kill_sig_queue):
+    def __init__(self, session_id, creator, db_settings, start_time, end_time, type, measurement_sensor_dict, kill_sig_queue):
         super().__init__()
         self.session_id = session_id
         self.creator = creator
         self.db_settings = db_settings
-        self.start_time = '%d' % (time.mktime(datetime.datetime.strptime(start_time, "%Y-%m-%dT%H:%M").timetuple()) * 1000000000)
-        self.end_time = '%d' % (time.mktime(datetime.datetime.strptime(end_time, "%Y-%m-%dT%H:%M").timetuple()) * 1000000000)
+        if str(ML_INFLUX_VERSION) == "2":
+            self.start_time = '%d' % time.mktime(datetime.datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S.%fZ").timetuple())
+            self.end_time = '%d' % time.mktime(datetime.datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S.%fZ").timetuple())
+        else:
+            self.start_time = '%d' % (time.mktime(datetime.datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S.%fZ").timetuple()) * 1000000000)
+            self.end_time = '%d' % (time.mktime(datetime.datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S.%fZ").timetuple()) * 1000000000)
+        self.type = type
         self.measurement_sensor_dict = measurement_sensor_dict
         self.kill_sig_queue = kill_sig_queue
 
         self.influx_helper = None
         self.preprocess_helper = None
+        self.mongo_helper = None
         self._train_futures = {}
         self.model_IDs = []
         self.input_columns = []
@@ -57,17 +77,28 @@ class MLSession(Process):
 
 
     @property
-    def influx_client(self):
+    def influx_client(self):            
         if self.influx_helper == None:
-            self.influx_helper = QueryHelper(self.db_settings)
+            if str(ML_INFLUX_VERSION) == "2":
+                self.influx_helper = Influx2QueryHelper(self.db_settings)
+            else:
+                self.influx_helper = QueryHelper(self.db_settings)
         return self.influx_helper
 
 
     @property
     def preprocessor(self):
         if self.preprocess_helper == None:
+
             self.preprocess_helper = MLPreprocessor(self.raw_data)
         return self.preprocess_helper
+
+
+    @property
+    def mongo_client(self):
+        if self.mongo_helper == None:
+            self.mongo_helper = MongoHelper()
+        return self.mongo_helper
 
 
     @concurrent.thread
@@ -106,15 +137,22 @@ class MLSession(Process):
         self.output_columns.sort()
 
 
-    def _post_info(self, alg, model_id, params, creator):
+    def _post_info(self, alg, model_id, params, creator, job):
         pkg = {
                 "Algorithm": alg,
-                "sessionID": self.session_id,
-                "modelID": model_id,
-                "Status": "train",
+                "sessionID": str(self.session_id),
+                "modelID": str(model_id),
+                "Status": "training",
                 "Parameters": params,
+                "MetaInfo": {
+                    "Creator": creator,
+                    "Created": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "Job": job,
+                    "Hardware": self.sensor_names
+                }
         }
-        requests.post(url=CELL_URL, json=pkg)
+        self.mongo_client.post_cell_data(pkg)
+        # requests.post(url=CELL_URL, json=pkg)
 
         # meta = {
         #     "modelID": model_id,
@@ -126,11 +164,119 @@ class MLSession(Process):
         # requests.post(url=METAURL, json=meta)
 
 
+class POFSession(MLSession):
+    def __init__(self, settings, algs, params, kill_sig_queue):
+        MLSession.__init__(self, settings['sessionID'], settings['creator'], settings['dbSettings'],
+                            settings['startTime'], settings['endTime'], settings['type'], settings['sensors'], kill_sig_queue)
+        self.algs = algs
+        self.params = params
+
+
+    def _query_weibull(self, failures):
+        pd_data = list()
+        for fail in failures:
+            ten_days = fail["failureStartTime"] - relativedelta.relativedelta(days=10)
+            before_ten_days = []
+            
+            for failure in failures:
+                if failure["failureStartTime"]>ten_days and failure["failureStartTime"]<fail["failureStartTime"]:
+                    before_ten_days.append(failure)
+            if len(before_ten_days):
+                ten_days = before_ten_days[-1]["failureStartTime"]
+                duration_start_date = ten_days
+                duration_end_date = fail["failureStartTime"]
+                if self.type == "machine":
+                    measurements = self.influx_client.get_measurements_on_db()
+                    all_data = list()
+                    for measurement in measurements:
+                        data_points = list()
+                        # fields = self.influx_client.get_fields_on_measurement(measurement)
+                        raw_data = self.influx_client.query_measurement_values(measurement, duration_start_date, duration_end_date)
+                        for entry in raw_data:
+                            data_point = {
+                                "time": entry['time'],
+                            }
+                            for field in entry['values'].keys():
+                                key = measurement + "." + field
+                                data_point[key] = entry['values'][field]
+                            data_points.append(data_point)
+                        all_data.append(data_points)
+                    pd_data = pd_data + merge_machine_data(all_data)
+                elif self.type == "component":
+                    measurement = list(self.measurement_sensor_dict["Input"].keys())[0]
+                    raw_data = self.influx_client.query_measurement_values(measurement, duration_start_date, duration_end_date)
+                    cycle = 0
+                    for entry in raw_data:
+                        data_point = {
+                            "time": cycle,
+                        }
+                        cycle += 1
+                        for field in entry['values'].keys():
+                            data_point[field] = entry['values'][field]
+                        pd_data.append(data_point)
+                elif self.type == "sensor":
+                    raw_data = self.influx_client.query_weibull(
+                        self.measurement_sensor_dict["Input"],
+                        duration_start_date,
+                        duration_end_date,
+                        self.params['Weibull'][0]
+                    )
+                        
+                    cycle = 0
+                    for entry in raw_data:
+                        data_point = {
+                            "time": cycle,
+                        }
+                        cycle += 1
+                        for field in entry['values'].keys():
+                            data_point[field] = entry['values'][field]
+                        pd_data.append(data_point)
+                    
+        df = list_to_dataframe(pd_data)
+
+        for key in self.measurement_sensor_dict["Input"].keys():
+            for col in self.measurement_sensor_dict["Input"][key]: 
+                self.input_columns.append(col)
+        self.input_columns.sort()
+
+        for key in self.measurement_sensor_dict["Output"].keys():
+            for col in self.measurement_sensor_dict["Output"][key]: 
+                self.output_columns.append(col)
+        self.output_columns.sort()
+
+        return df
+
+
+    def start_session(self):
+        if "Weibull" in self.algs:
+            failures = self.mongo_helper.get_failures()
+            weibull_dataframe = self._query_weibull(failures)
+
+        for i, alg in enumerate(self.algs):
+            mid = uuid.uuid4()
+            self.model_IDs.append(mid.hex)
+            if alg == "Weibull":
+                weibull_model = MLWeibull(weibull_dataframe, 
+                    self.input_columns, 
+                    self.output_columns,
+                    self.db_settings,
+                    self.session_id,
+                    self.model_IDs[i],
+                    self.params["Weibull"][0]
+                )
+                self._train_futures[self.model_IDs[i]] = weibull_model.run()
+            self._post_info(alg, self.model_IDs[i], self.params[alg], self.creator)
+
+
+    def run(self):
+        self._listen_for_kill_signal()
+        self.start_session()
+
 
 class ADSession(MLSession):
     def __init__(self, settings, algs, params, kill_sig_queue):
         MLSession.__init__(self, settings['sessionID'], settings['creator'], settings['dbSettings'], 
-                            settings['startTime'], settings['endTime'], settings['sensors'], kill_sig_queue)
+                            settings['startTime'], settings['endTime'], "AD", settings['sensors'], kill_sig_queue)
         self.algs = algs
         self.params = params
 
@@ -145,7 +291,7 @@ class ADSession(MLSession):
                 lstm_model = MLLSTM(dataframe, self.input_columns, self.output_columns, self.session_id, 
                                     self.model_IDs[i], self.params[alg], self.db_settings)
                 self._train_futures[self.model_IDs[i]] = lstm_model.run()
-            self._post_info(alg, self.model_IDs[i], self.params[alg], self.creator)
+            self._post_info(alg, self.model_IDs[i], self.params[alg], self.creator, "Anomaly Detection")
 
 
     def run(self):
@@ -202,6 +348,7 @@ class AutoMLSession:
     @property
     def influx_client(self):
         if self.influx_helper == None:
+            
             self.influx_helper = QueryHelper(self.db_settings)
         return self.influx_helper
 

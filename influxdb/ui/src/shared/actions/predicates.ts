@@ -290,7 +290,6 @@ export const setValuesByKey = (bucketName: string, keyName: string) => async (
   getState: GetState
 ) => {
   const orgID = getOrg(getState()).id
-
   try {
     const query = `import "influxdata/influxdb/v1" v1.tagValues(bucket: "${bucketName}", tag: "${keyName}")`
     const values = await extractBoxedCol(runQuery(orgID, query), '_value')

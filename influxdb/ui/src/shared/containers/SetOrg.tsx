@@ -59,6 +59,7 @@ import MachineActionsPage from 'src/side_nav/components/machineActions/container
 
 // ML
 import MLContainer from "src/ml/containers/MLContainer";
+import MLAdvancedContainer from "src/ml/containers/MLAdvancedContainer"
 
 import PermittedRoute from 'src/shared/middleware/PermittedRoute';
 
@@ -186,6 +187,7 @@ const SetOrg: FC<Props> = ({
 
         {/* ML */}
         <Route exact path={`${orgPath}/ml`} component={MLContainer} />
+        <Route exact path={`${orgPath}/advanced-ml`} component={MLAdvancedContainer} />
 
 
 

@@ -18,19 +18,22 @@ def get_sensor_names():
     data = db.find("digital_twin")
     json_data = json.loads(dumps(list(data), indent = 2))
 
+    plList = []
     machineList = []
     componentList = []
     sensorList = []
 
     for factory in json_data:
         factoryName = factory["factoryName"]
-        for machine in factory["machines"]:
-            machineList.append(machine['name'])
-            for component in machine["contents"]:
-                if component["@type"] == "Component":
-                    componentList.append(component['name'])
-                    for sensor in component["sensors"]:
-                        sensorList.append(sensor['name'])
+        for pl in factory["productionLines"]:
+            plList.append(pl["name"])
+            for machine in pl["machines"]:
+                machineList.append(machine['name'])
+                for component in machine["contents"]:
+                    if component["@type"] == "Component":
+                        componentList.append(component['name'])
+                        for sensor in component["sensors"]:
+                            sensorList.append(sensor['name'])
 
     return sensorList
 
