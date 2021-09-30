@@ -58,6 +58,13 @@ def get_model_data(session_id):
     return json.dumps(list(model_data), cls=JSONEncoder)
 
 
+@app.route('/getCellData/<session_id>/<model_id>', methods=['GET'])
+def get_cell_data(session_id, model_id):
+    cell_data = mongo.db.model_data.find({"sessionID": session_id, "modelID": model_id})
+
+    return json.dumps(list(cell_data), cls=JSONEncoder)
+
+
 @app.route('/updateModelData', methods=['POST'])
 def update_model_data():
     update_data = request.json
@@ -79,7 +86,7 @@ def get_post_training_data(session_id, model_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=7392)
+    app.run(debug=True, host="0.0.0.0", port=7393)
 
 
 

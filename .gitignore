@@ -6,3 +6,4 @@ backend/influxdbmanager/Pres31_DB2.csv
 influxdb/ui/node_modules/
 influxdb/go1.13.9.linux-amd64.tar.gz
 influxdb/ui/.env
+influxdb/ui/assets/reports/

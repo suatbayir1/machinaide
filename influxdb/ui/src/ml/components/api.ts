@@ -3,7 +3,7 @@ import AJAX from 'src/utils/ajax'
 let BASE_URL = "http://localhost:8000"
 let BASE_URL2 = "http://localhost:9798"
 
-let MONGO_URL = "http://localhost:7392"
+let MONGO_URL = "http://localhost:7393"
 let ALERT_URL = "http://localhost:7494"
 
 export const cancelTraining = (sessionID, modelID) => AJAX({
@@ -109,6 +109,13 @@ export const issueTrainingJob = (pkg) => AJAX({
     data: pkg,
 })
 
+export const issueAutoTrainingJob = (pkg) => AJAX({
+    url: BASE_URL + '/queueTrainingSession/auto',
+    //excludeBasePath: true,
+    method:'POST',
+    data: pkg
+})
+
 export const issueBasicTrainingJob = (pkg, task) => AJAX({
     url: BASE_URL2 + '/basicTraining/' + task,
     //excludeBasePath: true,
@@ -118,6 +125,7 @@ export const issueBasicTrainingJob = (pkg, task) => AJAX({
 
 
 export const getCellData = async (sessionID, modelID) => {
+    console.log("getcelldata")
     const response = await AJAX({
         url: MONGO_URL + '/getCellData/' + sessionID + '/' + modelID,
         //excludeBasePath: true,
@@ -188,13 +196,11 @@ export const acceptModel = async(modelObj) => AJAX({
 
 
 export const getCellCount = async (sessionID) => {
-    console.log(sessionID, "sesid")
     const response = await AJAX({
         url: MONGO_URL + '/getModelData/' + sessionID,
         //excludeBasePath: true,
         method: 'GET'
     })
-    console.log(response.data, "index")
 
     return response.data
 }

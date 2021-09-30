@@ -82,7 +82,7 @@ function CellSection({
                                     testID="dashboard-card--name"/>
                             )
                         }
-                        else if (key !== "sessionID" && key !== "modelID" && key !== "Parameters" && key !== "MetaInfo") {
+                        else if (key!== "_id" && key !== "sessionID" && key !== "modelID" && key !== "Parameters" && key !== "MetaInfo" && key !== "Explanation") {
                             return (
                                 <ResourceCard.Description
                                     description={key + ":" + model[key]}/>

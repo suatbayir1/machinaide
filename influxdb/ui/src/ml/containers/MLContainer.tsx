@@ -26,6 +26,8 @@ import { Page,
 } from '@influxdata/clockface'
 import ModelTable from 'src/ml/components/MLTable'
 import { Link } from 'react-router-dom'
+import * as api from '../components/api'
+
 
 interface Props { }
 
@@ -228,7 +230,33 @@ class MLPage extends PureComponent<Props, State> {
     }
 
     onGoClicked = () => {
-        
+        let sessionID = new Date().getTime()
+        let days = 10
+        let pkg = {
+            tunerType: "hyperband",
+            experimentName: sessionID.toString() + "-auto",
+            "nepochs": 5,
+            "nfeatures": 1,
+            "username": "berkayd1812@gmail.com",
+            "timeout": 10,
+            "sessionID": sessionID.toString(),
+            "startTime": new Date(sessionID - (days * 24 * 60 * 60 * 1000)),
+            "endTime":sessionID,
+            "dbSettings": {
+                "host": "localhost",
+                "port": 8080,
+                "db": this.state.database,
+                "rp": "autogen"
+            },
+            "sensors": {
+                "Input": {
+                    "Bendingsword": ["Bendingsword.Act_force_cyl.act_force_diff_cyl_1"]
+                },
+                "Output": {
+                    "Bendingsword": ["Bendingsword.Act_force_cyl.act_force_diff_cyl_1"]
+                }
+            }
+        }
     }
 
     public render(): JSX.Element {
