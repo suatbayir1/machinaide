@@ -89,7 +89,7 @@ class TreeSidebar extends PureComponent<Props> {
                 return <a href={item.link.location} className={className} />
               }
 
-              return <Link to={item.link.location} className={className} />
+              return <Link to={item.link.location} className={className} id={item.id} />
             }
             let navItemElement = (
               <TreeNav.Item

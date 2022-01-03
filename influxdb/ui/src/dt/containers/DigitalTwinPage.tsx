@@ -66,8 +66,8 @@ class DigitalTwinPage extends PureComponent<Props, State> {
             <Grid.Row>
               <Grid.Column
                 widthXS={Columns.Twelve}
-                widthSM={Columns.Four}
-                widthMD={Columns.Two}
+                widthSM={Columns.Twelve}
+                widthMD={Columns.Four}
                 widthLG={Columns.Two}
                 style={{ marginTop: '20px' }}
               >
@@ -83,8 +83,8 @@ class DigitalTwinPage extends PureComponent<Props, State> {
               </Grid.Column>
               <Grid.Column
                 widthXS={Columns.Twelve}
-                widthSM={Columns.Eight}
-                widthMD={Columns.Six}
+                widthSM={Columns.Twelve}
+                widthMD={Columns.Eight}
                 widthLG={Columns.Six}
                 style={{ marginTop: '20px' }}
               >
@@ -99,19 +99,22 @@ class DigitalTwinPage extends PureComponent<Props, State> {
                   orgID={this.props["match"].params.orgID}
                 />
               </Grid.Column>
-              <Grid.Column
-                widthXS={Columns.Twelve}
-                widthSM={Columns.Twelve}
-                widthMD={Columns.Four}
-                widthLG={Columns.Four}
-                style={{ marginTop: '20px' }}
-              >
-                <DigitalTwinVisualize
-                  selectedGraphNode={selectedGraphNode}
-                  resultNLPQuery={resultNLPQuery}
-                  refreshVisualizePage={refreshVisualizePage}
-                />
-              </Grid.Column>
+              <div id="dt-3d-scene">
+                <Grid.Column
+                  widthXS={Columns.Twelve}
+                  widthSM={Columns.Twelve}
+                  widthMD={Columns.Twelve}
+                  widthLG={Columns.Four}
+                  style={{ marginTop: '20px' }}
+                >
+                  <DigitalTwinVisualize
+                    selectedGraphNode={selectedGraphNode}
+                    resultNLPQuery={resultNLPQuery}
+                    refreshVisualizePage={refreshVisualizePage}
+                  />
+                </Grid.Column>
+              </div>
+
             </Grid.Row>
           </Grid>
         </Page.Contents>

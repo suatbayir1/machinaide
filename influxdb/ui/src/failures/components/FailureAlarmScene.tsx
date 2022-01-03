@@ -1122,7 +1122,7 @@ class FailureAlarmScene extends PureComponent<Props, State> {
         }
 
         return [
-            < Dropdown
+            <Dropdown
                 key="changeMachineDropdown"
                 style={{ width: '150px', marginRight: '10px' }}
                 button={(active, onClick) => (

@@ -90,6 +90,7 @@ class MaterialsButtons extends PureComponent<Props, State> {
                                 color={ComponentColor.Success}
                                 onClick={() => this.setState({ visibleImportFile: true })}
                                 style={{ width: '110px' }}
+                                className="show-pc-or-tablet"
                             />
                         }
                         {
@@ -101,6 +102,7 @@ class MaterialsButtons extends PureComponent<Props, State> {
                                 color={ComponentColor.Primary}
                                 style={{ width: '110px' }}
                                 onClick={() => { this.props.handleOpenAddMaterial() }}
+                                className="show-pc-or-tablet"
                             />
                         }
                     </FlexBox>

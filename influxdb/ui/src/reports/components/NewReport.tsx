@@ -268,12 +268,17 @@ class NewReport extends PureComponent<Props, State> {
 
         return (
             <>
-                <Panel style={{ marginTop: '30px' }}>
+                <Panel style={{ marginTop: '30px' }} id="new-report-page">
                     <Panel.Header size={ComponentSize.ExtraSmall}>
                         <Grid>
                             <Grid.Row>
-                                {/* FIRST LEFT SIDE */}
-                                <Grid.Column widthXS={Columns.Six}>
+                                {/* Report Details */}
+                                <Grid.Column
+                                    widthXS={Columns.Twelve}
+                                    widthSM={Columns.Twelve}
+                                    widthMD={Columns.Six}
+                                    widthLG={Columns.Six}
+                                >
                                     <Panel style={{ backgroundColor: '#292933', padding: '10px' }}>
                                         <FlexBox
                                             style={{ marginBottom: '20px' }}
@@ -294,7 +299,12 @@ class NewReport extends PureComponent<Props, State> {
                                         </FlexBox>
 
                                         <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element
                                                     label="Author"
                                                     required={true}
@@ -308,7 +318,12 @@ class NewReport extends PureComponent<Props, State> {
                                                 </Form.Element>
                                             </Grid.Column>
 
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element
                                                     label="Report Title"
                                                     required={true}
@@ -324,7 +339,12 @@ class NewReport extends PureComponent<Props, State> {
                                         </Grid.Row>
 
                                         <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element
                                                     label="Repeat"
                                                 >
@@ -336,7 +356,12 @@ class NewReport extends PureComponent<Props, State> {
                                                 </Form.Element>
                                             </Grid.Column>
 
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element
                                                     label="Schedule Report As"
                                                     required={true}
@@ -354,8 +379,13 @@ class NewReport extends PureComponent<Props, State> {
                                     </Panel>
                                 </Grid.Column>
 
-                                {/* FIRST RIGHT SIDE */}
-                                <Grid.Column widthXS={Columns.Six}>
+                                {/* Select Targets and Options */}
+                                <Grid.Column
+                                    widthXS={Columns.Twelve}
+                                    widthSM={Columns.Twelve}
+                                    widthMD={Columns.Six}
+                                    widthLG={Columns.Six}
+                                >
                                     <Panel style={{ backgroundColor: '#292933', padding: '10px' }}>
                                         <FlexBox
                                             style={{ marginBottom: '20px' }}
@@ -376,7 +406,12 @@ class NewReport extends PureComponent<Props, State> {
                                         </FlexBox>
 
                                         <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Four}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Four}
+                                                widthLG={Columns.Four}
+                                            >
                                                 <Form.Element
                                                     label="Factory"
                                                     required={true}
@@ -389,7 +424,12 @@ class NewReport extends PureComponent<Props, State> {
                                                 </Form.Element>
                                             </Grid.Column>
 
-                                            <Grid.Column widthXS={Columns.Four}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Four}
+                                                widthLG={Columns.Four}
+                                            >
                                                 <Form.Element
                                                     label="Machine"
                                                     required={true}
@@ -402,7 +442,12 @@ class NewReport extends PureComponent<Props, State> {
                                                 </Form.Element>
                                             </Grid.Column>
 
-                                            <Grid.Column widthXS={Columns.Four}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Four}
+                                                widthLG={Columns.Four}
+                                            >
                                                 <Form.Element
                                                     label="Component"
                                                 >
@@ -414,10 +459,13 @@ class NewReport extends PureComponent<Props, State> {
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
-                                        </Grid.Row>
 
-                                        <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Twelve}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Twelve}
+                                                widthLG={Columns.Twelve}
+                                            >
                                                 <Form.Element
                                                     label="Brief Description of Report"
                                                 >
@@ -444,7 +492,7 @@ class NewReport extends PureComponent<Props, State> {
                                         display: 'flex',
                                     }}
                                 >
-                                    <FlexBox margin={ComponentSize.Large}>
+                                    <FlexBox margin={ComponentSize.Large} className="toggle-container">
                                         <FlexBox margin={ComponentSize.Medium}>
                                             <SlideToggle
                                                 active={sendReportAsEmail}
@@ -469,10 +517,15 @@ class NewReport extends PureComponent<Props, State> {
                             </Grid.Row>
 
                             <Grid.Row style={{ marginTop: '20px' }}>
-                                {/* FIRST LEFT SIDE */}
+                                {/* Email Configuration (Optional) */}
                                 {
                                     sendReportAsEmail &&
-                                    <Grid.Column widthXS={Columns.Six}>
+                                    <Grid.Column
+                                        widthXS={Columns.Twelve}
+                                        widthSM={Columns.Twelve}
+                                        widthMD={Columns.Six}
+                                        widthLG={Columns.Six}
+                                    >
                                         <Panel style={{ backgroundColor: '#292933', padding: '10px' }}>
                                             <FlexBox
                                                 style={{ marginBottom: '20px' }}
@@ -493,7 +546,12 @@ class NewReport extends PureComponent<Props, State> {
                                             </FlexBox>
 
                                             <Grid.Row>
-                                                <Grid.Column widthXS={Columns.Six}>
+                                                <Grid.Column
+                                                    widthXS={Columns.Twelve}
+                                                    widthSM={Columns.Six}
+                                                    widthMD={Columns.Six}
+                                                    widthLG={Columns.Six}
+                                                >
                                                     <Form.Element
                                                         label="Email Subject Heading"
                                                         required={true}
@@ -508,7 +566,12 @@ class NewReport extends PureComponent<Props, State> {
                                                     </Form.Element>
                                                 </Grid.Column>
 
-                                                <Grid.Column widthXS={Columns.Six}>
+                                                <Grid.Column
+                                                    widthXS={Columns.Twelve}
+                                                    widthSM={Columns.Six}
+                                                    widthMD={Columns.Six}
+                                                    widthLG={Columns.Six}
+                                                >
                                                     <Form.Element
                                                         label="Default Email Message"
                                                     >
@@ -524,7 +587,12 @@ class NewReport extends PureComponent<Props, State> {
                                             </Grid.Row>
 
                                             <Grid.Row>
-                                                <Grid.Column widthXS={Columns.Six}>
+                                                <Grid.Column
+                                                    widthXS={Columns.Twelve}
+                                                    widthSM={Columns.Six}
+                                                    widthMD={Columns.Six}
+                                                    widthLG={Columns.Six}
+                                                >
                                                     <FlexBox
                                                         style={{ marginBottom: '20px' }}
                                                         margin={ComponentSize.Medium}
@@ -582,10 +650,15 @@ class NewReport extends PureComponent<Props, State> {
                                     </Grid.Column>
                                 }
 
-                                {/* FIRST RIGHT SIDE */}
+                                {/* Cloud Configuration (Optional) */}
                                 {
                                     saveToCloud &&
-                                    <Grid.Column widthXS={Columns.Six}>
+                                    <Grid.Column
+                                        widthXS={Columns.Twelve}
+                                        widthSM={Columns.Twelve}
+                                        widthMD={Columns.Six}
+                                        widthLG={Columns.Six}
+                                    >
                                         <Panel style={{ backgroundColor: '#292933', padding: '10px' }}>
                                             <FlexBox
                                                 style={{ marginBottom: '20px' }}
@@ -607,7 +680,12 @@ class NewReport extends PureComponent<Props, State> {
                                             </FlexBox>
 
                                             <Grid.Row>
-                                                <Grid.Column widthXS={Columns.Six}>
+                                                <Grid.Column
+                                                    widthXS={Columns.Twelve}
+                                                    widthSM={Columns.Six}
+                                                    widthMD={Columns.Six}
+                                                    widthLG={Columns.Six}
+                                                >
                                                     <Form.Element
                                                         label="Cloud Provider"
                                                     >
@@ -620,7 +698,12 @@ class NewReport extends PureComponent<Props, State> {
                                                     </Form.Element>
                                                 </Grid.Column>
 
-                                                <Grid.Column widthXS={Columns.Six}>
+                                                <Grid.Column
+                                                    widthXS={Columns.Twelve}
+                                                    widthSM={Columns.Six}
+                                                    widthMD={Columns.Six}
+                                                    widthLG={Columns.Six}
+                                                >
                                                     <Form.Element
                                                         label="Cloud Bucket Name"
                                                     >
@@ -633,10 +716,13 @@ class NewReport extends PureComponent<Props, State> {
                                                         />
                                                     </Form.Element>
                                                 </Grid.Column>
-                                            </Grid.Row>
 
-                                            <Grid.Row>
-                                                <Grid.Column widthXS={Columns.Six}>
+                                                <Grid.Column
+                                                    widthXS={Columns.Twelve}
+                                                    widthSM={Columns.Six}
+                                                    widthMD={Columns.Six}
+                                                    widthLG={Columns.Six}
+                                                >
                                                     <Form.Element
                                                         label="Cloud Object Name"
                                                     >

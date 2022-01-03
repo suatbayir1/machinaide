@@ -150,7 +150,7 @@ class MaintenancePage extends PureComponent<Props, State> {
         // get all data
         if (this.state.selectedFactory === "ALL") {
             this.state.tableData.map(row => {
-                let rowStartTime = new Date(row["date"]);
+                let rowStartTime = new Date(row["maintenanceTime"]);
 
                 if (rowStartTime >= startLower && rowStartTime <= startUpper) {
                     filteredRows.push(row);
@@ -165,7 +165,7 @@ class MaintenancePage extends PureComponent<Props, State> {
         // get all data of selected factory
         if (this.state.selectedMachine === "ALL" && this.state.selectedComponent === "ALL" && this.state.selectedSensor === "ALL") {
             this.state.tableData.map(row => {
-                let rowStartTime = new Date(row["date"]);
+                let rowStartTime = new Date(row["maintenanceTime"]);
 
                 if (row["factoryID"] === this.state.selectedFactory
                     && rowStartTime >= startLower && rowStartTime <= startUpper
@@ -182,7 +182,7 @@ class MaintenancePage extends PureComponent<Props, State> {
         // get all data of selected factory and machine
         if (this.state.selectedComponent === "ALL" && this.state.selectedSensor === "ALL") {
             this.state.tableData.map(row => {
-                let rowStartTime = new Date(row["date"]);
+                let rowStartTime = new Date(row["maintenanceTime"]);
                 let splitSource = row["asset"].split(".");
 
                 if (row["factoryID"] === this.state.selectedFactory
@@ -201,7 +201,7 @@ class MaintenancePage extends PureComponent<Props, State> {
         // get all data of selected factory, machine and component
         if (this.state.selectedSensor === "ALL") {
             this.state.tableData.map(row => {
-                let rowStartTime = new Date(row["date"]);
+                let rowStartTime = new Date(row["maintenanceTime"]);
                 let splitSource = row["asset"].split(".");
 
                 if (row["factoryID"] === this.state.selectedFactory
@@ -220,7 +220,7 @@ class MaintenancePage extends PureComponent<Props, State> {
 
         // get all data of selected factory, machine, component and sensor
         this.state.tableData.map(row => {
-            let rowStartTime = new Date(row["date"]);
+            let rowStartTime = new Date(row["maintenanceTime"]);
             let splitSource = row["asset"].split(".");
 
             if (row["factoryID"] === this.state.selectedFactory
@@ -471,8 +471,6 @@ class MaintenancePage extends PureComponent<Props, State> {
     }
 
     createCSV = () => {
-        console.log("filteredData", this.state.filteredData)
-
         const { filteredData } = this.state;
         let now = new Date().toISOString();
         let headers = ["Asset,Failure,Date,Cost,Down Time,Info,Reason,Request,Type,Person Responsible,Source ID"]
@@ -566,7 +564,7 @@ class MaintenancePage extends PureComponent<Props, State> {
     private get optionsComponents(): JSX.Element {
         return (
             <React.Fragment>
-                <FlexBox margin={ComponentSize.Small} style={{ marginRight: '10%' }}>
+                <FlexBox margin={ComponentSize.Small}>
                     <p style={{ fontSize: '12px', fontWeight: 600 }}>Maintenance Date</p>
                     <Popover
                         appearance={Appearance.Outline}
@@ -683,13 +681,18 @@ class MaintenancePage extends PureComponent<Props, State> {
                             </Breadcrumbs>
 
                             <Page.Contents fullWidth={true} scrollable={true}>
-                                <Grid.Column widthXS={Columns.One}>
-                                </Grid.Column>
-
-                                <Grid.Column widthXS={Columns.Ten}>
+                                <Grid.Column
+                                    widthLG={Columns.Ten}
+                                    offsetLG={Columns.One}
+                                >
                                     <Grid style={{ marginTop: "50px", marginBottom: '100px', background: '#292933', padding: '20px' }}>
                                         <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Three}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Three}
+                                            >
                                                 <Form.Element label="Factory">
                                                     <SelectDropdown
                                                         options={this.state.factories}
@@ -698,7 +701,12 @@ class MaintenancePage extends PureComponent<Props, State> {
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.Three}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Three}
+                                            >
                                                 <Form.Element label="Machine">
                                                     <SelectDropdown
                                                         options={this.state.machines}
@@ -707,7 +715,12 @@ class MaintenancePage extends PureComponent<Props, State> {
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.Three}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Three}
+                                            >
                                                 <Form.Element label="Component">
                                                     <SelectDropdown
                                                         options={this.state.components}
@@ -716,7 +729,12 @@ class MaintenancePage extends PureComponent<Props, State> {
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.Three}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Three}
+                                            >
                                                 <Form.Element label="Sensor">
                                                     <SelectDropdown
                                                         options={this.state.sensors}
@@ -773,6 +791,7 @@ class MaintenancePage extends PureComponent<Props, State> {
                                                                                 {
                                                                                     ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
                                                                                     <Button
+                                                                                        id="maintenance-table-edit-button"
                                                                                         size={ComponentSize.ExtraSmall}
                                                                                         icon={IconFont.Pencil}
                                                                                         color={ComponentColor.Primary}
@@ -808,10 +827,11 @@ class MaintenancePage extends PureComponent<Props, State> {
 
 
                                         <Grid.Row style={{ marginTop: '50px' }}>
-                                            <div style={{ float: 'right' }}>
+                                            <div className="maintenance-table-float-div">
                                                 <FlexBox margin={ComponentSize.Small}>
                                                     <Dropdown
-                                                        style={{ width: '110px' }}
+                                                        style={{ minWidth: '110px' }}
+                                                        id="maintenance-table-exports-button"
                                                         button={(active, onClick) => (
                                                             <Dropdown.Button
                                                                 active={active}
@@ -862,6 +882,7 @@ class MaintenancePage extends PureComponent<Props, State> {
                                                         ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
                                                         <Button
                                                             ref={this.importButtonRef}
+                                                            id="maintenance-table-import-button"
                                                             text="Import"
                                                             type={ButtonType.Button}
                                                             icon={IconFont.Import}
@@ -873,6 +894,7 @@ class MaintenancePage extends PureComponent<Props, State> {
                                                     {
                                                         ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
                                                         <Button
+                                                            id="maintenance-table-add-button"
                                                             text="Add"
                                                             type={ButtonType.Button}
                                                             icon={IconFont.Plus}

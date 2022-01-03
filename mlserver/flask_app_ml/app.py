@@ -8,11 +8,14 @@ import subprocess
 from flask_cors import CORS
 from multiprocessing import Queue
 from mlwrappers import ADSession, POFSession, AutoMLSession, ModelRunner
+import uuid
+from pathlib import Path
 from mlconstants import (
     G_ALGS,
     GET_POST_TRAINING_URL,
     AUTO_SETTINGS_DIR,
-    G_INFO
+    G_INFO,
+    INSERT_BASIC_URL
 )
 
 
@@ -69,37 +72,55 @@ def queue_training_session(auto=None):
         session_kill_queues[settings['sessionID']] = kill_sig_queue
         session.start()
     else:
-        if ('tunerType' not in settings.keys()
-           or 'experimentName' not in settings.keys()
-           or 'nfeatures' not in settings.keys()
-           or 'nepochs' not in settings.keys()
-           or 'dbSettings' not in settings.keys()
-           or 'username' not in settings.keys()
-           or 'timeout' not in settings.keys()
-           or 'endTime' not in settings.keys()
-           or 'startTime' not in settings.keys()
-           or 'sensors' not in settings.keys()
-           or 'sessionID' not in settings.keys()):
-            return "BAD REQUEST: Missing key.", 400
-        session = AutoMLSession(settings)
-        automl_futures[settings['sessionID']] = session.run()    
-        global process
+        if ('tuner_type' not in settings.keys()
+            or 'modelName' not in settings.keys()
+            or 'nfeatures' not in settings.keys()
+            or 'nepochs' not in settings.keys()
+            or 'dbSettings' not in settings.keys()
+            or 'username' not in settings.keys()
+            or 'timeout' not in settings.keys()
+            # or 'endTime' not in settings.keys()
+            # or 'startTime' not in settings.keys()
+            or 'sensors' not in settings.keys()
+            or 'sessionID' not in settings.keys()
+            or 'task' not in settings.keys()):
+                return "BAD REQUEST: Missing key3333.", 400
+        # session = AutoMLSession(settings)
+        # automl_futures[settings['sessionID']] = session.run()    
+        # global process
         if not os.path.isdir(AUTO_SETTINGS_DIR):
-            os.mkdir(AUTO_SETTINGS_DIR)
+            os.makedirs(AUTO_SETTINGS_DIR)
 
-        experiment_name = settings['experimentName']
+
+
+        experiment_name = settings['modelName']
         username = settings['username']
+        username = username.replace(".com", "")
+        username = username.replace(".","-")
+        settings["username"] = username
+        pkg = {
+            "modelID": uuid.uuid4().hex,
+            "hardware": list(settings['sensors']["Input"].keys())[0],
+            "modelName": experiment_name,
+            "task": settings['task'],
+            "algorithm": "undecided",
+            "status": "train"
+        }
+        settings["modelID"] = pkg["modelID"]
         t_dir = AUTO_SETTINGS_DIR + experiment_name + "-" + username + ".json"
         with open(t_dir, 'w') as fp:
             json.dump(settings, fp)
         timeout = str(settings['timeout']) + "h"
         cmd = "timeout -k 10 " + timeout + \
             " python3 automl_runner.py -e " + experiment_name + \
-            " -u " + username
+            " -u " + username + " -t " + settings['task']
         print(cmd)
+
+
+        requests.post(url=INSERT_BASIC_URL, json=pkg)
         process = subprocess.Popen(cmd.split(), close_fds=True)
         msg = "experiment " + experiment_name + " started with timeout " + timeout + " from user: " + username
-        return {"msg": msg}
+        # return {"msg": msg}
     return "OK", 201
 
 
@@ -162,3 +183,26 @@ def startInferenceJob(session_id, model_id):
     inference_futures[session_id][model_id] = runner.run()
 
     return "OK", 201
+
+
+@server.route('/getProgress/<name>', methods=['GET'])
+def getProgress(name):
+    starts_with = "Epoch "
+    file_path = "progress-logs/" + name + ".txt"
+    if Path(file_path).exists():
+        with open(file_path,"r") as f:
+            lines = []
+            for ln in f:
+                if ln.startswith(starts_with):
+                    lines.append(ln[len(starts_with):])
+            if(len(lines) and len(lines[-1])):
+                state = lines[-1][:-1]
+                # print(state, state.split("/"))
+                progress = state.split("/")
+            else:
+                # print("here")
+                progress = ["0", "100"]
+    else:
+        # print("hallo")
+        progress = ["-1", "100"]
+    return jsonify(progress=progress)

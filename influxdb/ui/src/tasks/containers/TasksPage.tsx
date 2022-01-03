@@ -1,13 +1,13 @@
 // Libraries
-import React, {PureComponent} from 'react'
-import {connect, ConnectedProps} from 'react-redux'
-import {Switch, Route} from 'react-router-dom'
+import React, { PureComponent } from 'react'
+import { connect, ConnectedProps } from 'react-redux'
+import { Switch, Route } from 'react-router-dom'
 
 // Components
 import TasksHeader from 'src/tasks/components/TasksHeader'
 import TasksList from 'src/tasks/components/TasksList'
-import {Page} from '@influxdata/clockface'
-import {ErrorHandling} from 'src/shared/decorators/errors'
+import { Page } from '@influxdata/clockface'
+import { ErrorHandling } from 'src/shared/decorators/errors'
 import FilterList from 'src/shared/components/FilterList'
 import GetResources from 'src/resources/components/GetResources'
 import GetAssetLimits from 'src/cloud/components/GetAssetLimits'
@@ -17,7 +17,7 @@ import TaskImportOverlay from 'src/tasks/components/TaskImportOverlay'
 import TaskImportFromTemplateOverlay from 'src/tasks/components/TaskImportFromTemplateOverlay'
 
 // Utils
-import {pageTitleSuffixer} from 'src/shared/utils/pageTitles'
+import { pageTitleSuffixer } from 'src/shared/utils/pageTitles'
 
 // Actions
 import {
@@ -34,21 +34,21 @@ import {
   setShowInactive as setShowInactiveAction,
 } from 'src/tasks/actions/creators'
 
-import {checkTaskLimits as checkTasksLimitsAction} from 'src/cloud/actions/limits'
+import { checkTaskLimits as checkTasksLimitsAction } from 'src/cloud/actions/limits'
 
 // Types
-import {AppState, Task, ResourceType} from 'src/types'
-import {RouteComponentProps} from 'react-router-dom'
-import {Sort} from '@influxdata/clockface'
-import {SortTypes} from 'src/shared/utils/sort'
-import {extractTaskLimits} from 'src/cloud/utils/limits'
-import {TaskSortKey} from 'src/shared/components/resource_sort_dropdown/generateSortItems'
+import { AppState, Task, ResourceType } from 'src/types'
+import { RouteComponentProps } from 'react-router-dom'
+import { Sort } from '@influxdata/clockface'
+import { SortTypes } from 'src/shared/utils/sort'
+import { extractTaskLimits } from 'src/cloud/utils/limits'
+import { TaskSortKey } from 'src/shared/components/resource_sort_dropdown/generateSortItems'
 
 // Selectors
-import {getAll} from 'src/resources/selectors'
+import { getAll } from 'src/resources/selectors'
 
 type ReduxProps = ConnectedProps<typeof connector>
-type Props = ReduxProps & RouteComponentProps<{orgID: string}>
+type Props = ReduxProps & RouteComponentProps<{ orgID: string }>
 
 interface State {
   isImporting: boolean
@@ -80,7 +80,7 @@ class TasksPage extends PureComponent<Props, State> {
   }
 
   public render(): JSX.Element {
-    const {sortKey, sortDirection, sortType} = this.state
+    const { sortKey, sortDirection, sortType } = this.state
     const {
       setSearchTerm,
       updateTaskName,
@@ -95,7 +95,7 @@ class TasksPage extends PureComponent<Props, State> {
 
     return (
       <>
-        <Page titleTag={pageTitleSuffixer(['Tasks'])}>
+        <Page titleTag={pageTitleSuffixer(['Tasks'])} className="show-only-pc">
           <TasksHeader
             onCreateTask={this.handleCreateTask}
             setShowInactive={setShowInactive}
@@ -174,7 +174,7 @@ class TasksPage extends PureComponent<Props, State> {
     sortDirection: Sort,
     sortType: SortTypes
   ) => {
-    this.setState({sortKey, sortDirection, sortType})
+    this.setState({ sortKey, sortDirection, sortType })
   }
 
   private handleActivate = (task: Task) => {
@@ -193,7 +193,7 @@ class TasksPage extends PureComponent<Props, State> {
     const {
       history,
       match: {
-        params: {orgID},
+        params: { orgID },
       },
     } = this.props
 
@@ -204,7 +204,7 @@ class TasksPage extends PureComponent<Props, State> {
     const {
       history,
       match: {
-        params: {orgID},
+        params: { orgID },
       },
     } = this.props
 
@@ -215,7 +215,7 @@ class TasksPage extends PureComponent<Props, State> {
     const {
       history,
       match: {
-        params: {orgID},
+        params: { orgID },
       },
     } = this.props
 
@@ -223,7 +223,7 @@ class TasksPage extends PureComponent<Props, State> {
   }
 
   private get filteredTasks(): Task[] {
-    const {tasks, showInactive} = this.props
+    const { tasks, showInactive } = this.props
     const matchingTasks = tasks.filter(t => {
       let activeFilter = true
       if (!showInactive) {
@@ -241,7 +241,7 @@ class TasksPage extends PureComponent<Props, State> {
   }
 
   private get hiddenTaskAlert(): JSX.Element {
-    const {showInactive, tasks} = this.props
+    const { showInactive, tasks } = this.props
 
     const hiddenCount = tasks.filter(t => t.status === 'inactive').length
 
@@ -265,9 +265,9 @@ class TasksPage extends PureComponent<Props, State> {
 const mstp = (state: AppState) => {
   const {
     resources,
-    cloud: {limits},
+    cloud: { limits },
   } = state
-  const {status, searchTerm, showInactive} = resources.tasks
+  const { status, searchTerm, showInactive } = resources.tasks
 
   return {
     tasks: getAll<Task>(state, ResourceType.Tasks),

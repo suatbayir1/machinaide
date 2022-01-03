@@ -1,15 +1,15 @@
 // Libraries
-import React, {PureComponent} from 'react'
-import {connect, ConnectedProps} from 'react-redux'
-import {withRouter, RouteComponentProps} from 'react-router-dom'
+import React, { PureComponent } from 'react'
+import { connect, ConnectedProps } from 'react-redux'
+import { withRouter, RouteComponentProps } from 'react-router-dom'
 
 // Components
-import {Page, IconFont, Sort} from '@influxdata/clockface'
+import { Page, IconFont, Sort } from '@influxdata/clockface'
 import TaskRunsList from 'src/tasks/components/TaskRunsList'
 import CloudUpgradeButton from 'src/shared/components/CloudUpgradeButton'
 
 // Types
-import {AppState, Run} from 'src/types'
+import { AppState, Run } from 'src/types'
 import {
   SpinnerContainer,
   TechnoSpinner,
@@ -18,16 +18,16 @@ import {
 } from '@influxdata/clockface'
 
 // Actions
-import {getRuns, runTask} from 'src/tasks/actions/thunks'
+import { getRuns, runTask } from 'src/tasks/actions/thunks'
 
 // Utils
-import {pageTitleSuffixer} from 'src/shared/utils/pageTitles'
+import { pageTitleSuffixer } from 'src/shared/utils/pageTitles'
 
 // Types
-import {SortTypes} from 'src/shared/utils/sort'
+import { SortTypes } from 'src/shared/utils/sort'
 
 type ReduxProps = ConnectedProps<typeof connector>
-type Props = ReduxProps & RouteComponentProps<{id: string; orgID: string}>
+type Props = ReduxProps & RouteComponentProps<{ id: string; orgID: string }>
 
 interface State {
   sortKey: SortKey
@@ -48,15 +48,15 @@ class TaskRunsPage extends PureComponent<Props, State> {
   }
 
   public render() {
-    const {match, runs} = this.props
-    const {sortKey, sortDirection, sortType} = this.state
+    const { match, runs } = this.props
+    const { sortKey, sortDirection, sortType } = this.state
 
     return (
       <SpinnerContainer
         loading={this.props.runStatus}
         spinnerComponent={<TechnoSpinner />}
       >
-        <Page titleTag={pageTitleSuffixer(['Task Runs'])}>
+        <Page titleTag={pageTitleSuffixer(['Task Runs'])} className="show-only-pc">
           <Page.Header fullWidth={false}>
             <Page.Title title={this.title} />
             <CloudUpgradeButton />
@@ -103,11 +103,11 @@ class TaskRunsPage extends PureComponent<Props, State> {
       sortType = SortTypes.Date
     }
 
-    this.setState({sortKey, sortDirection: nextSort, sortType})
+    this.setState({ sortKey, sortDirection: nextSort, sortType })
   }
 
   private get title() {
-    const {currentTask} = this.props
+    const { currentTask } = this.props
 
     if (currentTask) {
       return `${currentTask.name} - Runs`
@@ -116,7 +116,7 @@ class TaskRunsPage extends PureComponent<Props, State> {
   }
 
   private handleRunTask = () => {
-    const {onRunTask, match, getRuns} = this.props
+    const { onRunTask, match, getRuns } = this.props
     onRunTask(match.params.id)
     getRuns(match.params.id)
   }
@@ -126,7 +126,7 @@ class TaskRunsPage extends PureComponent<Props, State> {
       history,
       currentTask,
       match: {
-        params: {orgID},
+        params: { orgID },
       },
     } = this.props
 
@@ -135,7 +135,7 @@ class TaskRunsPage extends PureComponent<Props, State> {
 }
 
 const mstp = (state: AppState) => {
-  const {runs, runStatus, currentTask} = state.resources.tasks
+  const { runs, runStatus, currentTask } = state.resources.tasks
 
   return {
     runs,

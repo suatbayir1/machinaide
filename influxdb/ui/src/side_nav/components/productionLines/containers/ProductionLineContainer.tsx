@@ -101,9 +101,12 @@ class ProductionLine extends PureComponent<Props, State> {
                                 <Grid>
                                     <Grid.Row>
                                         <Grid.Column
-                                            widthXS={Columns.Four}
+                                            widthXS={Columns.Twelve}
+                                            widthSM={Columns.Twelve}
+                                            widthMD={Columns.Twelve}
+                                            widthLG={Columns.Four}
                                             key={productionLine["id"]}
-                                            style={{ borderRight: '1px solid white' }}
+                                            id="production-line-card"
                                         >
                                             <ProductionLineCard
                                                 productionLine={productionLine}
@@ -113,7 +116,10 @@ class ProductionLine extends PureComponent<Props, State> {
                                         </Grid.Column>
 
                                         <Grid.Column
-                                            widthXS={Columns.Eight}
+                                            widthXS={Columns.Twelve}
+                                            widthSM={Columns.Twelve}
+                                            widthMD={Columns.Twelve}
+                                            widthLG={Columns.Eight}
                                         >
                                             <ProductionLineDashboardPanel
                                                 orgID={this.props["match"].params.orgID}

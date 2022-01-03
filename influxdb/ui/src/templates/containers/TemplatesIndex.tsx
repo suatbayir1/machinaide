@@ -1,11 +1,11 @@
-import React, {Component} from 'react'
-import {RouteComponentProps} from 'react-router-dom'
-import {connect, ConnectedProps} from 'react-redux'
-import {Switch, Route} from 'react-router-dom'
+import React, { Component } from 'react'
+import { RouteComponentProps } from 'react-router-dom'
+import { connect, ConnectedProps } from 'react-redux'
+import { Switch, Route } from 'react-router-dom'
 
 // Components
-import {ErrorHandling} from 'src/shared/decorators/errors'
-import {Page} from '@influxdata/clockface'
+import { ErrorHandling } from 'src/shared/decorators/errors'
+import { Page } from '@influxdata/clockface'
 import SettingsTabbedPage from 'src/settings/components/SettingsTabbedPage'
 import SettingsHeader from 'src/settings/components/SettingsHeader'
 import TemplatesPage from 'src/templates/components/TemplatesPage'
@@ -15,14 +15,14 @@ import TemplateExportOverlay from 'src/templates/components/TemplateExportOverla
 import TemplateViewOverlay from 'src/templates/components/TemplateViewOverlay'
 import StaticTemplateViewOverlay from 'src/templates/components/StaticTemplateViewOverlay'
 
-import {CommunityTemplatesIndex} from 'src/templates/containers/CommunityTemplatesIndex'
+import { CommunityTemplatesIndex } from 'src/templates/containers/CommunityTemplatesIndex'
 
 // Utils
-import {pageTitleSuffixer} from 'src/shared/utils/pageTitles'
-import {getOrg} from 'src/organizations/selectors'
+import { pageTitleSuffixer } from 'src/shared/utils/pageTitles'
+import { getOrg } from 'src/organizations/selectors'
 
 // Types
-import {AppState, ResourceType} from 'src/types'
+import { AppState, ResourceType } from 'src/types'
 
 type ReduxProps = ConnectedProps<typeof connector>
 type Props = RouteComponentProps & ReduxProps
@@ -33,14 +33,14 @@ export const communityTemplatesImportPath = `${templatesPath}/import/:directory/
 @ErrorHandling
 class TemplatesIndex extends Component<Props> {
   public render() {
-    const {org, flags} = this.props
+    const { org, flags } = this.props
     if (flags.communityTemplates) {
       return <CommunityTemplatesIndex />
     }
 
     return (
       <>
-        <Page titleTag={pageTitleSuffixer(['Templates', 'Settings'])}>
+        <Page titleTag={pageTitleSuffixer(['Templates', 'Settings'])} className="show-only-pc">
           <SettingsHeader />
           <SettingsTabbedPage activeTab="templates" orgID={org.id}>
             <GetResources resources={[ResourceType.Templates]}>
@@ -71,7 +71,7 @@ class TemplatesIndex extends Component<Props> {
   }
 
   private handleImport = () => {
-    const {history, org} = this.props
+    const { history, org } = this.props
     history.push(`/orgs/${org.id}/settings/templates/import`)
   }
 }

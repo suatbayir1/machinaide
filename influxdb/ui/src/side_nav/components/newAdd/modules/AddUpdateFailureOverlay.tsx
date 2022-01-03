@@ -263,7 +263,12 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                                 <Grid.Row >
                                     <Grid.Column widthXS={Columns.Twelve}>
                                         <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="Machine/Component/Sensor Name">
                                                     <Dropdown
                                                         button={(active, onClick) => (
@@ -291,7 +296,12 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                                                 </Form.Element>
                                             </Grid.Column>
 
-                                            <Grid.Column widthXS={Columns.Three}>
+                                            <Grid.Column
+                                                widthXS={Columns.Six}
+                                                widthSM={Columns.Three}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Three}
+                                            >
                                                 <Form.Element label="Severity">
                                                     <SelectDropdown
                                                         options={["acceptable", "major", "critical"]}
@@ -306,7 +316,12 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                                                 </Form.Element>
                                             </Grid.Column>
 
-                                            <Grid.Column widthXS={Columns.Three}>
+                                            <Grid.Column
+                                                widthXS={Columns.Six}
+                                                widthSM={Columns.Three}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Three}
+                                            >
                                                 <Form.Element label="Cost to fix">
                                                     <Input
                                                         name="costToFix"
@@ -325,7 +340,12 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                                         </Grid.Row>
 
                                         <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="Start Time">
                                                     <input
                                                         name='startTime'
@@ -342,7 +362,12 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                                                 </Form.Element>
                                             </Grid.Column>
 
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="End Time">
                                                     <input
                                                         name='endTime'

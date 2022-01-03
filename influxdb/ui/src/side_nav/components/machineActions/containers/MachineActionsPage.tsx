@@ -4,33 +4,10 @@ import { Link } from "react-router-dom"
 
 // Components
 import {
-    Page,
-    Grid,
-    IconFont,
-    ComponentColor,
-    ComponentSize,
-    Button,
-    ButtonType,
-    Table,
-    DapperScrollbars,
-    BorderType,
-    Popover,
-    Appearance,
-    PopoverPosition,
-    PopoverInteraction,
-    DateRangePicker,
-    Columns,
-    FlexBox,
-    SquareButton,
-    Notification,
-    Gradients,
-    SpinnerContainer,
-    TechnoSpinner,
-    RemoteDataState,
-    ConfirmationButton,
-    Input,
-    Dropdown,
-    MultiSelectDropdown,
+    Page, Grid, IconFont, ComponentColor, ComponentSize, Button, ButtonType, Table, DapperScrollbars,
+    BorderType, Popover, Appearance, PopoverPosition, PopoverInteraction, DateRangePicker, Columns,
+    FlexBox, SquareButton, Notification, Gradients, SpinnerContainer, TechnoSpinner, RemoteDataState,
+    ConfirmationButton, Input, Dropdown, MultiSelectDropdown, Form,
 } from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
@@ -347,89 +324,92 @@ class MachineActionsPage extends PureComponent<Props, State> {
     private get optionsComponents(): JSX.Element {
         return (
             <React.Fragment>
-                <FlexBox margin={ComponentSize.Small} >
-                    <p style={{ fontSize: '12px', fontWeight: 600 }}>Start Time Range</p>
-                    <Popover
-                        appearance={Appearance.Outline}
-                        position={PopoverPosition.Below}
-                        triggerRef={this.startDateTimeRangeRef}
-                        visible={this.state.startTimeRangeOpen}
-                        showEvent={PopoverInteraction.None}
-                        hideEvent={PopoverInteraction.None}
-                        distanceFromTrigger={8}
-                        testID="timerange-popover"
-                        enableDefaultStyles={false}
-                        contents={() => (
-                            <DateRangePicker
-                                timeRange={this.state.startTimeRange}
-                                onSetTimeRange={(e) => { this.handleChangeStartTimeRange(e) }}
-                                onClose={() => { this.setState({ startTimeRangeOpen: false }) }}
-                                position={
-                                    { position: 'relative' }
-                                }
-                            />
-                        )}
-                    />
-                    <Button
-                        ref={this.startDateTimeRangeRef}
-                        text={
-                            `
+                <FlexBox margin={ComponentSize.Small} id="machine-actions-timerange-container">
+                    <FlexBox margin={ComponentSize.Small}>
+                        <p style={{ fontSize: '12px', fontWeight: 600 }}>Start Time Range</p>
+                        <Popover
+                            appearance={Appearance.Outline}
+                            position={PopoverPosition.Below}
+                            triggerRef={this.startDateTimeRangeRef}
+                            visible={this.state.startTimeRangeOpen}
+                            showEvent={PopoverInteraction.None}
+                            hideEvent={PopoverInteraction.None}
+                            distanceFromTrigger={8}
+                            testID="timerange-popover"
+                            enableDefaultStyles={false}
+                            contents={() => (
+                                <DateRangePicker
+                                    timeRange={this.state.startTimeRange}
+                                    onSetTimeRange={(e) => { this.handleChangeStartTimeRange(e) }}
+                                    onClose={() => { this.setState({ startTimeRangeOpen: false }) }}
+                                    position={
+                                        { position: 'relative' }
+                                    }
+                                />
+                            )}
+                        />
+                        <Button
+                            ref={this.startDateTimeRangeRef}
+                            text={
+                                `
                             ${new Date(this.state.startTimeRange["lower"]).toISOString().slice(0, 10)} - 
                             ${new Date(this.state.startTimeRange["upper"]).toISOString().slice(0, 10)}
                             `
-                        }
-                        onClick={() => { this.setState({ startTimeRangeOpen: true }) }}
-                        type={ButtonType.Button}
-                        icon={IconFont.Calendar}
-                        color={ComponentColor.Default}
-                    />
-                    <SquareButton
-                        icon={IconFont.Remove}
-                        color={ComponentColor.Danger}
-                        onClick={this.resetStartTimeRange}
-                    />
+                            }
+                            onClick={() => { this.setState({ startTimeRangeOpen: true }) }}
+                            type={ButtonType.Button}
+                            icon={IconFont.Calendar}
+                            color={ComponentColor.Default}
+                        />
+                        <SquareButton
+                            icon={IconFont.Remove}
+                            color={ComponentColor.Danger}
+                            onClick={this.resetStartTimeRange}
+                        />
+                    </FlexBox>
 
-
-                    <p style={{ fontSize: '12px', fontWeight: 600 }}>End Time Range</p>
-                    <Popover
-                        appearance={Appearance.Outline}
-                        position={PopoverPosition.Below}
-                        triggerRef={this.endDateTimeRangeRef}
-                        visible={this.state.endTimeRangeOpen}
-                        showEvent={PopoverInteraction.None}
-                        hideEvent={PopoverInteraction.None}
-                        distanceFromTrigger={8}
-                        testID="timerange-popover"
-                        enableDefaultStyles={false}
-                        contents={() => (
-                            <DateRangePicker
-                                timeRange={this.state.endTimeRange}
-                                onSetTimeRange={(e) => { this.handleChangeEndTimeRange(e) }}
-                                onClose={() => { this.setState({ endTimeRangeOpen: false }) }}
-                                position={
-                                    { position: 'relative' }
-                                }
-                            />
-                        )}
-                    />
-                    <Button
-                        ref={this.endDateTimeRangeRef}
-                        text={
-                            `
+                    <FlexBox margin={ComponentSize.Small}>
+                        <p style={{ fontSize: '12px', fontWeight: 600 }}>End Time Range</p>
+                        <Popover
+                            appearance={Appearance.Outline}
+                            position={PopoverPosition.Below}
+                            triggerRef={this.endDateTimeRangeRef}
+                            visible={this.state.endTimeRangeOpen}
+                            showEvent={PopoverInteraction.None}
+                            hideEvent={PopoverInteraction.None}
+                            distanceFromTrigger={8}
+                            testID="timerange-popover"
+                            enableDefaultStyles={false}
+                            contents={() => (
+                                <DateRangePicker
+                                    timeRange={this.state.endTimeRange}
+                                    onSetTimeRange={(e) => { this.handleChangeEndTimeRange(e) }}
+                                    onClose={() => { this.setState({ endTimeRangeOpen: false }) }}
+                                    position={
+                                        { position: 'relative' }
+                                    }
+                                />
+                            )}
+                        />
+                        <Button
+                            ref={this.endDateTimeRangeRef}
+                            text={
+                                `
                             ${new Date(this.state.endTimeRange["lower"]).toISOString().slice(0, 10)} - 
                             ${new Date(this.state.endTimeRange["upper"]).toISOString().slice(0, 10)}
                             `
-                        }
-                        onClick={() => { this.setState({ endTimeRangeOpen: true }) }}
-                        type={ButtonType.Button}
-                        icon={IconFont.Calendar}
-                        color={ComponentColor.Default}
-                    />
-                    <SquareButton
-                        icon={IconFont.Remove}
-                        color={ComponentColor.Danger}
-                        onClick={this.resetEndTimeRange}
-                    />
+                            }
+                            onClick={() => { this.setState({ endTimeRangeOpen: true }) }}
+                            type={ButtonType.Button}
+                            icon={IconFont.Calendar}
+                            color={ComponentColor.Default}
+                        />
+                        <SquareButton
+                            icon={IconFont.Remove}
+                            color={ComponentColor.Danger}
+                            onClick={this.resetEndTimeRange}
+                        />
+                    </FlexBox>
                 </FlexBox>
             </React.Fragment>
         )
@@ -496,7 +476,6 @@ class MachineActionsPage extends PureComponent<Props, State> {
                     <span className="notification--message">{this.state.notificationMessage}</span>
                 </Notification>
 
-
                 {
                     <SpinnerContainer
                         loading={spinnerLoading}
@@ -515,43 +494,60 @@ class MachineActionsPage extends PureComponent<Props, State> {
                                 }
                             </Page.Header>
 
-                            <Breadcrumbs separator="/" aria-label="breadcrumb" style={{ color: '#ffffff', marginLeft: '28px', marginTop: '-10px' }}>
-                                <Link color="inherit" to="/">
-                                    <HomeIcon style={{ marginTop: '4px' }} />
-                                </Link>
-                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/allFactories`}>
-                                    Factories
-                                </Link>
-                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/${this.props["match"].params["FID"]}`}>
-                                    Machines
-                                </Link>
-
-                                <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Machine Actions</Typography>
-                            </Breadcrumbs>
+                            <div className="responsive-breadcrumbs-with-margin">
+                                <Breadcrumbs separator="/" aria-label="breadcrumb" style={{ color: '#ffffff', marginLeft: '28px', marginTop: '-10px' }}>
+                                    <Link color="inherit" to="/">
+                                        <HomeIcon style={{ marginTop: '4px' }} />
+                                    </Link>
+                                    <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/allFactories`}>
+                                        Factories
+                                    </Link>
+                                    <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/production-line/${this.props["match"].params.FID}/${this.props["match"].params.PLID}`}>
+                                        Production Lines
+                                    </Link>
+                                    <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/${this.props["match"].params.FID}/${this.props["match"].params.PLID}`}>
+                                        Machines
+                                    </Link>
+                                    <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Machine Actions</Typography>
+                                </Breadcrumbs>
+                            </div>
 
                             <Page.Contents fullWidth={true} scrollable={true}>
-                                <Grid.Column widthXS={Columns.One}>
-                                </Grid.Column>
-
-                                <Grid.Column widthXS={Columns.Ten}>
-                                    <Grid style={{ marginTop: "50px", marginBottom: '100px', background: '#292933', padding: '20px' }}>
+                                <Grid.Column
+                                    widthLG={Columns.Ten}
+                                    offsetLG={Columns.One}
+                                >
+                                    <Grid className="responsive-table-with-mobile">
                                         <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Three}>
-                                                <Input
-                                                    icon={IconFont.Search}
-                                                    name="filterByJob"
-                                                    placeholder="Filter by job"
-                                                    value={this.state.filterByJob}
-                                                    onChange={(e) => { this.handleChangeInput(e) }}
-                                                />
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Three}
+                                            >
+                                                <Form.Element label="Filter by job">
+                                                    <Input
+                                                        icon={IconFont.Search}
+                                                        name="filterByJob"
+                                                        value={this.state.filterByJob}
+                                                        onChange={(e) => { this.handleChangeInput(e) }}
+                                                    />
+                                                </Form.Element>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.Three}>
-                                                <MultiSelectDropdown
-                                                    emptyText={"Select Material"}
-                                                    options={this.state.materialList}
-                                                    selectedOptions={this.state.filterByMaterial}
-                                                    onSelect={this.handleChangeDropdownMaterial}
-                                                />
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Three}
+                                            >
+                                                <Form.Element label="Filter by material">
+                                                    <MultiSelectDropdown
+                                                        emptyText={"Select Material"}
+                                                        options={this.state.materialList}
+                                                        selectedOptions={this.state.filterByMaterial}
+                                                        onSelect={this.handleChangeDropdownMaterial}
+                                                    />
+                                                </Form.Element>
                                             </Grid.Column>
                                         </Grid.Row>
 
@@ -602,6 +598,7 @@ class MachineActionsPage extends PureComponent<Props, State> {
                                                                                 {
                                                                                     ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
                                                                                     <Button
+                                                                                        className="show-pc-or-tablet"
                                                                                         size={ComponentSize.ExtraSmall}
                                                                                         icon={IconFont.Pencil}
                                                                                         color={ComponentColor.Primary}
@@ -705,6 +702,7 @@ class MachineActionsPage extends PureComponent<Props, State> {
                                                             color={ComponentColor.Success}
                                                             onClick={() => this.setState({ overlay: true })}
                                                             style={{ width: '110px' }}
+                                                            className="show-pc-or-tablet"
                                                         />
                                                     }
                                                     {
@@ -715,6 +713,7 @@ class MachineActionsPage extends PureComponent<Props, State> {
                                                             icon={IconFont.Plus}
                                                             color={ComponentColor.Primary}
                                                             style={{ width: '110px' }}
+                                                            className="show-pc-or-tablet"
                                                             onClick={() => { this.setState({ openAddUpdateMachineActionOverlay: true, editMode: false }) }}
                                                         />
                                                     }

@@ -1,6 +1,6 @@
 // Libraries
 import React, { PureComponent } from 'react'
-import ReactHover, { Trigger, Hover } from "react-hover";
+import uuid from "uuid";
 
 // Components
 import {
@@ -879,6 +879,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
     private get headerChildren(): JSX.Element[] {
         return [
             <QuestionMarkTooltip
+                key={uuid.v4()}
                 diameter={20}
                 tooltipStyle={{ width: '400px' }}
                 color={ComponentColor.Secondary}
@@ -954,26 +955,13 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                                         onClick={handleDismissAddNode}
                                     />
 
-                                    <ReactHover options={{
-                                        followCursor: true,
-                                        shiftX: 50,
-                                        shiftY: 0
-                                    }}>
-                                        <Trigger type="trigger">
-                                            <Button
-                                                text="Save"
-                                                icon={IconFont.Checkmark}
-                                                color={ComponentColor.Success}
-                                                type={ButtonType.Submit}
-                                                onClick={this.handleSaveAddNode}
-                                            />
-                                        </Trigger>
-                                        <Hover type="hover">
-                                            <span>hello world</span>
-                                        </Hover>
-                                    </ReactHover>
-
-
+                                    <Button
+                                        text="Save"
+                                        icon={IconFont.Checkmark}
+                                        color={ComponentColor.Success}
+                                        type={ButtonType.Submit}
+                                        onClick={this.handleSaveAddNode}
+                                    />
                                 </Form.Footer>
                             </Form>
                         </Overlay.Body>

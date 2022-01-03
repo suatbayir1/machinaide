@@ -115,7 +115,12 @@ class MachineActionDetailOverlay extends PureComponent<Props, State> {
                                 <Grid.Row >
                                     <Grid.Column widthXS={Columns.Twelve}>
                                         <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="Job Name">
                                                     <Input
                                                         name="jobName"
@@ -126,7 +131,12 @@ class MachineActionDetailOverlay extends PureComponent<Props, State> {
                                                 </Form.Element>
                                             </Grid.Column>
 
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="Material">
                                                     <Input
                                                         name="material"
@@ -139,7 +149,12 @@ class MachineActionDetailOverlay extends PureComponent<Props, State> {
                                         </Grid.Row>
 
                                         <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="Start Time">
                                                     <input
                                                         name='startTime'
@@ -152,7 +167,12 @@ class MachineActionDetailOverlay extends PureComponent<Props, State> {
                                                 </Form.Element>
                                             </Grid.Column>
 
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="End Time">
                                                     <input
                                                         name='endTime'

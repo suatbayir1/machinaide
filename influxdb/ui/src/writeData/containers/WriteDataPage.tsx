@@ -1,15 +1,15 @@
 // Libraries
-import React, {FC, useState, createContext} from 'react'
+import React, { FC, useState, createContext } from 'react'
 
 // Components
-import {Page} from '@influxdata/clockface'
+import { Page } from '@influxdata/clockface'
 import WriteDataSearchBar from 'src/writeData/components/WriteDataSearchBar'
 import WriteDataSections from 'src/writeData/components/WriteDataSections'
 import LoadDataHeader from 'src/settings/components/LoadDataHeader'
 import LoadDataTabbedPage from 'src/settings/components/LoadDataTabbedPage'
 
 // Utils
-import {pageTitleSuffixer} from 'src/shared/utils/pageTitles'
+import { pageTitleSuffixer } from 'src/shared/utils/pageTitles'
 
 interface WriteDataSearchContextType {
   searchTerm: string
@@ -19,7 +19,7 @@ interface WriteDataSearchContextType {
 export const WriteDataSearchContext = createContext<WriteDataSearchContextType>(
   {
     searchTerm: '',
-    setSearchTerm: () => {},
+    setSearchTerm: () => { },
   }
 )
 
@@ -27,8 +27,8 @@ const WriteDataPage: FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('')
 
   return (
-    <WriteDataSearchContext.Provider value={{searchTerm, setSearchTerm}}>
-      <Page titleTag={pageTitleSuffixer(['Sources', 'Load Data'])}>
+    <WriteDataSearchContext.Provider value={{ searchTerm, setSearchTerm }}>
+      <Page titleTag={pageTitleSuffixer(['Sources', 'Load Data'])} className="load-data-page">
         <LoadDataHeader />
         <LoadDataTabbedPage activeTab="sources">
           <WriteDataSearchBar />

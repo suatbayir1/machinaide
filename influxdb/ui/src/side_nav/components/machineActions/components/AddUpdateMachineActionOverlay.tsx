@@ -6,18 +6,8 @@ import { connect, ConnectedProps } from 'react-redux'
 // Components
 import AddMaterialOverlay from 'src/side_nav/components/machineActions/components/AddMaterialOverlay';
 import {
-    Form,
-    Input,
-    Button,
-    ButtonType,
-    ComponentColor,
-    Overlay,
-    IconFont,
-    Grid,
-    Columns,
-    TextArea,
-    Dropdown,
-    DapperScrollbars,
+    Form, Input, Button, ButtonType, ComponentColor, Overlay, IconFont,
+    Grid, Columns, TextArea, Dropdown, DapperScrollbars,
 } from '@influxdata/clockface'
 
 // Services
@@ -195,7 +185,12 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
                                 <Grid.Row >
                                     <Grid.Column widthXS={Columns.Twelve}>
                                         <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="Job Name">
                                                     <Input
                                                         name="jobName"
@@ -205,7 +200,12 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
                                                 </Form.Element>
                                             </Grid.Column>
 
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="Material">
                                                     <Dropdown
                                                         button={(active, onClick) => (
@@ -256,7 +256,12 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
                                         </Grid.Row>
 
                                         <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="Start Time">
                                                     <input
                                                         name='startTime'
@@ -268,7 +273,12 @@ class AddUpdateMachineActionOverlay extends PureComponent<Props, State> {
                                                 </Form.Element>
                                             </Grid.Column>
 
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="End Time">
                                                     <input
                                                         name='endTime'

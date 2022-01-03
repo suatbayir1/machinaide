@@ -69,7 +69,7 @@ class UserManualContainer extends PureComponent<Props, State> {
 
     render() {
         return (
-            <Page>
+            <Page className="show-pc-or-tablet">
                 {
                     <SpinnerContainer
                         loading={this.state.spinnerLoading}

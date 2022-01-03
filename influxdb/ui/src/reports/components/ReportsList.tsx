@@ -32,7 +32,6 @@ interface OwnProps {
     getReports: () => void
 }
 interface State {
-    activeTab: string
     visibleCreatedReportsList: boolean
     createdReportsData: object[]
     selectedReport: object
@@ -49,7 +48,6 @@ class ReportsList extends PureComponent<Props, State> {
         super(props)
 
         this.state = {
-            activeTab: "new-report",
             visibleCreatedReportsList: false,
             createdReportsData: [],
             selectedReport: {},
@@ -154,7 +152,12 @@ class ReportsList extends PureComponent<Props, State> {
                     <Panel.Header size={ComponentSize.ExtraSmall}>
                         <Grid>
                             <Grid.Row>
-                                <Grid.Column widthXS={Columns.Two}>
+                                <Grid.Column
+                                    widthXS={Columns.Six}
+                                    widthSM={Columns.Four}
+                                    widthMD={Columns.Three}
+                                    widthLG={Columns.Two}
+                                >
                                     <Input
                                         icon={IconFont.Search}
                                         name="filterByTitle"
@@ -163,7 +166,12 @@ class ReportsList extends PureComponent<Props, State> {
                                         onChange={(e) => { this.handleChangeInput(e) }}
                                     />
                                 </Grid.Column>
-                                <Grid.Column widthXS={Columns.Two}>
+                                <Grid.Column
+                                    widthXS={Columns.Six}
+                                    widthSM={Columns.Four}
+                                    widthMD={Columns.Three}
+                                    widthLG={Columns.Two}
+                                >
                                     <Input
                                         icon={IconFont.Search}
                                         name="filterByAuthor"

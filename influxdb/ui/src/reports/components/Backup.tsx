@@ -164,14 +164,18 @@ class Backup extends PureComponent<Props, State> {
 
         return (
             <>
-                <Panel style={{ marginTop: '30px' }}>
+                <Panel style={{ marginTop: '30px' }} id="backup-page">
                     <Panel.Header size={ComponentSize.ExtraSmall}>
                         <Grid>
                             <Grid.Row>
                                 {/* FIRST LEFT SIDE */}
                                 <Grid.Column
-                                    widthXS={Columns.Six}
-                                    offsetXS={Columns.Three}
+                                    widthXS={Columns.Twelve}
+                                    widthSM={Columns.Twelve}
+                                    widthMD={Columns.Eight}
+                                    widthLG={Columns.Six}
+                                    offsetMD={Columns.Two}
+                                    offsetLG={Columns.Three}
                                 >
                                     <Panel style={{ backgroundColor: '#292933', padding: '10px' }}>
                                         <FlexBox
@@ -195,7 +199,12 @@ class Backup extends PureComponent<Props, State> {
 
 
                                         <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element
                                                     label="Start Date"
                                                     required={true}
@@ -210,7 +219,12 @@ class Backup extends PureComponent<Props, State> {
                                                 </Form.Element>
                                             </Grid.Column>
 
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element
                                                     label="End Date"
                                                     required={true}
@@ -235,7 +249,7 @@ class Backup extends PureComponent<Props, State> {
                                                     display: 'flex',
                                                 }}
                                             >
-                                                <FlexBox margin={ComponentSize.Large}>
+                                                <FlexBox margin={ComponentSize.Large} className="toggle-container">
                                                     <FlexBox margin={ComponentSize.Medium}>
                                                         <SlideToggle
                                                             active={machineActionsToggle}

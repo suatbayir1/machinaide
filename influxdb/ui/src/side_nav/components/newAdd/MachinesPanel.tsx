@@ -147,8 +147,12 @@ class MachinesPanel extends PureComponent<Props, State> {
                                             machines.length > 0 ? machines.map((machine) => {
                                                 return (
                                                     <Grid.Column
-                                                        widthXS={Columns.Four}
+                                                        widthXS={Columns.Twelve}
+                                                        widthSM={Columns.Six}
+                                                        widthMD={Columns.Six}
+                                                        widthLG={Columns.Four}
                                                         key={machine["id"]}
+                                                        id="machine-panel"
                                                     >
                                                         <div
                                                             onMouseLeave={() => this.handleLeaveMouseCard()}
@@ -157,20 +161,25 @@ class MachinesPanel extends PureComponent<Props, State> {
                                                         >
                                                             <ResourceCard
                                                                 key={machine["id"]}
-                                                                style={{ marginTop: '20px' }}
+                                                                className="resource-card"
                                                             >
                                                                 <Grid.Row>
-                                                                    <Grid.Column widthXS={Columns.Seven}>
+                                                                    <Grid.Column
+                                                                        widthXS={Columns.Twelve}
+                                                                        widthSM={Columns.Twelve}
+                                                                        widthMD={Columns.Seven}
+                                                                        widthLG={Columns.Seven}
+                                                                    >
                                                                         <div>
                                                                             <img
                                                                                 src="../../../../assets/images/machine-image.jpg"
-                                                                                width='100%' height='150px'
+                                                                                className="machine-image"
                                                                             />
                                                                         </div>
                                                                         <FlexBox margin={ComponentSize.Small}>
                                                                             <img
                                                                                 src='../../../assets/icons/machine-card-icon.png'
-                                                                                width='50px' height='50px' style={{ marginRight: '10px' }}
+                                                                                className="machine-icon"
                                                                             />
                                                                             <h2>
                                                                                 {machine["machineName"]}
@@ -181,33 +190,36 @@ class MachinesPanel extends PureComponent<Props, State> {
                                                                     {
                                                                         this.state.hoveredMachine["id"] === machine["id"]
                                                                             ? (
-                                                                                <Grid.Column widthXS={Columns.Five}>
+                                                                                <Grid.Column
+                                                                                    widthXS={Columns.Twelve}
+                                                                                    widthSM={Columns.Twelve}
+                                                                                    widthMD={Columns.Five}
+                                                                                    widthLG={Columns.Five}
+                                                                                >
                                                                                     <FlexBox direction={FlexDirection.Row}>
                                                                                         <ul
-                                                                                            className="ComponentList"
-                                                                                            style={{ listStyleType: "none", marginTop: '5%', paddingLeft: '0px', fontSize: '0.800rem' }}
+                                                                                            className="machine-shortcut-list"
                                                                                         >
-                                                                                            <li className="links" style={{ marginBottom: '0px' }}>
+                                                                                            <li className="links">
                                                                                                 <Link to={`/orgs/${this.props["match"].params["orgID"]}/dashboard-router/${machine["id"]}`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-                                                                                                        <div><img src="../../../assets/icons/dashboards-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
+                                                                                                        <div><img src="../../../assets/icons/dashboards-icon.png" className="li-icon" /></div>
                                                                                                     </div>
                                                                                                     <span>
                                                                                                         Show Dashboards
                                                                                                     </span>
                                                                                                 </Link>
                                                                                             </li>
-
                                                                                             {
                                                                                                 machine?.["dashboards"].length > 0 &&
-                                                                                                <li className="links" style={{ marginBottom: '0px' }}>
+                                                                                                <li className="links">
                                                                                                     <Link
                                                                                                         to={{
                                                                                                             pathname: `/orgs/${this.props["match"].params["orgID"]}/dashboards/${machine?.["dashboards"][0]["dashboardID"]}`
                                                                                                         }}
                                                                                                     >
                                                                                                         <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-                                                                                                            <div><img src="../../../assets/icons/dashboards-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
+                                                                                                            <div><img src="../../../assets/icons/dashboards-icon.png" className="li-icon" /></div>
                                                                                                         </div>
                                                                                                         <span>
                                                                                                             Show Snapshots
@@ -215,21 +227,18 @@ class MachinesPanel extends PureComponent<Props, State> {
                                                                                                     </Link>
                                                                                                 </li>
                                                                                             }
-
-
-
-                                                                                            <li className="links" style={{ marginBottom: '0px' }}>
+                                                                                            <li className="links">
                                                                                                 <Link to={`/orgs/${this.props["match"].params["orgID"]}/dt`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-                                                                                                        <div><img src="../../../assets/icons/tree-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
+                                                                                                        <div><img src="../../../assets/icons/tree-icon.png" className="li-icon" /></div>
                                                                                                     </div>
                                                                                                     Show Sensor Tree
                                                                                                 </Link>
                                                                                             </li>
-                                                                                            <li className="links" style={{ marginBottom: '0px' }}>
+                                                                                            <li className="links">
                                                                                                 <Link to={`/orgs/${this.props["match"].params["orgID"]}/components/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${machine["id"]}`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-                                                                                                        <div><img src="../../../assets/icons/component-list-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
+                                                                                                        <div><img src="../../../assets/icons/component-list-icon.png" className="li-icon" /></div>
                                                                                                     </div>
                                                                                                     Show Components
                                                                                                     <span style={{ color: "#bef0ff" }}>
@@ -237,10 +246,10 @@ class MachinesPanel extends PureComponent<Props, State> {
                                                                                                     </span>
                                                                                                 </Link>
                                                                                             </li>
-                                                                                            <li className="links" style={{ marginBottom: '0px' }}>
+                                                                                            <li className="links">
                                                                                                 <Link to={`/orgs/${this.props["match"].params["orgID"]}/alerting`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-                                                                                                        <div><img src="../../../assets/icons/alerts-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
+                                                                                                        <div><img src="../../../assets/icons/alerts-icon.png" className="li-icon" /></div>
                                                                                                     </div>
                                                                                                     Alerts
                                                                                                     <span style={{ color: "#bef0ff" }}>
@@ -248,26 +257,26 @@ class MachinesPanel extends PureComponent<Props, State> {
                                                                                                     </span>
                                                                                                 </Link>
                                                                                             </li>
-                                                                                            <li className="links" style={{ marginBottom: '0px' }}>
-                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/machines/${this.props["match"].params.FID}/${machine["id"]}/actions`}>
+                                                                                            <li className="links">
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/machines/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${machine["id"]}/actions`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-                                                                                                        <div><img src="../../../assets/icons/machine-action-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
+                                                                                                        <div><img src="../../../assets/icons/machine-action-icon.png" className="li-icon" /></div>
                                                                                                     </div>
                                                                                                     Machine Actions
                                                                                                 </Link>
                                                                                             </li>
-                                                                                            <li className="links" style={{ marginBottom: '0px' }}>
-                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/predictions/<sensorID>`}>
+                                                                                            <li className="links">
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/predictions/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${machine["id"]}`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-                                                                                                        <div><img src="../../../assets/icons/prediction-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
+                                                                                                        <div><img src="../../../assets/icons/prediction-icon.png" className="li-icon" /></div>
                                                                                                     </div>
                                                                                                     Show Predictions
                                                                                                 </Link>
                                                                                             </li>
-                                                                                            <li className="links" style={{ marginBottom: '0px' }}>
+                                                                                            <li className="links">
                                                                                                 <Link to={`/orgs/${this.props["match"].params["orgID"]}/failures/${this.props["match"].params.FID}/${machine["id"]}`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-                                                                                                        <div><img src="../../../assets/icons/failure-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
+                                                                                                        <div><img src="../../../assets/icons/failure-icon.png" className="li-icon" /></div>
                                                                                                     </div>
                                                                                                     Show Failures
                                                                                                 </Link>
@@ -276,8 +285,13 @@ class MachinesPanel extends PureComponent<Props, State> {
                                                                                     </FlexBox>
                                                                                 </Grid.Column>
                                                                             ) :
-                                                                            <Grid.Column widthXS={Columns.Five}>
-                                                                                <h4 style={{ marginTop: '40%' }}>
+                                                                            <Grid.Column
+                                                                                widthXS={Columns.Twelve}
+                                                                                widthSM={Columns.Twelve}
+                                                                                widthMD={Columns.Five}
+                                                                                widthLG={Columns.Five}
+                                                                            >
+                                                                                <h4 className="unhovered-text">
                                                                                     This machine contains a total of {machine["componentCount"]} components.
                                                                                 </h4>
                                                                             </Grid.Column>

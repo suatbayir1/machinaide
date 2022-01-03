@@ -1,12 +1,12 @@
 // Libraries
-import React, {FC} from 'react'
+import React, { FC } from 'react'
 import _ from 'lodash'
 
 // Components
-import {Tabs, Orientation, ComponentSize} from '@influxdata/clockface'
+import { Tabs, Orientation, ComponentSize } from '@influxdata/clockface'
 import CloudExclude from 'src/shared/components/cloud/CloudExclude'
 import CloudOnly from 'src/shared/components/cloud/CloudOnly'
-import {FeatureFlag} from 'src/shared/utils/featureFlag'
+import { FeatureFlag } from 'src/shared/utils/featureFlag'
 
 export interface TabbedPageTab {
   text: string
@@ -23,9 +23,20 @@ interface Props {
   onTabClick: (id: string) => void
 }
 
-const SettingsNavigation: FC<Props> = ({activeTab, tabs, onTabClick}) => {
+const activeTabName = (activeTab, tabs) => {
+  const tab = tabs.filter(tab => tab.id === activeTab);
+  console.log(tab);
+  return tab[0]["text"];
+}
+
+const SettingsNavigation: FC<Props> = ({ activeTab, tabs, onTabClick }) => {
   return (
-    <Tabs orientation={Orientation.Horizontal} size={ComponentSize.Large}>
+    <Tabs
+      orientation={Orientation.Horizontal}
+      size={ComponentSize.Large}
+      dropdownBreakpoint={872}
+      dropdownLabel={activeTabName(activeTab, tabs)}
+    >
       {tabs.map(t => {
         let tab = (
           <Tabs.Tab

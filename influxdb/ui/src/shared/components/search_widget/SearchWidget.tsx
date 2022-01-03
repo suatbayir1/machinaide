@@ -1,15 +1,15 @@
 // Libraries
-import React, {Component, ChangeEvent} from 'react'
-import {debounce} from 'lodash'
+import React, { Component, ChangeEvent } from 'react'
+import { debounce } from 'lodash'
 
 // Components
-import {Input} from '@influxdata/clockface'
+import { Input } from '@influxdata/clockface'
 
 // Types
-import {IconFont} from '@influxdata/clockface'
+import { IconFont } from '@influxdata/clockface'
 
 // Decorators
-import {ErrorHandling} from 'src/shared/decorators/errors'
+import { ErrorHandling } from 'src/shared/decorators/errors'
 
 interface Props {
   onSearch: (searchTerm: string) => void
@@ -33,7 +33,7 @@ class SearchWidget extends Component<Props, State> {
 
   public componentDidUpdate(prevProps: Props) {
     if (this.props.searchTerm !== prevProps.searchTerm) {
-      this.setState({searchTerm: this.props.searchTerm})
+      this.setState({ searchTerm: this.props.searchTerm })
     }
   }
 
@@ -49,8 +49,8 @@ class SearchWidget extends Component<Props, State> {
   }
 
   public render() {
-    const {placeholderText, testID} = this.props
-    const {searchTerm} = this.state
+    const { placeholderText, testID } = this.props
+    const { searchTerm } = this.state
 
     return (
       <Input
@@ -61,6 +61,7 @@ class SearchWidget extends Component<Props, State> {
         onBlur={this.handleBlur}
         testID={testID}
         className="search-widget-input"
+        style={{ minWidth: '210px', width: '210px' }}
       />
     )
   }
@@ -70,11 +71,11 @@ class SearchWidget extends Component<Props, State> {
   }
 
   private handleBlur = (e: ChangeEvent<HTMLInputElement>): void => {
-    this.setState({searchTerm: e.target.value}, this.handleSearch)
+    this.setState({ searchTerm: e.target.value }, this.handleSearch)
   }
 
   private handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    this.setState({searchTerm: e.target.value}, this.handleSearch)
+    this.setState({ searchTerm: e.target.value }, this.handleSearch)
   }
 }
 

@@ -1,107 +1,61 @@
 // Libraries
 import React, { Component } from 'react'
+import uuid from "uuid"
 
 // Components
 import {
     Grid,
     Columns,
 } from '@influxdata/clockface'
-import GradientBorder from 'src/shared/components/cells/GradientBorder'
-import CellHeader from 'src/shared/components/cells/CellHeader'
-import CellContext from 'src/shared/components/cells/CellContext'
 
 interface Props {
     manualRefresh: number
 }
 
-class CustomAddedCells extends Component<Props> {
+interface State {
+    boxList: object[]
+}
+
+class CustomAddedCells extends Component<Props, State> {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            boxList: [
+                { text: "Total Alerts", value: 10 },
+                { text: "Total Maintenance", value: 20 },
+                { text: "Total Failures", value: 30 },
+                { text: "Total Machine Actions", value: 40 },
+                { text: "Total Machine Actions", value: 50 },
+                { text: "Total Machine Actions", value: 60 },
+            ]
+        }
+    }
+
     render() {
+        const { boxList } = this.state;
+
         return (
-
             <Grid.Row>
-                <Grid.Column
-                    widthXS={Columns.Two}
-                    style={{ paddingRight: '30px' }}
-                >
-                    <div className="cell">
-                        <div style={{ cursor: 'pointer' }}>
-                            <div style={{ textAlign: 'center' }}>
-                                <h4 style={{ marginTop: '20px' }} >Total Alerts</h4>
-                                <h4 style={{ color: 'white', fontSize: '20px' }}>{20}</h4>
-                            </div>
-                        </div>
-                    </div>
-                </Grid.Column>
-
-                <Grid.Column
-                    widthXS={Columns.Two}
-                    style={{ paddingRight: '15px', paddingLeft: '15px' }}
-                >
-                    <div className="cell">
-                        <div style={{ cursor: 'pointer' }}>
-                            <div style={{ textAlign: 'center' }}>
-                                <h4 style={{ marginTop: '20px' }} >Total Maintenance</h4>
-                                <h4 style={{ color: 'white', fontSize: '20px' }}>{30}</h4>
-                            </div>
-                        </div>
-                    </div>
-                </Grid.Column>
-
-                <Grid.Column
-                    widthXS={Columns.Two}
-                    style={{ paddingRight: '15px', paddingLeft: '15px' }}
-                >
-                    <div className="cell">
-                        <div style={{ cursor: 'pointer' }}>
-                            <div style={{ textAlign: 'center' }}>
-                                <h4 style={{ marginTop: '20px' }} >Total Failures</h4>
-                                <h4 style={{ color: 'white', fontSize: '20px' }}>{40}</h4>
-                            </div>
-                        </div>
-                    </div>
-                </Grid.Column>
-
-                <Grid.Column
-                    widthXS={Columns.Two}
-                    style={{ paddingRight: '15px', paddingLeft: '15px' }}
-                >
-                    <div className="cell">
-                        <div style={{ cursor: 'pointer' }}>
-                            <div style={{ textAlign: 'center' }}>
-                                <h4 style={{ marginTop: '20px' }} >Total Machine Actions</h4>
-                                <h4 style={{ color: 'white', fontSize: '20px' }}>{30}</h4>
-                            </div>
-                        </div>
-                    </div>
-                </Grid.Column>
-
-                <Grid.Column
-                    widthXS={Columns.Two}
-                    style={{ paddingRight: '15px', paddingLeft: '15px' }}
-                >
-                    <div className="cell">
-                        <div style={{ cursor: 'pointer' }}>
-                            <div style={{ textAlign: 'center' }}>
-                                <h4 style={{ marginTop: '20px' }} >Total Machine Actions</h4>
-                                <h4 style={{ color: 'white', fontSize: '20px' }}>{30}</h4>
-                            </div>
-                        </div>
-                    </div>
-                </Grid.Column>
-
-                <Grid.Column
-                    widthXS={Columns.Two}
-                    style={{ paddingRight: '15px', paddingLeft: '15px' }}
-                >
-                    <div className="cell">
-                        <div style={{ cursor: 'pointer' }}>
-                            <div style={{ textAlign: 'center' }}>
-                                <h4 style={{ marginTop: '20px' }} >Total Machine Actions</h4>
-                                <h4 style={{ color: 'white', fontSize: '20px' }}>{30}</h4>
-                            </div>
-                        </div>
-                    </div>
-                </Grid.Column>
+                {
+                    boxList.map(box => {
+                        return (
+                            <Grid.Column
+                                key={uuid.v4()}
+                                widthXS={Columns.Six}
+                                widthSM={Columns.Four}
+                                widthMD={Columns.Four}
+                                widthLG={Columns.Two}
+                                className={"dashboard-box-column"}
+                            >
+                                <div className="dashboard-cell-wrapper">
+                                    <h4>{box["text"]}</h4>
+                                    <h4>{box["value"]}</h4>
+                                </div>
+                            </Grid.Column>
+                        )
+                    })
+                }
             </Grid.Row>
         )
     }

@@ -14,7 +14,7 @@
         }
     },
     "host": "vmi474601.contaboserver.net",
-    "basePath": "/api",
+    "basePath": "/api/v1.0",
     "tags": [
         {
             "name": "Authentication",

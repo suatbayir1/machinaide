@@ -1,6 +1,6 @@
 import React, { PureComponent, createRef } from "react";
 import {
-    Page,
+    Page, Form,
     Grid,
     Columns,
     IconFont,
@@ -35,9 +35,8 @@ import Pagination from "@material-ui/lab/Pagination";
 import { withStyles } from "@material-ui/core/styles";
 import { dataToCSV, dataToXLSX } from 'src/shared/parsing/dataToCsv';
 import download from 'src/external/download.js';
-import LogsDetailDialog from 'src/logs/components/LogsDetailDialog';
 
-const styles = theme => ({
+const styles = _ => ({
     root: {
         backgroundColor: "red"
     },
@@ -70,7 +69,9 @@ interface State {
     selectedRowData: object
 }
 
-interface Props { }
+interface Props {
+    classes: any
+}
 
 class LogsPage extends PureComponent<Props, State> {
     private startDateTimeRangeRef = createRef<HTMLButtonElement>();
@@ -123,7 +124,7 @@ class LogsPage extends PureComponent<Props, State> {
         })
     }
 
-    handlePageClick = (event, value) => {
+    handlePageClick = (_, value) => {
         this.setState({
             page: value,
         }, () => this.handleFilterData());
@@ -175,8 +176,8 @@ class LogsPage extends PureComponent<Props, State> {
         const nextYear = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
         const previousYear = new Date(new Date().setFullYear(new Date().getFullYear() - 1));
 
-        const startLower = this.state.startTimeRange.lower === undefined ? previousYear : new Date(this.state.startTimeRange.lower);
-        const startUpper = this.state.startTimeRange.upper === undefined ? nextYear : new Date(this.state.startTimeRange.upper);
+        const startLower = this.state.startTimeRange["lower"] === undefined ? previousYear : new Date(this.state.startTimeRange["lower"]);
+        const startUpper = this.state.startTimeRange["upper"] === undefined ? nextYear : new Date(this.state.startTimeRange["upper"]);
 
         let intStatus = this.state.filteredStatus.map(function (item) {
             return parseInt(item, 10);
@@ -286,17 +287,10 @@ class LogsPage extends PureComponent<Props, State> {
         });
     }
 
-    closeLogsDetailDialog = () => {
-        this.setState({
-            openLogsDetailDiloag: false,
-            selectedRowData: {},
-        });
-    }
-
     private get optionsComponents(): JSX.Element {
         return (
             <React.Fragment>
-                <FlexBox margin={ComponentSize.Small} style={{ marginRight: '10%' }}>
+                <FlexBox margin={ComponentSize.Small}>
                     <p style={{ fontSize: '12px', fontWeight: 600 }}>Time Range</p>
                     <Popover
                         appearance={Appearance.Outline}
@@ -341,7 +335,7 @@ class LogsPage extends PureComponent<Props, State> {
         const { classes } = this.props;
 
         return (
-            <Page>
+            <Page className="show-pc-or-tablet">
                 {
                     <SpinnerContainer
                         loading={this.state.spinnerLoading}
@@ -353,114 +347,159 @@ class LogsPage extends PureComponent<Props, State> {
                 {
                     this.state.isLoading && (
                         <React.Fragment>
-                            <Page.Header fullWidth={true}>
+                            <Page.Header fullWidth={false}>
                                 <Page.Title title={"Logs Page"} />
                                 {
                                     this.optionsComponents
                                 }
                             </Page.Header>
 
-                            <Breadcrumbs separator="/" aria-label="breadcrumb" style={{ color: '#ffffff', marginLeft: '28px', marginTop: '-10px' }}>
-                                <Link color="inherit" to="/">
-                                    <HomeIcon style={{ marginTop: '4px' }} />
-                                </Link>
-                                <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Logs</Typography>
-                            </Breadcrumbs>
+                            <div className="breadcrumb-responsive">
+                                <Breadcrumbs separator="/" aria-label="breadcrumb" style={{ color: '#ffffff', marginTop: '-10px' }}>
+                                    <Link color="inherit" to="/">
+                                        <HomeIcon style={{ marginTop: '4px' }} />
+                                    </Link>
+                                    <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Logs</Typography>
+                                </Breadcrumbs>
+                            </div>
 
-                            <Page.Contents fullWidth={true} scrollable={true}>
-                                <Grid.Column widthXS={Columns.One}>
-                                </Grid.Column>
-
-                                <Grid.Column widthXS={Columns.Ten}>
+                            <Page.Contents fullWidth={false} scrollable={true}>
+                                <Grid.Column widthXS={Columns.Twelve}>
                                     <Grid style={{ marginTop: "50px", marginBottom: '100px', background: '#292933', padding: '20px' }}>
-                                        <Grid.Row style={{ marginTop: '20px' }}>
-                                            <Grid.Column widthXS={Columns.Two}>
-                                                <Input
-                                                    icon={IconFont.Search}
-                                                    name="filterIP"
-                                                    placeholder="Filter by IP"
-                                                    value={this.state.filterIP}
-                                                    onChange={(e) => { this.handleChangeInput(e) }}
-                                                />
+                                        <Grid.Row>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Three}
+                                                widthMD={Columns.Two}
+                                                widthLG={Columns.Two}
+                                            >
+                                                <Form.Element label="Filter by IP">
+                                                    <Input
+                                                        icon={IconFont.Search}
+                                                        name="filterIP"
+                                                        value={this.state.filterIP}
+                                                        onChange={(e) => { this.handleChangeInput(e) }}
+                                                    />
+                                                </Form.Element>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.Two}>
-                                                <Input
-                                                    icon={IconFont.Search}
-                                                    name="filterUsername"
-                                                    placeholder="Filter by username"
-                                                    value={this.state.filterUsername}
-                                                    onChange={(e) => { this.handleChangeInput(e) }}
-                                                />
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Three}
+                                                widthMD={Columns.Two}
+                                                widthLG={Columns.Two}
+                                            >
+                                                <Form.Element label="Filter by username">
+                                                    <Input
+                                                        icon={IconFont.Search}
+                                                        name="filterUsername"
+                                                        value={this.state.filterUsername}
+                                                        onChange={(e) => { this.handleChangeInput(e) }}
+                                                    />
+                                                </Form.Element>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.One}>
-                                                <MultiSelectDropdown
-                                                    emptyText={"Select Request Type"}
-                                                    options={["GET", "POST", "PUT", "DELETE"]}
-                                                    selectedOptions={this.state.filteredRequestType}
-                                                    onSelect={this.handleChangeDropdownRequestType}
-                                                />
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Three}
+                                                widthMD={Columns.Two}
+                                                widthLG={Columns.One}
+                                            >
+                                                <Form.Element label="Request type">
+                                                    <MultiSelectDropdown
+                                                        emptyText={"Select Request Type"}
+                                                        options={["GET", "POST", "PUT", "DELETE"]}
+                                                        selectedOptions={this.state.filteredRequestType}
+                                                        onSelect={this.handleChangeDropdownRequestType}
+                                                    />
+                                                </Form.Element>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.One}>
-                                                <MultiSelectDropdown
-                                                    emptyText={"Select Log Type"}
-                                                    options={["INFO", "ERROR", "WARNING", "DUPLICATED"]}
-                                                    selectedOptions={this.state.filteredLogType}
-                                                    onSelect={this.handleChangeDropdownLogType}
-                                                />
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Three}
+                                                widthMD={Columns.Two}
+                                                widthLG={Columns.One}
+                                            >
+                                                <Form.Element label="Log type">
+                                                    <MultiSelectDropdown
+                                                        emptyText={"Select Log Type"}
+                                                        options={["INFO", "ERROR", "WARNING", "DUPLICATED"]}
+                                                        selectedOptions={this.state.filteredLogType}
+                                                        onSelect={this.handleChangeDropdownLogType}
+                                                    />
+                                                </Form.Element>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.One}>
-                                                <MultiSelectDropdown
-                                                    emptyText={"Select Status"}
-                                                    options={["200", "400", "401", "404", "409"]}
-                                                    selectedOptions={this.state.filteredStatus}
-                                                    onSelect={this.handleChangeDropdownStatus}
-                                                />
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Three}
+                                                widthMD={Columns.Two}
+                                                widthLG={Columns.One}
+                                            >
+                                                <Form.Element label="Status">
+                                                    <MultiSelectDropdown
+                                                        emptyText={"Select Status"}
+                                                        options={["200", "400", "401", "404", "409"]}
+                                                        selectedOptions={this.state.filteredStatus}
+                                                        onSelect={this.handleChangeDropdownStatus}
+                                                    />
+                                                </Form.Element>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.Two}>
-                                                <Input
-                                                    icon={IconFont.Search}
-                                                    name="filterEndpoint"
-                                                    placeholder="Filter by endpoint"
-                                                    value={this.state.filterEndpoint}
-                                                    onChange={(e) => { this.handleChangeInput(e) }}
-                                                />
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Three}
+                                                widthMD={Columns.Two}
+                                                widthLG={Columns.Two}
+                                            >
+                                                <Form.Element label="Filter by endpoint">
+                                                    <Input
+                                                        icon={IconFont.Search}
+                                                        name="filterEndpoint"
+                                                        value={this.state.filterEndpoint}
+                                                        onChange={(e) => { this.handleChangeInput(e) }}
+                                                    />
+                                                </Form.Element>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.One}>
-                                                <Dropdown
-                                                    button={(active, onClick) => (
-                                                        <Dropdown.Button
-                                                            active={active}
-                                                            onClick={onClick}
-                                                            color={ComponentColor.Primary}
-                                                            icon={IconFont.Export}
-                                                            testID="dropdown-button--gen-token"
-                                                        >
-                                                            {'Export'}
-                                                        </Dropdown.Button>
-                                                    )}
-                                                    menu={onCollapse => (
-                                                        <Dropdown.Menu onCollapse={onCollapse}>
-                                                            <Dropdown.Item
-                                                                testID="dropdown-item generate-token--read-write"
-                                                                id={'csv'}
-                                                                key={'csv'}
-                                                                value={'csv'}
-                                                                onClick={this.handleChangeExportType}
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Three}
+                                                widthMD={Columns.Two}
+                                                widthLG={Columns.One}
+                                            >
+                                                <Form.Element label="Export File">
+                                                    <Dropdown
+                                                        button={(active, onClick) => (
+                                                            <Dropdown.Button
+                                                                active={active}
+                                                                onClick={onClick}
+                                                                color={ComponentColor.Primary}
+                                                                icon={IconFont.Export}
+                                                                testID="dropdown-button--gen-token"
                                                             >
-                                                                {'csv'}
-                                                            </Dropdown.Item>
-                                                            <Dropdown.Item
-                                                                testID="dropdown-item generate-token--read-write"
-                                                                id={'xlsx'}
-                                                                key={'xlsx'}
-                                                                value={'xlsx'}
-                                                                onClick={this.handleChangeExportType}
-                                                            >
-                                                                {'xlsx'}
-                                                            </Dropdown.Item>
-                                                        </Dropdown.Menu>
-                                                    )}
-                                                />
+                                                                {'Export'}
+                                                            </Dropdown.Button>
+                                                        )}
+                                                        menu={onCollapse => (
+                                                            <Dropdown.Menu onCollapse={onCollapse}>
+                                                                <Dropdown.Item
+                                                                    testID="dropdown-item generate-token--read-write"
+                                                                    id={'csv'}
+                                                                    key={'csv'}
+                                                                    value={'csv'}
+                                                                    onClick={this.handleChangeExportType}
+                                                                >
+                                                                    {'csv'}
+                                                                </Dropdown.Item>
+                                                                <Dropdown.Item
+                                                                    testID="dropdown-item generate-token--read-write"
+                                                                    id={'xlsx'}
+                                                                    key={'xlsx'}
+                                                                    value={'xlsx'}
+                                                                    onClick={this.handleChangeExportType}
+                                                                >
+                                                                    {'xlsx'}
+                                                                </Dropdown.Item>
+                                                            </Dropdown.Menu>
+                                                        )}
+                                                    />
+                                                </Form.Element>
                                             </Grid.Column>
                                         </Grid.Row>
 
@@ -485,7 +524,6 @@ class LogsPage extends PureComponent<Props, State> {
                                                             <Table.HeaderCell style={{ width: "80px" }}>Status</Table.HeaderCell>
                                                             <Table.HeaderCell style={{ width: "120px" }}>Endpoint</Table.HeaderCell>
                                                             <Table.HeaderCell style={{ width: "100px" }}>Time</Table.HeaderCell>
-                                                            {/* <Table.HeaderCell style={{ width: "50px" }}></Table.HeaderCell> */}
                                                         </Table.Row>
                                                     </Table.Header>
                                                     <Table.Body>
@@ -501,15 +539,6 @@ class LogsPage extends PureComponent<Props, State> {
                                                                         <Table.Cell>{row["status"]}</Table.Cell>
                                                                         <Table.Cell>{row["endpoint"]}</Table.Cell>
                                                                         <Table.Cell>{row["time"]}</Table.Cell>
-                                                                        {/* <Table.Cell>
-                                                                            <Button
-                                                                                size={ComponentSize.ExtraSmall}
-                                                                                icon={IconFont.Pencil}
-                                                                                color={ComponentColor.Primary}
-                                                                                type={ButtonType.Submit}
-                                                                                onClick={() => { this.handleClickEditRow(row) }}
-                                                                            />
-                                                                        </Table.Cell> */}
                                                                     </Table.Row>
                                                                 )
                                                             })
@@ -518,39 +547,37 @@ class LogsPage extends PureComponent<Props, State> {
                                                 </Table>
                                             </DapperScrollbars>
 
-                                            <div style={{ float: 'right', marginTop: '20px' }}>
-                                                <FlexBox margin={ComponentSize.Small}>
-                                                    <h5>Rows per page:</h5>
+                                            {/* <div style={{ float: 'right', marginTop: '20px' }}> */}
+                                            <FlexBox margin={ComponentSize.Small} className="logs-page-table-bottom">
+                                                <FlexBox margin={ComponentSize.Small} className="logs-page-table-bottom-flex">
+                                                    <FlexBox margin={ComponentSize.Small}>
+                                                        <h5>Rows per page:</h5>
 
-                                                    <div style={{ width: '70px' }}>
-                                                        <SelectDropdown
-                                                            options={["5", "10", "25", "50", "100"]}
-                                                            selectedOption={this.state.rowsPerPage}
-                                                            onSelect={(e) => { this.handleChangePageRows(e) }}
-                                                        />
-                                                    </div>
+                                                        <div style={{ width: '70px' }}>
+                                                            <SelectDropdown
+                                                                options={["5", "10", "25", "50", "100"]}
+                                                                selectedOption={this.state.rowsPerPage}
+                                                                onSelect={(e) => { this.handleChangePageRows(e) }}
+                                                            />
+                                                        </div>
+                                                    </FlexBox>
 
                                                     <h5 style={{ marginLeft: '10px' }}>Total row count: {this.state.totalRecordCount}</h5>
-
-                                                    <Pagination
-                                                        className={classes.ul}
-                                                        size={"large"}
-                                                        count={Math.ceil(this.state.totalRecordCount / Number(this.state.rowsPerPage))}
-                                                        color="primary"
-                                                        page={this.state.page}
-                                                        onChange={this.handlePageClick}
-                                                    />
                                                 </FlexBox>
-                                            </div>
+
+                                                <Pagination
+                                                    className={`${classes.ul} pagination-buttons-group`}
+                                                    size={"large"}
+                                                    count={Math.ceil(this.state.totalRecordCount / Number(this.state.rowsPerPage))}
+                                                    color="primary"
+                                                    page={this.state.page}
+                                                    onChange={this.handlePageClick}
+                                                />
+                                            </FlexBox>
+                                            {/* </div> */}
                                         </Grid.Row>
                                     </Grid>
                                 </Grid.Column>
-
-                                {/* <LogsDetailDialog
-                                    openLogsDetailDialog={this.state.openLogsDetailDiloag}
-                                    handleDismissLogsDetailDialog={this.closeLogsDetailDialog}
-                                    selectedRowData={this.state.selectedRowData}
-                                /> */}
                             </Page.Contents>
                         </React.Fragment>
                     )

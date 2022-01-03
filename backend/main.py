@@ -1,5 +1,6 @@
 import datetime
 import logging
+import time
 from flask import Flask, request, Response, send_from_directory, jsonify
 from flask_cors import CORS, cross_origin
 from flask_swagger_ui import get_swaggerui_blueprint
@@ -17,7 +18,10 @@ from application.controller.MaintenanceController import maintenance
 from application.controller.UserController import user
 from application.controller.GeneralController import general
 from application.controller.BrandController import brand
-import time
+from application.controller.MLController import mlserver
+from application.controller.MetaDataController import metadataserver
+# from application.controller.NLPController import nlp
+
 
 today = datetime.date.today()
 logging.basicConfig(filename=f'/home/machinaide/backend/logs/current.log', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s %(funcName)s %(module)s : %(message)s')
@@ -25,7 +29,7 @@ logging.basicConfig(filename=f'/home/machinaide/backend/logs/current.log', level
 UPLOAD_FOLDER =  "/home/machinaide/influxdb/ui/assets/images"
 
 app = Flask(__name__)
-app_prefix = "/api"
+app_prefix = "/api/v1.0"
 app.register_blueprint(auth, url_prefix = f"{app_prefix}/auth")
 app.register_blueprint(dt, url_prefix = f"{app_prefix}/dt")
 app.register_blueprint(obj, url_prefix = f"{app_prefix}/object")
@@ -37,14 +41,22 @@ app.register_blueprint(maintenance, url_prefix = f"{app_prefix}/maintenance")
 app.register_blueprint(user, url_prefix = f"{app_prefix}/user")
 app.register_blueprint(general, url_prefix = f"{app_prefix}/general")
 app.register_blueprint(brand, url_prefix = f"{app_prefix}/brand")
+app.register_blueprint(mlserver, url_prefix = f"{app_prefix}/ml")
+app.register_blueprint(metadataserver, url_prefix = f"{app_prefix}/metadata")
+# app.register_blueprint(nlp, url_prefix = f"{app_prefix}/nlp")
+
+
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+
 CORS(dt)
 CORS(app, supports_credentials = True, resources={r"*": {"origins": "*"}})
 
 
 ### swagger specific ###
-SWAGGER_URL = '/docs/api'
-API_URL = '/static/swagger.json'
+SWAGGER_URL = f'{app_prefix}/docs'
+API_URL = f'{app_prefix}/static/swagger.json'
 SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
@@ -55,7 +67,7 @@ SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
 app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix = SWAGGER_URL)
 ### end swagger specific ###
 
-@app.route('/static/<path:path>')
+@app.route(f'{app_prefix}/static/<path:path>')
 def send_static(path):
     return send_from_directory('static', path)
 

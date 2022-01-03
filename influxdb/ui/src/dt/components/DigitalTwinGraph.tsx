@@ -531,7 +531,7 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                                 </Grid.Row>
                                 <Grid.Row>
                                     <Grid.Column widthXS={Columns.Twelve}>
-                                        <div className="tabbed-page--header-left">
+                                        <div className="dt-graph-buttons ">
                                             {
                                                 ["admin"].includes(localStorage.getItem("userRole")) &&
                                                 <Button
@@ -540,10 +540,12 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                                                     onClick={this.openAddNodeOverlay}
                                                     type={ButtonType.Button}
                                                     color={ComponentColor.Primary}
+                                                    className="show-only-pc"
                                                 />
                                             }
 
                                             <Button
+                                                className="show-only-pc"
                                                 text="View Factory"
                                                 icon={IconFont.Pulse}
                                                 onClick={() => history.push(`/orgs/${this.props.orgID}/dt/factory-scene`)}
@@ -552,6 +554,7 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                                             />
 
                                             <Button
+                                                className="show-only-pc"
                                                 text="Data Flow"
                                                 icon={IconFont.Shuffle}
                                                 onClick={() => history.push(`/orgs/${this.props.orgID}/dt/data-flow-settings`)}
@@ -567,6 +570,7 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                                                         active={active}
                                                         onClick={onClick}
                                                         color={ComponentColor.Primary}
+                                                        // style={{ width: '125px' }}
                                                         testID="dropdown-button--gen-token"
                                                     >
                                                         {selectedGraphType['text']}

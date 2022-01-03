@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 // Components
 import {
     Page, Grid, Columns, IconFont, Input, SpinnerContainer, TechnoSpinner, RemoteDataState, InfluxColors,
-    Table, DapperScrollbars, BorderType, ComponentSize, QuestionMarkTooltip, ComponentColor,
+    Table, DapperScrollbars, BorderType, ComponentSize, QuestionMarkTooltip, ComponentColor, Form,
 } from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
@@ -159,38 +159,57 @@ class SensorsTable extends PureComponent<Props, State> {
                             </Breadcrumbs>
 
                             <Page.Contents fullWidth={true} scrollable={true}>
-                                <Grid.Column widthXS={Columns.One}>
-                                </Grid.Column>
-
-                                <Grid.Column widthXS={Columns.Ten}>
+                                <Grid.Column
+                                    widthMD={Columns.Twelve}
+                                    widthLG={Columns.Ten}
+                                    offsetLG={Columns.One}
+                                >
                                     <Grid style={{ marginTop: "50px", marginBottom: '100px', background: '#292933', padding: '20px' }}>
                                         <Grid.Row style={{ marginTop: '20px' }}>
-                                            <Grid.Column widthXS={Columns.Two}>
-                                                <Input
-                                                    icon={IconFont.Search}
-                                                    name="filterName"
-                                                    placeholder="Filter by name"
-                                                    onChange={this.handleChangeInput}
-                                                    value={this.state.filterName}
-                                                />
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Four}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Two}
+                                            >
+                                                <Form.Element label="Filter by name">
+                                                    <Input
+                                                        icon={IconFont.Search}
+                                                        name="filterName"
+                                                        onChange={this.handleChangeInput}
+                                                        value={this.state.filterName}
+                                                    />
+                                                </Form.Element>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.Two}>
-                                                <Input
-                                                    icon={IconFont.Search}
-                                                    name="filterType"
-                                                    placeholder="Filter by type"
-                                                    onChange={this.handleChangeInput}
-                                                    value={this.state.filterType}
-                                                />
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Four}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Two}
+                                            >
+                                                <Form.Element label="Filter by type">
+                                                    <Input
+                                                        icon={IconFont.Search}
+                                                        name="filterType"
+                                                        onChange={this.handleChangeInput}
+                                                        value={this.state.filterType}
+                                                    />
+                                                </Form.Element>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.Two}>
-                                                <Input
-                                                    icon={IconFont.Search}
-                                                    name="filterSensorStatus"
-                                                    placeholder="Filter by sensor status"
-                                                    onChange={this.handleChangeInput}
-                                                    value={this.state.filterSensorStatus}
-                                                />
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Four}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Two}
+                                            >
+                                                <Form.Element label="Filter by status">
+                                                    <Input
+                                                        icon={IconFont.Search}
+                                                        name="filterSensorStatus"
+                                                        onChange={this.handleChangeInput}
+                                                        value={this.state.filterSensorStatus}
+                                                    />
+                                                </Form.Element>
                                             </Grid.Column>
                                         </Grid.Row>
 

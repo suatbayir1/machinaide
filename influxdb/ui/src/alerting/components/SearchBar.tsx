@@ -1,5 +1,5 @@
 // Libraries
-import React, {useState, FC} from 'react'
+import React, { useState, FC } from 'react'
 import {
   Input,
   Icon,
@@ -12,13 +12,13 @@ import {
 } from '@influxdata/clockface'
 
 // Actions
-import {search} from 'src/eventViewer/components/EventViewer.reducer'
+import { search } from 'src/eventViewer/components/EventViewer.reducer'
 
 // Utils
-import {isSearchInputValid} from 'src/eventViewer/utils/search'
+import { isSearchInputValid } from 'src/eventViewer/utils/search'
 
 // Types
-import {EventViewerChildProps} from 'src/eventViewer/types'
+import { EventViewerChildProps } from 'src/eventViewer/types'
 
 const SUGGESTION_CLASS = 'status-search-bar--suggestion'
 
@@ -61,7 +61,7 @@ const SearchBar: FC<Props> = ({
         <Input
           icon={IconFont.Search}
           placeholder={placeholder}
-          style={{width: '100%'}}
+          style={{ width: '100%' }}
           value={state.searchInput}
           status={inputStatus}
           onChange={e => search(state, dispatch, loadRows, e.target.value)}

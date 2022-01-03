@@ -1,0 +1,2 @@
+Epoch 0/5
+loss: nan, mean_squared_error: nan

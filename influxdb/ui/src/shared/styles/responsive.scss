@@ -1,0 +1,412 @@
+@import "../../style/modules.scss";
+
+/* GENERAL */
+.center-the-children {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+.breadcrumb-responsive {
+  margin-left: 8%;
+}
+
+.responsive-table-with-mobile {
+  margin-top: 50px;
+  margin-bottom: 100px;
+  background: #292933;
+  padding: 20px;
+}
+
+
+/* DASHBOARD */
+.dashboard-box-column { 
+    margin-bottom: 10px;
+}
+
+.dashboard-cell-wrapper {
+    background-color: #0f0e15;
+    text-align: center;
+    cursor: pointer;
+    font-size: 13px;
+    color: '#BEC2CC';
+    padding: 10px;
+    transition: 0.5s;
+}
+
+.dashboard-cell-wrapper:hover{
+  color: #0f0e15;
+  background-color: white;
+}
+
+.dashboard-cell-wrapper :first-child {
+    margin-top: 20px;
+}
+
+/* DT */
+.dt-graph-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+
+  & > * {
+    margin-right: $cf-marg-a;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+/* OBJECT CREATOR */
+.object-creator-info-buttons {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.object-creator-info-buttons > *{
+  margin-right: 10px;
+}
+
+.object-creator-left-buttons {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.object-creator-left-buttons > * {
+  margin-right: 10px;
+}
+
+/* USERS TABLE */
+.users-table-bottom-buttons-container {
+  float:right;
+}
+
+/* LOGS PAGE */
+.logs-page-table-bottom {
+  float: right;
+  margin-top: 20px;
+}
+
+/* MACHINE PANEL */
+#machine-panel .resource-card {
+  margin-top: 20px;
+  height: 275px;
+}
+
+#component-panel .resource-card {
+  margin-top: 20px;
+  height: 275px;
+}
+
+#machine-panel .machine-image {
+  width: 100%;
+  height: 150px;
+}
+
+#component-panel .component-image {
+  width: 70%;
+  margin-left: 17%;
+  height: 175px;
+}
+
+#machine-panel .machine-icon {
+  width: 50px;
+  height: 50px;
+  margin-right: 10px;
+}
+
+#component-panel .component-icon {
+  width: 50px;
+  height: 50px;
+  margin-right: 10px;
+}
+
+#machine-panel .machine-shortcut-list {
+  list-style-type: none;
+  margin-top: 5%;
+  padding-left: 0px; 
+  font-size: 0.8rem;
+}
+
+#component-panel .component-shortcut-list {
+  list-style-type: none;
+  margin-top: 5%;
+  padding-left: 0px; 
+  font-size: 0.8rem;
+}
+
+#machine-panel .machine-shortcut-list li{
+  margin-bottom: 0px;
+}
+
+#component-panel .component-shortcut-list li{
+  margin-bottom: 0px;
+}
+
+#machine-panel .unhovered-text {
+  margin-top: 40%;
+}
+
+#machine-panel .li-icon {
+  width: 20px;
+  height: 20px; 
+  margin-right: 5px;
+}
+
+#component-panel .li-icon {
+  width: 20px;
+  height: 20px; 
+  margin-right: 5px;
+}
+
+/* FAILURE TABLE */
+#maintenance-records-button {
+  width: 224px;
+}
+
+.failure-table-float-div {
+  float: right;
+}
+
+/* MAINTENANCE TABLE */
+.maintenance-table-float-div {
+  float: right;
+}
+
+/* PRODUCTION LINE */
+#production-line-card {
+  border-right: 1px solid white;
+}
+
+.production-line-dashboard-scrollbar {
+  display: none;
+}
+
+#productivity-column,
+#summary-column,
+#production-column,
+#total-column {
+  border-right: 1px solid white;
+  height: 700px;
+}
+
+.production-line-total-font-size {
+  font-size: 35px;
+}
+
+@media only screen and (max-width:1650px) {
+  .breadcrumb-responsive {
+    margin-left: 32px;
+  }
+}
+
+@media only screen and (max-width:1500px) {
+  #production-line-card {
+    border: none;
+  }
+
+  #total-column {
+    border: none;
+  }
+}
+
+@media only screen and (max-width:1250px) {
+  .object-creator-flex-container {
+    flex-direction: column;
+  }
+
+  .object-creator-flex-container > * {
+    margin-top: 10px;
+  }
+}
+
+@media only screen and (max-width:1100px) {
+  .logs-page-table-bottom {
+    flex-direction: column;
+    float: none;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+@media only screen and (max-width:1080px) {
+  #machine-panel .unhovered-text {
+    margin-top: 10%;
+  }
+
+  #machine-panel .machine-shortcut-list li{
+    width: 50%;
+  }
+
+  #machine-panel .machine-shortcut-list {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 0px;
+  }
+
+  #machine-panel .resource-card {
+    height: 400px;
+  }
+
+  #summary-column {
+    border: none;
+  }
+}
+
+@media only screen and (max-width:1000px) {
+  .dashboard-filter-buttons {
+    flex-wrap: wrap;
+  }
+
+  .dashboard-filter-buttons > * {
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  #dt-3d-scene,
+  #load-data, 
+  #load-data + div, 
+  .load-data-page,
+  #data-explorer,
+  #tasks,
+  #settings,
+  #settings + div,
+  #object-creator,
+  .show-only-pc,
+  .data-explorer-page,
+  .users-page-display,
+  .members-page-display,
+  #new-report, 
+  #new-report-page, 
+  #backup, 
+  #backup-page,
+  .cf-tree-nav--user-menu #user-menu-users-link, 
+  #user-menu-members-link,
+  #ml  {
+    display: none;
+  }
+
+  #machine-actions-timerange-container {
+    flex-direction: column;
+  }
+}
+
+@media only screen and (max-width:800px) {
+  .responsive-breadcrumbs-with-margin {
+    margin-top: 20px;
+  }
+
+  .responsive-table-with-mobile {
+    margin-top: 0px;
+  }
+}
+
+@media only screen and (max-width:750px) {
+  #productivity-column,
+  #production-column {
+    border: none;
+  }
+}
+
+@media only screen and (max-width:700px) {
+  .object-creator-left-buttons {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .object-creator-left-buttons  > * {
+    margin-top: 10px;
+    width: 44% !important;
+  }
+
+  .uptime-flex-container {
+    padding-left: 20%;
+  }
+}
+
+@media only screen and (max-width:600px) {
+  .pagination-buttons-group {
+    font-size: 8px;
+  }
+
+  #failure-table-timerange-container {
+    flex-direction: column;
+  }
+
+  #three-d-failures-button,
+  #import-failures-button,
+  #add-failures-button,
+  #failure-table-edit-button,
+  #maintenance-table-import-button,
+  #maintenance-table-add-button,
+  #maintenance-table-edit-button,
+  #logs,
+  .show-pc-or-tablet,
+  #userManual {
+    display: none;
+  }
+
+  #maintenance-records-button, 
+  #failure-table-exports-button,
+  #maintenance-table-exports-button{
+    width: 100%;
+  }
+
+  .failure-table-float-div, .maintenance-table-float-div {
+    float: none;
+  }
+}
+
+@media only screen and (max-width:480px) {
+    .dashboard-box-column { 
+      width: 100%;
+    }
+
+    .dt-graph-buttons  {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .dt-graph-buttons > * {
+      margin-top: 10px;
+      width: 44% !important;
+    }
+
+    .object-creator-info-buttons > *:not(:first-child){
+      width: 40% !important;
+    }
+    
+    .toggle-container {
+      flex-direction: column;
+    }
+
+    .toggle-container > * {
+      margin-top: 10px;
+    }
+
+    .users-table-bottom-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .users-table-bottom-buttons > * {
+      margin-top: 10px;
+      width: 48% !important;
+    }
+    
+    .users-table-bottom-buttons-container {
+      float: none;
+    }
+
+    .logs-page-table-bottom-flex {
+      flex-direction: column;
+    }
+}

@@ -1,40 +1,17 @@
-import React, { PureComponent, createRef } from "react";
-import {
-    Page,
-    Grid,
-    IconFont,
-    ComponentColor,
-    ComponentSize,
-    FlexBox,
-    PopoverInteraction,
-    Button,
-    ButtonType,
-    Popover,
-    Appearance,
-    DateRangePicker,
-    SquareButton,
-    PopoverPosition,
-    SelectDropdown,
-    SlideToggle,
-    Panel,
-    Columns,
-    InputLabel,
-    Table,
-    DapperScrollbars,
-    BorderType,
-} from '@influxdata/clockface'
+// Libraries
+import React, { PureComponent } from "react";
 import { Link } from "react-router-dom";
+
+// Components
+import {
+    Page, Grid, ComponentColor, ComponentSize, FlexBox, SelectDropdown, SlideToggle, Panel,
+    Columns, InputLabel, Table, DapperScrollbars, BorderType,
+} from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
 import HomeIcon from '@material-ui/icons/Home';
-// import Paper from '@material-ui/core/Paper';
-// import Table from '@material-ui/core/Table';
-// import TableBody from '@material-ui/core/TableBody';
-// import TableCell from '@material-ui/core/TableCell';
-// import TableContainer from '@material-ui/core/TableContainer';
-// import TableHead from '@material-ui/core/TableHead';
-// import TablePagination from '@material-ui/core/TablePagination';
-// import TableRow from '@material-ui/core/TableRow';
+
+// Services
 import PredictionService from 'src/shared/services/PredictionService';
 
 interface State {
@@ -104,7 +81,7 @@ class PredictionPageShowAll extends PureComponent<Props, State> {
         }
     }
 
-    handleChangePage = (event, newPage) => {
+    handleChangePage = (_, newPage) => {
         this.setState({ page: newPage })
     };
 
@@ -115,6 +92,12 @@ class PredictionPageShowAll extends PureComponent<Props, State> {
         })
     };
 
+    predictionsRoute = () => {
+        return this.props.match.params["CID"] == undefined ?
+            `/orgs/${this.props.match.params["orgID"]}/predictions/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${this.props["match"].params.MID}`
+            : `/orgs/${this.props.match.params["orgID"]}/predictions/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${this.props["match"].params.MID}/${this.props["match"].params.CID}`;
+    }
+
     render() {
         return (
             <Page>
@@ -122,32 +105,44 @@ class PredictionPageShowAll extends PureComponent<Props, State> {
                     <Page.Title title={"Predictions"} />
                 </Page.Header>
 
-                <Breadcrumbs separator="/" aria-label="breadcrumb" style={{ color: '#ffffff', marginLeft: '28px', marginTop: '-10px' }}>
-                    <Link color="inherit" to="/">
-                        <HomeIcon style={{ marginTop: '4px' }} />
-                    </Link>
-                    <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/allFactories`}>
-                        Factories
+                <div className="responsive-breadcrumbs-with-margin">
+                    <Breadcrumbs separator="/" aria-label="breadcrumb" style={{ color: '#ffffff', marginLeft: '28px', marginTop: '-10px' }}>
+                        <Link color="inherit" to="/">
+                            <HomeIcon style={{ marginTop: '4px' }} />
                         </Link>
-                    <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/machines/<factoryID>`}>
-                        Machines
+                        <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/allFactories`}>
+                            Factories
                         </Link>
-                    <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/machines/<factoryID>/<machineID>`}>
-                        Components
+                        <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/production-line/${this.props["match"].params.FID}/${this.props["match"].params.PLID}`}>
+                            Production Lines
                         </Link>
-                    <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/predictions/:SID`}>
-                        Predictions
+                        <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/${this.props["match"].params.FID}/${this.props["match"].params.PLID}`}>
+                            Machines
                         </Link>
-                    <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Show All</Typography>
-                </Breadcrumbs>
+                        {
+                            this.props["match"].params["CID"] !== undefined &&
+                            <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/components/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${this.props["match"].params.MID}`}>
+                                Components
+                            </Link>
+                        }
+                        <Link
+                            color="inherit"
+                            to={this.predictionsRoute()}
+                        >
+                            Predictions
+                        </Link>
+                        <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Show All</Typography>
+                    </Breadcrumbs>
+                </div>
 
                 <Page.Contents fullWidth={true} scrollable={true}>
-                    <Grid.Column widthXS={Columns.One}>
-                    </Grid.Column>
+                    <Grid.Column
+                        widthXS={Columns.Twelve}
+                        widthLG={Columns.Ten}
+                        offsetLG={Columns.One}
+                    >
 
-                    <Grid.Column widthXS={Columns.Ten}>
-
-                        <Grid style={{ marginTop: "50px", marginBottom: '100px', background: '#292933', padding: '20px' }}>
+                        <Grid className="responsive-table-with-mobile">
                             <Grid.Row>
                                 <FlexBox margin={ComponentSize.Small}>
                                     <SlideToggle
@@ -165,17 +160,32 @@ class PredictionPageShowAll extends PureComponent<Props, State> {
                                 <Panel style={{ marginTop: '20px', fontSize: '15px', border: '2px solid #000000' }}>
                                     <Panel.Body size={ComponentSize.ExtraSmall}>
                                         <Grid.Row >
-                                            <Grid.Column widthXS={Columns.Four}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Four}
+                                                widthMD={Columns.Four}
+                                                widthLG={Columns.Four}
+                                            >
                                                 <b>Model Name:</b> <i>{this.state.predictionModel.modelName} (version {this.state.predictionModel.modelVersion})</i><br /><br />
                                                 <b>Model creator:</b> <i>{this.state.predictionInfo.creator}</i><br /><br />
                                                 <b>Created date:</b> <i>{this.state.predictionInfo.createdDate}</i><br /><br />
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.Four}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Four}
+                                                widthMD={Columns.Four}
+                                                widthLG={Columns.Four}
+                                            >
                                                 <b>Total Positive Feedback:</b> <i>{this.state.predictionInfo.totalFb.positive}</i><br /><br />
                                                 <b>Total Negative Feedback:</b> <i>{this.state.predictionInfo.totalFb.negative}</i><br /><br />
                                                 <b>Total Neutral Feedback:</b> <i>{this.state.predictionInfo.totalFb.neutral}</i>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.Four}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Four}
+                                                widthMD={Columns.Four}
+                                                widthLG={Columns.Four}
+                                            >
                                                 <b>Related hardwares:</b><br />
                                                 {
                                                     this.state.predictionInfo.releatedHardware.map((item, index) => (

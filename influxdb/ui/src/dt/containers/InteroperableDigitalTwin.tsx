@@ -25,7 +25,7 @@ class Interoperable extends PureComponent<Props, State> {
     public render() {
 
         return (
-            <Page>
+            <Page className="show-only-pc">
                 <Page.Header fullWidth={false}>
                     <Page.Title title="Data Flow Settings" />
                     <QuestionMarkTooltip
@@ -44,7 +44,7 @@ class Interoperable extends PureComponent<Props, State> {
                 <Page.Contents fullWidth={false} scrollable={true}>
                     <Grid>
                         <Grid.Row>
-                            <Grid.Column widthXS={Columns.Six}>
+                            <Grid.Column widthXS={Columns.Twelve}>
                                 <DataFlowSettings />
                             </Grid.Column>
                         </Grid.Row>

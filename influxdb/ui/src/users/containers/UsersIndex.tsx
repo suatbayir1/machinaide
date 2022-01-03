@@ -1,48 +1,31 @@
+// Libraries
 import React, { Component, createRef } from 'react'
 import { withRouter, RouteComponentProps } from 'react-router-dom'
 import { connect, ConnectedProps } from 'react-redux'
+import { Link } from "react-router-dom"
+
+// Services
 import UserService from 'src/users/services/UserService';
 import MemberService from 'src/members/services/MemberService';
 import OrganizationService from 'src/organizations/services/OrganizationService';
-import AddUserOverlay from 'src/users/components/AddUserOverlay';
-import ImportUserFile from 'src/users/components/ImportUserFile';
-import { getAll } from 'src/resources/selectors'
 
-// Components
+// Helpers
+import { getAll } from 'src/resources/selectors'
 import { dataToCSV, dataToXLSX } from 'src/shared/parsing/dataToCsv';
 import download from 'src/external/download.js';
+
+// Components
+import AddUserOverlay from 'src/users/components/AddUserOverlay';
+import ImportUserFile from 'src/users/components/ImportUserFile';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
-import { Link } from "react-router-dom"
 import HomeIcon from '@material-ui/icons/Home';
 import {
-    Page,
-    Grid,
-    IconFont,
-    ComponentColor,
-    ComponentSize,
-    Button,
-    ButtonType,
-    Table,
-    DapperScrollbars,
-    BorderType,
-    Popover,
-    Appearance,
-    PopoverPosition,
-    PopoverInteraction,
-    Columns,
-    FlexBox,
-    Notification,
-    Gradients,
-    ConfirmationButton,
-    Input,
-    MultiSelectDropdown,
-    Dropdown,
-    SlideToggle,
-    SpinnerContainer,
-    TechnoSpinner,
-    RemoteDataState,
-    SelectDropdown,
+    Page, Grid, IconFont, ComponentColor, ComponentSize, Button, ButtonType,
+    Table, DapperScrollbars, BorderType, Popover, Appearance, PopoverPosition,
+    PopoverInteraction, Columns, FlexBox, Notification, Gradients, ConfirmationButton,
+    Input, MultiSelectDropdown, Dropdown, SlideToggle, SpinnerContainer, TechnoSpinner,
+    RemoteDataState, SelectDropdown, Form,
 } from '@influxdata/clockface'
 
 // Utils
@@ -364,12 +347,17 @@ class UsersIndex extends Component<Props, State> {
                 }
 
                 {
-                    this.state.isLoading && <Page titleTag={pageTitleSuffixer(['Members', 'Organization'])}>
+                    this.state.isLoading &&
+                    <Page titleTag={pageTitleSuffixer(['Members', 'Organization'])} className="users-page-display">
                         <Page.Header fullWidth={true} testID="member-page--header">
                             <Page.Title title="User Management Page" />
                         </Page.Header>
 
-                        <Breadcrumbs separator="/" aria-label="breadcrumb" style={{ color: '#ffffff', marginLeft: '28px', marginTop: '-10px' }}>
+                        <Breadcrumbs
+                            separator="/"
+                            aria-label="breadcrumb"
+                            style={{ color: '#ffffff', marginLeft: '28px', marginTop: '-10px' }}
+                        >
                             <Link color="inherit" to="/">
                                 <HomeIcon style={{ marginTop: '4px' }} />
                             </Link>
@@ -379,30 +367,50 @@ class UsersIndex extends Component<Props, State> {
                         <Page.Contents fullWidth={false} scrollable={true}>
                             <Grid style={{ marginBottom: '100px', background: '#292933', padding: '20px' }}>
                                 <Grid.Row style={{ marginBottom: '20px' }}>
-                                    <Grid.Column widthXS={Columns.Two}>
-                                        <Input
-                                            icon={IconFont.Search}
-                                            name="filterUsername"
-                                            placeholder="Filter by username"
-                                            value={this.state.filterUsername}
-                                            onChange={(e) => { this.setState({ filterUsername: e.target.value }, () => { this.handleFilterData() }) }}
-                                        />
+                                    <Grid.Column
+                                        widthXS={Columns.Twelve}
+                                        widthSM={Columns.Four}
+                                        widthMD={Columns.Three}
+                                        widthLG={Columns.Two}
+                                    >
+                                        <Form.Element label="Filter by username">
+                                            <Input
+                                                icon={IconFont.Search}
+                                                name="filterUsername"
+                                                value={this.state.filterUsername}
+                                                onChange={(e) => { this.setState({ filterUsername: e.target.value }, () => { this.handleFilterData() }) }}
+                                            />
+                                        </Form.Element>
                                     </Grid.Column>
-                                    <Grid.Column widthXS={Columns.Two}>
-                                        <MultiSelectDropdown
-                                            emptyText={"Select role"}
-                                            options={this.state.roleList}
-                                            selectedOptions={this.state.filterRole}
-                                            onSelect={this.handleChangeDropdownRole}
-                                        />
+                                    <Grid.Column
+                                        widthXS={Columns.Twelve}
+                                        widthSM={Columns.Four}
+                                        widthMD={Columns.Three}
+                                        widthLG={Columns.Two}
+                                    >
+                                        <Form.Element label="Filter by role">
+                                            <MultiSelectDropdown
+                                                emptyText={"Select role"}
+                                                options={this.state.roleList}
+                                                selectedOptions={this.state.filterRole}
+                                                onSelect={this.handleChangeDropdownRole}
+                                            />
+                                        </Form.Element>
                                     </Grid.Column>
-                                    <Grid.Column widthXS={Columns.Two}>
-                                        <MultiSelectDropdown
-                                            emptyText={"Select status"}
-                                            options={["active", "inactive"]}
-                                            selectedOptions={this.state.filterStatus}
-                                            onSelect={this.handleChangeDropdownStatus}
-                                        />
+                                    <Grid.Column
+                                        widthXS={Columns.Twelve}
+                                        widthSM={Columns.Four}
+                                        widthMD={Columns.Three}
+                                        widthLG={Columns.Two}
+                                    >
+                                        <Form.Element label="Filter by status">
+                                            <MultiSelectDropdown
+                                                emptyText={"Select status"}
+                                                options={["active", "inactive"]}
+                                                selectedOptions={this.state.filterStatus}
+                                                onSelect={this.handleChangeDropdownStatus}
+                                            />
+                                        </Form.Element>
                                     </Grid.Column>
                                 </Grid.Row>
 
@@ -557,8 +565,8 @@ class UsersIndex extends Component<Props, State> {
                                 </Grid.Row>
 
                                 <Grid.Row style={{ marginTop: '50px' }}>
-                                    <div style={{ float: 'right' }}>
-                                        <FlexBox margin={ComponentSize.Small}>
+                                    <div className="users-table-bottom-buttons-container">
+                                        <FlexBox margin={ComponentSize.Small} className="users-table-bottom-buttons">
                                             <Dropdown
                                                 style={{ width: '110px' }}
                                                 button={(active, onClick) => (

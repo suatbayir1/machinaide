@@ -82,19 +82,22 @@ class AllFactories extends PureComponent<Props, State> {
                                 />
                             </Page.Header>
 
+                            {/* <div className="breadcrumb-responsive"> */}
                             <Breadcrumbs separator="/" aria-label="breadcrumb" style={{ color: '#ffffff', marginLeft: '28px', marginTop: '-10px' }}>
                                 <Link color="inherit" to="/">
                                     <HomeIcon style={{ marginTop: '4px' }} />
                                 </Link>
                                 <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Factories</Typography>
                             </Breadcrumbs>
+                            {/* </div> */}
 
                             <Page.Contents fullWidth={true} scrollable={true}>
                                 <Grid>
                                     <Grid.Row>
                                         <Grid.Column
-                                            widthXS={Columns.Four}
-                                            offsetXS={Columns.Two}
+                                            widthMD={Columns.Six}
+                                            widthLG={Columns.Five}
+                                            offsetLG={Columns.One}
                                         >
                                             <FactoryCard
                                                 factory={this.state.factory}
@@ -103,7 +106,8 @@ class AllFactories extends PureComponent<Props, State> {
                                         </Grid.Column>
 
                                         <Grid.Column
-                                            widthXS={Columns.Four}
+                                            widthMD={Columns.Six}
+                                            widthLG={Columns.Five}
                                         >
                                             <ProductionLineCards
                                                 factory={this.state.factory}

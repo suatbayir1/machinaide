@@ -1,0 +1,53 @@
+/*
+   User Page Styles
+   -----------------------------------------------------------------------------
+*/
+
+@import "../../style/modules.scss";
+
+
+.subsection-list,
+.useful-links {
+  padding: 0;
+  list-style: none;
+}
+
+.subsection-list > li {
+  font-size: 1.25em;
+//   background-color: #92a8d1;
+  border-radius: $radius;
+  padding: $ix-marg-c;
+  margin-bottom: $ix-marg-a;
+  &:hover,
+  &.active {
+      cursor: pointer;
+      color: $g18-cloud;
+      background-color: $g3-castle;
+  }
+}
+
+// .subsection--tab {
+//     border-radius: $radius 0 0 $radius;
+//     padding: 0 8px 0 16px;
+//     height: $chronograf-page-header-height;
+//     white-space: nowrap;
+//     line-height: $chronograf-page-header-height;
+//     text-align: left;
+//     font-size: $subsection-font;
+//     font-weight: 500;
+//     color: $g11-sidewalk;
+//     @include no-user-select();
+//     transition: background-color 0.25s ease, color 0.25s ease;
+
+//     &:hover,
+//     &.active {
+//         cursor: pointer;
+//         color: $g18-cloud;
+//         background-color: $g3-castle;
+//     }
+// }
+
+.useful-links > li {
+  margin-bottom: $cf-marg-b;
+  padding: 0;
+}

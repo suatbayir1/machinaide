@@ -534,78 +534,83 @@ class FailureTable extends PureComponent<Props, State> {
     private get optionsComponents(): JSX.Element {
         return (
             <React.Fragment>
-                <FlexBox margin={ComponentSize.Small}>
-                    <p style={{ fontSize: '12px', fontWeight: 600 }}>Start Time Range</p>
-                    <Popover
-                        appearance={Appearance.Outline}
-                        position={PopoverPosition.Below}
-                        triggerRef={this.startDateTimeRangeRef}
-                        visible={this.state.startTimeRangeOpen}
-                        showEvent={PopoverInteraction.None}
-                        hideEvent={PopoverInteraction.None}
-                        distanceFromTrigger={8}
-                        testID="timerange-popover"
-                        enableDefaultStyles={false}
-                        contents={() => (
-                            <DateRangePicker
-                                timeRange={this.state.startTimeRange}
-                                onSetTimeRange={(e) => { this.handleChangeStartTimeRange(e) }}
-                                onClose={() => { this.setState({ startTimeRangeOpen: false }) }}
-                                position={
-                                    { position: 'relative' }
-                                }
-                            />
-                        )}
-                    />
-                    <Button
-                        ref={this.startDateTimeRangeRef}
-                        text="Start Time Range"
-                        onClick={() => { this.setState({ startTimeRangeOpen: true }) }}
-                        type={ButtonType.Button}
-                        icon={IconFont.Calendar}
-                        color={ComponentColor.Default}
-                    />
-                    <SquareButton
-                        icon={IconFont.Remove}
-                        color={ComponentColor.Danger}
-                        onClick={this.resetStartTimeRange}
-                    />
-                    <p style={{ fontSize: '12px', marginLeft: '20px !important', fontWeight: 600 }}>   End Time Range</p>
-                    <Popover
-                        appearance={Appearance.Outline}
-                        position={PopoverPosition.Below}
-                        triggerRef={this.endDateTimeRangeRef}
-                        visible={this.state.endTimeRangeOpen}
-                        showEvent={PopoverInteraction.None}
-                        hideEvent={PopoverInteraction.None}
-                        distanceFromTrigger={8}
-                        testID="timerange-popover"
-                        enableDefaultStyles={false}
-                        contents={() => (
-                            <DateRangePicker
-                                timeRange={this.state.endTimeRange}
-                                onSetTimeRange={(e) => { this.handleChangeEndTimeRange(e) }}
-                                onClose={() => { this.setState({ endTimeRangeOpen: false }) }}
-                                position={
-                                    { position: 'relative' }
-                                }
-                            />
-                        )}
-                    />
+                <FlexBox margin={ComponentSize.Small} id="failure-table-timerange-container">
+                    <FlexBox margin={ComponentSize.Small}>
+                        <p style={{ fontSize: '12px', fontWeight: 600 }}>Start Time Range</p>
+                        <Popover
+                            appearance={Appearance.Outline}
+                            position={PopoverPosition.Below}
+                            triggerRef={this.startDateTimeRangeRef}
+                            visible={this.state.startTimeRangeOpen}
+                            showEvent={PopoverInteraction.None}
+                            hideEvent={PopoverInteraction.None}
+                            distanceFromTrigger={8}
+                            testID="timerange-popover"
+                            enableDefaultStyles={false}
+                            contents={() => (
+                                <DateRangePicker
+                                    timeRange={this.state.startTimeRange}
+                                    onSetTimeRange={(e) => { this.handleChangeStartTimeRange(e) }}
+                                    onClose={() => { this.setState({ startTimeRangeOpen: false }) }}
+                                    position={
+                                        { position: 'relative' }
+                                    }
+                                />
+                            )}
+                        />
+                        <Button
+                            ref={this.startDateTimeRangeRef}
+                            text="Start Time Range"
+                            onClick={() => { this.setState({ startTimeRangeOpen: true }) }}
+                            type={ButtonType.Button}
+                            icon={IconFont.Calendar}
+                            color={ComponentColor.Default}
+                        />
+                        <SquareButton
+                            icon={IconFont.Remove}
+                            color={ComponentColor.Danger}
+                            onClick={this.resetStartTimeRange}
+                        />
+                    </FlexBox>
 
-                    <Button
-                        ref={this.endDateTimeRangeRef}
-                        text="End Time Range"
-                        onClick={() => { this.setState({ endTimeRangeOpen: true }) }}
-                        type={ButtonType.Button}
-                        icon={IconFont.Calendar}
-                        color={ComponentColor.Default}
-                    />
-                    <SquareButton
-                        icon={IconFont.Remove}
-                        color={ComponentColor.Danger}
-                        onClick={this.resetEndTimeRange}
-                    />
+                    <FlexBox margin={ComponentSize.Small}>
+                        <p style={{ fontSize: '12px', marginLeft: '20px !important', fontWeight: 600 }}>   End Time Range</p>
+                        <Popover
+                            appearance={Appearance.Outline}
+                            position={PopoverPosition.Below}
+                            triggerRef={this.endDateTimeRangeRef}
+                            visible={this.state.endTimeRangeOpen}
+                            showEvent={PopoverInteraction.None}
+                            hideEvent={PopoverInteraction.None}
+                            distanceFromTrigger={8}
+                            testID="timerange-popover"
+                            enableDefaultStyles={false}
+                            contents={() => (
+                                <DateRangePicker
+                                    timeRange={this.state.endTimeRange}
+                                    onSetTimeRange={(e) => { this.handleChangeEndTimeRange(e) }}
+                                    onClose={() => { this.setState({ endTimeRangeOpen: false }) }}
+                                    position={
+                                        { position: 'relative' }
+                                    }
+                                />
+                            )}
+                        />
+
+                        <Button
+                            ref={this.endDateTimeRangeRef}
+                            text="End Time Range"
+                            onClick={() => { this.setState({ endTimeRangeOpen: true }) }}
+                            type={ButtonType.Button}
+                            icon={IconFont.Calendar}
+                            color={ComponentColor.Default}
+                        />
+                        <SquareButton
+                            icon={IconFont.Remove}
+                            color={ComponentColor.Danger}
+                            onClick={this.resetEndTimeRange}
+                        />
+                    </FlexBox>
                 </FlexBox>
             </React.Fragment>
         )
@@ -712,24 +717,23 @@ class FailureTable extends PureComponent<Props, State> {
                                 </Link>
                                 <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/allFactories`}>
                                     Factories
-                        </Link>
-                                {/* <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/<factoryID>`}>
-                                    Machines
-                        </Link>
-                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/<factoryID>/<machineID>`}>
-                                    Components
-                        </Link> */}
+                                </Link>
                                 <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Failures</Typography>
                             </Breadcrumbs>
 
                             <Page.Contents fullWidth={true} scrollable={true}>
-                                <Grid.Column widthXS={Columns.One}>
-                                </Grid.Column>
-
-                                <Grid.Column widthXS={Columns.Ten}>
+                                <Grid.Column
+                                    widthLG={Columns.Ten}
+                                    offsetLG={Columns.One}
+                                >
                                     <Grid style={{ marginTop: "50px", marginBottom: '100px', background: '#292933', padding: '20px' }}>
                                         <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Three}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Four}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Three}
+                                            >
                                                 <Form.Element label="Factory">
                                                     <SelectDropdown
                                                         options={this.state.factories}
@@ -738,7 +742,12 @@ class FailureTable extends PureComponent<Props, State> {
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.Three}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Four}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Three}
+                                            >
                                                 <Form.Element label="Machine">
                                                     <SelectDropdown
                                                         options={this.state.machines}
@@ -747,7 +756,12 @@ class FailureTable extends PureComponent<Props, State> {
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.Two}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Four}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Two}
+                                            >
                                                 <Form.Element label="Component">
                                                     <SelectDropdown
                                                         options={this.state.components}
@@ -756,7 +770,12 @@ class FailureTable extends PureComponent<Props, State> {
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.Two}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Four}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Two}
+                                            >
                                                 <Form.Element label="Sensor">
                                                     <SelectDropdown
                                                         options={this.state.sensors}
@@ -765,7 +784,12 @@ class FailureTable extends PureComponent<Props, State> {
                                                     />
                                                 </Form.Element>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.Two}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Four}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Two}
+                                            >
                                                 <Form.Element label="Severity">
                                                     <MultiSelectDropdown
                                                         emptyText={"Select severity"}
@@ -825,6 +849,7 @@ class FailureTable extends PureComponent<Props, State> {
                                                                                 {
                                                                                     ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
                                                                                     <Button
+                                                                                        id="failure-table-edit-button"
                                                                                         size={ComponentSize.ExtraSmall}
                                                                                         icon={IconFont.Pencil}
                                                                                         color={ComponentColor.Primary}
@@ -862,18 +887,11 @@ class FailureTable extends PureComponent<Props, State> {
 
 
                                         <Grid.Row style={{ marginTop: '20px' }}>
-                                            <div style={{ float: 'right' }}>
+                                            <div className="failure-table-float-div">
                                                 <FlexBox margin={ComponentSize.Small}>
-                                                    {/* <Button
-                                                        text="Maintenances"
-                                                        type={ButtonType.Button}
-                                                        icon={IconFont.Shuffle}
-                                                        color={ComponentColor.Secondary}
-                                                        onClick={() => this.props["history"].push(`/orgs/${this.props["match"].params["orgID"]}/maintenance-records/${this.props["match"].params["FID"]}`)}
-                                                        style={{ width: '200px' }}
-                                                    /> */}
                                                     <Dropdown
-                                                        style={{ width: '110px' }}
+                                                        style={{ minWidth: '110px' }}
+                                                        id="failure-table-exports-button"
                                                         button={(active, onClick) => (
                                                             <Dropdown.Button
                                                                 active={active}
@@ -923,6 +941,7 @@ class FailureTable extends PureComponent<Props, State> {
                                                     {
                                                         ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
                                                         <Button
+                                                            id="import-failures-button"
                                                             ref={this.importButtonRef}
                                                             text="Import"
                                                             type={ButtonType.Button}
@@ -935,6 +954,7 @@ class FailureTable extends PureComponent<Props, State> {
                                                     {
                                                         ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
                                                         <Button
+                                                            id="add-failures-button"
                                                             text="Add Failure"
                                                             type={ButtonType.Button}
                                                             icon={IconFont.Plus}
@@ -948,9 +968,10 @@ class FailureTable extends PureComponent<Props, State> {
                                         </Grid.Row>
 
                                         <Grid.Row style={{ marginTop: '5px' }}>
-                                            <div style={{ float: 'right' }}>
+                                            <div className="failure-table-float-div">
                                                 <FlexBox margin={ComponentSize.Small}>
                                                     <Button
+                                                        id="three-d-failures-button"
                                                         text="3D Failures"
                                                         type={ButtonType.Button}
                                                         icon={IconFont.Pulse}
@@ -959,12 +980,12 @@ class FailureTable extends PureComponent<Props, State> {
                                                         onClick={() => { this.setState({ visibleFailureAlarmScene: true }) }}
                                                     />
                                                     <Button
+                                                        id="maintenance-records-button"
                                                         text="Maintenance Records"
                                                         type={ButtonType.Button}
                                                         icon={IconFont.Shuffle}
                                                         color={ComponentColor.Secondary}
                                                         onClick={() => this.props["history"].push(`/orgs/${this.props["match"].params["orgID"]}/maintenance-records/${this.props["match"].params["FID"]}`)}
-                                                        style={{ width: '224px' }}
                                                     />
                                                 </FlexBox>
                                             </div>

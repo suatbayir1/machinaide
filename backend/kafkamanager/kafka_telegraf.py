@@ -5,7 +5,7 @@ import time
 import random
 
 client = KafkaClient(hosts = "localhost:9092")
-topic = client.topics["Press31DB1"]
+topic = client.topics["Press31-DB1"]
 producer = topic.get_sync_producer()
 
 while True:

@@ -70,9 +70,11 @@ class ProductionLineCard extends PureComponent<Props, State> {
                     {
                         this.state.shortcutCards.map((shortcut, i) =>
                             <Grid.Column
-                                widthXS={Columns.Four}
+                                widthXS={Columns.Six}
+                                widthSM={Columns.Four}
+                                widthMD={Columns.Four}
+                                widthLG={Columns.Four}
                                 key={i}
-                                style={{ paddingRight: '15px', paddingLeft: '15px' }}
                                 id={"shortcutCard"}
                             >
                                 <Link
@@ -80,7 +82,7 @@ class ProductionLineCard extends PureComponent<Props, State> {
                                     className={"routingCard"}
                                     style={{ marginBottom: '40px', cursor: 'pointer' }}
                                 >
-                                    <div style={{ background: 'rgba(255, 255, 255, 0.1)', textAlign: 'center' }}>
+                                    <div style={{ background: 'rgba(255, 255, 255, 0.1)', textAlign: 'center', height: '150px', marginBottom: '20px' }}>
                                         <img src={shortcut["icon"]} width={shortcut["width"]} height={shortcut["height"]} style={{ marginTop: shortcut["marginTop"] }} />
                                         <h4 style={{ paddingBottom: '20px', color: 'white' }}>{shortcut["name"]}</h4>
                                     </div>

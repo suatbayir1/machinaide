@@ -1,11 +1,11 @@
 // Libraries
-import React, {PureComponent, ChangeEvent} from 'react'
-import {connect, ConnectedProps} from 'react-redux'
+import React, { PureComponent, ChangeEvent } from 'react'
+import { connect, ConnectedProps } from 'react-redux'
 
 // Components
 import TaskForm from 'src/tasks/components/TaskForm'
 import TaskHeader from 'src/tasks/components/TaskHeader'
-import {Page} from '@influxdata/clockface'
+import { Page } from '@influxdata/clockface'
 
 import FluxEditor from 'src/shared/components/FluxMonacoEditor'
 
@@ -15,17 +15,17 @@ import {
   setTaskOption,
   clearTask,
 } from 'src/tasks/actions/creators'
-import {saveNewScript, cancel} from 'src/tasks/actions/thunks'
+import { saveNewScript, cancel } from 'src/tasks/actions/thunks'
 
 // Utils
 import {
   taskOptionsToFluxScript,
   addDestinationToFluxScript,
 } from 'src/utils/taskOptionsToFluxScript'
-import {pageTitleSuffixer} from 'src/shared/utils/pageTitles'
+import { pageTitleSuffixer } from 'src/shared/utils/pageTitles'
 
 // Types
-import {AppState, TaskOptionKeys, TaskSchedule} from 'src/types'
+import { AppState, TaskOptionKeys, TaskSchedule } from 'src/types'
 
 type ReduxProps = ConnectedProps<typeof connector>
 type Props = ReduxProps
@@ -47,10 +47,10 @@ class TaskPage extends PureComponent<Props> {
   }
 
   public render(): JSX.Element {
-    const {newScript, taskOptions} = this.props
+    const { newScript, taskOptions } = this.props
 
     return (
-      <Page titleTag={pageTitleSuffixer(['Create Task'])}>
+      <Page titleTag={pageTitleSuffixer(['Create Task'])} className="show-only-pc">
         <TaskHeader
           title="Create Task"
           canSubmit={this.isFormValid}
@@ -81,7 +81,7 @@ class TaskPage extends PureComponent<Props> {
 
   private get isFormValid(): boolean {
     const {
-      taskOptions: {name, cron, interval},
+      taskOptions: { name, cron, interval },
       newScript,
     } = this.props
 
@@ -94,11 +94,11 @@ class TaskPage extends PureComponent<Props> {
   }
 
   private handleChangeScheduleType = (value: TaskSchedule) => {
-    this.props.setTaskOption({key: 'taskScheduleType', value})
+    this.props.setTaskOption({ key: 'taskScheduleType', value })
   }
 
   private handleSave = () => {
-    const {newScript, taskOptions} = this.props
+    const { newScript, taskOptions } = this.props
 
     const taskOption: string = taskOptionsToFluxScript(taskOptions)
     const script: string = addDestinationToFluxScript(newScript, taskOptions)
@@ -112,16 +112,16 @@ class TaskPage extends PureComponent<Props> {
   }
 
   private handleChangeInput = (e: ChangeEvent<HTMLInputElement>) => {
-    const {name, value} = e.target
+    const { name, value } = e.target
     const key = name as TaskOptionKeys
 
-    this.props.setTaskOption({key, value})
+    this.props.setTaskOption({ key, value })
   }
 }
 
 const mstp = (state: AppState) => {
-  const {tasks} = state.resources
-  const {taskOptions, newScript} = tasks
+  const { tasks } = state.resources
+  const { taskOptions, newScript } = tasks
 
   return {
     taskOptions,

@@ -127,7 +127,7 @@ class FactorySceneOverlay extends PureComponent<Props, State> {
 
     public render(): JSX.Element {
         return (
-            <Overlay visible={true}>
+            <Overlay visible={true} className="show-only-pc">
                 <Overlay.Container maxWidth={1500}>
                     <Overlay.Header
                         title="Factory Scene"

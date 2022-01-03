@@ -96,7 +96,7 @@ const UserWidget: FC<Props> = ({
             testID="user-nav-item-users"
             active={getNavItemActivation(['users'], location.pathname)}
             linkElement={className => (
-              <Link className={className} to={`${orgPrefix}/users`} />
+              <Link className={className} to={`${orgPrefix}/users`} id="user-menu-users-link" />
             )}
           />
         }
@@ -106,7 +106,7 @@ const UserWidget: FC<Props> = ({
           testID="user-nav-item-members"
           active={getNavItemActivation(['members'], location.pathname)}
           linkElement={className => (
-            <Link className={className} to={`${orgPrefix}/members`} />
+            <Link className={className} to={`${orgPrefix}/members`} id="user-menu-members-link" />
           )}
         />
         {

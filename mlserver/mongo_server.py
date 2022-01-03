@@ -85,6 +85,23 @@ def get_post_training_data(session_id, model_id):
     return jsonify(post_training_data)
 
 
+@app.route('/getBasicModels', methods=['GET'])
+def get_basic_models():
+    basic_models = mongo.db.basic_models
+    models = basic_models.find({})
+
+    return json.dumps(list(models), cls=JSONEncoder)
+
+
+@app.route('/postBasicModel', methods=['POST'])
+def post_basic_model():
+    model = request.json
+    print(model)
+    mongo.db.basic_models.insert_one(model)
+
+    return "UPDATED", 201
+    
+
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=7393)
 

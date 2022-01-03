@@ -702,8 +702,8 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
 
       vm.addObjectToScene(dae);
 
-      // scene.add(dae);
-      // renderer.render(scene, camera);
+      scene.add(dae);
+      renderer.render(scene, camera);
       vm.setupTween();
       vm.animate();
     });

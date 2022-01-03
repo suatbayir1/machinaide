@@ -131,7 +131,7 @@ export const generateNavItems = (orgID: string): NavItem[] => {
         type: 'link',
         location: `${orgPrefix}/dashboards-list`,
       },
-      activeKeywords: ['dashboards'],
+      activeKeywords: ['dashboards', 'dashboards-list'],
     },
     {
       id: 'tasks',
@@ -239,7 +239,17 @@ export const generateNavItems = (orgID: string): NavItem[] => {
         type: 'link',
         location: `${orgPrefix}/allFactories`,
       },
-      activeKeywords: ['allFactories'],
+      activeKeywords: [
+        'allFactories',
+        'production-line',
+        'machines',
+        'failures',
+        'maintenance-records',
+        'components',
+        'sensors',
+        'predictions',
+        'prediction-info'
+      ],
       permitted: ["member", "admin", "editor"],
     },
     {
@@ -254,18 +264,18 @@ export const generateNavItems = (orgID: string): NavItem[] => {
       activeKeywords: ['logs'],
       permitted: ["admin"],
     },
-    {
-      id: 'examples',
-      testID: 'nav-item-examples',
-      icon: IconFont.Erlenmeyer,
-      label: 'Example',
-      link: {
-        type: 'link',
-        location: `${orgPrefix}/examples`,
-      },
-      activeKeywords: ['examples'],
-      permitted: ["member", "admin", "editor"],
-    },
+    // {
+    //   id: 'examples',
+    //   testID: 'nav-item-examples',
+    //   icon: IconFont.Erlenmeyer,
+    //   label: 'Example',
+    //   link: {
+    //     type: 'link',
+    //     location: `${orgPrefix}/examples`,
+    //   },
+    //   activeKeywords: ['examples'],
+    //   permitted: ["member", "admin", "editor"],
+    // },
     {
       id: 'userManual',
       testID: 'nav-item-user-manual',
@@ -275,7 +285,7 @@ export const generateNavItems = (orgID: string): NavItem[] => {
         type: 'link',
         location: `${orgPrefix}/user-manual`,
       },
-      activeKeywords: ['userManual'],
+      activeKeywords: ['user-manual'],
       permitted: ["admin", "editor", "member"],
     },
     {
@@ -287,7 +297,7 @@ export const generateNavItems = (orgID: string): NavItem[] => {
         type: 'link',
         location: `${orgPrefix}/ml`,
       },
-      activeKeywords: ['ml'],
+      activeKeywords: ['ml', 'advanced-ml'],
       permitted: ["admin", "editor", "member"],
     },
   ]

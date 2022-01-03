@@ -1,4 +1,4 @@
-export {}
+export { }
 const path = require('path')
 const merge = require('webpack-merge')
 const common = require('./webpack.common.ts')
@@ -9,6 +9,8 @@ const {
 } = require('./src/utils/env')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const webpack = require('webpack')
+const fs = require('fs');
+
 
 module.exports = merge(common, {
   mode: 'development',
@@ -23,20 +25,25 @@ module.exports = merge(common, {
   devServer: {
     hot: true,
     historyApiFallback: {
-        index: `${BASE_PATH}/index.html`
+      index: `${BASE_PATH}/index.html`
     },
     compress: true,
     proxy: {
-      '/api/v2': 'http://localhost:8086',
-      '/debug/flush': 'http://localhost:8086',
-      '/oauth': 'http://localhost:8086',
+      '/api/v2': 'https://localhost:8086',
+      '/debug/flush': 'https://localhost:8086',
+      '/oauth': 'https://localhost:8086',
     },
     disableHostCheck: true,
     host: '0.0.0.0',
     port: PORT,
     public: PUBLIC,
     publicPath: PUBLIC,
-    sockPath: `${BASE_PATH}hmr`
+    sockPath: `${BASE_PATH}hmr`,
+    https: {
+      key: fs.readFileSync('/etc/letsencrypt/live/vmi474601.contaboserver.net/privkey.pem'),
+      cert: fs.readFileSync('/etc/letsencrypt/live/vmi474601.contaboserver.net/fullchain.pem'),
+      // ca: fs.readFileSync('/path/to/ca.pem'),
+    }
   },
   plugins: [
     new webpack.DllReferencePlugin({

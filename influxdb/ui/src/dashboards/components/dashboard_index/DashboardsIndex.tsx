@@ -79,7 +79,7 @@ class DashboardIndex extends PureComponent<Props, State> {
           </Page.Header>
 
           <Page.ControlBar fullWidth={false}>
-            <Page.ControlBarLeft>
+            <Page.ControlBarLeft className="dashboard-filter-buttons">
               <SearchWidget
                 placeholderText="Filter dashboards..."
                 onSearch={this.handleFilterDashboards}

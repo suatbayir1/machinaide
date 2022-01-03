@@ -1,9 +1,9 @@
 // Libraries
-import React, {PureComponent} from 'react'
-import {Route, Switch} from 'react-router-dom'
+import React, { PureComponent } from 'react'
+import { Route, Switch } from 'react-router-dom'
 
 // Components
-import {ErrorHandling} from 'src/shared/decorators/errors'
+import { ErrorHandling } from 'src/shared/decorators/errors'
 import LoadDataTabbedPage from 'src/settings/components/LoadDataTabbedPage'
 import LoadDataHeader from 'src/settings/components/LoadDataHeader'
 import Collectors from 'src/telegrafs/components/Collectors'
@@ -11,7 +11,7 @@ import GetResources from 'src/resources/components/GetResources'
 import LimitChecker from 'src/cloud/components/LimitChecker'
 import TelegrafInstructionsOverlay from 'src/telegrafs/components/TelegrafInstructionsOverlay'
 import CollectorsWizard from 'src/dataLoaders/components/collectorsWizard/CollectorsWizard'
-import {Page} from '@influxdata/clockface'
+import { Page } from '@influxdata/clockface'
 import OverlayHandler, {
   RouteOverlay,
 } from 'src/overlays/components/RouteOverlay'
@@ -32,13 +32,13 @@ const TelegrafOutputOverlay = RouteOverlay(
 )
 
 // Utils
-import {pageTitleSuffixer} from 'src/shared/utils/pageTitles'
+import { pageTitleSuffixer } from 'src/shared/utils/pageTitles'
 
 // Types
-import {ResourceType} from 'src/types'
+import { ResourceType } from 'src/types'
 
 // Constant
-import {ORGS, ORG_ID, TELEGRAFS} from 'src/shared/constants/routes'
+import { ORGS, ORG_ID, TELEGRAFS } from 'src/shared/constants/routes'
 
 const telegrafsPath = `/${ORGS}/${ORG_ID}/load-data/${TELEGRAFS}`
 
@@ -47,7 +47,7 @@ class TelegrafsPage extends PureComponent {
   public render() {
     return (
       <>
-        <Page titleTag={pageTitleSuffixer(['Telegraf', 'Load Data'])}>
+        <Page titleTag={pageTitleSuffixer(['Telegraf', 'Load Data'])} className="load-data-page">
           <LimitChecker>
             <LoadDataHeader />
             <LoadDataTabbedPage activeTab="telegrafs">

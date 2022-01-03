@@ -1,4 +1,4 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import {
   withRouter,
   matchPath,
@@ -6,13 +6,13 @@ import {
   Switch,
   Route,
 } from 'react-router-dom'
-import {connect, ConnectedProps} from 'react-redux'
-import {notify} from 'src/shared/actions/notifications'
+import { connect, ConnectedProps } from 'react-redux'
+import { notify } from 'src/shared/actions/notifications'
 
 // Components
-import {ErrorHandling} from 'src/shared/decorators/errors'
-import {CommunityTemplateImportOverlay} from 'src/templates/components/CommunityTemplateImportOverlay'
-import {CommunityTemplatesInstalledList} from 'src/templates/components/CommunityTemplatesInstalledList'
+import { ErrorHandling } from 'src/shared/decorators/errors'
+import { CommunityTemplateImportOverlay } from 'src/templates/components/CommunityTemplateImportOverlay'
+import { CommunityTemplatesInstalledList } from 'src/templates/components/CommunityTemplatesInstalledList'
 
 import {
   Bullet,
@@ -30,37 +30,37 @@ import {
 import SettingsTabbedPage from 'src/settings/components/SettingsTabbedPage'
 import SettingsHeader from 'src/settings/components/SettingsHeader'
 
-import {communityTemplatesImportPath} from 'src/templates/containers/TemplatesIndex'
+import { communityTemplatesImportPath } from 'src/templates/containers/TemplatesIndex'
 
 import GetResources from 'src/resources/components/GetResources'
-import {getOrg} from 'src/organizations/selectors'
+import { getOrg } from 'src/organizations/selectors'
 
-import {setStagedTemplateUrl} from 'src/templates/actions/creators'
+import { setStagedTemplateUrl } from 'src/templates/actions/creators'
 
 // Utils
-import {pageTitleSuffixer} from 'src/shared/utils/pageTitles'
+import { pageTitleSuffixer } from 'src/shared/utils/pageTitles'
 import {
   getGithubUrlFromTemplateDetails,
   getTemplateNameFromUrl,
 } from 'src/templates/utils'
-import {reportError} from 'src/shared/utils/errors'
+import { reportError } from 'src/shared/utils/errors'
 
-import {communityTemplateUnsupportedFormatError} from 'src/shared/copy/notifications'
+import { communityTemplateUnsupportedFormatError } from 'src/shared/copy/notifications'
 
 // Types
-import {AppState, ResourceType} from 'src/types'
+import { AppState, ResourceType } from 'src/types'
 
-import {event} from 'src/cloud/utils/reporting'
+import { event } from 'src/cloud/utils/reporting'
 
 const communityTemplatesUrl =
   'https://github.com/influxdata/community-templates#templates'
 const templatesPath = '/orgs/:orgID/settings/templates'
 
 type Params = {
-  params: {directory: string; templateName: string; templateExtension: string}
+  params: { directory: string; templateName: string; templateExtension: string }
 }
 type ReduxProps = ConnectedProps<typeof connector>
-type Props = ReduxProps & RouteComponentProps<{templateName: string}>
+type Props = ReduxProps & RouteComponentProps<{ templateName: string }>
 
 @ErrorHandling
 class UnconnectedTemplatesIndex extends Component<Props> {
@@ -92,10 +92,10 @@ class UnconnectedTemplatesIndex extends Component<Props> {
   }
 
   public render() {
-    const {org} = this.props
+    const { org } = this.props
     return (
       <>
-        <Page titleTag={pageTitleSuffixer(['Templates', 'Settings'])}>
+        <Page titleTag={pageTitleSuffixer(['Templates', 'Settings'])} className="show-only-pc">
           <SettingsHeader />
           <SettingsTabbedPage activeTab="templates" orgID={org.id}>
             {/* todo: maybe make this not a div */}
@@ -138,7 +138,7 @@ class UnconnectedTemplatesIndex extends Component<Props> {
                     className="community-templates-template-url"
                     onChange={this.handleTemplateChange}
                     placeholder="Enter the URL of an InfluxDB Template..."
-                    style={{flex: '1 0 0'}}
+                    style={{ flex: '1 0 0' }}
                     value={this.state.templateUrl}
                     testID="lookup-template-input"
                     size={ComponentSize.Large}
@@ -204,7 +204,7 @@ class UnconnectedTemplatesIndex extends Component<Props> {
   }
 
   private handleTemplateChange = evt => {
-    this.setState({templateUrl: evt.target.value})
+    this.setState({ templateUrl: evt.target.value })
   }
 
   private onClickBrowseCommunityTemplates = () => {

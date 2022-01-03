@@ -1,12 +1,12 @@
 // Libraries
-import React, {PureComponent, ChangeEvent} from 'react'
-import {connect, ConnectedProps} from 'react-redux'
-import {RouteComponentProps} from 'react-router-dom'
+import React, { PureComponent, ChangeEvent } from 'react'
+import { connect, ConnectedProps } from 'react-redux'
+import { RouteComponentProps } from 'react-router-dom'
 
 // Components
 import TaskForm from 'src/tasks/components/TaskForm'
 import TaskHeader from 'src/tasks/components/TaskHeader'
-import {Page} from '@influxdata/clockface'
+import { Page } from '@influxdata/clockface'
 
 import FluxEditor from 'src/shared/components/FluxMonacoEditor'
 
@@ -24,13 +24,13 @@ import {
 } from 'src/tasks/actions/thunks'
 
 // Utils
-import {pageTitleSuffixer} from 'src/shared/utils/pageTitles'
+import { pageTitleSuffixer } from 'src/shared/utils/pageTitles'
 
 // Types
-import {AppState, TaskOptionKeys, TaskSchedule} from 'src/types'
+import { AppState, TaskOptionKeys, TaskSchedule } from 'src/types'
 
 type ReduxProps = ConnectedProps<typeof connector>
-type Props = ReduxProps & RouteComponentProps<{id: string}>
+type Props = ReduxProps & RouteComponentProps<{ id: string }>
 
 class TaskEditPage extends PureComponent<Props> {
   constructor(props) {
@@ -40,7 +40,7 @@ class TaskEditPage extends PureComponent<Props> {
   public componentDidMount() {
     const {
       match: {
-        params: {id},
+        params: { id },
       },
     } = this.props
     this.props.selectTaskByID(id)
@@ -52,10 +52,10 @@ class TaskEditPage extends PureComponent<Props> {
   }
 
   public render(): JSX.Element {
-    const {currentScript, taskOptions} = this.props
+    const { currentScript, taskOptions } = this.props
 
     return (
-      <Page titleTag={pageTitleSuffixer([`Edit ${taskOptions.name}`])}>
+      <Page titleTag={pageTitleSuffixer([`Edit ${taskOptions.name}`])} className="show-only-pc">
         <TaskHeader
           title="Edit Task"
           canSubmit={this.isFormValid}
@@ -86,7 +86,7 @@ class TaskEditPage extends PureComponent<Props> {
 
   private get isFormValid(): boolean {
     const {
-      taskOptions: {name, cron, interval},
+      taskOptions: { name, cron, interval },
       currentScript,
     } = this.props
 
@@ -99,7 +99,7 @@ class TaskEditPage extends PureComponent<Props> {
   }
 
   private handleChangeScheduleType = (schedule: TaskSchedule) => {
-    this.props.setTaskOption({key: 'taskScheduleType', value: schedule})
+    this.props.setTaskOption({ key: 'taskScheduleType', value: schedule })
   }
 
   private handleSave = () => {
@@ -111,15 +111,15 @@ class TaskEditPage extends PureComponent<Props> {
   }
 
   private handleChangeInput = (e: ChangeEvent<HTMLInputElement>) => {
-    const {name, value} = e.target
+    const { name, value } = e.target
     const key = name as TaskOptionKeys
 
-    this.props.setTaskOption({key, value})
+    this.props.setTaskOption({ key, value })
   }
 }
 
 const mstp = (state: AppState) => {
-  const {taskOptions, currentScript, currentTask} = state.resources.tasks
+  const { taskOptions, currentScript, currentTask } = state.resources.tasks
 
   return {
     taskOptions,

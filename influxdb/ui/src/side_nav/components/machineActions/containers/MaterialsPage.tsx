@@ -12,18 +12,8 @@ import {
 import MaterialsTable from 'src/side_nav/components/machineActions/components/MaterialsTable';
 import MaterialsButtons from 'src/side_nav/components/machineActions/components/MaterialsButtons';
 
-// Services
-import FactoryService from 'src/shared/services/FactoryService';
-
 // Actions
 import { notify as notifyAction } from 'src/shared/actions/notifications'
-
-// Constants
-import {
-    pleaseFillInTheFormCompletely,
-    materialAddedSuccessfully,
-    materialAddedFailure,
-} from 'src/shared/copy/notifications'
 
 interface OwnProps {
     visibleMaterialsPage: boolean

@@ -1,18 +1,21 @@
+import { BACKEND } from 'src/config';
+
 import AJAX from 'src/utils/ajax'
 
-let BASE_URL = "http://localhost:8000"
-let BASE_URL2 = "http://localhost:9798"
+let BASE_URL = "http://localhost:9632/api/ml"
+let BASE_URL2 = "http://localhost:9632/api/ml"
 
-let MONGO_URL = "http://localhost:7393"
-let ALERT_URL = "http://localhost:7494"
+// let MONGO_URL = "http://localhost:7393"
+let MONGO_URL = "http://localhost:9632/api/metadata"
+let ALERT_URL = "http://localhost:9632"
 
 export const cancelTraining = (sessionID, modelID) => AJAX({
-    url: BASE_URL + '/stop_training/' + sessionID + '/' + modelID, 
+    url: BASE_URL + '/stop_training/' + sessionID + '/' + modelID,
     //excludeBasePath: true,
     method: 'DELETE',
 })
 
-export const startModel = async(sessionID, modelID) => {
+export const startModel = async (sessionID, modelID) => {
     let url = BASE_URL + '/models/start/' + sessionID + "/" + modelID
 
     const response = await AJAX({
@@ -21,14 +24,14 @@ export const startModel = async(sessionID, modelID) => {
         method: 'POST'
     })
 
-    if(response.data.msg === "Model started.") {
+    if (response.data.msg === "Model started.") {
         return true
     } else {
         return false
     }
 }
 
-export const getMLinfo = async() => {
+export const getMLinfo = async () => {
     let url = BASE_URL + '/getAllInfo'
 
     const response = await AJAX({
@@ -39,16 +42,16 @@ export const getMLinfo = async() => {
     return response.data
 }
 
-export const getMaintenanceRecords = async() => {
+export const getMaintenanceRecords = async () => {
     let url = ALERT_URL + '/getMaintenanceRecords'
 
     const response = await AJAX({
         url: url,
         //excludeBasePath: true
     })
-    
+
     return response.data
-} 
+}
 
 export const deleteMaintenanceRecord = (oid) => AJAX({
     url: ALERT_URL + '/deleteMaintenanceRecord/' + oid,
@@ -84,17 +87,17 @@ export const checkModelAccepted = async (sessionID, modelID) => {
         url: MONGO_URL + '/checkModelAccepted/' + sessionID + '/' + modelID,
         //excludeBasePath: true
     })
-    
+
     return response.data
 }
 
-export const getModelTypes = () => AJAX ({
+export const getModelTypes = () => AJAX({
     url: BASE_URL + '/models/types',
     //excludeBasePath: true
 })
 
 export const getModels = async () => {
-    const response = await AJAX ({
+    const response = await AJAX({
         url: BASE_URL + '/models',
         //excludeBasePath: true
     })
@@ -105,21 +108,21 @@ export const getModels = async () => {
 export const issueTrainingJob = (pkg) => AJAX({
     url: BASE_URL + '/queueTrainingSession',
     //excludeBasePath: true,
-    method:'POST',
+    method: 'POST',
     data: pkg,
 })
 
 export const issueAutoTrainingJob = (pkg) => AJAX({
     url: BASE_URL + '/queueTrainingSession/auto',
     //excludeBasePath: true,
-    method:'POST',
+    method: 'POST',
     data: pkg
 })
 
 export const issueBasicTrainingJob = (pkg, task) => AJAX({
     url: BASE_URL2 + '/basicTraining/' + task,
     //excludeBasePath: true,
-    method:'POST',
+    method: 'POST',
     data: pkg,
 })
 
@@ -139,23 +142,30 @@ export const updateModelData = async (pkg) => {
     const response = await AJAX({
         url: MONGO_URL + '/updateModelData',
         //excludeBasePath: true,
-        method:'POST',
-        data: pkg 
+        method: 'POST',
+        data: pkg
     })
 
     return response.data
 }
 
+export const updateRetrainMethod = async(pkg) => AJAX({
+    url: MONGO_URL + '/updateRetrainMethod',
+    method: 'POST',
+    data: pkg
+})
+
 
 export const deleteModel = async (modelID) => AJAX({
     url: BASE_URL + '/models/delete/' + modelID,
     //excludeBasePath: true,
-    method:'DELETE',
+    method: 'DELETE',
     //isWithCredentials: true,
 })
 
 
 export const getSessions = async () => {
+    console.log("getsessions")
     const response = await AJAX({
         url: MONGO_URL + '/getSessions',
         //excludeBasePath: true,
@@ -186,7 +196,7 @@ export const getAcceptedModels = async (sessionID) => {
 }
 
 
-export const acceptModel = async(modelObj) => AJAX({
+export const acceptModel = async (modelObj) => AJAX({
     url: MONGO_URL + '/acceptModel',
     //excludeBasePath: true,
     method: 'POST',
@@ -207,7 +217,7 @@ export const getCellCount = async (sessionID) => {
 
 export const getBasicModels = async () => {
     const response = await AJAX({
-        url: MONGO_URL + '/getBasicModels',
+        url: BACKEND.API_URL + 'metadata/getBasicModels',
         //excludeBasePath: true,
         method: 'GET'
     })
@@ -226,17 +236,17 @@ export const basicRun = async (modelID) => {
 export const getBasicCell = async (modelID) => AJAX({
     url: MONGO_URL + '/getBasicCell/' + modelID,
     //excludeBasePath: true,
-    method: 'GET' 
+    method: 'GET'
 })
 
-export const trainModel = (modelId) => AJAX ({
+export const trainModel = (modelId) => AJAX({
     url: BASE_URL + '/jobs/train/' + modelId,
     //excludeBasePath: true,
     method: 'POST'
 })
 
 export const postModel = async (model) => {
-    const response = await AJAX ({
+    const response = await AJAX({
         url: BASE_URL + '/models',
         //excludeBasePath: true,
         method: 'POST',
@@ -249,7 +259,7 @@ export const postModel = async (model) => {
 export const cancelDetection = (modelId) => AJAX({
     url: BASE_URL + '/jobs/detect/cancel/' + modelId,
     //excludeBasePath: true,
-    method: 'POST'  
+    method: 'POST'
 })
 
 export const getParams = () => AJAX({

@@ -112,14 +112,23 @@ class FactoryDashboardPanel extends PureComponent<Props, State> {
         })
     }
 
+    isScreenWidthGreaterThan1500 = () => {
+        return true;
+    }
+
     render() {
         const { machines } = this.state;
 
         return (
             <>
-                <Grid.Column widthXS={Columns.Three} style={{ borderRight: '1px solid white' }}>
+                <Grid.Column
+                    widthXS={Columns.Twelve}
+                    widthSM={Columns.Six}
+                    widthMD={Columns.Three}
+                    widthLG={Columns.Three}
+                    id="productivity-column"
+                >
                     <div
-                        className="cell--view"
                         style={{ marginBottom: '10px' }}
                     >
                         <h2 style={{ textAlign: 'center', padding: '0px', margin: '0px' }}>Productivity</h2>
@@ -132,12 +141,11 @@ class FactoryDashboardPanel extends PureComponent<Props, State> {
                         </div>
                     </div>
 
-
-                    <div style={{ fontSize: '15px', marginTop: '30px' }}>
+                    <div style={{ fontSize: '15px', marginTop: '30px', justifyContent: 'center', alignItems: 'center' }}>
                         <h2 style={{ textAlign: 'center', margin: '0px' }}>Uptime</h2>
                         {
                             machines.map(machine =>
-                                <FlexBox margin={ComponentSize.Large} key={machine["id"]}>
+                                <FlexBox margin={ComponentSize.Large} key={machine["id"]} className="uptime-flex-container">
                                     <Icon
                                         glyph={IconFont.Checkmark}
                                         style={{ color: 'green' }}
@@ -152,9 +160,14 @@ class FactoryDashboardPanel extends PureComponent<Props, State> {
                     </div>
                 </Grid.Column>
 
-                <Grid.Column widthXS={Columns.Three} style={{ borderRight: '1px solid white' }}>
+                <Grid.Column
+                    widthXS={Columns.Twelve}
+                    widthSM={Columns.Six}
+                    widthMD={Columns.Three}
+                    widthLG={Columns.Three}
+                    id="summary-column"
+                >
                     <div
-                        className="cell--view"
                         style={{ marginBottom: '50px', textAlign: 'center' }}
                     >
                         <h2 style={{ marginTop: '0px' }}>Summary</h2>
@@ -162,34 +175,7 @@ class FactoryDashboardPanel extends PureComponent<Props, State> {
                         <h5 style={{ margin: '0px' }}>Injury free days</h5>
                     </div>
 
-
-                    {/* <table id={"summaryTable"}>
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Total</th>
-                                <th>SA</th>
-                                <th>LH</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-                                [...Array(10)].map((_, i) =>
-                                    <tr key={i}>
-                                        <td>
-                                            Logs
-                                        </td>
-                                        <td>5,556</td>
-                                        <td>6,666</td>
-                                        <td>900</td>
-                                    </tr>
-                                )
-                            }
-                        </tbody>
-                    </table> */}
-
                     <div
-                        className="cell--view"
                         style={{ marginBottom: '0px', textAlign: 'center' }}
                     >
                         <h2 style={{ marginBottom: '20px' }}>Last Week Total</h2>
@@ -223,9 +209,7 @@ class FactoryDashboardPanel extends PureComponent<Props, State> {
 
                     </div>
 
-
                     <div
-                        className="cell--view"
                         style={{ marginBottom: '20px', textAlign: 'center' }}
                     >
                         <h2 style={{ marginBottom: '20px' }}>Last Month Total</h2>
@@ -260,9 +244,14 @@ class FactoryDashboardPanel extends PureComponent<Props, State> {
                     </div>
                 </Grid.Column>
 
-                <Grid.Column widthXS={Columns.Three} style={{ borderRight: '1px solid white' }}>
+                <Grid.Column
+                    widthXS={Columns.Twelve}
+                    widthSM={Columns.Six}
+                    widthMD={Columns.Three}
+                    widthLG={Columns.Three}
+                    id="production-column"
+                >
                     <div
-                        className="cell--view"
                         style={{ marginBottom: '10px', textAlign: 'center' }}
                     >
                         <h2 style={{ marginTop: '0px' }}>Production</h2>
@@ -332,64 +321,45 @@ class FactoryDashboardPanel extends PureComponent<Props, State> {
                     </table>
                 </Grid.Column>
 
-                <Grid.Column widthXS={Columns.Three} style={{ borderRight: '1px solid white' }}>
-                    {/* <div
-                        className="cell--view"
-                        style={{ marginBottom: '10px' }}
-                    >
-                        <h2 style={{ textAlign: 'center', padding: '0px', margin: '0px' }}>Debarkers</h2>
-
-                        <div style={{ width: 'auto', height: '200px' }}>
-                            <GaugeChart
-                                value={58}
-                                properties={this.state.properties}
-                                theme={'dark'}
-                            />
-                        </div>
-                        <h2 style={{ textAlign: 'center', margin: '0px' }}>Uptime</h2>
-                    </div> */}
-
-                    {/* <div style={{ width: 'auto', height: '200px' }}>
-                        <GaugeChart
-                            value={5}
-                            properties={this.state.properties}
-                            theme={'dark'}
-                        />
-                    </div> */}
-
+                <Grid.Column
+                    widthXS={Columns.Twelve}
+                    widthSM={Columns.Six}
+                    widthMD={Columns.Three}
+                    widthLG={Columns.Three}
+                    id="total-column"
+                >
                     <h2 style={{ textAlign: 'center', margin: '0px' }}>Total</h2>
 
-
                     <div style={{ marginTop: '30px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '50px', color: 'green' }}>
+                        <div className="production-line-total-font-size" style={{ color: 'green' }}>
                             <h5 style={{ margin: '0px' }}>12,116</h5>
                         </div>
                         <h4 style={{ margin: '0px' }}>Piece products produced</h4>
                     </div>
 
                     <div style={{ marginTop: '30px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '50px', color: 'red' }}>
+                        <div className="production-line-total-font-size" style={{ color: 'red' }}>
                             <h5 style={{ margin: '0px' }}>222,540</h5>
                         </div>
                         <h4 style={{ margin: '0px' }}>TL maintenance cost</h4>
                     </div>
 
                     <div style={{ marginTop: '30px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '50px', color: 'yellow' }}>
+                        <div className="production-line-total-font-size" style={{ color: 'yellow' }}>
                             <h5 style={{ margin: '0px' }}>100</h5>
                         </div>
                         <h4 style={{ margin: '0px' }}>Hours maintenance time</h4>
                     </div>
 
                     <div style={{ marginTop: '30px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '50px', color: 'white' }}>
+                        <div className="production-line-total-font-size" style={{ color: 'white' }}>
                             <h5 style={{ margin: '0px' }}>400</h5>
                         </div>
                         <h4 style={{ margin: '0px' }}>Hours estimated saving time</h4>
                     </div>
 
                     <div style={{ marginTop: '30px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '50px', color: 'white' }}>
+                        <div className="production-line-total-font-size" style={{ color: 'white' }}>
                             <h5 style={{ margin: '0px' }}>140,000</h5>
                         </div>
                         <h4 style={{ margin: '0px' }}>TL estimated saving money</h4>

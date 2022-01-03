@@ -1430,7 +1430,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         ]
 
         return (
-            <Page>
+            <Page className="show-only-pc">
                 <Page.Header fullWidth={true}>
                     <Page.Title title={"Digital Twin Management"}></Page.Title>
                     <QuestionMarkTooltip
@@ -1453,7 +1453,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                             <Grid.Column
                                 widthXS={Columns.Twelve}
                                 widthSM={Columns.Twelve}
-                                widthMD={Columns.Two}
+                                widthMD={Columns.Three}
                                 widthLG={Columns.Two}
                                 style={{ marginTop: '20px' }}
                             >
@@ -1461,7 +1461,12 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                                     <Panel.Header size={ComponentSize.ExtraSmall}>
                                         <Grid>
                                             <Grid.Row>
-                                                <Grid.Column widthXS={Columns.Twelve}>
+                                                <Grid.Column
+                                                    widthXS={Columns.Twelve}
+                                                    widthSM={Columns.Six}
+                                                    widthMD={Columns.Twelve}
+                                                    widthLG={Columns.Twelve}
+                                                >
                                                     <Form.Element label="Component name">
                                                         <Input
                                                             name="componentName"
@@ -1472,10 +1477,12 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                                                         />
                                                     </Form.Element>
                                                 </Grid.Column>
-                                            </Grid.Row>
-
-                                            <Grid.Row>
-                                                <Grid.Column widthXS={Columns.Twelve}>
+                                                <Grid.Column
+                                                    widthXS={Columns.Twelve}
+                                                    widthSM={Columns.Six}
+                                                    widthMD={Columns.Twelve}
+                                                    widthLG={Columns.Twelve}
+                                                >
                                                     <Form.Element label="Box Measure">
                                                         <FlexBox margin={ComponentSize.Small}>
                                                             <Input
@@ -1507,10 +1514,12 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                                                         </FlexBox>
                                                     </Form.Element>
                                                 </Grid.Column>
-                                            </Grid.Row>
-
-                                            <Grid.Row>
-                                                <Grid.Column widthXS={Columns.Twelve}>
+                                                <Grid.Column
+                                                    widthXS={Columns.Twelve}
+                                                    widthSM={Columns.Six}
+                                                    widthMD={Columns.Twelve}
+                                                    widthLG={Columns.Twelve}
+                                                >
                                                     <Form.Element label="Position">
                                                         <FlexBox margin={ComponentSize.Small}>
                                                             <Input
@@ -1542,10 +1551,12 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                                                         </FlexBox>
                                                     </Form.Element>
                                                 </Grid.Column>
-                                            </Grid.Row>
-
-                                            <Grid.Row>
-                                                <Grid.Column widthXS={Columns.Twelve}>
+                                                <Grid.Column
+                                                    widthXS={Columns.Twelve}
+                                                    widthSM={Columns.Six}
+                                                    widthMD={Columns.Twelve}
+                                                    widthLG={Columns.Twelve}
+                                                >
                                                     <Form.Element label="Rotation">
                                                         <FlexBox margin={ComponentSize.Small}>
                                                             <Input
@@ -1577,10 +1588,12 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                                                         </FlexBox>
                                                     </Form.Element>
                                                 </Grid.Column>
-                                            </Grid.Row>
-
-                                            <Grid.Row>
-                                                <Grid.Column widthSM={Columns.Twelve}>
+                                                <Grid.Column
+                                                    widthXS={Columns.Twelve}
+                                                    widthSM={Columns.Six}
+                                                    widthMD={Columns.Twelve}
+                                                    widthLG={Columns.Twelve}
+                                                >
                                                     <Form.Element label="Color">
                                                         <ColorPicker
                                                             color={this.state.color}
@@ -1588,10 +1601,12 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                                                         />
                                                     </Form.Element>
                                                 </Grid.Column>
-                                            </Grid.Row>
-
-                                            <Grid.Row>
-                                                <Grid.Column>
+                                                <Grid.Column
+                                                    widthXS={Columns.Twelve}
+                                                    widthSM={Columns.Six}
+                                                    widthMD={Columns.Twelve}
+                                                    widthLG={Columns.Twelve}
+                                                >
                                                     <FlexBox margin={ComponentSize.Medium}>
                                                         <Form.Element label="Texture">
                                                             <Dropdown
@@ -1637,9 +1652,6 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                                                         />
                                                     </FlexBox>
                                                 </Grid.Column>
-                                            </Grid.Row>
-
-                                            <Grid.Row>
                                                 <Grid.Column widthSM={Columns.Six}>
                                                     <Form.Element label="Opacity">
                                                         <FlexBox
@@ -1677,10 +1689,9 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
 
                                     <Panel.Body size={ComponentSize.ExtraSmall}>
                                         <Grid.Row>
-                                            <div style={{ float: 'right' }}>
+                                            <div className="object-creator-info-buttons">
                                                 <QuestionMarkTooltip
                                                     diameter={20}
-                                                    style={{ marginRight: '10px' }}
                                                     tooltipStyle={{ width: '400px' }}
                                                     color={ComponentColor.Secondary}
                                                     tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
@@ -1696,7 +1707,6 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                                                     type={ButtonType.Button}
                                                     icon={IconFont.Remove}
                                                     color={ComponentColor.Danger}
-                                                    style={{ marginRight: '10px', marginBottom: '20px' }}
                                                 />
                                                 <Button
                                                     text="Update"
@@ -1715,7 +1725,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                             <Grid.Column
                                 widthXS={Columns.Twelve}
                                 widthSM={Columns.Twelve}
-                                widthMD={Columns.Ten}
+                                widthMD={Columns.Nine}
                                 widthLG={Columns.Ten}
                                 style={{ marginTop: '20px' }}
                             >
@@ -1723,52 +1733,54 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                                     <Panel.Header size={ComponentSize.ExtraSmall}>
                                         <Grid>
                                             <Grid.Row>
-                                                <FlexBox margin={ComponentSize.Small}>
-                                                    <Dropdown
-                                                        style={{ maxWidth: '150px', width: '150px' }}
-                                                        button={(active, onClick) => (
-                                                            <Dropdown.Button
-                                                                style={{ maxWidth: '150px' }}
-                                                                icon={IconFont.Plus}
-                                                                active={active}
-                                                                onClick={onClick}
-                                                                color={ComponentColor.Secondary}
-                                                            >
-                                                                {"Add Object"}
-                                                            </Dropdown.Button>
-                                                        )}
-                                                        menu={onCollapse => (
-                                                            <Dropdown.Menu
-                                                                style={{ maxWidth: '150px' }}
-                                                                onCollapse={onCollapse}
-                                                            >
-                                                                {
-                                                                    addObjectType
-                                                                }
-                                                            </Dropdown.Menu>
-                                                        )}
-                                                    />
-                                                    <Button
-                                                        text="Texture Upload"
-                                                        icon={IconFont.Export}
-                                                        onClick={this.handleFileUploadOverlay}
-                                                        type={ButtonType.Button}
-                                                        color={ComponentColor.Primary}
-                                                    />
-                                                    <Button
-                                                        text="Import Component"
-                                                        icon={IconFont.Import}
-                                                        onClick={this.handleImportComponentToScene}
-                                                        type={ButtonType.Button}
-                                                        color={ComponentColor.Primary}
-                                                    />
-                                                    <Button
-                                                        text="Save Component"
-                                                        icon={IconFont.Checkmark}
-                                                        onClick={this.handleSaveComponentOverlay}
-                                                        type={ButtonType.Button}
-                                                        color={ComponentColor.Success}
-                                                    />
+                                                <FlexBox margin={ComponentSize.Small} className="object-creator-flex-container">
+                                                    <div className="object-creator-left-buttons">
+                                                        <Dropdown
+                                                            style={{ width: '150px' }}
+                                                            button={(active, onClick) => (
+                                                                <Dropdown.Button
+                                                                    // style={{ maxWidth: '150px' }}
+                                                                    icon={IconFont.Plus}
+                                                                    active={active}
+                                                                    onClick={onClick}
+                                                                    color={ComponentColor.Secondary}
+                                                                >
+                                                                    {"Add Object"}
+                                                                </Dropdown.Button>
+                                                            )}
+                                                            menu={onCollapse => (
+                                                                <Dropdown.Menu
+                                                                    style={{ maxWidth: '150px' }}
+                                                                    onCollapse={onCollapse}
+                                                                >
+                                                                    {
+                                                                        addObjectType
+                                                                    }
+                                                                </Dropdown.Menu>
+                                                            )}
+                                                        />
+                                                        <Button
+                                                            text="Texture Upload"
+                                                            icon={IconFont.Export}
+                                                            onClick={this.handleFileUploadOverlay}
+                                                            type={ButtonType.Button}
+                                                            color={ComponentColor.Primary}
+                                                        />
+                                                        <Button
+                                                            text="Import Component"
+                                                            icon={IconFont.Import}
+                                                            onClick={this.handleImportComponentToScene}
+                                                            type={ButtonType.Button}
+                                                            color={ComponentColor.Primary}
+                                                        />
+                                                        <Button
+                                                            text="Save Component"
+                                                            icon={IconFont.Checkmark}
+                                                            onClick={this.handleSaveComponentOverlay}
+                                                            type={ButtonType.Button}
+                                                            color={ComponentColor.Success}
+                                                        />
+                                                    </div>
 
                                                     <div className="tabbed-page--header-right">
                                                         <QuestionMarkTooltip

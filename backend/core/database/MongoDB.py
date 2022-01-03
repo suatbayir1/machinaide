@@ -9,6 +9,9 @@ class MongoDB():
     def find(self, collection, filter = {}):
         return self.db[collection].find(filter)
 
+    def find_one(self, collection, filter = {}):
+        return self.db[collection].find_one(filter)
+
     def find_by_columns(self, collection, filter = {}, columns = {}):
         return self.db[collection].find(filter, columns)
 

@@ -60,6 +60,11 @@ import MachineActionsPage from 'src/side_nav/components/machineActions/container
 // ML
 import MLContainer from "src/ml/containers/MLContainer";
 import MLAdvancedContainer from "src/ml/containers/MLAdvancedContainer"
+import RetrainControlContainer from "src/ml/containers/RetrainControlContainer"
+
+// AutoML
+import AutoML from "src/ml/containers/AutoML";
+
 
 import PermittedRoute from 'src/shared/middleware/PermittedRoute';
 
@@ -74,6 +79,7 @@ import LogsPage from 'src/logs/containers/LogsPage';
 
 // Example components
 import ExamplePage from 'src/example/Example'
+import AnomalyMonitorPage from 'src/example/AnomalyMonitorPage'
 
 // Types
 import { AppState, Organization, ResourceType } from 'src/types'
@@ -174,22 +180,27 @@ const SetOrg: FC<Props> = ({
         <Route exact path={`${orgPath}/components/:FID/:PLID/:MID`} component={ComponentsPanel} />
         <Route exact path={`${orgPath}/machines/:FID/:MID/:CID/history`} component={ComponentAlertHistoryTable} />
         <Route exact path={`${orgPath}/sensors/:FID/:PLID/:MID/:CID`} component={SensorsTable} />
-        <Route exact path={`${orgPath}/machines/:FID/:MID/actions`} component={MachineActionsPage} />
+        <Route exact path={`${orgPath}/machines/:FID/:PLID/:MID/actions`} component={MachineActionsPage} />
         <Route exact path={`${orgPath}/failures/:FID/:MID/:CID`} component={FailureTable} />
         <Route exact path={`${orgPath}/failures/:FID/:MID`} component={FailureTable} />
         <Route exact path={`${orgPath}/failures/:FID`} component={FailureTable} />
         <Route exact path={`${orgPath}/failures`} component={FailureTable} />
         <Route exact path={`${orgPath}/maintenance-records/:FID`} component={MaintenancePage} />
-        <Route exact path={`${orgPath}/predictions/:SID`} component={PredictionPage} />
-        <Route exact path={`${orgPath}/predictions/:SID/:PID`} component={PredictionPageShowAll} />
+
+        <Route exact path={`${orgPath}/predictions/:FID/:PLID/:MID`} component={PredictionPage} />
+        <Route exact path={`${orgPath}/predictions/:FID/:PLID/:MID/:CID`} component={PredictionPage} />
+
+        <Route exact path={`${orgPath}/prediction-info/:FID/:PLID/:MID/:PID`} component={PredictionPageShowAll} />
+        <Route exact path={`${orgPath}/prediction-info/:FID/:PLID/:MID/:CID/:PID`} component={PredictionPageShowAll} />
+
         <Route exact path={`${orgPath}/alerts`} component={AlertsPage} />
         <Route exact path={`${orgPath}/alerts/:hardwareName`} component={AlertsPage} />
 
         {/* ML */}
         <Route exact path={`${orgPath}/ml`} component={MLContainer} />
         <Route exact path={`${orgPath}/advanced-ml`} component={MLAdvancedContainer} />
-
-
+        <Route exact path={`${orgPath}/retrain`} component={RetrainControlContainer} />
+        <Route exact path={`${orgPath}/automl/:experimentName/:tab`} component={AutoML} />
 
         {/* User Manual */}
         <PermittedRoute exact path={`${orgPath}/user-manual`} component={UserManualContainer} allowedRoles={["member", "admin", "editor"]} />
@@ -203,6 +214,11 @@ const SetOrg: FC<Props> = ({
 
         {/* EXAMPLE */}
         <Route path={`${orgPath}/examples`} component={ExamplePage} />
+
+        {/* ANOMALY MONITOR */}
+        <Route path="/public/iris_model_performance_dashboard" component={AnomalyMonitorPage} />
+        <Route path={`${orgPath}/anomaly-monitor`} component={AnomalyMonitorPage} />
+        
 
         {/* Data Explorer */}
         <Route path={`${orgPath}/data-explorer`} component={DataExplorerPage} />

@@ -97,7 +97,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
             <Form key={selectedGraphNode["id"]}>
                 <Grid>
                     <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Six}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Twelve}
+                        >
                             <Form.Element label="Type">
                                 <Label
                                     size={ComponentSize.Small}
@@ -108,9 +113,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Six}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Twelve}
+                        >
                             <Form.Element label="Factory Name">
                                 <Label
                                     size={ComponentSize.Small}
@@ -121,8 +129,6 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
                         <Grid.Column widthXS={Columns.Twelve}>
                             <Form.Element label={`Production Line List (${selectedGraphNode["productionLines"].length})`}>
                                 <DapperScrollbars
@@ -165,7 +171,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
             <Form key={selectedGraphNode["id"]}>
                 <Grid>
                     <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Six}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Twelve}
+                        >
                             <Form.Element label="Type">
                                 <Label
                                     size={ComponentSize.Small}
@@ -176,9 +187,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Six}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Twelve}
+                        >
                             <Form.Element label="Production Line">
                                 <Label
                                     size={ComponentSize.Small}
@@ -189,9 +203,9 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Twelve}
+                        >
                             <Form.Element label={`Machine List (${selectedGraphNode["machines"].length})`}>
                                 <DapperScrollbars
                                     autoHide={false}
@@ -233,7 +247,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
             <Form key={selectedGraphNode["id"]}>
                 <Grid>
                     <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Four}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Twelve}
+                        >
                             <Form.Element label="Type">
                                 <Label
                                     size={ComponentSize.Small}
@@ -244,9 +263,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Four}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Twelve}
+                        >
                             <Form.Element label="Display Name">
                                 <Label
                                     size={ComponentSize.Small}
@@ -257,9 +279,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Twelve}
+                            widthSM={Columns.Four}
+                            widthMD={Columns.Twelve}
+                            widthLG={Columns.Twelve}
+                        >
                             <Form.Element label="Parent">
                                 <Label
                                     size={ComponentSize.Small}
@@ -270,8 +295,6 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
                         <Grid.Column widthXS={Columns.Twelve}>
                             <Form.Element label={`Component List (${this.getComponentCount(selectedGraphNode["contents"])})`}>
                                 <DapperScrollbars
@@ -314,7 +337,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
             <Form key={selectedGraphNode["id"]}>
                 <Grid>
                     <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Three}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Twelve}
+                        >
                             <Form.Element label="Type">
                                 <Label
                                     size={ComponentSize.Small}
@@ -325,9 +353,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Three}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Twelve}
+                        >
                             <Form.Element label="Display Name">
                                 <Label
                                     size={ComponentSize.Small}
@@ -338,9 +369,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Three}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Twelve}
+                        >
                             <Form.Element label="Description">
                                 <Label
                                     size={ComponentSize.Small}
@@ -351,9 +385,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Three}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Twelve}
+                        >
                             <Form.Element label="Parent">
                                 <Label
                                     size={ComponentSize.Small}
@@ -364,8 +401,6 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
                         <Grid.Column widthXS={Columns.Twelve}>
                             <Form.Element label={`Sensor List (${selectedGraphNode["sensors"].length})`}>
                                 <DapperScrollbars
@@ -408,7 +443,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
             <Form key={selectedGraphNode["@id"]}>
                 <Grid>
                     <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Three}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Twelve}
+                        >
                             <Form.Element label="Type">
                                 <Label
                                     size={ComponentSize.Small}
@@ -419,9 +459,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Three}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Twelve}
+                        >
                             <Form.Element label="Display Name">
                                 <Label
                                     size={ComponentSize.Small}
@@ -432,9 +475,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Three}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Twelve}
+                        >
                             <Form.Element label="Parent">
                                 <Label
                                     size={ComponentSize.Small}
@@ -445,44 +491,22 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    {/* <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
-                            <Form.Element label="Data Source">
-                                <SelectDropdown
-                                    buttonStatus={["admin"].includes(localStorage.getItem("userRole")) ? ComponentStatus.Valid : ComponentStatus.Disabled}
-                                    options={["sensors_data"]}
-                                    selectedOption={this.state.sSelectedDataSource}
-                                    onSelect={(e) => this.setState({ sSelectedDataSource: e })}
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Three}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Twelve}
+                        >
+                            <Form.Element label="Unit">
+                                <Label
+                                    size={ComponentSize.Small}
+                                    name={selectedGraphNode["unit"]}
+                                    description="Unit"
+                                    color={InfluxColors.Ocean}
+                                    id={selectedGraphNode["unit"]}
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Grid.Column widthXS={Columns.Six}>
-                            <Form.Element label="Min Value">
-                                <Input
-                                    name="sMinValue"
-                                    onChange={this.handleChangeInput}
-                                    value={this.state.sMinValue}
-                                    type={InputType.Number}
-                                    status={["admin"].includes(localStorage.getItem("userRole")) ? ComponentStatus.Default : ComponentStatus.Disabled}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column widthXS={Columns.Six}>
-                            <Form.Element label="Max Value">
-                                <Input
-                                    name="sMaxValue"
-                                    onChange={this.handleChangeInput}
-                                    value={this.state.sMaxValue}
-                                    type={InputType.Number}
-                                    status={["admin"].includes(localStorage.getItem("userRole")) ? ComponentStatus.Default : ComponentStatus.Disabled}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                    </Grid.Row> */}
-                    <Grid.Row>
                         <Grid.Column widthXS={Columns.Twelve}>
                             <Form.Element label="Data Type">
                                 {
@@ -506,19 +530,6 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                             </Form.Element>
                         </Grid.Column>
                     </Grid.Row>
-                    <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
-                            <Form.Element label="Unit">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["unit"]}
-                                    description="Unit"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["unit"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                    </Grid.Row>
                 </Grid>
             </Form>
         ]
@@ -531,7 +542,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
             <Form key={selectedGraphNode["name"]}>
                 <Grid>
                     <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Three}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Twelve}
+                        >
                             <Form.Element label="Type">
                                 <Label
                                     size={ComponentSize.Small}
@@ -542,9 +558,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Three}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Twelve}
+                        >
                             <Form.Element label="Name">
                                 <Label
                                     size={ComponentSize.Small}
@@ -555,9 +574,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Three}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Twelve}
+                        >
                             <Form.Element label="Parent">
                                 <Label
                                     size={ComponentSize.Small}
@@ -568,9 +590,28 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Three}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Twelve}
+                        >
+                            <Form.Element label="Unit">
+                                <Label
+                                    size={ComponentSize.Small}
+                                    name={selectedGraphNode["unit"]}
+                                    description="Unit"
+                                    color={InfluxColors.Ocean}
+                                    id={selectedGraphNode["unit"]}
+                                />
+                            </Form.Element>
+                        </Grid.Column>
+                        <Grid.Column
+                            widthXS={Columns.Six}
+                            widthSM={Columns.Three}
+                            widthMD={Columns.Twelve}
+                            widthLG={Columns.Twelve}
+                        >
                             <Form.Element label="Data Source">
                                 <SelectDropdown
                                     buttonStatus={["admin"].includes(localStorage.getItem("userRole")) ? ComponentStatus.Valid : ComponentStatus.Disabled}
@@ -580,9 +621,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Grid.Column widthXS={Columns.Six}>
+                        <Grid.Column
+                            widthXS={Columns.Three}
+                            widthSM={Columns.Three}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Six}
+                        >
                             <Form.Element label="Min Value">
                                 <Input
                                     name="sMinValue"
@@ -593,7 +637,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                 />
                             </Form.Element>
                         </Grid.Column>
-                        <Grid.Column widthXS={Columns.Six}>
+                        <Grid.Column
+                            widthXS={Columns.Three}
+                            widthSM={Columns.Three}
+                            widthMD={Columns.Six}
+                            widthLG={Columns.Six}
+                        >
                             <Form.Element label="Max Value">
                                 <Input
                                     name="sMaxValue"
@@ -601,19 +650,6 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                     value={this.state.sMaxValue}
                                     type={InputType.Number}
                                     status={["admin"].includes(localStorage.getItem("userRole")) ? ComponentStatus.Default : ComponentStatus.Disabled}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Grid.Column widthXS={Columns.Twelve}>
-                            <Form.Element label="Unit">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["unit"]}
-                                    description="Unit"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["unit"]}
                                 />
                             </Form.Element>
                         </Grid.Column>
@@ -812,7 +848,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                     <Panel.Header size={ComponentSize.ExtraSmall}>
                         <Grid>
                             <Grid.Row>
-                                <Grid.Column widthXS={Columns.Twelve}>
+                                <Grid.Column
+                                    widthXS={Columns.Six}
+                                    widthSM={Columns.Three}
+                                    widthMD={Columns.Six}
+                                    widthLG={Columns.Twelve}
+                                >
                                     <Form.Element label="Factory">
                                         <Label
                                             size={ComponentSize.Small}
@@ -823,9 +864,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                         />
                                     </Form.Element>
                                 </Grid.Column>
-                            </Grid.Row>
-                            <Grid.Row>
-                                <Grid.Column widthXS={Columns.Four}>
+                                <Grid.Column
+                                    widthXS={Columns.Six}
+                                    widthSM={Columns.Three}
+                                    widthMD={Columns.Six}
+                                    widthLG={Columns.Four}
+                                >
                                     <Form.Element label="Machine Count">
                                         <Label
                                             size={ComponentSize.Small}
@@ -836,7 +880,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                         />
                                     </Form.Element>
                                 </Grid.Column>
-                                <Grid.Column widthXS={Columns.Four}>
+                                <Grid.Column
+                                    widthXS={Columns.Six}
+                                    widthSM={Columns.Three}
+                                    widthMD={Columns.Six}
+                                    widthLG={Columns.Four}
+                                >
                                     <Form.Element label="Component Count">
                                         <Label
                                             size={ComponentSize.Small}
@@ -847,7 +896,12 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                         />
                                     </Form.Element>
                                 </Grid.Column>
-                                <Grid.Column widthXS={Columns.Four}>
+                                <Grid.Column
+                                    widthXS={Columns.Six}
+                                    widthSM={Columns.Three}
+                                    widthMD={Columns.Six}
+                                    widthLG={Columns.Four}
+                                >
                                     <Form.Element label="Sensor Count">
                                         <Label
                                             size={ComponentSize.Small}
@@ -861,8 +915,17 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                             </Grid.Row>
 
                             <Grid.Row>
-                                <Grid.Column widthXS={Columns.Twelve}>
-                                    <FlexBox margin={ComponentSize.Large}>
+                                <div
+                                    style={{
+                                        marginTop: '10px',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        display: 'flex',
+                                    }}
+                                >
+                                    <FlexBox
+                                        margin={ComponentSize.Large}
+                                    >
                                         <h5>Show All Sensor Values</h5>
                                         <SlideToggle
                                             active={this.props.showAllSensorValues}
@@ -882,7 +945,7 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                             </div>}
                                         />
                                     </FlexBox>
-                                </Grid.Column>
+                                </div>
                             </Grid.Row>
                         </Grid>
                     </Panel.Header>
@@ -912,6 +975,93 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                         }
 
                         <Grid.Row>
+                            <div className="center-the-children">
+                                <FlexBox margin={ComponentSize.Medium}>
+                                    {
+                                        Object.keys(selectedGraphNode).length !== 0 &&
+                                        selectedGraphNode["type"] === "Field" &&
+                                        <>
+                                            <QuestionMarkTooltip
+                                                diameter={20}
+                                                tooltipStyle={{ width: '400px' }}
+                                                color={ComponentColor.Secondary}
+                                                tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                                    <div style={{ color: InfluxColors.Star }}>{"Update sensor:"}
+                                                        <hr style={tipStyle} />
+                                                    </div>
+                                                    {updateSensor}
+                                                </div>}
+                                            />
+                                            {/* <div style={{ float: 'right' }}> */}
+                                            {
+                                                ["admin"].includes(localStorage.getItem("userRole")) &&
+                                                <ConfirmationButton
+                                                    icon={IconFont.Checkmark}
+                                                    onConfirm={this.handleUpdateSensor}
+                                                    text={"Update"}
+                                                    popoverColor={ComponentColor.Success}
+                                                    popoverAppearance={Appearance.Outline}
+                                                    color={ComponentColor.Success}
+                                                    confirmationLabel="Do you want to update ?"
+                                                    confirmationButtonColor={ComponentColor.Success}
+                                                    confirmationButtonText="Yes"
+                                                />
+                                            }
+                                            {/* </div> */}
+                                        </>
+                                    }
+
+                                    {
+                                        Object.keys(selectedGraphNode).length !== 0 &&
+                                        ["Machine", "Component", "Sensor"].includes(selectedGraphNode["type"]) &&
+                                        <div style={{ float: 'right' }}>
+                                            {
+                                                <FlexBox margin={ComponentSize.Medium}>
+                                                    <Button
+                                                        text=""
+                                                        icon={IconFont.CogThick}
+                                                        onClick={this.clickPartDetail}
+                                                        type={ButtonType.Button}
+                                                        color={ComponentColor.Primary}
+                                                    />
+
+                                                    <Button
+                                                        text="Brands"
+                                                        icon={IconFont.Plus}
+                                                        onClick={this.clickBrands}
+                                                        type={ButtonType.Button}
+                                                        color={ComponentColor.Secondary}
+                                                    />
+                                                </FlexBox>
+                                            }
+                                        </div>
+                                    }
+
+                                    {
+                                        Object.keys(selectedGraphNode).length !== 0 &&
+                                        selectedGraphNode["type"] !== "Factory" &&
+                                        <div style={{ float: 'right' }}>
+                                            {
+                                                ["admin"].includes(localStorage.getItem("userRole")) &&
+                                                <ConfirmationButton
+                                                    icon={IconFont.Remove}
+                                                    onConfirm={this.handleDeleteNode}
+                                                    text={"Delete"}
+                                                    popoverColor={ComponentColor.Danger}
+                                                    popoverAppearance={Appearance.Outline}
+                                                    color={ComponentColor.Danger}
+                                                    confirmationLabel="Do you want to delete ?"
+                                                    confirmationButtonColor={ComponentColor.Success}
+                                                    confirmationButtonText="Yes"
+                                                />
+                                            }
+                                        </div>
+                                    }
+                                </FlexBox>
+                            </div>
+                        </Grid.Row>
+
+                        {/* <Grid.Row>
                             <FlexBox margin={ComponentSize.Medium} style={{ float: 'right' }}>
                                 {
                                     Object.keys(selectedGraphNode).length !== 0 &&
@@ -954,7 +1104,7 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                         {
                                             <FlexBox margin={ComponentSize.Medium}>
                                                 <Button
-                                                    text=""
+                                                    text="Snapshot"
                                                     icon={IconFont.CogThick}
                                                     onClick={this.clickPartDetail}
                                                     type={ButtonType.Button}
@@ -962,7 +1112,7 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                                 />
 
                                                 <Button
-                                                    text="Brands & Models"
+                                                    text="Brands"
                                                     icon={IconFont.Plus}
                                                     onClick={this.clickBrands}
                                                     type={ButtonType.Button}
@@ -994,8 +1144,8 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
                                     </div>
                                 }
                             </FlexBox>
+                        </Grid.Row> */}
 
-                        </Grid.Row>
                     </Panel.Body>
                 </Panel>
             </>

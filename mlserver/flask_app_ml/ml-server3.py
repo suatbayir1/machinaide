@@ -11,6 +11,7 @@ from flask import (
 from mlconstants import (
 #    MAX_WORKERS,
 #    MAX_TASKS, 
+    AUTO_SETTINGS_DIR,
     G_ALGS, 
 #    AUTOSETTINGSDIR,
     G_INFO,
@@ -68,7 +69,7 @@ def queueTrainingSession(auto=None):
             or 'startTime' not in settings.keys()
             or 'sensors' not in settings.keys()
             or 'params' not in settings.keys()):
-            return "BAD REQUEST: Missing key.", 400
+            return "BAD REQUEST: Missing key22222.", 400
         if len(settings.keys()) > 8:
             return "BAD REQUEST: Unnecessary key.", 400
 
@@ -94,38 +95,39 @@ def queueTrainingSession(auto=None):
         session_kill_queues[settings['sessionID']] = kill_sig_queue
         session.start()
         return "OK", 201
-#    else:
-#        if ('tunerType' not in settings.keys()
-#            or 'experimentName' not in settings.keys()
-#            or 'nfeatures' not in settings.keys()
-#            or 'nepochs' not in settings.keys()
-#            or 'dbSettings' not in settings.keys()
-#            or 'username' not in settings.keys()
-#            or 'timeout' not in settings.keys()
-#            or 'endTime' not in settings.keys()
-#            or 'startTime' not in settings.keys()
-#            or 'sensors' not in settings.keys()
-#            or 'sessionID' not in settings.keys()):
-#            return "BAD REQUEST: Missing key.", 400
-#         session = AutoMLSession(settings)
-#         automl_futures[settings['sessionID']] = session.run()    
-#         global process
-#        if not os.path.isdir(AUTOSETTINGSDIR):
-#            os.mkdir(AUTOSETTINGSDIR)
+    else:
+        if ('tunerType' not in settings.keys()
+            or 'modelName' not in settings.keys()
+            or 'nfeatures' not in settings.keys()
+            or 'nepochs' not in settings.keys()
+            or 'dbSettings' not in settings.keys()
+            or 'username' not in settings.keys()
+            or 'timeout' not in settings.keys()
+            # or 'endTime' not in settings.keys()
+            # or 'startTime' not in settings.keys()
+            or 'sensors' not in settings.keys()
+            or 'sessionID' not in settings.keys()
+            or 'task' not in settings.keys()):
+                return "BAD REQUEST: Missing key3333.", 400
+        # session = AutoMLSession(settings)
+        # automl_futures[settings['sessionID']] = session.run()    
+        # global process
+        if not os.path.isdir(AUTO_SETTINGS_DIR):
+            os.mkdir(AUTO_SETTINGS_DIR)
 
-#        experiment_name = settings['experimentName']
-#        username = settings['username']
-#        t_dir = AUTOSETTINGSDIR + experiment_name + "-" + username + ".json"
-#        with open(t_dir, 'w') as fp:
-#            json.dump(settings, fp)
-#        timeout = str(settings['timeout']) + "h"
-#        cmd = "timeout -k 10 " + timeout + \
-#            " python3 automl_runner.py -e " + experiment_name + \
-#            " -u " + username
-#        print(cmd)
-#        process = subprocess.Popen(cmd.split(), close_fds=True)
-#        msg = "experiment " + experiment_name + " started with timeout " + timeout + " from user: " + username
-#        return {"msg": msg}
+        experiment_name = settings['experimentName']
+        username = settings['username']
+        t_dir = AUTO_SETTINGS_DIR + experiment_name + "-" + username + ".json"
+        with open(t_dir, 'w') as fp:
+            json.dump(settings, fp)
+        timeout = str(settings['timeout']) + "h"
+        cmd = "timeout -k 10 " + timeout + \
+            " python3 automl_runner.py -e " + experiment_name + \
+            " -u " + username + " -t " + settings['task']
+        print(cmd)
+        process = subprocess.Popen(cmd.split(), close_fds=True)
+        msg = "experiment " + experiment_name + " started with timeout " + timeout + " from user: " + username
+        return {"msg": msg}
 
 
 @app.route('/startInferenceJob/<session_id>/<model_id>')
@@ -169,3 +171,11 @@ if __name__ == '__main__':
 #    alert_module = AlertModule(ALERT_MODULE_SETTINGS)
 #    alert_module_future = alert_module.run()
     app.run(debug = True, port=9798)
+
+
+
+
+
+
+
+# 2021-11-07 03:00:00

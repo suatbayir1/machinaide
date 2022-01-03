@@ -133,18 +133,23 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                         {
                                             components.length > 0 ? components.map((component) => {
                                                 return (
-                                                    <div
-                                                        onMouseLeave={() => this.handleLeaveMouseCard()}
-                                                        onMouseEnter={() => this.handleOnMouseCard(component)}
+                                                    <Grid.Column
+                                                        widthXS={Columns.Twelve}
+                                                        widthSM={Columns.Six}
+                                                        widthMD={Columns.Four}
+                                                        widthLG={Columns.Three}
                                                         key={component["id"]}
+                                                        id="component-panel"
                                                     >
-                                                        <Grid.Column
-                                                            widthXS={Columns.Three}
+                                                        <div
+                                                            onMouseLeave={() => this.handleLeaveMouseCard()}
+                                                            onMouseEnter={() => this.handleOnMouseCard(component)}
                                                             key={component["id"]}
                                                         >
+
                                                             <ResourceCard
                                                                 key={component["id"]}
-                                                                style={{ marginTop: '20px' }}
+                                                                className="resource-card"
                                                             >
                                                                 <Grid.Row>
                                                                     <Grid.Column
@@ -154,16 +159,16 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                                                 : Columns.Six
                                                                         }
                                                                     >
-                                                                        <div style={{ marginLeft: "40%" }}>
+                                                                        <div>
                                                                             <img
                                                                                 src='https://cdn1.iconfinder.com/data/icons/cars-components-3/24/gears_gear_car_component_part-512.png'
-                                                                                width='130px' height='130px'
+                                                                                className="component-image"
                                                                             />
                                                                         </div>
                                                                         <FlexBox margin={ComponentSize.Small}>
                                                                             <img
                                                                                 src='../../../assets/icons/component-card-icon.png'
-                                                                                width='50px' height='50px' style={{ marginRight: '10px' }}
+                                                                                className="component-icon"
                                                                             />
                                                                             <h5>
                                                                                 {component["componentName"]}
@@ -177,41 +182,40 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                                                 <Grid.Column widthXS={Columns.Six}>
                                                                                     <FlexBox direction={FlexDirection.Row}>
                                                                                         <ul
-                                                                                            className="ComponentList"
-                                                                                            style={{ listStyleType: "none", marginTop: '5px', paddingLeft: '0px', fontSize: '0.800rem', margin: 'auto' }}
+                                                                                            className="component-shortcut-list"
                                                                                         >
-                                                                                            <li className="links" style={{ marginBottom: '0px' }}>
+                                                                                            <li className="links">
                                                                                                 <Link to={`/orgs/${this.props["match"].params["orgID"]}/dashboard-router/${component["id"]}`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-                                                                                                        <div><img src="../../../assets/icons/dashboards-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
+                                                                                                        <div><img src="../../../assets/icons/dashboards-icon.png" className="li-icon" /></div>
                                                                                                     </div>
                                                                                                     <span>
                                                                                                         Show Dashboards
                                                                                                     </span>
                                                                                                 </Link>
                                                                                             </li>
-                                                                                            <li className="links" style={{ marginBottom: '0px' }}>
+                                                                                            <li className="links">
                                                                                                 <Link to={`/orgs/${this.props["match"].params["orgID"]}/snapshot-router/component-${component["id"]}`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-                                                                                                        <div><img src="../../../assets/icons/dashboards-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
+                                                                                                        <div><img src="../../../assets/icons/dashboards-icon.png" className="li-icon" /></div>
                                                                                                     </div>
                                                                                                     <span>
                                                                                                         Show Snapshots
                                                                                                     </span>
                                                                                                 </Link>
                                                                                             </li>
-                                                                                            <li className="links" style={{ marginBottom: '0px' }}>
+                                                                                            <li className="links">
                                                                                                 <Link to={`/orgs/${this.props["match"].params["orgID"]}/dt`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-                                                                                                        <div><img src="../../../assets/icons/tree-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
+                                                                                                        <div><img src="../../../assets/icons/tree-icon.png" className="li-icon" /></div>
                                                                                                     </div>
                                                                                                     Show Sensor Tree
                                                                                                 </Link>
                                                                                             </li>
-                                                                                            <li className="links" style={{ marginBottom: '0px' }}>
+                                                                                            <li className="links">
                                                                                                 <Link to={`/orgs/${this.props["match"].params["orgID"]}/sensors/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${this.props["match"].params.MID}/${component["id"]}`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-                                                                                                        <div><img src="../../../assets/icons/sensor-list.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
+                                                                                                        <div><img src="../../../assets/icons/sensor-list.png" className="li-icon" /></div>
                                                                                                     </div>
                                                                                                     Show Sensors
                                                                                                     <span style={{ color: "#bef0ff" }}>
@@ -219,10 +223,10 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                                                                     </span>
                                                                                                 </Link>
                                                                                             </li>
-                                                                                            <li className="links" style={{ marginBottom: '0px' }}>
+                                                                                            <li className="links">
                                                                                                 <Link to={`/orgs/${this.props["match"].params["orgID"]}/alerting`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-                                                                                                        <div><img src="../../../assets/icons/alerts-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
+                                                                                                        <div><img src="../../../assets/icons/alerts-icon.png" className="li-icon" /></div>
                                                                                                     </div>
                                                                                                     Alerts
                                                                                                     <span style={{ color: "#bef0ff" }}>
@@ -230,18 +234,18 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                                                                     </span>
                                                                                                 </Link>
                                                                                             </li>
-                                                                                            <li className="links" style={{ marginBottom: '0px' }}>
-                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/predictions/<sensorID>`}>
+                                                                                            <li className="links">
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/predictions/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${this.props["match"].params.MID}/${component["id"]}`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-                                                                                                        <div><img src="../../../assets/icons/prediction-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
+                                                                                                        <div><img src="../../../assets/icons/prediction-icon.png" className="li-icon" /></div>
                                                                                                     </div>
                                                                                                     Show Predictions
                                                                                                 </Link>
                                                                                             </li>
-                                                                                            <li className="links" style={{ marginBottom: '0px' }}>
+                                                                                            <li className="links">
                                                                                                 <Link to={`/orgs/${this.props["match"].params["orgID"]}/failures/:FID/:MID/:CID`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-                                                                                                        <div><img src="../../../assets/icons/failure-icon.png" width='20px' height='20px' style={{ marginRight: '5px' }} /></div>
+                                                                                                        <div><img src="../../../assets/icons/failure-icon.png" className="li-icon" /></div>
                                                                                                     </div>
                                                                                                     Show Failures
                                                                                                 </Link>
@@ -253,8 +257,8 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                                     }
                                                                 </Grid.Row>
                                                             </ResourceCard>
-                                                        </Grid.Column>
-                                                    </div>
+                                                        </div>
+                                                    </Grid.Column>
                                                 )
                                             }) : (
                                                 <h1>No component found for this machine</h1>

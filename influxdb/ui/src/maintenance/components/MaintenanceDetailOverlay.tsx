@@ -169,128 +169,163 @@ class MaintenanceDetailOverlay extends PureComponent<Props, State> {
                         <Overlay.Body>
                             <Form style={{ marginBottom: '20px' }}>
                                 <Grid.Row >
-                                    <Grid.Column widthXS={Columns.Twelve}>
-
-                                        <Grid.Row style={{ marginTop: '20px' }}>
-                                            <Grid.Column widthXS={Columns.Twelve}>
-                                                <Form.Element label="Asset" required={true}>
-                                                    <Dropdown
-                                                        button={(active, onClick) => (
-                                                            <Dropdown.Button
-                                                                status={ComponentStatus.Disabled}
-                                                                active={active}
-                                                                onClick={onClick}
-                                                                color={ComponentColor.Default}
-                                                            >
-                                                                {this.state.selectedPart['text']}
-                                                            </Dropdown.Button>
-                                                        )}
-                                                        menu={onCollapse => (
-                                                            <Dropdown.Menu onCollapse={onCollapse}>
-                                                                {
-                                                                    allParts
-                                                                }
-                                                            </Dropdown.Menu>
-                                                        )}
-                                                    />
-                                                </Form.Element>
-                                            </Grid.Column>
-                                        </Grid.Row>
-
-                                        <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Six}>
-                                                <Form.Element label="Maintenance Date" required={true}>
-                                                    <input
-                                                        type='datetime-local'
-                                                        value={this.state.maintenanceTime}
-                                                        onChange={(e) => { this.setState({ maintenanceTime: e.target.value }) }}
-                                                        style={{ background: '#383846', color: '#ffffff' }}
-                                                        disabled
-                                                    />
-                                                </Form.Element>
-                                            </Grid.Column>
-
-                                            <Grid.Column widthXS={Columns.Six}>
-                                                <Form.Element label="Maintenance Reason">
-                                                    <Input
-                                                        onChange={(e) => { this.setState({ maintenanceReason: e.target.value }) }}
-                                                        value={maintenanceReason}
+                                    <Grid.Column
+                                        widthXS={Columns.Twelve}
+                                        widthSM={Columns.Twelve}
+                                        widthMD={Columns.Twelve}
+                                        widthLG={Columns.Twelve}
+                                    >
+                                        <Form.Element label="Asset" required={true}>
+                                            <Dropdown
+                                                button={(active, onClick) => (
+                                                    <Dropdown.Button
                                                         status={ComponentStatus.Disabled}
-                                                    />
-                                                </Form.Element>
-                                            </Grid.Column>
-                                        </Grid.Row>
-
-                                        <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Six}>
-                                                <Form.Element label="Maintenance Request">
-                                                    <TextArea
-                                                        rows={5}
-                                                        value={maintenanceRequest}
-                                                        onChange={(e) => this.setState({ maintenanceRequest: e.target.value })}
-                                                        status={ComponentStatus.Disabled}
-                                                    />
-                                                </Form.Element>
-                                            </Grid.Column>
-
-                                            <Grid.Column widthXS={Columns.Six}>
-                                                <Form.Element label="Maintenance Info">
-                                                    <TextArea
-                                                        rows={5}
-                                                        value={maintenanceInfo}
-                                                        onChange={(e) => this.setState({ maintenanceInfo: e.target.value })}
-                                                        status={ComponentStatus.Disabled}
-                                                    />
-                                                </Form.Element>
-                                            </Grid.Column>
-                                        </Grid.Row>
-
-                                        <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Six}>
-                                                <Form.Element label="Maintenance Down Time">
-                                                    <Input
-                                                        onChange={(e) => { this.setState({ maintenanceDownTime: e.target.value }) }}
-                                                        type={InputType.Number}
-                                                        value={maintenanceDownTime}
-                                                        status={ComponentStatus.Disabled}
-                                                    />
-                                                </Form.Element>
-                                            </Grid.Column>
-
-                                            <Grid.Column widthXS={Columns.Six}>
-                                                <Form.Element label="Maintenance Type">
-                                                    <Input
-                                                        onChange={(e) => { this.setState({ maintenanceType: e.target.value }) }}
-                                                        value={maintenanceType}
-                                                        status={ComponentStatus.Disabled}
-                                                    />
-                                                </Form.Element>
-                                            </Grid.Column>
-                                        </Grid.Row>
-
-                                        <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Six}>
-                                                <Form.Element label="Maintenance Cost">
-                                                    <Input
-                                                        onChange={(e) => { this.setState({ maintenanceCost: e.target.value }) }}
-                                                        type={InputType.Number}
-                                                        value={maintenanceCost}
-                                                        status={ComponentStatus.Disabled}
-                                                    />
-                                                </Form.Element>
-                                            </Grid.Column>
-
-                                            <Grid.Column widthXS={Columns.Six}>
-                                                <Form.Element label="Person Responsible for Maintenance">
-                                                    <Input
-                                                        onChange={(e) => { this.setState({ personResponsible: e.target.value }) }}
-                                                        value={personResponsible}
-                                                        status={ComponentStatus.Disabled}
-                                                    />
-                                                </Form.Element>
-                                            </Grid.Column>
-                                        </Grid.Row>
+                                                        active={active}
+                                                        onClick={onClick}
+                                                        color={ComponentColor.Default}
+                                                    >
+                                                        {this.state.selectedPart['text']}
+                                                    </Dropdown.Button>
+                                                )}
+                                                menu={onCollapse => (
+                                                    <Dropdown.Menu onCollapse={onCollapse}>
+                                                        {
+                                                            allParts
+                                                        }
+                                                    </Dropdown.Menu>
+                                                )}
+                                            />
+                                        </Form.Element>
                                     </Grid.Column>
+
+
+                                    <Grid.Column
+                                        widthXS={Columns.Twelve}
+                                        widthSM={Columns.Six}
+                                        widthMD={Columns.Six}
+                                        widthLG={Columns.Six}
+                                    >
+                                        <Form.Element label="Maintenance Date" required={true}>
+                                            <input
+                                                type='datetime-local'
+                                                value={this.state.maintenanceTime}
+                                                onChange={(e) => { this.setState({ maintenanceTime: e.target.value }) }}
+                                                style={{ background: '#383846', color: '#ffffff' }}
+                                                disabled
+                                            />
+                                        </Form.Element>
+                                    </Grid.Column>
+
+                                    <Grid.Column
+                                        widthXS={Columns.Twelve}
+                                        widthSM={Columns.Six}
+                                        widthMD={Columns.Six}
+                                        widthLG={Columns.Six}
+                                    >
+                                        <Form.Element label="Maintenance Reason">
+                                            <Input
+                                                onChange={(e) => { this.setState({ maintenanceReason: e.target.value }) }}
+                                                value={maintenanceReason}
+                                                status={ComponentStatus.Disabled}
+                                            />
+                                        </Form.Element>
+                                    </Grid.Column>
+
+                                    <Grid.Column
+                                        widthXS={Columns.Twelve}
+                                        widthSM={Columns.Six}
+                                        widthMD={Columns.Six}
+                                        widthLG={Columns.Six}
+                                    >
+                                        <Form.Element label="Maintenance Request">
+                                            <TextArea
+                                                rows={5}
+                                                value={maintenanceRequest}
+                                                onChange={(e) => this.setState({ maintenanceRequest: e.target.value })}
+                                                status={ComponentStatus.Disabled}
+                                            />
+                                        </Form.Element>
+                                    </Grid.Column>
+
+                                    <Grid.Column
+                                        widthXS={Columns.Twelve}
+                                        widthSM={Columns.Six}
+                                        widthMD={Columns.Six}
+                                        widthLG={Columns.Six}
+                                    >
+                                        <Form.Element label="Maintenance Info">
+                                            <TextArea
+                                                rows={5}
+                                                value={maintenanceInfo}
+                                                onChange={(e) => this.setState({ maintenanceInfo: e.target.value })}
+                                                status={ComponentStatus.Disabled}
+                                            />
+                                        </Form.Element>
+                                    </Grid.Column>
+
+                                    <Grid.Column
+                                        widthXS={Columns.Twelve}
+                                        widthSM={Columns.Six}
+                                        widthMD={Columns.Six}
+                                        widthLG={Columns.Six}
+                                    >
+                                        <Form.Element label="Maintenance Down Time">
+                                            <Input
+                                                onChange={(e) => { this.setState({ maintenanceDownTime: e.target.value }) }}
+                                                type={InputType.Number}
+                                                value={maintenanceDownTime}
+                                                status={ComponentStatus.Disabled}
+                                            />
+                                        </Form.Element>
+                                    </Grid.Column>
+
+                                    <Grid.Column
+                                        widthXS={Columns.Twelve}
+                                        widthSM={Columns.Six}
+                                        widthMD={Columns.Six}
+                                        widthLG={Columns.Six}
+                                    >
+                                        <Form.Element label="Maintenance Type">
+                                            <Input
+                                                onChange={(e) => { this.setState({ maintenanceType: e.target.value }) }}
+                                                value={maintenanceType}
+                                                status={ComponentStatus.Disabled}
+                                            />
+                                        </Form.Element>
+                                    </Grid.Column>
+
+                                    <Grid.Row>
+                                        <Grid.Column
+                                            widthXS={Columns.Twelve}
+                                            widthSM={Columns.Six}
+                                            widthMD={Columns.Six}
+                                            widthLG={Columns.Six}
+                                        >
+                                            <Form.Element label="Maintenance Cost">
+                                                <Input
+                                                    onChange={(e) => { this.setState({ maintenanceCost: e.target.value }) }}
+                                                    type={InputType.Number}
+                                                    value={maintenanceCost}
+                                                    status={ComponentStatus.Disabled}
+                                                />
+                                            </Form.Element>
+                                        </Grid.Column>
+
+                                        <Grid.Column
+                                            widthXS={Columns.Twelve}
+                                            widthSM={Columns.Six}
+                                            widthMD={Columns.Six}
+                                            widthLG={Columns.Six}
+                                        >
+                                            <Form.Element label="Person Responsible for Maintenance">
+                                                <Input
+                                                    onChange={(e) => { this.setState({ personResponsible: e.target.value }) }}
+                                                    value={personResponsible}
+                                                    status={ComponentStatus.Disabled}
+                                                />
+                                            </Form.Element>
+                                        </Grid.Column>
+                                    </Grid.Row>
                                 </Grid.Row>
 
                                 <Button

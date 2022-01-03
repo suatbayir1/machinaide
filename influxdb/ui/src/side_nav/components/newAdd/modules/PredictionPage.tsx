@@ -1,41 +1,26 @@
+// Libraries
 import React, { PureComponent, createRef } from "react";
-import {
-    Page,
-    Grid,
-    Columns,
-    IconFont,
-    ComponentColor,
-    ComponentSize,
-    FlexBox,
-    Input,
-    QuestionMarkTooltip,
-    Table,
-    DapperScrollbars,
-    BorderType,
-    MultiSelectDropdown,
-    PopoverInteraction,
-    Button,
-    ButtonType,
-    Popover,
-    Appearance,
-    DateRangePicker,
-    SquareButton,
-    PopoverPosition,
-    Dropdown,
-    SpinnerContainer,
-    TechnoSpinner,
-    RemoteDataState,
-} from '@influxdata/clockface'
 import { Link } from "react-router-dom";
+
+// Components
+import {
+    Page, Grid, Columns, IconFont, ComponentColor, ComponentSize, FlexBox, Input, QuestionMarkTooltip,
+    Table, DapperScrollbars, BorderType, MultiSelectDropdown, PopoverInteraction, Button, Form,
+    ButtonType, Popover, Appearance, DateRangePicker, SquareButton, PopoverPosition, Dropdown,
+    SpinnerContainer, TechnoSpinner, RemoteDataState,
+} from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
 import HomeIcon from '@material-ui/icons/Home';
 import IconButton from '@material-ui/core/IconButton';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
+
+// Services
 import PredictionService from 'src/shared/services/PredictionService';
+
+// Helpers
 import { dataToCSV, dataToXLSX } from 'src/shared/parsing/dataToCsv';
 import download from 'src/external/download.js';
-
 
 interface State {
     rows: object[]
@@ -254,6 +239,13 @@ class PredictionPage extends PureComponent<Props, State> {
         )
     }
 
+    getPredictionInfoRoute = (model) => {
+        return this.props["match"].params["CID"] !== undefined ?
+            `/orgs/${this.props["match"].params["orgID"]}/prediction-info/${this.props["match"].params["FID"]}/${this.props["match"].params["PLID"]}/${this.props["match"].params["MID"]}/${this.props["match"].params["CID"]}/${model["modelID"]}`
+            : `/orgs/${this.props["match"].params["orgID"]}/prediction-info/${this.props["match"].params["FID"]}/${this.props["match"].params["PLID"]}/${this.props["match"].params["MID"]}/${model["modelID"]}`
+
+    }
+
     render() {
         const exportList =
             (
@@ -297,67 +289,95 @@ class PredictionPage extends PureComponent<Props, State> {
                                 }
                             </Page.Header>
 
-                            <Breadcrumbs separator="/" aria-label="breadcrumb" style={{ color: '#ffffff', marginLeft: '28px', marginTop: '-10px' }}>
-                                <Link color="inherit" to="/">
-                                    <HomeIcon style={{ marginTop: '4px' }} />
-                                </Link>
-                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/allFactories`}>
-                                    Factories
-                        </Link>
-                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/<factoryID>`}>
-                                    Machines
-                        </Link>
-                                <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/<factoryID>/<machineID>`}>
-                                    Components
-                        </Link>
-                                <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Predictions</Typography>
-                            </Breadcrumbs>
+                            <div className="responsive-breadcrumbs-with-margin">
+                                <Breadcrumbs separator="/" aria-label="breadcrumb" style={{ color: '#ffffff', marginLeft: '28px', marginTop: '-10px' }}>
+                                    <Link color="inherit" to="/">
+                                        <HomeIcon style={{ marginTop: '4px' }} />
+                                    </Link>
+                                    <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/allFactories`}>
+                                        Factories
+                                    </Link>
+                                    <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/production-line/${this.props["match"].params.FID}/${this.props["match"].params.PLID}`}>
+                                        Production Lines
+                                    </Link>
+                                    <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/${this.props["match"].params.FID}/${this.props["match"].params.PLID}`}>
+                                        Machines
+                                    </Link>
+                                    {
+                                        this.props["match"].params["CID"] !== undefined &&
+                                        <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/components/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${this.props["match"].params.MID}`}>
+                                            Components
+                                        </Link>
+                                    }
+                                    <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Predictions</Typography>
+                                </Breadcrumbs>
+                            </div>
 
                             <Page.Contents fullWidth={true} scrollable={true}>
-                                <Grid.Column widthXS={Columns.One}>
-                                </Grid.Column>
-
-                                <Grid.Column widthXS={Columns.Ten}>
-                                    <Grid style={{ marginTop: "50px", marginBottom: '100px', background: '#292933', padding: '20px' }}>
-                                        <Grid.Row style={{ marginTop: '20px' }}>
-                                            <Grid.Column widthXS={Columns.Two}>
-                                                <Input
-                                                    icon={IconFont.Search}
-                                                    name="filterHardware"
-                                                    placeholder="Filter by hardware"
-                                                    onChange={(e) => { this.handleChangeFilterHardware(e.target.value) }}
-                                                    value={this.state.filterHardware}
-                                                />
+                                <Grid.Column
+                                    widthLG={Columns.Ten}
+                                    offsetLG={Columns.One}
+                                >
+                                    <Grid className="responsive-table-with-mobile">
+                                        <Grid.Row>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Four}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Two}
+                                            >
+                                                <Form.Element label="Filter by hardware">
+                                                    <Input
+                                                        icon={IconFont.Search}
+                                                        name="filterHardware"
+                                                        onChange={(e) => { this.handleChangeFilterHardware(e.target.value) }}
+                                                        value={this.state.filterHardware}
+                                                    />
+                                                </Form.Element>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.Two}>
-                                                <MultiSelectDropdown
-                                                    emptyText={"Select ML Algorithm"}
-                                                    options={["K-means", "Isolation Forest", "ARIMA"]}
-                                                    selectedOptions={this.state.filteredModel}
-                                                    onSelect={this.handleChangeDropdownFilter}
-                                                />
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Four}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Two}
+                                            >
+                                                <Form.Element label="Filter by algorithm">
+                                                    <MultiSelectDropdown
+                                                        emptyText={"Select ML Algorithm"}
+                                                        options={["K-means", "Isolation Forest", "ARIMA"]}
+                                                        selectedOptions={this.state.filteredModel}
+                                                        onSelect={this.handleChangeDropdownFilter}
+                                                    />
+                                                </Form.Element>
                                             </Grid.Column>
-                                            <Grid.Column widthXS={Columns.One}>
-                                                <Dropdown
-                                                    button={(active, onClick) => (
-                                                        <Dropdown.Button
-                                                            active={active}
-                                                            onClick={onClick}
-                                                            color={ComponentColor.Primary}
-                                                            icon={IconFont.Export}
-                                                            testID="dropdown-button--gen-token"
-                                                        >
-                                                            {'Export'}
-                                                        </Dropdown.Button>
-                                                    )}
-                                                    menu={onCollapse => (
-                                                        <Dropdown.Menu onCollapse={onCollapse}>
-                                                            {
-                                                                exportList
-                                                            }
-                                                        </Dropdown.Menu>
-                                                    )}
-                                                />
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Four}
+                                                widthMD={Columns.Three}
+                                                widthLG={Columns.Two}
+                                            >
+                                                <Form.Element label="Export file">
+                                                    <Dropdown
+                                                        button={(active, onClick) => (
+                                                            <Dropdown.Button
+                                                                active={active}
+                                                                onClick={onClick}
+                                                                color={ComponentColor.Primary}
+                                                                icon={IconFont.Export}
+                                                                testID="dropdown-button--gen-token"
+                                                            >
+                                                                {'Export'}
+                                                            </Dropdown.Button>
+                                                        )}
+                                                        menu={onCollapse => (
+                                                            <Dropdown.Menu onCollapse={onCollapse}>
+                                                                {
+                                                                    exportList
+                                                                }
+                                                            </Dropdown.Menu>
+                                                        )}
+                                                    />
+                                                </Form.Element>
                                             </Grid.Column>
                                         </Grid.Row>
 
@@ -400,7 +420,9 @@ class PredictionPage extends PureComponent<Props, State> {
                                                                         <Table.Cell>{row["daysToFail"]} days</Table.Cell>
                                                                         <Table.Cell>
                                                                             <FlexBox margin={ComponentSize.Medium} >
-                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/predictions/:SID/${row["modelID"]}`}>
+                                                                                <Link
+                                                                                    to={this.getPredictionInfoRoute(row)}
+                                                                                >
                                                                                     <IconButton
                                                                                         aria-label="delete"
                                                                                         style={{ color: '#22ADF6', paddingTop: '0px', paddingBottom: '0px' }}

@@ -471,7 +471,12 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
                                         }
 
                                         <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="Maintenance Date" required={true}>
                                                     <input
                                                         type='datetime-local'
@@ -487,7 +492,12 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
                                                 </Form.Element>
                                             </Grid.Column>
 
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="Maintenance Reason">
                                                     <Input
                                                         onChange={(e) => { this.setState({ maintenanceReason: e.target.value }) }}
@@ -503,7 +513,12 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
                                         </Grid.Row>
 
                                         <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="Maintenance Request">
                                                     <TextArea
                                                         rows={5}
@@ -518,7 +533,12 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
                                                 </Form.Element>
                                             </Grid.Column>
 
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="Maintenance Info">
                                                     <TextArea
                                                         rows={5}
@@ -535,7 +555,12 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
                                         </Grid.Row>
 
                                         <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="Maintenance Down Time">
                                                     <Input
                                                         onChange={(e) => { this.setState({ maintenanceDownTime: e.target.value }) }}
@@ -550,7 +575,12 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
                                                 </Form.Element>
                                             </Grid.Column>
 
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="Maintenance Type">
                                                     <Input
                                                         onChange={(e) => { this.setState({ maintenanceType: e.target.value }) }}
@@ -566,7 +596,12 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
                                         </Grid.Row>
 
                                         <Grid.Row>
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="Maintenance Cost">
                                                     <Input
                                                         onChange={(e) => { this.setState({ maintenanceCost: e.target.value }) }}
@@ -581,7 +616,12 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
                                                 </Form.Element>
                                             </Grid.Column>
 
-                                            <Grid.Column widthXS={Columns.Six}>
+                                            <Grid.Column
+                                                widthXS={Columns.Twelve}
+                                                widthSM={Columns.Six}
+                                                widthMD={Columns.Six}
+                                                widthLG={Columns.Six}
+                                            >
                                                 <Form.Element label="Person Responsible for Maintenance">
                                                     <Input
                                                         onChange={(e) => { this.setState({ personResponsible: e.target.value }) }}

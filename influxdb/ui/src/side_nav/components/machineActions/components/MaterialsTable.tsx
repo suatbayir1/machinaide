@@ -108,6 +108,7 @@ class MaterialsTable extends PureComponent<Props, State> {
                                                     {
                                                         ["admin", "editor"].includes(localStorage.getItem("userRole")) &&
                                                         <Button
+                                                            className="show-pc-or-tablet"
                                                             size={ComponentSize.ExtraSmall}
                                                             icon={IconFont.Pencil}
                                                             color={ComponentColor.Primary}

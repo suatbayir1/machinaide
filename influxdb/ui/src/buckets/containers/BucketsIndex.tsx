@@ -1,9 +1,9 @@
 // Libraries
-import React, {Component} from 'react'
-import {Switch, Route} from 'react-router-dom'
+import React, { Component } from 'react'
+import { Switch, Route } from 'react-router-dom'
 
 // Components
-import {ErrorHandling} from 'src/shared/decorators/errors'
+import { ErrorHandling } from 'src/shared/decorators/errors'
 import LoadDataTabbedPage from 'src/settings/components/LoadDataTabbedPage'
 import LoadDataHeader from 'src/settings/components/LoadDataHeader'
 import BucketsTab from 'src/buckets/components/BucketsTab'
@@ -16,16 +16,16 @@ import UpdateBucketOverlay from 'src/buckets/components/UpdateBucketOverlay'
 import RenameBucketOverlay from 'src/buckets/components/RenameBucketOverlay'
 import CreateScraperOverlay from 'src/scrapers/components/CreateScraperOverlay'
 import DeleteDataOverlay from 'src/shared/components/DeleteDataOverlay'
-import {Page} from '@influxdata/clockface'
+import { Page } from '@influxdata/clockface'
 
 // Utils
-import {pageTitleSuffixer} from 'src/shared/utils/pageTitles'
+import { pageTitleSuffixer } from 'src/shared/utils/pageTitles'
 
 // Constants
-import {ORGS, ORG_ID, BUCKETS, BUCKET_ID} from 'src/shared/constants/routes'
+import { ORGS, ORG_ID, BUCKETS, BUCKET_ID } from 'src/shared/constants/routes'
 
 // Types
-import {ResourceType} from 'src/types'
+import { ResourceType } from 'src/types'
 
 const bucketsPath = `/${ORGS}/${ORG_ID}/load-data/${BUCKETS}/${BUCKET_ID}`
 
@@ -34,7 +34,7 @@ class BucketsIndex extends Component {
   public render() {
     return (
       <>
-        <Page titleTag={pageTitleSuffixer(['Buckets', 'Load Data'])}>
+        <Page titleTag={pageTitleSuffixer(['Buckets', 'Load Data'])} className="load-data-page">
           <LimitChecker>
             <LoadDataHeader />
             <LoadDataTabbedPage activeTab="buckets">

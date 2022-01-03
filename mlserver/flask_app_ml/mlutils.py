@@ -446,6 +446,8 @@ class Influx2QueryHelper:
                     query += 'r._field == "{}" or '.format(sensor)
                 else:
                     query += 'r._field == "{}")'.format(sensor)
+            
+            query_list.append(query)
 
         return query_list
 
@@ -480,6 +482,7 @@ class Influx2QueryHelper:
 
     def query(self, measurement_to_sensor, startTime, endTime):
         query_list = self._build_influx_queries(measurement_to_sensor, startTime, endTime)
+        print(query_list)
         final_results = list()
         for query in query_list:
             results = self.influxdb.query(query=query)
@@ -715,3 +718,14 @@ def list_to_dataframe(arr):
         return df
 
             
+class POFQueryHelper:
+    def __init__(self, settings):
+        self.host = settings['host']
+        self.port = settings['port']
+        self.database = settings['database']
+        self.client = InfluxDBClient(host= self.host, port=self.port, database=self.database) 
+    
+    def queryDB(self, query):
+        res = self.client.query(query)
+        return res
+        

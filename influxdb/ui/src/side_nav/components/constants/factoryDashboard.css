@@ -26,6 +26,11 @@
 
 
 
+#shortcutCard {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
 #shortcutCard div:hover {
     background-color: #ffbd39 !important;
     color: #000 !important;

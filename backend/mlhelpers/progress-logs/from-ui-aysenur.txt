@@ -1,0 +1,74 @@
+Epoch 1/50
+15/15 - 9s - loss: 171.2657 - val_loss: 133.3979
+Epoch 2/50
+15/15 - 5s - loss: 103.3265 - val_loss: 125.3158
+Epoch 3/50
+15/15 - 5s - loss: 97.6317 - val_loss: 118.0456
+Epoch 4/50
+15/15 - 5s - loss: 92.0973 - val_loss: 111.1394
+Epoch 5/50
+15/15 - 5s - loss: 86.8542 - val_loss: 104.6392
+Epoch 6/50
+15/15 - 5s - loss: 81.9370 - val_loss: 98.5901
+Epoch 7/50
+15/15 - 5s - loss: 77.3733 - val_loss: 92.9944
+Epoch 8/50
+15/15 - 6s - loss: 73.1219 - val_loss: 87.7664
+Epoch 9/50
+15/15 - 5s - loss: 69.1649 - val_loss: 82.9063
+Epoch 10/50
+15/15 - 5s - loss: 65.4760 - val_loss: 78.3742
+Epoch 11/50
+15/15 - 5s - loss: 62.0387 - val_loss: 74.1530
+Epoch 12/50
+15/15 - 5s - loss: 58.8289 - val_loss: 70.2116
+Epoch 13/50
+15/15 - 5s - loss: 55.8243 - val_loss: 66.5199
+Epoch 14/50
+15/15 - 5s - loss: 52.9929 - val_loss: 63.0470
+Epoch 15/50
+15/15 - 5s - loss: 50.3249 - val_loss: 59.7974
+Epoch 16/50
+15/15 - 5s - loss: 47.8292 - val_loss: 56.7587
+Epoch 17/50
+15/15 - 5s - loss: 45.4812 - val_loss: 53.8972
+Epoch 18/50
+15/15 - 5s - loss: 43.2605 - val_loss: 51.1814
+Epoch 19/50
+15/15 - 7s - loss: 41.1688 - val_loss: 48.6175
+Epoch 20/50
+15/15 - 6s - loss: 39.2140 - val_loss: 46.1957
+Epoch 21/50
+15/15 - 5s - loss: 37.4136 - val_loss: 43.9534
+Epoch 22/50
+15/15 - 5s - loss: 35.7740 - val_loss: 41.9227
+Epoch 23/50
+15/15 - 5s - loss: 34.2600 - val_loss: 40.0628
+Epoch 24/50
+15/15 - 5s - loss: 32.8466 - val_loss: 38.3097
+Epoch 25/50
+15/15 - 5s - loss: 31.5266 - val_loss: 36.6912
+Epoch 26/50
+15/15 - 5s - loss: 30.2921 - val_loss: 35.1830
+Epoch 27/50
+15/15 - 5s - loss: 29.1326 - val_loss: 33.7610
+Epoch 28/50
+15/15 - 5s - loss: 28.0447 - val_loss: 32.4409
+Epoch 29/50
+15/15 - 5s - loss: 27.0227 - val_loss: 31.1963
+Epoch 30/50
+15/15 - 5s - loss: 26.0605 - val_loss: 30.0134
+Epoch 31/50
+15/15 - 5s - loss: 25.1571 - val_loss: 28.9109
+Epoch 32/50
+15/15 - 5s - loss: 24.3084 - val_loss: 27.8840
+Epoch 33/50
+15/15 - 5s - loss: 23.5106 - val_loss: 26.9036
+Epoch 34/50
+15/15 - 5s - loss: 22.7585 - val_loss: 25.9851
+Epoch 35/50
+15/15 - 5s - loss: 22.0501 - val_loss: 25.1237
+Epoch 36/50
+15/15 - 5s - loss: 21.3853 - val_loss: 24.3128
+Epoch 37/50
+15/15 - 5s - loss: 20.7571 - val_loss: 23.5552

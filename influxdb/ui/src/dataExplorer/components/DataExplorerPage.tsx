@@ -1,10 +1,10 @@
 // Libraries
-import React, {FC} from 'react'
-import {Switch, Route} from 'react-router-dom'
+import React, { FC } from 'react'
+import { Switch, Route } from 'react-router-dom'
 
 // Components
 import DataExplorer from 'src/dataExplorer/components/DataExplorer'
-import {Page} from '@influxdata/clockface'
+import { Page } from '@influxdata/clockface'
 import SaveAsButton from 'src/dataExplorer/components/SaveAsButton'
 import VisOptionsButton from 'src/timeMachine/components/VisOptionsButton'
 import ViewTypeDropdown from 'src/timeMachine/components/view_options/ViewTypeDropdown'
@@ -16,17 +16,17 @@ import SaveAsOverlay from 'src/dataExplorer/components/SaveAsOverlay'
 import DEDeleteDataOverlay from 'src/dataExplorer/components/DeleteDataOverlay'
 
 // Utils
-import {pageTitleSuffixer} from 'src/shared/utils/pageTitles'
-import {useLoadTimeReporting} from 'src/cloud/utils/reporting'
+import { pageTitleSuffixer } from 'src/shared/utils/pageTitles'
+import { useLoadTimeReporting } from 'src/cloud/utils/reporting'
 
 // Types
-import {ResourceType} from 'src/types'
+import { ResourceType } from 'src/types'
 
 const DataExplorerPage: FC = () => {
   useLoadTimeReporting('DataExplorerPage load start')
 
   return (
-    <Page titleTag={pageTitleSuffixer(['Data Explorer'])}>
+    <Page titleTag={pageTitleSuffixer(['Data Explorer'])} className="data-explorer-page">
       <Switch>
         <Route
           path="/orgs/:orgID/data-explorer/save"

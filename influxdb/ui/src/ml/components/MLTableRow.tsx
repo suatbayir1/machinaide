@@ -1,14 +1,24 @@
+// Libraries
+import { Link } from 'react-router-dom'
+import React, { PureComponent } from 'react'
+
+// Helpers
 import { useInterval } from "./useInterval"
 import * as api from "./index"
+
+// Components
 import {
-    TechnoSpinner,
+    TechnoSpinner, Icon, IconFont,
     Table,
     Button,
     ComponentColor,
     ComponentStatus,
     ButtonType
 } from "@influxdata/clockface"
-import React, { PureComponent } from 'react'
+import IconButton from '@material-ui/core/IconButton';
+import DashboardIcon from '@material-ui/icons/Dashboard';
+import PlayArrowIcon from '@material-ui/icons/PlayArrow';
+import Report from '@material-ui/icons/Report';
 
 
 function TableRow({
@@ -16,13 +26,16 @@ function TableRow({
     modelName,
     algorithm,
     status,
+    sessionID,
     model_id,
     startModel,
     stopModel,
+    task,
+    orgID,
     // refreshRow
 }) {
     if (status !== "train") {
-        useInterval(() => {}, null)
+        useInterval(() => { console.log("test") }, null)
         // if (status === "idle") {
         //     startModel({target:{name:model_id}})
         // }
@@ -36,29 +49,54 @@ function TableRow({
             startStatus = ComponentStatus.Default
             stopStatus = ComponentStatus.Disabled
         }
-        return(
+        return (
             <Table.Row>
                 <Table.Cell>{hardware}</Table.Cell>
                 <Table.Cell>{modelName}</Table.Cell>
                 <Table.Cell>{algorithm}</Table.Cell>
-                {/* <Table.Cell></Table.Cell> */}
-                {/* <td style={{width: 240}}>{this.state.precision}</td> */}
-                {/* <td style={{width: 240}}>{this.state.recall}</td> */}
-                {/* <div className = "col-xs-8" style={{marginTop: 10, marginBottom: 10}}> */}
                 <Table.Cell>
-                    <Button
+                    {task === "anomaly" ? (
+                        <Link to={`/orgs/${orgID}/automl/anomaly/${sessionID}`}>
+                            <Icon glyph={IconFont.Search} />
+                        </Link>
+                    ) : (
+                        <Link to={`/orgs/${orgID}/automl/${modelName}/duration`}>
+                            <Icon style={{ fontSize: '14px' }} glyph={IconFont.Search} />
+                        </Link>
+                    )}
+                </Table.Cell>
+                <Table.Cell>
+                    <IconButton
+                        aria-label="delete"
+                        style={{ color: '#22ADF6', paddingTop: '0px', paddingBottom: '0px' }}
+                        onClick={() => { console.log("start model") }}
+                    >
+                        <PlayArrowIcon />
+                    </IconButton>
+
+                    <IconButton
+                        aria-label="delete"
+                        style={{ color: '#ff0000', paddingTop: '0px', paddingBottom: '0px' }}
+                        onClick={() => { console.log("stop model") }}
+                    >
+                        <Report />
+                    </IconButton>
+
+                    {/* <Button
                         status={startStatus}
                         color={ComponentColor.Primary}
                         text="Start"
                         type={ButtonType.Button}
-                        onClick={startModel}/>
+                        onClick={startModel} />
                     <Button
-                        style={{marginLeft: 10}}
+                        style={{ marginLeft: 10 }}
                         status={stopStatus}
                         color={ComponentColor.Danger}
                         text="Stop"
                         type={ButtonType.Button}
-                        onClick={stopModel}/>
+                        onClick={stopModel} /> */}
+
+
                     {/* <button disabled={status === "running"} name={model_id} className="btn btn-primary btn-sm" onClick={startModel}>Start</button>
                     <button disabled={status === "stopped" || status === "idle"} name={model_id} className="btn btn-danger btn-sm" onClick={stopModel}>Stop</button> */}
                 </Table.Cell>
@@ -73,7 +111,7 @@ function TableRow({
         //     refreshRow(obj)
         // }, 1000)
 
-        return(
+        return (
             <Table.Row>
                 <Table.Cell>{hardware}</Table.Cell>
                 <Table.Cell>{modelName}</Table.Cell>
@@ -87,7 +125,7 @@ function TableRow({
             </Table.Row>
         )
     }
-    
+
 }
 
 export default TableRow

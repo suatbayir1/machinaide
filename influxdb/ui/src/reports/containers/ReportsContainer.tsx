@@ -29,7 +29,12 @@ class ReportsContainer extends PureComponent<Props, State> {
     }
 
     async componentDidMount() {
+        window.addEventListener('resize', this.settingsOnMobile)
         await this.getReports();
+    }
+
+    async componentWillUnmount() {
+        await window.removeEventListener('resize', this.settingsOnMobile);
     }
 
     getReports = async () => {
@@ -43,6 +48,14 @@ class ReportsContainer extends PureComponent<Props, State> {
         this.setState({ reports });
     }
 
+    settingsOnMobile = async () => {
+        if (window.innerWidth < 1000) {
+            this.setState({ activeTab: 'reports' })
+        } else {
+            this.setState({ activeTab: 'new-report' })
+        }
+    }
+
     public render() {
         const { activeTab, reports } = this.state;
 
@@ -52,7 +65,7 @@ class ReportsContainer extends PureComponent<Props, State> {
                     <Page.Title title="Reports" />
                 </Page.Header>
 
-                <Page.Contents fullWidth={false}>
+                <Page.Contents fullWidth={false} scrollable={true}>
                     <TabbedPageTabs
                         tabs={[
                             {

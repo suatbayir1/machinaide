@@ -1,10 +1,10 @@
 // Libraries
-import React, {Component} from 'react'
-import {Switch, Route} from 'react-router-dom'
+import React, { Component } from 'react'
+import { Switch, Route } from 'react-router-dom'
 
 // Components
-import {Page} from '@influxdata/clockface'
-import {ErrorHandling} from 'src/shared/decorators/errors'
+import { Page } from '@influxdata/clockface'
+import { ErrorHandling } from 'src/shared/decorators/errors'
 import LoadDataTabbedPage from 'src/settings/components/LoadDataTabbedPage'
 import LoadDataHeader from 'src/settings/components/LoadDataHeader'
 import GetResources from 'src/resources/components/GetResources'
@@ -15,12 +15,12 @@ import {
 } from 'src/overlays/components'
 
 // Utils
-import {pageTitleSuffixer} from 'src/shared/utils/pageTitles'
+import { pageTitleSuffixer } from 'src/shared/utils/pageTitles'
 
 // Types
-import {ResourceType} from 'src/types'
+import { ResourceType } from 'src/types'
 
-import {ORGS, ORG_ID, TOKENS} from 'src/shared/constants/routes'
+import { ORGS, ORG_ID, TOKENS } from 'src/shared/constants/routes'
 
 const tokensPath = `/${ORGS}/${ORG_ID}/load-data/${TOKENS}/generate`
 
@@ -29,7 +29,7 @@ class TokensIndex extends Component {
   public render() {
     return (
       <>
-        <Page titleTag={pageTitleSuffixer(['Tokens', 'Load Data'])}>
+        <Page titleTag={pageTitleSuffixer(['Tokens', 'Load Data'])} className="load-data-page">
           <LoadDataHeader />
           <LoadDataTabbedPage activeTab="tokens">
             <GetResources resources={[ResourceType.Authorizations]}>

@@ -1,6 +1,6 @@
 // Libraries
-import React, {PureComponent} from 'react'
-import {connect, ConnectedProps} from 'react-redux'
+import React, { PureComponent } from 'react'
+import { connect, ConnectedProps } from 'react-redux'
 
 // Components
 import {
@@ -19,13 +19,13 @@ import GettingStarted from 'src/me/components/GettingStarted'
 import RateLimitAlert from 'src/cloud/components/RateLimitAlert'
 
 // Utils
-import {pageTitleSuffixer} from 'src/shared/utils/pageTitles'
+import { pageTitleSuffixer } from 'src/shared/utils/pageTitles'
 
 // Types
-import {AppState} from 'src/types'
+import { AppState } from 'src/types'
 
 // Decorators
-import {ErrorHandling} from 'src/shared/decorators/errors'
+import { ErrorHandling } from 'src/shared/decorators/errors'
 
 type ReduxProps = ConnectedProps<typeof connector>
 type Props = ReduxProps
@@ -33,7 +33,7 @@ type Props = ReduxProps
 @ErrorHandling
 export class MePage extends PureComponent<Props> {
   public render() {
-    const {me} = this.props
+    const { me } = this.props
 
     return (
       <Page titleTag={pageTitleSuffixer(['Home'])}>
@@ -72,9 +72,9 @@ export class MePage extends PureComponent<Props> {
 }
 
 const mstp = (state: AppState) => {
-  const {me} = state
+  const { me } = state
 
-  return {me}
+  return { me }
 }
 
 const connector = connect(mstp)
