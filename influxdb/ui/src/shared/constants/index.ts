@@ -9,9 +9,9 @@ import {
   ECTOPLASM,
   T_MAX_400_FILM,
 } from '@influxdata/giraffe'
-import {InfluxColors} from '@influxdata/clockface'
+import { InfluxColors } from '@influxdata/clockface'
 
-import {AutoRefreshStatus} from 'src/types'
+import { AutoRefreshStatus } from 'src/types'
 
 export const DEFAULT_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss ZZ'
 
@@ -99,15 +99,23 @@ export const VIS_THEME_LIGHT: Partial<Config> = {
 }
 
 export const GIRAFFE_COLOR_SCHEMES = [
-  {name: 'Nineteen Eighty Four', colors: NINETEEN_EIGHTY_FOUR},
-  {name: 'Atlantis', colors: ATLANTIS},
-  {name: 'Do Androids Dream of Electric Sheep?', colors: DO_ANDROIDS_DREAM},
-  {name: 'Delorean', colors: DELOREAN},
-  {name: 'Cthulhu', colors: CTHULHU},
-  {name: 'Ectoplasm', colors: ECTOPLASM},
-  {name: 'T-MAX 400 Film', colors: T_MAX_400_FILM},
+  { name: 'Nineteen Eighty Four', colors: NINETEEN_EIGHTY_FOUR },
+  { name: 'Atlantis', colors: ATLANTIS },
+  { name: 'Do Androids Dream of Electric Sheep?', colors: DO_ANDROIDS_DREAM },
+  { name: 'Delorean', colors: DELOREAN },
+  { name: 'Cthulhu', colors: CTHULHU },
+  { name: 'Ectoplasm', colors: ECTOPLASM },
+  { name: 'T-MAX 400 Film', colors: T_MAX_400_FILM },
 ]
 
 export const BAND_LINE_OPACITY = 0.7
 export const BAND_LINE_WIDTH = 3
 export const BAND_SHADE_OPACITY = 0.3
+
+
+export const FAILURE_COLOR = '#BF3D5E'
+
+export const MAINTENANCE_COLOR = '#3844b9'
+
+export const GRAPH_COLORS = ['#00C9FF', '#4ED8A0', '#ffcc00', '#ff00f0', '#33aa99', '#9dfc5d',
+  '#9394FF', '#38b94a', '#ca96fb', '#a0725b', '#92bcc3']

@@ -47,6 +47,8 @@ const FormDialog = (props) => {
             email: email,
             reportData: data,
         }
+
+        console.log(params);
     }
 
     return (
@@ -56,7 +58,7 @@ const FormDialog = (props) => {
                 <DialogContent>
                     <DialogContentText>
                         Enter Configuration Details in the sections provided
-          </DialogContentText>
+                    </DialogContentText>
                     <TextField
                         autoFocus
                         margin="dense"
@@ -91,10 +93,10 @@ const FormDialog = (props) => {
                 <DialogActions>
                     <Button onClick={() => setOpen(false)} color="primary">
                         Cancel
-          </Button>
+                    </Button>
                     <Button onClick={handleSubmit} color="primary">
                         Confirm
-          </Button>
+                    </Button>
                 </DialogActions>
             </Dialog>
         </div>

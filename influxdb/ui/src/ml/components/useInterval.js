@@ -10,8 +10,8 @@ export function useInterval(callback, delay) {
     }, [callback])
 
     useEffect(() => {
-        console.log(savedCallback);
-        console.log(savedCallback.current);
+        //console.log(savedCallback);
+        //console.log(savedCallback.current);
 
         function tick() {
             if (savedCallback.current !== null) {

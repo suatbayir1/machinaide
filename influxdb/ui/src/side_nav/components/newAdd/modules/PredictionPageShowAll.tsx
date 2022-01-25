@@ -57,7 +57,7 @@ class PredictionPageShowAll extends PureComponent<Props, State> {
 
     getPredictionInfo = async () => {
         const payload = {
-            "modelID": this.props.match.params.PID
+            "modelID": this.props["match"].params.PID
         };
 
         const predictionInfo = await PredictionService.getPredictionInfo(payload);
@@ -70,7 +70,7 @@ class PredictionPageShowAll extends PureComponent<Props, State> {
 
     getPredictionModel = async () => {
         const payload = {
-            "modelID": this.props.match.params.PID
+            "modelID": this.props["match"].params.PID
         };
 
         const predictionModel = await PredictionService.getPredictionById(payload);
@@ -93,9 +93,9 @@ class PredictionPageShowAll extends PureComponent<Props, State> {
     };
 
     predictionsRoute = () => {
-        return this.props.match.params["CID"] == undefined ?
-            `/orgs/${this.props.match.params["orgID"]}/predictions/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${this.props["match"].params.MID}`
-            : `/orgs/${this.props.match.params["orgID"]}/predictions/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${this.props["match"].params.MID}/${this.props["match"].params.CID}`;
+        return this.props["match"].params["CID"] == undefined ?
+            `/orgs/${this.props["match"].params["orgID"]}/predictions/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${this.props["match"].params.MID}`
+            : `/orgs/${this.props["match"].params["orgID"]}/predictions/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${this.props["match"].params.MID}/${this.props["match"].params.CID}`;
     }
 
     render() {
@@ -121,7 +121,7 @@ class PredictionPageShowAll extends PureComponent<Props, State> {
                         </Link>
                         {
                             this.props["match"].params["CID"] !== undefined &&
-                            <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/components/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${this.props["match"].params.MID}`}>
+                            <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/components/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${this.props["match"].params.MID}`}>
                                 Components
                             </Link>
                         }
@@ -166,9 +166,9 @@ class PredictionPageShowAll extends PureComponent<Props, State> {
                                                 widthMD={Columns.Four}
                                                 widthLG={Columns.Four}
                                             >
-                                                <b>Model Name:</b> <i>{this.state.predictionModel.modelName} (version {this.state.predictionModel.modelVersion})</i><br /><br />
-                                                <b>Model creator:</b> <i>{this.state.predictionInfo.creator}</i><br /><br />
-                                                <b>Created date:</b> <i>{this.state.predictionInfo.createdDate}</i><br /><br />
+                                                <b>Model Name:</b> <i>{this.state.predictionModel["modelName"]} (version {this.state.predictionModel["modelVersion"]})</i><br /><br />
+                                                <b>Model creator:</b> <i>{this.state.predictionInfo["creator"]}</i><br /><br />
+                                                <b>Created date:</b> <i>{this.state.predictionInfo["createdDate"]}</i><br /><br />
                                             </Grid.Column>
                                             <Grid.Column
                                                 widthXS={Columns.Twelve}
@@ -176,9 +176,9 @@ class PredictionPageShowAll extends PureComponent<Props, State> {
                                                 widthMD={Columns.Four}
                                                 widthLG={Columns.Four}
                                             >
-                                                <b>Total Positive Feedback:</b> <i>{this.state.predictionInfo.totalFb.positive}</i><br /><br />
-                                                <b>Total Negative Feedback:</b> <i>{this.state.predictionInfo.totalFb.negative}</i><br /><br />
-                                                <b>Total Neutral Feedback:</b> <i>{this.state.predictionInfo.totalFb.neutral}</i>
+                                                <b>Total Positive Feedback:</b> <i>{this.state.predictionInfo["totalFb"].positive}</i><br /><br />
+                                                <b>Total Negative Feedback:</b> <i>{this.state.predictionInfo["totalFb"].negative}</i><br /><br />
+                                                <b>Total Neutral Feedback:</b> <i>{this.state.predictionInfo["totalFb"].neutral}</i>
                                             </Grid.Column>
                                             <Grid.Column
                                                 widthXS={Columns.Twelve}
@@ -188,7 +188,7 @@ class PredictionPageShowAll extends PureComponent<Props, State> {
                                             >
                                                 <b>Related hardwares:</b><br />
                                                 {
-                                                    this.state.predictionInfo.releatedHardware.map((item, index) => (
+                                                    this.state.predictionInfo["releatedHardware"].map((item, index) => (
                                                         <React.Fragment key={index}>
                                                             <i>{item}</i><br />
                                                         </React.Fragment>

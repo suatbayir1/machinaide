@@ -234,7 +234,7 @@ export default class MLAdvancedContainer extends PureComponent<Props, State> {
 
     cellDataReceived = (pkg, modelID) => {
         let newModels = []
-        console.log(pkg)
+        // console.log(pkg)
         if (pkg !== undefined || pkg !== null) {
             const {models} = this.state
 

@@ -5,7 +5,7 @@ import { withRouter, RouteComponentProps } from 'react-router'
 
 // Components
 import TimeMachineFluxEditor from 'src/timeMachine/components/TimeMachineFluxEditor'
-import CSVExportButton from 'src/shared/components/CSVExportButton'
+// import CSVExportButton from 'src/shared/components/CSVExportButton'
 import FileExportDropdown from 'src/shared/components/FileExportDropdown'
 import TimeMachineQueriesSwitcher from 'src/timeMachine/components/QueriesSwitcher'
 import TimeMachineRefreshDropdown from 'src/timeMachine/components/RefreshDropdown'

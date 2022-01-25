@@ -321,6 +321,15 @@ def get_retired(token):
             status_code = 500
             return return_response(success = False, message = message), 500
 
+        for oldPart in result:
+            maintenances = maintenanceModel.get_by_condition({"retired": oldPart["_id"]["$oid"]})
+            maintenance_array = [maintenance["_id"]["$oid"] for maintenance in maintenances]
+            oldPart["maintenanceIDs"] = maintenance_array
+            failures = failureModel.get_by_condition({"retired": oldPart["_id"]["$oid"]})
+            failure_array = [failure["_id"]["$oid"] for failure in failures]
+            oldPart["failureIDs"] = failure_array
+
+
         message = "Retired records has been fetched successfully"
         log_type = "INFO"
         status_code = 200

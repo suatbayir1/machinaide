@@ -1,6 +1,5 @@
 // Libraries
-import React, { PureComponent } from 'react'
-import { RouteComponentProps } from 'react-router-dom'
+import React, { PureComponent } from 'react';
 
 // Components
 import { IconFont, ComponentColor, Dropdown } from '@influxdata/clockface'
@@ -8,9 +7,6 @@ import { IconFont, ComponentColor, Dropdown } from '@influxdata/clockface'
 //  Services
 import DTService from 'src/shared/services/DTService';
 import DashboardService from 'src/shared/services/DashboardService';
-
-// Utilities
-// import { history } from 'src/store/history'
 
 interface Props {
     dashboard: object
@@ -21,8 +17,6 @@ interface Props {
 interface State {
     snapshots: object[]
 }
-
-// type Props = RouteComponentProps<{ orgID: string }> & OwnProps
 
 class SnapshotsGroupDropdown extends PureComponent<Props, State> {
     constructor(props) {

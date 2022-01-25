@@ -778,7 +778,7 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
         const { selectedGraphNode } = this.props;
         const oldParts = await DTService.getRetired({ "name": selectedGraphNode["name"] });
 
-        console.log(oldParts);
+        console.log("oldParts information component", oldParts);
 
         this.setState({ oldParts });
     }

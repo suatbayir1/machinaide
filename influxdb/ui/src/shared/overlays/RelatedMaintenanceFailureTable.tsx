@@ -7,15 +7,11 @@ import { RouteComponentProps } from 'react-router-dom'
 import {
     Form, Button, ButtonType, ComponentColor, Overlay, IconFont, Grid, Columns,
     DapperScrollbars, Table, BorderType, ComponentSize,
-    FlexBox, Panel, Input, ComponentStatus,
+    FlexBox, Panel,
 } from '@influxdata/clockface'
 
 // Actions
 import { notify as notifyAction } from 'src/shared/actions/notifications'
-
-// Services
-import FailureService from "src/shared/services/FailureService";
-import MaintenanceService from "src/maintenance/services/MaintenanceService";
 
 // Overlays
 import AddUpdateFailureOverlay from 'src/side_nav/components/newAdd/modules/AddUpdateFailureOverlay';
@@ -103,7 +99,7 @@ class RelatedMaintenanceFailureTable extends PureComponent<Props, State> {
 
     render() {
         const { visible, onDismiss, selectedPart, relatedMaintenances, relatedType, relatedFailures } = this.props;
-        const { maintenances, failures, visibleDetailFailure, updateData, editMode, isDetail, visibleDetailMaintenance } = this.state;
+        const { visibleDetailFailure, updateData, editMode, isDetail, visibleDetailMaintenance } = this.state;
 
         return (
             <>

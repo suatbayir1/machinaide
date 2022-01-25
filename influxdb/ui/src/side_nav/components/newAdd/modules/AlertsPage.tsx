@@ -77,7 +77,7 @@ class AlertsPage extends PureComponent<Props, State> {
         };
     }
 
-    handleChangePage = (event, newPage) => {
+    handleChangePage = (_, newPage) => {
         this.setState({ page: newPage })
     };
 
@@ -220,15 +220,15 @@ class AlertsPage extends PureComponent<Props, State> {
                     <Link color="inherit" to="/">
                         <HomeIcon style={{ marginTop: '4px' }} />
                     </Link>
-                    <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/allFactories`}>
+                    <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/allFactories`}>
                         Factories
-                        </Link>
-                    <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/machines/<factoryID>`}>
+                    </Link>
+                    <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/<factoryID>`}>
                         Machines
-                        </Link>
-                    <Link color="inherit" to={`/orgs/${this.props.match.params["orgID"]}/machines/<factoryID>/<machineID>`}>
+                    </Link>
+                    <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/<factoryID>/<machineID>`}>
                         Components
-                        </Link>
+                    </Link>
                     <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Alerts</Typography>
                 </Breadcrumbs>
 
@@ -294,15 +294,15 @@ class AlertsPage extends PureComponent<Props, State> {
                                                     if (!["id"].includes(column["id"])) {
                                                         return (
                                                             <TableCell
-                                                                key={column.id}
-                                                                align={column.align}
+                                                                key={column["id"]}
+                                                                align={column["align"]}
                                                                 style={{
-                                                                    minWidth: column.minWidth,
+                                                                    minWidth: column["minWidth"],
                                                                     background: "#000000",
                                                                     color: "#ffffff",
                                                                 }}
                                                             >
-                                                                {column.label}
+                                                                {column["label"]}
                                                             </TableCell>
                                                         )
                                                     }
@@ -317,21 +317,21 @@ class AlertsPage extends PureComponent<Props, State> {
                                                             background: "#333",
                                                         }}
                                                         hover
-                                                        role="checkbox" tabIndex={-1} key={row.id}
+                                                        role="checkbox" tabIndex={-1} key={row["id"]}
                                                     >
-                                                        <TableCell align={row.align} style={{ color: "#fff" }}>
+                                                        <TableCell align={row["align"]} style={{ color: "#fff" }}>
                                                             {row["alertType"]}
                                                         </TableCell>
-                                                        <TableCell align={row.align} style={{ color: "#fff" }}>
+                                                        <TableCell align={row["align"]} style={{ color: "#fff" }}>
                                                             {row["hardware"]}
                                                         </TableCell>
-                                                        <TableCell align={row.align} style={{ color: "#fff" }}>
+                                                        <TableCell align={row["align"]} style={{ color: "#fff" }}>
                                                             {row["severity"]}
                                                         </TableCell>
-                                                        <TableCell align={row.align} style={{ color: "#fff" }}>
+                                                        <TableCell align={row["align"]} style={{ color: "#fff" }}>
                                                             {row["time"]}
                                                         </TableCell>
-                                                        <TableCell align={row.align} style={{ color: "#fff" }}>
+                                                        <TableCell align={row["align"]} style={{ color: "#fff" }}>
                                                             <QuestionMarkTooltip
                                                                 diameter={20}
                                                                 tooltipStyle={{ width: '100px' }}

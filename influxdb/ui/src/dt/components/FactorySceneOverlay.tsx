@@ -1,8 +1,11 @@
 // Libraries
 import React, { PureComponent } from 'react'
+
+// Components
 import {
     Overlay,
 } from '@influxdata/clockface'
+
 var THREE = require("three");
 var OrbitControls = require("three-orbit-controls")(THREE);
 var initializeDomEvents = require('threex-domevents')
@@ -59,10 +62,10 @@ class FactorySceneOverlay extends PureComponent<Props, State> {
                 await renderer.render(scene, camera);
             },
 
-            function (xhr) {
+            function (_) {
             },
 
-            function (error) {
+            function (_) {
             }
         );
         await renderer.render(scene, camera);

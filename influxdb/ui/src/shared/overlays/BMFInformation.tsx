@@ -35,6 +35,7 @@ import AddUpdateMaintenanceOverlay from "src/maintenance/components/AddUpdateMai
 import RetirePart from "src/shared/overlays/RetirePart";
 import RetirePartDetail from "src/shared/overlays/RetirePartDetail";
 import RelatedMaintenanceFailureTable from "src/shared/overlays/RelatedMaintenanceFailureTable";
+import StatusOverlay from "src/shared/overlays/StatusOverlay";
 
 
 interface OwnProps {
@@ -68,6 +69,10 @@ interface State {
     relatedType: string
     relatedMaintenances: object[]
     relatedFailures: object[]
+    showStatus: boolean
+    oldFailures: object[]
+    oldMaintenanceRecords: object[]
+    oldParts: object[]
 }
 
 type ReduxProps = ConnectedProps<typeof connector>
@@ -93,6 +98,10 @@ class BMFInformation extends PureComponent<Props, State> {
             relatedType: "",
             relatedMaintenances: [],
             relatedFailures: [],
+            showStatus: false,
+            oldFailures: [],
+            oldMaintenanceRecords: [],
+            oldParts: [],
         };
     }
 
@@ -109,6 +118,68 @@ class BMFInformation extends PureComponent<Props, State> {
                 this.clearComponent();
             }
         }
+
+        if (prevProps.visible !== this.props.visible && this.props.visible) {
+            this.setDataForStatusGraphs();
+        }
+    }
+
+    setDataForStatusGraphs = () => {
+        const { oldParts, maintenances, failures, brands } = this.props;
+
+        console.log("changed");
+        console.log("oldParts", this.props.oldParts);
+        console.log("maintenances", this.props.maintenances);
+        console.log("failures", this.props.failures);
+        console.log("brands", this.props.brands);
+
+
+        let oldPartsBMs = []
+        for (let oldPart of oldParts) {
+            for (let brandModel of brands) {
+                console.log("oldPart", oldPart);
+                console.log("brandModel", brandModel);
+
+                if (brandModel["brandName"] === oldPart["brand"]["brandName"] && brandModel["modelName"] === oldPart["brand"]["modelName"]) {
+                    let name = `${brandModel["brandName"]}/${brandModel["modelName"]}`;
+                    let deploymentDateStr = oldPart["deploymentTime"] ? oldPart["deploymentTime"].substr(0, 10) : "unknown deployment date";
+                    oldPartsBMs.push({ ...oldPart, brandModelText: name, brandModel: brandModel["_id"]["$oid"] })
+                    if (oldPart["failureIDs"] && oldPart["failureIDs"].length) {
+                        console.log("===>", oldPart);
+                        FailureService.getByCondition({ "inArray": { "_id": oldPart["failureIDs"] } }).then(res => {
+                            console.log("res", res);
+                            let failures = res;
+                            failures = failures.sort((a, b) => new Date(a["startTime"]) - new Date(b["startTime"]))
+                            this.setState({
+                                oldFailures: [...this.state.oldFailures, {
+                                    failures: failures,
+                                    name: name + "-" + deploymentDateStr, deploymentDate: oldPart["deploymentTime"]
+                                }]
+                            })
+                        }).catch(err => {
+                            console.log(err)
+                        })
+                    }
+                    if (oldPart["maintenanceIDs"] && oldPart["maintenanceIDs"].length) {
+                        MaintenanceService.getByCondition({ "inArray": { "_id": oldPart["maintenanceIDs"] } }).then(res => {
+                            let mrecords = res;
+                            mrecords = mrecords.sort((a, b) => new Date(a["startTime"]) - new Date(b["startTime"]))
+                            this.setState({
+                                oldMaintenanceRecords: [...this.state.oldMaintenanceRecords,
+                                {
+                                    maintenanceRecords: mrecords, name: name + "-" + deploymentDateStr,
+                                    deploymentDate: oldPart["deploymentDate"]
+                                }]
+                            })
+                        }).catch(err => {
+                            console.log(err)
+                        })
+                    }
+                }
+            }
+        }
+        console.log("oldPartsBMs", oldPartsBMs);
+        this.setState({ oldParts: oldPartsBMs })
     }
 
     dismissOverlay = (state) => {
@@ -287,15 +358,18 @@ class BMFInformation extends PureComponent<Props, State> {
 
     render() {
         const { visible, maintenances, failures, brands, refreshGraph,
-            selectedPart, getMaintenances, getFailures, generalInfo, oldParts,
+            selectedPart, getMaintenances, getFailures, generalInfo,
         } = this.props;
 
         const {
             visibleAddUpdateFailure, addBySelectedPart, propsPart, editMode, relatedMaintenances,
             updateData, visibleAddUpdateMaintenance, deploymentTime, selectedBrand, relatedType,
             visibleRetirePart, visibleRetirePartDetail, selectedOldPart, visibleRelatedMaintenanceFailure,
-            relatedFailures,
+            relatedFailures, showStatus,
         } = this.state;
+
+        let oldParts = this.state.oldParts.sort((a, b) => new Date(a["terminationTime"]) - new Date(b["terminationTime"]))
+
 
         return (
             <>
@@ -364,6 +438,19 @@ class BMFInformation extends PureComponent<Props, State> {
                     relatedFailures={relatedFailures}
                 />
 
+                <StatusOverlay
+                    visible={showStatus}
+                    onDismiss={() => { this.setState({ showStatus: false }) }}
+                    selectedPart={selectedPart}
+                    currentDeploymentDate={deploymentTime}
+                    currentFailures={failures}
+                    currentMaintenanceRecords={maintenances}
+                    currentBrandModel={`${selectedBrand["brandName"]}/${selectedBrand["modelName"]}`}
+                    oldParts={oldParts}
+                    oldFailures={this.state.oldFailures}
+                    oldMaintenanceRecords={this.state.oldMaintenanceRecords}
+                />
+
                 <Overlay visible={visible}>
                     <Overlay.Container maxWidth={1000}>
                         <Overlay.Header
@@ -374,7 +461,20 @@ class BMFInformation extends PureComponent<Props, State> {
                         <Overlay.Body>
                             <Form>
                                 <Grid.Column widthXS={Columns.Six}>
-                                    <h6>Current {selectedPart["type"]}</h6>
+                                    <Grid.Row>
+                                        <Grid.Column widthXS={Columns.Twelve}>
+                                            <h6 style={{ float: 'left' }}>Current {selectedPart["type"]}</h6>
+
+                                            <Button
+                                                style={{ float: 'right', marginTop: '10px' }}
+                                                text="Show Status"
+                                                icon={IconFont.Eye}
+                                                type={ButtonType.Button}
+                                                color={ComponentColor.Secondary}
+                                                onClick={() => { this.setState({ showStatus: true }) }}
+                                            />
+                                        </Grid.Column>
+                                    </Grid.Row>
 
                                     <Grid.Row>
                                         <Grid.Column widthXS={Columns.Twelve}>

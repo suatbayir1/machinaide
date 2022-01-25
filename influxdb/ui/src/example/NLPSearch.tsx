@@ -218,12 +218,16 @@ class NLPSearch extends PureComponent<Props, State>{
     }
 
     async postQuestion(): Promise<void> {
-        const fetchPromise = fetch(BACKEND.NLP_MODULE_URL + '/postQuestion', {
+        const fetchPromise = fetch(BACKEND.API_URL + 'nlp/postQuestion', {
             method: 'POST',
             mode: 'cors',
             body: JSON.stringify({ "question": this.state.question }),
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
             }
         })
 
@@ -239,12 +243,16 @@ class NLPSearch extends PureComponent<Props, State>{
     };
 
     postTrainData = async (data) => {
-        const fetchPromise = fetch(BACKEND.NLP_MODULE_URL + '/postTrainData', {
+        const fetchPromise = fetch(BACKEND.API_URL + 'nlp/postTrainData', {
             method: 'PUT',
             mode: 'cors',
             body: JSON.stringify(data),
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
             }
         })
 
@@ -795,7 +803,7 @@ class NLPSearch extends PureComponent<Props, State>{
                                 )}
                                 <div style={{ textAlign: "center", marginTop: "10px", marginBottom: "5px" }}>
                                     Is the result correct?
-                                <Button
+                                    <Button
                                         text="Yes"
                                         onClick={this.addTrainData}
                                         type={ButtonType.Button}

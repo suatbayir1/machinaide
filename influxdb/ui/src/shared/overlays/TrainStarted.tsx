@@ -2,7 +2,7 @@
 import React, { PureComponent } from 'react'
 
 // Components
-import { Overlay, Form, Grid, Columns, Button, IconFont, ComponentColor, Panel } from '@influxdata/clockface'
+import { Overlay, Form, Grid, Columns, Button, IconFont, ComponentColor } from '@influxdata/clockface'
 
 interface Props {
     visible: boolean

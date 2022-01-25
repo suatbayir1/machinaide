@@ -11,6 +11,7 @@ authentication = dict(
     SECRET_KEY = "machinaidesecretkey",
     USER_NAME = "machinaide",
     USER_PASSWORD = "erste2020",
+    EMAIL_SENDER = "email.machinaide@gmail.com"
 )
 
 url = dict(
@@ -171,6 +172,7 @@ experiments_path_2 = os.getcwd() + "/mlhelpers/experiments/"
 
 #### NLP
 influx = dict(
+    host = 'https://vmi474601.contaboserver.net:8086',
     orgID = 'd572bde16b31757c',
     dbtoken = "FlviKxQ-RHHWxd1FRkHIc5VwNZuFnP6QTmsJcU6GI7nrd4cuqaTx3cCijZchENMH0zSGuKOew_e4LxW6V09Erw=="
 )

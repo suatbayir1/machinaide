@@ -14,6 +14,7 @@ from pathlib import Path
 from multiprocessing import Process, Queue
 from multiprocessing.pool import ThreadPool
 from mlhelpers.mlwrappers import MLSession, ModelRunner
+import codecs
 # from mlserver.flask_app_ml.mlconstants import VAE_SENSOR_DIR
 
 mlserver = Blueprint("mlserver", __name__)
@@ -54,6 +55,14 @@ class JSONEncoder(json.JSONEncoder):
         if isinstance(o, (datetime.date, datetime.datetime)):
             return o.isoformat()
         return json.JSONEncoder.default(self, o)
+
+@mlserver.route('/getMLReport/<report_path>', methods=['GET'])
+def getMLReport(report_path):
+    reports_path= "/home/machinaide/influxdb/ui/public/"
+    path = reports_path + report_path
+    html_file = codecs.open(path, "r", "utf-8")
+    file_str = html_file.read()
+    return {"report": file_str}
 
 @mlserver.route('/getAutomlSettings', methods=['GET'])
 def getAutomlSettings():
@@ -127,7 +136,7 @@ def queueTrainingSession(auto=None):
 
         model_name = "vae_" + str(settings['sessionID'])
         settings_cmd = " -h " + settings['dbSettings']['host'] + " -p " + str(settings['dbSettings']['port']) + " -db " + settings['dbSettings']['db'] + " -rp " + settings['dbSettings']['rp']
-        cmd = "python3 mlhelpers/auto_vae.py" + " -u " + settings['creator'] + " -sid " + str(settings['sessionID']) +  " -mn " + model_name + settings_cmd
+        cmd = "python3 ./mlhelpers/auto_vae.py" + " -u " + settings['creator'] + " -sid " + str(settings['sessionID']) +  " -mn " + model_name + settings_cmd
         if not os.path.isdir(config.VAE_SENSOR_DIR):
             os.makedirs(config.VAE_SENSOR_DIR)
         if not os.path.isdir(config.VAE_HPS_DIR):
@@ -166,7 +175,7 @@ def queueTrainingSession(auto=None):
             json.dump(settings, fp)
         timeout = str(settings['timeout']) + "h"
         cmd = "timeout -k 10 " + timeout + \
-            " python3 helpers/mlhelpers/automl_runner.py -e " + experiment_name + \
+            " python3 ./mlhelpers/automl_runner.py -e " + experiment_name + \
             " -u " + username + " -t " + settings['task']
         print(cmd)
         process = subprocess.Popen(cmd.split(), close_fds=True)
@@ -206,7 +215,7 @@ def startPOFModelTraining():
     username = username.replace(".com", "")
     username = username.replace(".","-")
     
-    cmd = "python3 mlhelpers/pof_runner.py" + " -u " + username + " -mn " + model_name + settings_cmd 
+    cmd = "python3 ./mlhelpers/pof_runner.py" + " -u " + username + " -mn " + model_name + settings_cmd 
     print(cmd)
     tp.apply_async(callProcessPOF, (cmd, now, ))
     print("background check")

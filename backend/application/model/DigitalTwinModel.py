@@ -363,7 +363,7 @@ class DigitalTwinModel():
 
     def get_retired(self, where):
         try:
-            return self.db.find("retired", where)
+            return cursor_to_json(self.db.find("retired", where))
         except:
             return 500
 

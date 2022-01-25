@@ -1,4 +1,4 @@
-import { INFLUX, BACKEND } from 'src/config';
+import { BACKEND } from 'src/config';
 import axios from "axios";
 
 class BrandService {

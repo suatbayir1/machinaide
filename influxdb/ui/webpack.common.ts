@@ -53,6 +53,10 @@ module.exports = {
         loader: 'file-loader',
         type: 'javascript/auto',
       },
+      /* {
+        test: /\.html$/i,
+        loader: "html-loader",
+      }, */
       {
         test: /\.tsx?$/,
         use: [

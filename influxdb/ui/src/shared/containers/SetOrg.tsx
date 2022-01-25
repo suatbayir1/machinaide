@@ -79,7 +79,11 @@ import LogsPage from 'src/logs/containers/LogsPage';
 
 // Example components
 import ExamplePage from 'src/example/Example'
-import AnomalyMonitorPage from 'src/example/AnomalyMonitorPage'
+
+// ML Monitor pages
+import AnomalyMonitorPage from 'src/example/anomalyMonitor/AnomalyMonitorPage'
+import POFMonitorPage from 'src/example/pofMonitor/POFMonitorPage'
+import RULMonitorPage from 'src/example/rulMonitor/RULMonitorPage'
 
 // Types
 import { AppState, Organization, ResourceType } from 'src/types'
@@ -215,9 +219,11 @@ const SetOrg: FC<Props> = ({
         {/* EXAMPLE */}
         <Route path={`${orgPath}/examples`} component={ExamplePage} />
 
-        {/* ANOMALY MONITOR */}
+        {/* ML MONITOR */}
         <Route path="/public/iris_model_performance_dashboard" component={AnomalyMonitorPage} />
         <Route path={`${orgPath}/anomaly-monitor`} component={AnomalyMonitorPage} />
+        <Route path={`${orgPath}/pof-monitor`} component={POFMonitorPage} />
+        <Route path={`${orgPath}/rul-monitor`} component={RULMonitorPage} />
         
 
         {/* Data Explorer */}

@@ -1,17 +1,13 @@
+// Libraries
 import React, { PureComponent } from 'react'
-import MemberService from 'src/members/services/MemberService';
+
+// Services
 import UserService from 'src/users/services/UserService';
+
+// Components
 import {
-    Form,
-    Button,
-    ButtonType,
-    ComponentColor,
-    Overlay,
-    IconFont,
-    Grid,
-    Columns,
-    Input,
-    InputType,
+    Form, Button, ButtonType, ComponentColor, Overlay, IconFont,
+    Grid, Columns, Input, InputType,
 } from '@influxdata/clockface'
 
 interface Props {

@@ -8,8 +8,10 @@ export const BACKEND = {
 
 export const INFLUX = {
     // "CHRONOGRAF_URL": "http://localhost:8080/",
-    "CHRONOGRAF_URL": "http://vmi474601.contaboserver.net:8080/"
+    "CHRONOGRAF_URL": "https://vmi474601.contaboserver.net:8080/"
 }
+
+export const ERMETAL_TOKEN = "XBbTcT2uvUnvJmHOfGFpMTwiu5ASX67t_aSt5QAdjk8ZO0zx7d3vDGtsFsOW5lXsAKkHYO-7_YvhhdbxajSXSQ=="
 
 process.env.INFLUX_USERNAME = "machinaide";
 process.env.INFLUX_PASSWORD = "erste2020";

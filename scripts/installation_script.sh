@@ -7,10 +7,11 @@ DIR=/home/machinaide
 cd $PROJECT_FOLDER
 git clone https://github.com/suatbayir1/machinaide.git
 
-# gvm install for go
+# gvm install for go (before these commands execute sudo -s / sudo su)
 sudo apt-get install curl git mercurial make binutils bison gcc build-essential
-RUN ["/bin/bash", "-c", "bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)"]
+#RUN ["/bin/bash", "-c", "bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)"]
 # bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)
+curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer
 
 source /root/.gvm/scripts/gvm
 

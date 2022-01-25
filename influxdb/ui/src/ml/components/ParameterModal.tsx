@@ -34,6 +34,7 @@ import ButtonGroup from '@material-ui/core/ButtonGroup'
 
 export default function TabGroup(tabinfo) {
   let algs = []
+  console.log(tabinfo, "hey")
   if (tabinfo.tabinfo.selectedClass === 'ALL') {
     Object.keys(tabinfo.tabinfo.info.Classes).forEach(key => {
       tabinfo.tabinfo.info.Classes[key].forEach(alg => {
@@ -41,7 +42,6 @@ export default function TabGroup(tabinfo) {
       })
     })
   } else {
-    console.log(tabinfo)
     algs = tabinfo.tabinfo.info.Classes[tabinfo.tabinfo.selectedClass]
   }
 //   const [active, setActive] = React.useState(types[0]);
@@ -104,7 +104,7 @@ function FormDialog(forminfo) {
     forminfo.forminfo.info.Parameters[selectedAlgorithm][e.target.name].Value = e.target.value
     setUpdate((update + 1) % 10)
   }
-
+  
   return (
     <div>
         <div>
@@ -114,7 +114,7 @@ function FormDialog(forminfo) {
                 labelId="alg-label"
                 name="algorithm"
                 onChange={handleAlgorithmChoose}
-                children={forminfo.forminfo.algs.map(alg => {return (<MenuItem value={alg}>{alg}</MenuItem>)})}
+                children={Object.keys(forminfo.forminfo.info.Parameters).map(alg => {return (<MenuItem value={alg}>{alg}</MenuItem>)})}
                 value={selectedAlgorithm}
                 />
         </div>

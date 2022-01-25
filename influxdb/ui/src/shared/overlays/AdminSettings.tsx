@@ -19,7 +19,6 @@ import { notify as notifyAction } from 'src/shared/actions/notifications'
 // Constants
 import {
     generalSuccessMessage,
-    generalErrorMessage,
 } from 'src/shared/copy/notifications'
 
 interface OwnProps {

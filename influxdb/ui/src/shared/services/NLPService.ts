@@ -2,13 +2,17 @@ import { BACKEND } from 'src/config';
 
 class NLPService {
     getWordFrequency = async () => {
-        const url = `${BACKEND.NLP_MODULE_URL}/wordFrequency`;
+        const url = `${BACKEND.API_URL}nlp/wordFrequency`;
 
         const request = fetch(url, {
             method: 'GET',
             mode: 'cors',
             headers: {
                 'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
             }
         })
 

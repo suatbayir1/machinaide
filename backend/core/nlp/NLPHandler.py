@@ -29,6 +29,8 @@ class NLPHandler():
     def check_in_training_data(self, question):
         exist = self.mongoManager.is_question_exist(question)
 
+        print("exist", exist)
+
         if(exist):
             # send annotations to create query from annotations
             exist = exist[0]

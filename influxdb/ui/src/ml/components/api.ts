@@ -2,12 +2,14 @@ import { BACKEND } from 'src/config';
 
 import AJAX from 'src/utils/ajax'
 
-let BASE_URL = "http://localhost:9632/api/ml"
-let BASE_URL2 = "http://localhost:9632/api/ml"
+let BASE_URL = "https://vmi474601.contaboserver.net/api/v1.0/ml"
+let BASE_URL2 = "https://vmi474601.contaboserver.net/api/v1.0/ml"
 
 // let MONGO_URL = "http://localhost:7393"
-let MONGO_URL = "http://localhost:9632/api/metadata"
+let MONGO_URL = "https://vmi474601.contaboserver.net/api/v1.0/metadata"
 let ALERT_URL = "http://localhost:9632"
+let HPC_URL = "https://vmi474601.contaboserver.net/api/v1.0/hpc"
+
 
 export const cancelTraining = (sessionID, modelID) => AJAX({
     url: BASE_URL + '/stop_training/' + sessionID + '/' + modelID,
@@ -112,8 +114,16 @@ export const issueTrainingJob = (pkg) => AJAX({
     data: pkg,
 })
 
-export const issueAutoTrainingJob = (pkg) => AJAX({
-    url: BASE_URL + '/queueTrainingSession/auto',
+export const issueAutoTrainingJob = (pkg, auto="") => AJAX({
+    url: BASE_URL + '/queueTrainingSession' + auto,
+    //excludeBasePath: true,
+    method: 'POST',
+    data: pkg
+})
+
+
+export const startPOFModelTraining = (pkg) => AJAX({
+    url: BASE_URL + '/startPOFModelTraining',
     //excludeBasePath: true,
     method: 'POST',
     data: pkg
@@ -276,3 +286,14 @@ export const getTrainingProgress = (modelId) => AJAX({
     url: BASE_URL + '/train_progress/' + modelId,
     //excludeBasePath: true
 })
+
+export const getPartitionSpecs = async() => {
+    let url = HPC_URL + '/getPartitionSpecs'
+
+    const response = await AJAX({
+        url: url,
+        //excludeBasePath: true
+    })
+
+    return response.data
+}

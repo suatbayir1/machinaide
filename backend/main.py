@@ -20,7 +20,8 @@ from application.controller.GeneralController import general
 from application.controller.BrandController import brand
 from application.controller.MLController import mlserver
 from application.controller.MetaDataController import metadataserver
-# from application.controller.NLPController import nlp
+from application.controller.NLPController import nlpserver
+from application.controller.NotificationController import notification
 
 
 today = datetime.date.today()
@@ -43,12 +44,10 @@ app.register_blueprint(general, url_prefix = f"{app_prefix}/general")
 app.register_blueprint(brand, url_prefix = f"{app_prefix}/brand")
 app.register_blueprint(mlserver, url_prefix = f"{app_prefix}/ml")
 app.register_blueprint(metadataserver, url_prefix = f"{app_prefix}/metadata")
-# app.register_blueprint(nlp, url_prefix = f"{app_prefix}/nlp")
-
-
+app.register_blueprint(nlpserver, url_prefix = f"{app_prefix}/nlp")
+app.register_blueprint(notification, url_prefix = f"{app_prefix}/notification")
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
 
 CORS(dt)
 CORS(app, supports_credentials = True, resources={r"*": {"origins": "*"}})
@@ -73,6 +72,7 @@ def send_static(path):
 
 @app.route(f"{app_prefix}/")
 def index():
+    print("request arrived")
     return {"text": "Server is running"}
 
 @app.route(f"{app_prefix}/topic/<topicname>")

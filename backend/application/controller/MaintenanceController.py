@@ -4,6 +4,7 @@ from application.model.MaintenanceModel import MaintenanceModel
 import json
 from application.helpers.Helper import return_response, token_required, request_validation
 from core.logger.MongoLogger import MongoLogger
+from bson import ObjectId
 
 maintenance = Blueprint("maintenance", __name__)
 
@@ -107,6 +108,18 @@ def get_by_condition(token):
             for item in request.json["inside"]:
                 for key, value in item.items():
                     payload[key] = {'$regex': f'.*{value}.*'}
+
+        if "inArray" in request.json:
+            print("inside in array")
+            for item in request.json["inArray"]:
+                print("item", item)
+
+                objectid_array = [ObjectId(i) for i in request.json["inArray"][item]]
+                print("objectid_array", objectid_array)
+                payload[item] = {'$in': objectid_array}
+                print("after inArray")
+
+        print("payload", payload)
 
         result = model.get_by_condition(payload)
 

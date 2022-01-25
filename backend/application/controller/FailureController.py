@@ -4,6 +4,7 @@ from application.model.FailureModel import FailureModel
 import json
 from application.helpers.Helper import return_response, token_required
 from core.logger.MongoLogger import MongoLogger
+from bson import ObjectId
 
 failure = Blueprint("failure", __name__)
 
@@ -71,6 +72,7 @@ def remove_failure(token):
 @token_required(roles = ["admin", "editor", "member"])
 def get_by_condition(token):
     try:
+        print("request.json", request.json)
         if not request.json:
             message = "Payload cannot be empty"
             log_type = "ERROR"
@@ -93,7 +95,23 @@ def get_by_condition(token):
                 for key, value in item.items():
                     payload[key] = value
 
+        print("before in array")
+
+        if "inArray" in request.json:
+            print("inside in array")
+            for item in request.json["inArray"]:
+                print("item", item)
+
+                objectid_array = [ObjectId(i) for i in request.json["inArray"][item]]
+                print("objectid_array", objectid_array)
+                payload[item] = {'$in': objectid_array}
+                print("after inArray")
+
+        print("payload", payload)
+
         result = model.get_by_condition(payload)
+
+        print("result", result)
 
         message = "Failure records were successfully fetched"
         log_type = "INFO"

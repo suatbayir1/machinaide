@@ -1,6 +1,7 @@
 // Libraries
 import React, { PureComponent } from 'react'
 import { Link } from 'react-router-dom'
+import {connect, ConnectedProps} from 'react-redux'
 
 // Components
 import {
@@ -11,8 +12,25 @@ import ModelTable from 'src/ml/components/MLTable'
 import * as api from '../components/api'
 import AdminSettings from "src/shared/overlays/AdminSettings"
 import TrainStarted from "src/shared/overlays/TrainStarted";
+import MLBucketSelector from '../components/MLBucketSelector'
+import BucketsDropdown from "src/shared/components/DeleteDataForm/BucketsDropdown"
+import GetResources from 'src/resources/components/GetResources'
 
-interface Props { }
+// Actions
+import {selectBucket} from 'src/timeMachine/actions/queryBuilder'
+
+// Utils
+import {getActiveQuery} from 'src/timeMachine/selectors'
+import {getAll, getStatus} from 'src/resources/selectors'
+import { extractBoxedCol } from "src/timeMachine/apis/queryBuilder"
+import { runQuery } from "src/shared/apis/query"
+
+// Types
+import {AppState, Bucket, ResourceType} from 'src/types'
+import {RemoteDataState} from 'src/types'
+
+type ReduxProps = ConnectedProps<typeof connector>
+type Props = ReduxProps
 
 interface State {
     selected: string[],
@@ -27,7 +45,13 @@ interface State {
     extraDropdown: boolean
     adminPanel: boolean
     trainStarted: boolean
+    dropdownData: object
+    measurements: any[]
+    selectedBucket: string
 }
+
+const fb = term => bucket =>
+  bucket.toLocaleLowerCase().includes(term.toLocaleLowerCase())
 
 class MLPage extends PureComponent<Props, State> {
     constructor(props) {
@@ -46,13 +70,49 @@ class MLPage extends PureComponent<Props, State> {
             extraDropdown: false,
             trainStarted: false,
             adminPanel: false,
+            dropdownData: {},
+            measurements: [],
+            selectedBucket: "",
         }
     }
 
     componentDidMount() {
-        console.log(this.props);
-
+        const list = this.props.bucketNames.filter(fb(""))
+        console.log(list, this.props);
         this.getModels();
+    }
+
+    setSelectedBucket = (selectedBucket: string) => {
+        this.setState({selectedBucket: selectedBucket})
+        this.constructDropdownData(selectedBucket)
+    }
+
+    constructDropdownData = (selectedBucket: string) => {
+        const orgID = this.props["match"].params["orgID"]
+        const measurementQuery = `import "influxdata/influxdb/v1" v1.measurements(bucket: "${selectedBucket}")`
+        async function asyncForEach(array, callback) {
+            for (let index = 0; index < array.length; index++) {
+              await callback(array[index], index, array);
+            }
+        }
+        let dropdownData = {}
+        extractBoxedCol(runQuery(orgID, measurementQuery), '_value').promise.then(async(measurements) => {
+            this.setState({measurements: measurements})
+                asyncForEach(measurements, async(msr) => {
+                    const fieldQuery = `import "influxdata/influxdb/v1" v1.measurementFieldKeys(bucket: "${selectedBucket}", \ 
+                    measurement: "${msr}")`
+                    let children = []
+                    let fields = await extractBoxedCol(runQuery(orgID, fieldQuery), '_value').promise
+
+                    fields.forEach(field => {
+                        children.push(field)
+                    })
+                    dropdownData[msr] = children
+
+                }).then(() => {
+                    this.setState({dropdownData: dropdownData}, ()=>console.log(dropdownData, measurements))
+                })
+            })
     }
 
     getModels = () => {
@@ -68,6 +128,8 @@ class MLPage extends PureComponent<Props, State> {
 
     onDatabaseChange = (e) => {
         this.setState({ database: e })
+        this.setState({selectedBucket: e})
+        this.constructDropdownData(e)
     }
 
     onComponentChange = (e) => {
@@ -207,40 +269,111 @@ class MLPage extends PureComponent<Props, State> {
     }
 
     onGoClicked = () => {
-        let sessionID = new Date().getTime()
-        let days = 10
-        let pkg = {
-            "tuner_type": "hyperband",
-            modelName: this.state.modelName,
-            "nepochs": 5,
-            "nfeatures": 1,
-            "username": "berkayd1812@gmail.com",
-            "timeout": 10,
-            "sessionID": sessionID.toString(),
-            "startTime": "2021-07-11T09:49:03.000Z",
-            "endTime": "2021-07-11T10:49:03.000Z",
-            "dbSettings": {
-                "host": "localhost",
-                "port": 8080,
-                "db": "Ermetal",
-                "rp": "autogen"
-            },
-            "sensors": {
-                "Input": {
-                    "Press030": ["Ana_hava_debi_act"]
+        if(this.state.task === "Learn the remaining useful lifetime"){
+            let sessionID = new Date().getTime()
+            let days = 10
+            let pkg = {
+                "tuner_type": "hyperband",
+                modelName: this.state.modelName,
+                "nepochs": 5,
+                "nfeatures": 1,
+                "username": "berkayd1812@gmail.com",
+                "timeout": 10,
+                "sessionID": sessionID.toString(),
+                "startTime": "2021-07-11T09:49:03.000Z",
+                "endTime": "2021-07-11T10:49:03.000Z",
+                "dbSettings": {
+                    "host": "localhost",
+                    "port": 8080,
+                    "db": "Ermetal",
+                    "rp": "autogen"
                 },
-                "Output": {
-                    "Press030": ["Ana_hava_debi_act"]
-                }
-            },
-            "task": "anomaly"
-        }
+                "sensors": {
+                    "Input": {
+                        "Press030": ["Ana_hava_debi_act"]
+                    },
+                    "Output": {
+                        "Press030": ["Ana_hava_debi_act"]
+                    }
+                },
+                "task": "anomaly"
+            }
 
-        api.issueAutoTrainingJob(pkg).then(() => {
-            api.getBasicModels().then(models => {
-                this.setState({ models: models })
+            api.issueAutoTrainingJob(pkg, "/auto").then(() => {
+                api.getBasicModels().then(models => {
+                    this.setState({ models: models })
+                })
             })
-        })
+        }
+        else if(this.state.task === "Learn the probability of failure"){
+            let pkg = {
+                "tuner_type": "hyperband",
+                modelName: this.state.modelName,
+                "nepochs": 5,
+                "nfeatures": 1,
+                "username": "berkayd1812@gmail.com",
+                "timeout": 10,
+                "sessionID": sessionID.toString(),
+                "startTime": "2021-07-11T09:49:03.000Z",
+                "endTime": "2021-07-11T10:49:03.000Z",
+                "dbSettings": {
+                    "host": "localhost",
+                    "port": 8080,
+                    "db": "Ermetal",
+                    "rp": "autogen"
+                },
+                "sensors": {
+                    "Input": {
+                        "Press030": ["Ana_hava_debi_act"]
+                    },
+                    "Output": {
+                        "Press030": ["Ana_hava_debi_act"]
+                    }
+                },
+                "task": "anomaly"
+            }
+            api.startPOFModelTraining(pkg).then(() => {
+                api.getBasicModels().then(models => {
+                    this.setState({ models: models })
+                })
+            })
+        }
+        else{
+            let sessionID = new Date().getTime()
+            let days = 10
+            let pkg = {
+                "tuner_type": "hyperband",
+                modelName: this.state.modelName,
+                "nepochs": 5,
+                "nfeatures": 1,
+                "username": "berkayd1812@gmail.com",
+                "timeout": 10,
+                "sessionID": sessionID.toString(),
+                "startTime": "2021-07-11T09:49:03.000Z",
+                "endTime": "2021-07-11T10:49:03.000Z",
+                "dbSettings": {
+                    "host": "localhost",
+                    "port": 8080,
+                    "db": "Ermetal",
+                    "rp": "autogen"
+                },
+                "sensors": {
+                    "Input": {
+                        "Press030": ["Ana_hava_debi_act"]
+                    },
+                    "Output": {
+                        "Press030": ["Ana_hava_debi_act"]
+                    }
+                },
+                "task": "anomaly"
+            }
+
+            api.issueAutoTrainingJob(pkg).then(() => {
+                api.getBasicModels().then(models => {
+                    this.setState({ models: models })
+                })
+            })
+        }
     }
 
     public render(): JSX.Element {
@@ -318,15 +451,70 @@ class MLPage extends PureComponent<Props, State> {
                                                                             )}
                                                                         </Dropdown.Button>
                                                                     )}
-                                                                    menu={onCollapse => (
-                                                                        <Dropdown.Menu onCollapse={onCollapse}>
-                                                                            {dropdownItems[i]}
-                                                                        </Dropdown.Menu>
-                                                                    )}
+                                                                    menu={onCollapse => {
+                                                                        if(header === "Database"){
+                                                                            return(
+                                                                                <GetResources resources={[ResourceType.Buckets]}>
+                                                                                    <Dropdown.Menu onCollapse={onCollapse}>
+                                                                                        {this.props.bucketNames.map(x=>(
+                                                                                            <Dropdown.Item
+                                                                                                testID="dropdown-item generate-token--read-write"
+                                                                                                id={x}
+                                                                                                key={x}
+                                                                                                value={x}
+                                                                                                onClick={this.onDatabaseChange}
+                                                                                            >
+                                                                                                {x}
+                                                                                            </Dropdown.Item>
+                                                                                        ))}
+                                                                                        
+                                                                                    </Dropdown.Menu>
+                                                                                    {/* <BucketsDropdown
+                                                                                        bucketName={this.state.selectedBucket}
+                                                                                        //bucketNames={this.state.dropdownData}
+                                                                                        onSetBucketName={this.setSelectedBucket}
+                                                                                    /> */}
+                                                                                </GetResources>
+                                                                            )
+                                                                        }
+                                                                        else if(header === "Component"){
+                                                                            return(
+                                                                                <Dropdown.Menu onCollapse={onCollapse}>
+                                                                                    {this.state.measurements.map(x=>(
+                                                                                        <Dropdown.Item
+                                                                                            testID="dropdown-item generate-token--read-write"
+                                                                                            id={x}
+                                                                                            key={x}
+                                                                                            value={x}
+                                                                                            onClick={this.onComponentChange}
+                                                                                        >
+                                                                                            {x}
+                                                                                        </Dropdown.Item>
+                                                                                    ))}
+                                                                                    
+                                                                                </Dropdown.Menu>
+                                                                            )
+                                                                        }
+                                                                        else{
+                                                                            return(
+                                                                                <Dropdown.Menu onCollapse={onCollapse}>
+                                                                                    {dropdownItems[i]}
+                                                                                </Dropdown.Menu>
+                                                                            )
+                                                                        }
+                                                                    }}
                                                                 />
                                                             </Table.Cell>
                                                         </Table.Row>
                                                     ))}
+                                                    
+                                                    {/* <MLBucketSelector
+                                                        setSelectedDatabase={this.setSelectedBucket}
+                                                        dropdownData={this.state.dropdownData}
+                                                        databases={[]}
+                                                        selectedDatabase={this.state.selectedBucket}
+                                                        onDropdownTreeChange={this.onDropdownTreeChange}
+                                                    /> */}
                                                     <Table.Row key={"Model Name"}>
                                                         <Table.Cell>{"Model Name"}</Table.Cell>
                                                         <Table.Cell>
@@ -436,5 +624,20 @@ class MLPage extends PureComponent<Props, State> {
         )
     }
 }
+const mstp = (state: AppState) => {
+    const buckets = getAll<Bucket>(state, ResourceType.Buckets)
+    const bucketNames = buckets.map(bucket => bucket.name || '')
+    const bucketsStatus = getStatus(state, ResourceType.Buckets)
+    const selectedBucket =
+        getActiveQuery(state).builderConfig.buckets[0] || bucketNames[0]
 
-export default MLPage;
+    return {selectedBucket, bucketNames, bucketsStatus}
+}
+
+const mdtp = {
+    onSelectBucket: selectBucket,
+}
+
+const connector = connect(mstp, mdtp)
+
+export default connector(MLPage)
