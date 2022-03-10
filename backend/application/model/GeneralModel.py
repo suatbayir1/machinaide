@@ -18,6 +18,9 @@ class GeneralModel():
     def get_reports(self):
         return self.db.find(self.reports_col)
 
+    def get_report_by_condition(self, where):
+        return cursor_to_json(self.db.find(self.reports_col, where))
+
     def delete_report(self, payload):
         try:
             where = {

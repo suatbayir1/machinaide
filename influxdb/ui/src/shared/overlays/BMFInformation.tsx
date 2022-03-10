@@ -1,7 +1,6 @@
 // Libraries
 import React, { PureComponent } from 'react'
 import { connect, ConnectedProps } from 'react-redux'
-import { RouteComponentProps } from 'react-router-dom'
 
 // Components
 import {
@@ -76,7 +75,7 @@ interface State {
 }
 
 type ReduxProps = ConnectedProps<typeof connector>
-type Props = OwnProps & RouteComponentProps & ReduxProps
+type Props = OwnProps & ReduxProps
 
 class BMFInformation extends PureComponent<Props, State> {
     constructor(props) {

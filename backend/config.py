@@ -14,6 +14,12 @@ authentication = dict(
     EMAIL_SENDER = "email.machinaide@gmail.com"
 )
 
+INFLUXDB_CLIENT = dict(
+    URL = "https://vmi474601.contaboserver.net:8080",
+    TOKEN = "-Y8yuCS19k6ZD0FLiVvpY-zcEK4VhbBe6HC7WPKR7Z5X2bkm-Ag2iMJUSDSBOugpG6klF2XEddhCMkHRuJPbsQ==",
+    ORG = "machinaide"
+)
+
 url = dict(
     BACKEND = "http://127.0.0.1:9632/api/",
     CHRONOGRAPH = "http://localhost:8080/",
@@ -26,6 +32,7 @@ G_ALGS = {
 
 
 VAE_HPS_DIR = os.getcwd() + "/mlhelpers/VAESettings/hps/"
+TASK_DIRECTORY = os.getcwd() + "/mlhelpers/HPCTasks/"
 VAE_SENSOR_DIR = os.getcwd() +  "/mlhelpers/VAESettings/sensors/"
 AUTO_SETTINGS_DIR = os.getcwd() + "/mlhelpers/AutoSettings/"
 GETSENSORFROMMAPPING = url["BACKEND"] + "/getSensorFromMapping"

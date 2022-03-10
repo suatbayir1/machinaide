@@ -4,11 +4,16 @@ from application.model.FactoryModel import FactoryModel
 import json
 from application.helpers.Helper import return_response, token_required
 from core.logger.MongoLogger import MongoLogger
+from application.classes.Validator import Validator
+from application.classes.FactoryManager import FactoryManager
+
 
 factory = Blueprint("factory", __name__)
 
 model = FactoryModel()
 logger = MongoLogger()
+validator = Validator()
+factoryManager = FactoryManager()
 
 @factory.route("/getFactories", methods = ["GET"])
 @token_required(roles = ["admin", "member", "editor"])
@@ -289,3 +294,58 @@ def is_dashboard_exists(token):
         message = "Dashboard record already exists"
         logger.add_log("DUPLICATED", request.remote_addr, token["username"], request.method, request.url, request.json, message,  409)
         return return_response(success = True, message = message, code = 409)
+
+
+@factory.route("/getMetadataByProcessId", methods = ["POST"])
+@token_required(roles = ["admin", "editor"])
+def getMetadataByProcessId(token):
+    try:
+        message, confirm = validator.check_request_params(
+            request.json, 
+            ["processId"]
+        )
+
+        if not confirm:
+            log_type = "ERROR"
+            status_code = 400
+            return return_response(success = False, message = message, code = 400), 400
+
+        if not isinstance(request.json["processId"], int):
+            message = "processId must be integer"
+            log_type = "ERROR"
+            status_code = 400
+            return return_response(success = False, message = message, code = 400), 400
+
+        processId = str(request.json["processId"])
+
+        processes = {
+            "1": factoryManager.get_production_line_by_name,
+            "2": factoryManager.get_machine_by_name,
+            "3": factoryManager.get_component_by_name,
+            "4": factoryManager.get_sensor_by_name,
+            "5": factoryManager.get_machine_actions_by_name,
+            "6": factoryManager.get_reports_by_name,
+            "7": factoryManager.get_detail_sensor_info_by_name
+        }
+
+        chosen_operation_function = processes.get(processId, factoryManager.invalid_operation)
+
+        result = chosen_operation_function(request.json)
+
+        if result["success"] == False:
+            message = result["message"]
+            log_type = "ERROR"
+            status_code = 400
+            return return_response(success = False, message = message, code = 400), 400
+
+        message = result["message"]
+        log_type = "INFO"
+        status_code = 200
+        return return_response(success = True, message = message, data = result["data"], code = 200, total_count = len(result["data"])), 200
+    except:
+        message = "An expected error has occurred"
+        log_type = "ERROR"
+        status_code = 400
+        return return_response(success = False, message = message, code = 400), 400
+    finally:
+        logger.add_log(log_type, request.remote_addr, token["username"], request.method, request.url, "", message,  status_code)

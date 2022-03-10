@@ -59,6 +59,26 @@
   }
 }
 
+.dt-information-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+
+  & > * {
+    margin-right: $cf-marg-a;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+.dt-information-buttons > * {
+  margin-top: 10px;
+  width: 44% !important;
+}
+
 /* OBJECT CREATOR */
 .object-creator-info-buttons {
   justify-content: center;

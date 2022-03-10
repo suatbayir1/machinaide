@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import {
     Page, QuestionMarkTooltip, InfluxColors, Grid, ComponentColor, Columns, ResourceCard,
     ComponentSize, FlexBox, FlexDirection, SpinnerContainer, TechnoSpinner, RemoteDataState,
+    EmptyState, ButtonType, Button, IconFont,
 } from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
@@ -260,9 +261,22 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                         </div>
                                                     </Grid.Column>
                                                 )
-                                            }) : (
-                                                <h1>No component found for this machine</h1>
-                                            )
+                                            })
+                                                :
+                                                <EmptyState size={ComponentSize.Large}>
+                                                    <EmptyState.Text>
+                                                        No <b>Component</b> record has been created, why not create
+                                                        one?
+                                                    </EmptyState.Text>
+                                                    <Button
+                                                        text="Create Component"
+                                                        type={ButtonType.Button}
+                                                        icon={IconFont.Plus}
+                                                        color={ComponentColor.Primary}
+                                                        titleText={"Go to digital twin page and create component"}
+                                                        onClick={() => this.props["history"].push(`/orgs/${this.props["match"].params["orgID"]}/dt`)}
+                                                    />
+                                                </EmptyState>
                                         }
                                     </Grid.Row>
                                 </Grid>

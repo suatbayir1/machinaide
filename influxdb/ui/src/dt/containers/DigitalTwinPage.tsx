@@ -1,7 +1,6 @@
 // Libraries
 import React, { PureComponent } from 'react'
 import { connect, ConnectedProps } from 'react-redux'
-import { BACKEND } from "src/config";
 
 // Components
 import DigitalTwinHeader from 'src/dt/components/DigitalTwinHeader'
@@ -14,11 +13,15 @@ import { Page, Grid, Columns, RemoteDataState } from '@influxdata/clockface'
 import {
   clearTask,
 } from 'src/tasks/actions/creators'
+import { loadBuckets } from 'src/timeMachine/actions/queryBuilder'
 
 import { saveNewScript, cancel } from 'src/tasks/actions/thunks'
 
 // Types
 import { AppState } from 'src/types'
+
+// Services
+import DTService from 'src/shared/services/DTService';
 
 type ReduxProps = ConnectedProps<typeof connector>
 type Props = ReduxProps
@@ -73,12 +76,14 @@ class DigitalTwinPage extends PureComponent<Props, State> {
               >
                 <DigitalTwinInformation
                   selectedGraphNode={selectedGraphNode}
+                  refreshGeneralInfo={this.refreshGeneralInfo}
                   generalInfo={generalInfo}
                   spinnerLoading={spinnerLoadingInformationPage}
                   changeShowAllSensorValues={this.changeShowAllSensorValues}
                   showAllSensorValues={this.state.showAllSensorValues}
                   refreshGraph={this.refreshGraph}
                   refreshVisualizePage={this.refreshVisualizePage}
+                  orgID={this.props["match"].params.orgID}
                 />
               </Grid.Column>
               <Grid.Column
@@ -90,6 +95,7 @@ class DigitalTwinPage extends PureComponent<Props, State> {
               >
                 <DigitalTwinGraph
                   handleNodeClick={this.onClickNode}
+                  generalInfo={generalInfo}
                   refreshGeneralInfo={this.refreshGeneralInfo}
                   refreshVisualizePage={this.refreshVisualizePage}
                   selectedGraphNode={selectedGraphNode}
@@ -140,42 +146,17 @@ class DigitalTwinPage extends PureComponent<Props, State> {
 
 
   async componentDidMount(): Promise<void> {
+    this.props.onLoadBuckets()
     await this.refreshGeneralInfo();
   }
 
   refreshGeneralInfo = async () => {
-    const generalInfo = await this.getGeneralInfo();
+    const generalInfo = await DTService.getGeneralInfo();
+
     this.setState({
       generalInfo,
       spinnerLoadingInformationPage: RemoteDataState.Done
     })
-  }
-
-  getGeneralInfo = async () => {
-    const url = `${BACKEND.API_URL}dt/getGeneralInfo`;
-
-    const request = fetch(url, {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
-        'token': window.localStorage.getItem("token")
-      }
-    })
-
-    try {
-      const response = await request;
-      const res = await response.json();
-
-      if (res.data.success !== true) return;
-      const result = JSON.parse(res.data.data)
-      return result;
-    } catch (err) {
-      console.error(err);
-    }
   }
 
   refreshVisualizePage = () => {
@@ -206,6 +187,7 @@ const mdtp = {
   saveNewScript,
   clearTask,
   cancel,
+  onLoadBuckets: loadBuckets,
 }
 
 const connector = connect(mstp, mdtp)

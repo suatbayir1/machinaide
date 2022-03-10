@@ -235,19 +235,21 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
   renderInitialCubeInfo = async (payload) => {
     let cubeInfo = JSON.parse(JSON.stringify(payload));
 
-    cubeInfo[0]["productionLines"].forEach(pl => {
-      pl["machines"].forEach(machine => {
-        machine["contents"].forEach(component => {
+    cubeInfo?.[0]?.["productionLines"].forEach(pl => {
+      pl?.["machines"].forEach(machine => {
+        machine?.["contents"].forEach(component => {
           if (component["@type"] === "Component") {
-            if (component["visual"] !== undefined) {
-              component["visual"].forEach(visual => {
+            if (component["visual"] !== undefined && component["visual"] !== "") {
+              component["visual"]["objects"].forEach(visual => {
                 visual["isRender"] = true;
               })
             }
 
-            component["sensors"].forEach(sensor => {
-              if (sensor["visual"] !== undefined) {
-                sensor["visual"]["isRender"] = true;
+            component?.["sensors"].forEach(sensor => {
+              if (sensor["visual"] !== undefined && sensor["visual"] !== "") {
+                sensor["visual"]["objects"].forEach(visual => {
+                  visual["isRender"] = true;
+                })
               }
             })
           }
@@ -678,11 +680,16 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
     const loader = new ColladaLoader();
 
     let vm = this;
-    await loader.load(`../../assets/images/model/${object["fileName"]}`, async function (collada) {
+    await loader.load(`../../assets/images/model/${object['fileName']}`, async function (collada) {
       dae = collada.scene;
       dae.traverse(function (child) {
         if (child.isMesh) {
           child.material.flatShading = true;
+
+          if (object["color"] !== undefined || object["opacity"] !== undefined) {
+            child.material.color.set(object["color"]);
+            child.material.opacity = object["opacity"];
+          }
         }
       });
 
@@ -694,7 +701,7 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
       dae.position.z = object["position"]["z"];
 
       dae.updateMatrix();
-      kinematics = collada.kinematics;
+      // kinematics = collada.kinematics;
 
       Object.keys(collada.library.materials).forEach(material => {
         collada.library.materials[material].build.wireframe = wireframe;
@@ -704,8 +711,8 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
 
       scene.add(dae);
       renderer.render(scene, camera);
-      vm.setupTween();
-      vm.animate();
+      // vm.setupTween();
+      // vm.animate();
     });
     await renderer.render(scene, camera);
   }
@@ -730,15 +737,17 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
           pl["machines"].forEach(machine => {
             machine["contents"].forEach(component => {
               if (component["@type"] === "Component") {
-                if (component["visual"] !== undefined) {
-                  component["visual"].forEach(visual => {
+                if (component["visual"] !== undefined && component["visual"] !== "") {
+                  component["visual"]["objects"].forEach(visual => {
                     visual["isRender"] = true;
                   })
                 }
 
                 component["sensors"].forEach(sensor => {
-                  if (sensor["visual"] !== undefined) {
-                    sensor["visual"]["isRender"] = true;
+                  if (sensor["visual"] !== undefined && sensor["visual"] !== "") {
+                    sensor["visual"]["objects"].forEach(sensorVisual => {
+                      sensorVisual["isRender"] = true;
+                    })
                   }
                 })
               }
@@ -752,15 +761,17 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
             pl["machines"].forEach(machine => {
               machine["contents"].forEach(component => {
                 if (component["@type"] === "Component") {
-                  if (component["visual"] !== undefined) {
-                    component["visual"].forEach(visual => {
+                  if (component["visual"] !== undefined && component["visual"] !== "") {
+                    component["visual"]["objects"].forEach(visual => {
                       visual["isRender"] = true;
                     })
                   }
 
                   component["sensors"].forEach(sensor => {
-                    if (sensor["visual"] !== undefined) {
-                      sensor["visual"]["isRender"] = true;
+                    if (sensor["visual"] !== undefined && sensor["visual"] !== "") {
+                      sensor["visual"]["objects"].forEach(sensorVisual => {
+                        sensorVisual["isRender"] = true;
+                      })
                     }
                   })
                 }
@@ -775,15 +786,17 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
             if (machine["displayName"] === payload["name"]) {
               machine["contents"].forEach(component => {
                 if (component["@type"] === "Component") {
-                  if (component["visual"] !== undefined) {
-                    component["visual"].forEach(visual => {
+                  if (component["visual"] !== undefined && component["visual"] !== "") {
+                    component["visual"]["objects"].forEach(visual => {
                       visual["isRender"] = true;
                     })
                   }
 
                   component["sensors"].forEach(sensor => {
-                    if (sensor["visual"] !== undefined) {
-                      sensor["visual"]["isRender"] = true;
+                    if (sensor["visual"] !== undefined && sensor["visual"] !== "") {
+                      sensor["visual"]["objects"].forEach(sensorVisual => {
+                        sensorVisual["isRender"] = true;
+                      })
                     }
                   })
                 }
@@ -797,15 +810,17 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
           pl["machines"].forEach(machine => {
             machine["contents"].forEach(component => {
               if (component["@type"] === "Component" && component["name"] === payload["name"]) {
-                if (component["visual"] !== undefined) {
-                  component["visual"].forEach(visual => {
+                if (component["visual"] !== undefined && component["visual"] !== "") {
+                  component["visual"]["objects"].forEach(visual => {
                     visual["isRender"] = true;
                   })
                 }
 
                 component["sensors"].forEach(sensor => {
-                  if (sensor["visual"] !== undefined) {
-                    sensor["visual"]["isRender"] = true;
+                  if (sensor["visual"] !== undefined && sensor["visual"] !== "") {
+                    sensor["visual"]["objects"].forEach(sensorVisual => {
+                      sensorVisual["isRender"] = true;
+                    })
                   }
                 })
               }
@@ -820,8 +835,10 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
               if (component["@type"] === "Component") {
                 component["sensors"].forEach(sensor => {
                   if (sensor["name"] === payload["name"]) {
-                    if (sensor["visual"] !== undefined) {
-                      sensor["visual"]["isRender"] = true;
+                    if (sensor["visual"] !== undefined && sensor["visual"] !== "") {
+                      sensor["visual"]["objects"].forEach(sensorVisual => {
+                        sensorVisual["isRender"] = true;
+                      })
                     }
                   }
                 })
@@ -838,8 +855,10 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
                 component["sensors"].forEach(sensor => {
                   sensor["fields"].forEach(field => {
                     if (field["name"] === payload["name"]) {
-                      if (sensor["visual"] !== undefined) {
-                        sensor["visual"]["isRender"] = true;
+                      if (sensor["visual"] !== undefined && sensor["visual"] !== "") {
+                        sensor["visual"]["objects"].forEach(sensorVisual => {
+                          sensorVisual["isRender"] = true;
+                        })
                       }
                     }
                   })
@@ -878,7 +897,7 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
     let CubeInfo = payload;
     let wireframe;
 
-    if (CubeInfo === undefined) {
+    if (CubeInfo == undefined) {
       return;
     }
 
@@ -886,28 +905,26 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
       CubeInfo = payload[0];
     }
 
+    if (CubeInfo == undefined) {
+      return;
+    }
+
     CubeInfo["productionLines"].forEach(pl => {
       pl["machines"].forEach((machine) => {
         if (machine["contents"] !== undefined) {
           machine["contents"].forEach((component) => {
-            if (component["visual"] !== undefined) {
-              component["visual"].forEach((visualObject) => {
+            if (component["visual"] !== undefined && component["visual"] !== "") {
+              component["visual"]["objects"].forEach((visualObject) => {
                 wireframe = visualObject["isRender"] ? false : true;
                 this.handleAddObjectType(visualObject, wireframe);
               });
 
               component["sensors"].forEach((sensor) => {
-                if (sensor["visual"] !== undefined) {
-                  wireframe = sensor["visual"]["isRender"] ? false : true;
-                  // if visual objects of the sensor consist of more than one object
-                  if (sensor["visual"]["children"] !== undefined) {
-                    sensor["visual"]["children"].forEach((sensorVisualObject) => {
-                      this.handleAddObjectType(sensorVisualObject, wireframe);
-                    });
-                  } else {
-                    // If the visual object of the sensor consists of a single object
-                    this.handleAddObjectType(sensor["visual"], wireframe);
-                  }
+                if (sensor["visual"] !== undefined && sensor["visual"] !== "") {
+                  sensor["visual"]["objects"].forEach((sensorVisualObject) => {
+                    wireframe = sensorVisualObject["isRender"] ? false : true;
+                    this.handleAddObjectType(sensorVisualObject, wireframe);
+                  })
                 }
               })
             }

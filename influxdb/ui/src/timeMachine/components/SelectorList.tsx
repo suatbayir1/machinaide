@@ -1,8 +1,8 @@
 // Libraries
-import React, {SFC} from 'react'
+import React, { SFC } from 'react'
 
 // Components
-import {List, ComponentSize, Gradients} from '@influxdata/clockface'
+import { List, ComponentSize, Gradients } from '@influxdata/clockface'
 
 interface Props {
   items: string[]
@@ -26,7 +26,7 @@ const SelectorList: SFC<Props> = props => {
   } = props
 
   return (
-    <List autoHideScrollbars={true} testID={testID} style={{flex: '1 0 0'}}>
+    <List autoHideScrollbars={true} testID={testID} style={{ flex: '1 0 0' }}>
       {items.map(item => {
         const selected = selectedItems.includes(item)
 

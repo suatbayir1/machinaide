@@ -105,7 +105,6 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
     async componentDidMount(): Promise<void> {
         await this.getCombinationAllHierarchy();
         const failures = await FailureService.getAllFailures();
-        console.log(failures);
         this.setState({
             failures,
         });
@@ -145,10 +144,7 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
     }
 
     handleChangeEditRowData = (editRow) => {
-        console.log("editorRow", editRow);
         const { failures } = this.state;
-
-        console.log(failures);
 
         if (editRow.failure !== null && editRow.failure !== undefined) {
             this.setState({
@@ -229,9 +225,6 @@ class AddUpdateMaintenanceOverlay extends PureComponent<Props, State> {
                 return;
             }
         }
-
-        console.log(selectedFailure);
-        console.log(selectedPart);
 
         const payload = {
             "asset": activeTab === "periodic" ? selectedPart["text"] : selectedFailure["sourceName"],

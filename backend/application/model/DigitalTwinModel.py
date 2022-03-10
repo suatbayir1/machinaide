@@ -25,6 +25,8 @@ class DigitalTwinModel():
         data = self.db.find(self.collection)
         json_data = json.loads(dumps(list(data), indent = 2))
 
+        factoryName = ""
+        factoryID = ""
         productionLineList = []
         machineList = []
         componentList = []
@@ -32,7 +34,7 @@ class DigitalTwinModel():
 
         for factory in json_data:
             factoryName = factory["factoryName"]
-            factoryID = factory["factoryId"]
+            factoryID = factory["id"]
             for productionLine in factory["productionLines"]:
                 productionLineList.append(productionLine["name"])
                 for machine in productionLine["machines"]:
@@ -57,55 +59,6 @@ class DigitalTwinModel():
         }
 
         return response
-
-    def add_machine(self, payload):
-        data = self.db.find(self.collection)
-        json_data = json.loads(dumps(list(data), indent = 2))
-        isExists = self.is_item_already_exists(payload["name"])
-
-        if not isExists:
-            for factory in json_data:
-                del [factory['_id']]
-                for pl in factory["productionLines"]:
-                    if pl["name"] == payload["parent"]:
-                        pl["machines"].append(payload)      
-
-            update_data = {
-                '$set': json_data[0]
-            }              
-
-            where = {
-                "id": factory["id"]
-            }
-
-            return self.db.update_one(self.collection, update_data, where)
-        else:
-            return False
-
-    def add_component(self, payload):
-        data = self.db.find(self.collection)
-        json_data = json.loads(dumps(list(data), indent = 2))
-        isExists = self.is_item_already_exists(payload['name'])
-
-        if not isExists:
-            for factory in json_data:
-                del factory['_id']
-                for pl in factory["productionLines"]:
-                    for machine in pl['machines']:
-                        if machine['name'] == payload["parent"]:
-                            machine['contents'].append(payload)
-
-            update_data = {
-                '$set': json_data[0]
-            }
-
-            where = {
-                "id": factory["id"]
-            }
-
-            return self.db.update_one(self.collection, update_data, where)
-        else:
-            return False
 
     def add_sensor(self, payload):
         data = self.db.find(self.collection)
@@ -196,7 +149,7 @@ class DigitalTwinModel():
         for factory in hierarchy:
             del factory['_id']
             for pl in factory["productionLines"]:
-                if (pl["@id"] == payload["name"]):
+                if (pl["@id"] == payload["id"]):
                     factory["productionLines"].remove(pl)
         
         update_data = {
@@ -216,7 +169,7 @@ class DigitalTwinModel():
             del factory['_id']
             for pl in factory["productionLines"]:
                 for machine in pl["machines"]:
-                    if machine["name"] == payload["name"]:
+                    if machine["@id"] == payload["id"]:
                         pl["machines"].remove(machine)
         
         update_data = {
@@ -231,14 +184,16 @@ class DigitalTwinModel():
 
     def delete_component(self, payload):
         hierarchy = self.get_all()
+        factoryID = ""
 
         for factory in hierarchy:
             del factory['_id']
             for pl in factory["productionLines"]:
                 for machine in pl["machines"]:
                     for component in machine["contents"]:
-                        if component["@type"] == "Component" and payload["name"] == component["name"]:
+                        if component["@type"] == "Component" and payload["id"] == component["@id"]:
                             machine["contents"].remove(component)
+                            factoryID = factory["id"]
         
         update_data = {
             '$set': hierarchy[0]
@@ -248,10 +203,14 @@ class DigitalTwinModel():
             "id": factory["id"]
         }
 
+        if not factoryID:
+            return False
+
         return self.db.update_one(self.collection, update_data, where)
 
     def delete_sensor(self, payload):
         hierarchy = self.get_all()
+        factoryID = ""
 
         for factory in hierarchy:
             del factory['_id']
@@ -260,8 +219,9 @@ class DigitalTwinModel():
                     for component in machine["contents"]:
                         if component["@type"] == "Component":
                             for sensor in component["sensors"]:
-                                if sensor["name"] == payload["name"]:
+                                if sensor["@id"] == payload["id"]:
                                     component["sensors"].remove(sensor)
+                                    factoryID = factory["id"]
             
         update_data = {
             '$set': hierarchy[0]
@@ -270,6 +230,9 @@ class DigitalTwinModel():
         where = {
             "id": factory["id"]
         }
+
+        if not factoryID:
+            return False
 
         return self.db.update_one(self.collection, update_data, where)
 
@@ -303,9 +266,311 @@ class DigitalTwinModel():
         except:
             return False
 
-    def update_sensor_bounds(self, payload):
+    def insert_factory(self, payload):
         try:
             hierarchy = self.get_all()
+
+            if len(hierarchy) > 0:
+                return 409
+
+            return self.db.insert_one(self.collection, payload)
+        except:
+            return False
+
+    def insert_production_line(self, payload):
+        try:
+            hierarchy = self.get_all()
+            factoryID = ""
+
+            for factory in hierarchy:
+                del factory['_id']
+                if factory["id"] == payload["parent"]:
+                    factory["productionLines"].append(payload)
+                    factoryID = factory["id"]  
+                
+            update_data = {
+                '$set': hierarchy[0]
+            }
+
+            where = {
+                "id": factoryID
+            }
+
+            if not factoryID:
+                return False
+
+            return self.db.update_one(self.collection, update_data, where)
+        except:
+            return False
+
+    def insert_machine(self, payload):
+        try:
+            hierarchy = self.get_all()
+            factoryID = ""
+
+            for factory in hierarchy:
+                del [factory['_id']]
+                for pl in factory["productionLines"]:
+                    if pl["name"] == payload["parent"]:
+                        pl["machines"].append(payload)      
+                        factoryID = factory["id"]  
+
+            update_data = {
+                '$set': hierarchy[0]
+            }              
+
+            where = {
+                "id": factoryID
+            }
+
+            if not factoryID:
+                return False
+
+            return self.db.update_one(self.collection, update_data, where)
+        except:
+            return False
+
+    def insert_component(self, payload):
+        try:
+            hierarchy = self.get_all()
+            factoryID = ""
+
+            for factory in hierarchy:
+                del factory['_id']
+                for pl in factory["productionLines"]:
+                    for machine in pl['machines']:
+                        if machine['name'] == payload["parent"]:
+                            machine['contents'].append(payload)
+                            factoryID = factory["id"]  
+
+            update_data = {
+                '$set': hierarchy[0]
+            }
+
+            where = {
+                "id": factoryID
+            }
+
+            return self.db.update_one(self.collection, update_data, where)
+        except:
+            return False    
+
+    def insert_sensor(self, payload):
+        try:
+            hierarchy = self.get_all()
+            factoryID = ""
+
+            for factory in hierarchy:
+                del factory['_id']
+                for pl in factory["productionLines"]:
+                    for machine in pl['machines']:
+                        for component in machine["contents"]:
+                            if component["@type"] == "Component":
+                                if component["name"] == payload["parent"]:
+                                    component['sensors'].append(payload)
+                                    factoryID = factory["id"]  
+
+            update_data = {
+                '$set': hierarchy[0]
+            }
+
+            where = {
+                "id": factoryID
+            }
+
+            return self.db.update_one(self.collection, update_data, where)
+        except:
+            return False
+
+    def insert_field(self, payload):
+        try:
+            hierarchy = self.get_all()
+            factoryID = ""
+
+            for factory in hierarchy:
+                del factory["_id"]
+                for pl in factory["productionLines"]:
+                    for machine in pl["machines"]:
+                        for component in machine["contents"]:
+                            if component["@type"] == "Component":
+                                for sensor in component["sensors"]:
+                                    if sensor["@id"] == payload["parent"]:
+                                        sensor["fields"].append(payload)
+                                        factoryID = factory["id"]
+
+            update_data = { 
+                '$set': hierarchy[0]
+            }
+
+            where = {
+                "id": factoryID
+            }
+
+            return self.db.update_one(self.collection, update_data, where)
+        except:
+            return False
+        
+    def update_factory(self, payload):
+        try:
+            hierarchy = self.get_all()
+
+            for factory in hierarchy:
+                del factory['_id']
+                if factory["id"] == payload["id"]:
+                    factory["bucket"] = payload["bucket"]
+                    factory["factoryName"] = payload["factoryName"]
+                    factory["location"] = payload["location"]
+                    factory["description"] = payload["description"]
+                
+            update_data = {
+                '$set': hierarchy[0]
+            }
+
+            where = {
+                "id": payload["id"]
+            }
+
+            return self.db.update_one(self.collection, update_data, where)
+        except:
+            return False
+
+    def update_production_line(self, payload):
+        try:
+            hierarchy = self.get_all()
+            factoryID = ""
+
+            for factory in hierarchy:
+                del factory['_id']
+                for pl in factory["productionLines"]:
+                    if pl["@id"] == payload["id"]:
+                        pl["displayName"] = payload["displayName"]
+                        pl["description"] = payload["description"]
+                        factoryID = factory["id"]
+                
+            update_data = {
+                '$set': hierarchy[0]
+            }
+
+            where = {
+                "id": factoryID
+            }
+
+            return self.db.update_one(self.collection, update_data, where)
+        except:
+            return False
+
+    def update_machine(self, payload):
+        try:
+            hierarchy = self.get_all()
+            factoryID = ""
+
+            for factory in hierarchy:
+                del factory['_id']
+                for pl in factory["productionLines"]:
+                    for machine in pl["machines"]:
+                        if machine["@id"] == payload["id"]:
+                            machine["measurements"] = payload["measurements"]
+                            machine["displayName"] = payload["displayName"]
+                            machine["description"] = payload["description"]
+                            factoryID = factory["id"]
+                
+            update_data = {
+                '$set': hierarchy[0]
+            }
+
+            where = {
+                "id": factoryID
+            }
+
+            if not factoryID:
+                return False
+
+            return self.db.update_one(self.collection, update_data, where)
+        except:
+            return False
+
+    def update_component(self, payload):
+        try:
+            hierarchy = self.get_all()
+            factoryID = ""
+
+            for factory in hierarchy:
+                del factory['_id']
+                for pl in factory["productionLines"]:
+                    for machine in pl["machines"]:
+                        for component in machine["contents"]:
+                            if component["@type"] == "Component" and component["@id"] == payload["id"]:
+                                component["displayName"] = payload["displayName"]
+                                component["description"] = payload["description"]
+                                component["visual"] = payload["visual"]
+                                factoryID = factory["id"]
+                
+            update_data = {
+                '$set': hierarchy[0]
+            }
+
+            where = {
+                "id": factoryID
+            }
+
+            if not factoryID:
+                return False
+
+            return self.db.update_one(self.collection, update_data, where)
+        except:
+            return False
+
+    def update_sensor(self, payload):
+        try:
+            hierarchy = self.get_all()
+            factoryID = ""
+
+            for factory in hierarchy:
+                del factory['_id']
+                for pl in factory["productionLines"]:
+                    for machine in pl["machines"]:
+                        for component in machine["contents"]:
+                            if component["@type"] == "Component":
+                                for sensor in component["sensors"]:
+                                    if sensor["@id"] == payload["id"]:
+                                        sensor["unit"] = payload["unit"]
+                                        sensor["schema"] = payload["unit"]
+                                        sensor["status"] = payload["status"]
+                                        sensor["@type"] = payload["@type"]
+                                        sensor["displayName"] = payload["displayName"]
+                                        sensor["description"] = payload["description"]
+                                        sensor["visual"] = payload["visual"]
+                                        factoryID = factory["id"]
+                
+            update_data = {
+                '$set': hierarchy[0]
+            }
+
+            where = {
+                "id": factoryID
+            }
+
+            if not factoryID:
+                return False
+
+            return self.db.update_one(self.collection, update_data, where)
+        except:
+            return False
+
+    def delete_factory(self, payload):
+        try:
+            where = {
+                "id": payload["id"]
+            }
+
+            return self.db.delete_one(self.collection, where)
+        except:
+            return False
+
+    def update_field(self, payload):
+        try:
+            hierarchy = self.get_all()
+            factoryID = ""
 
             for factory in hierarchy:
                 del factory["_id"]
@@ -315,22 +580,55 @@ class DigitalTwinModel():
                             if component["@type"] == "Component":
                                 for sensor in component["sensors"]:
                                     for field in sensor["fields"]:
-                                        if field["name"] == payload["name"]:
+                                        if field["@id"] == payload["id"]:
                                             field["dataSource"] = payload["dataSource"]
                                             field["minValue"] = payload["minValue"]
                                             field["maxValue"] = payload["maxValue"]
+                                            field["measurement"] = payload["measurement"]
+                                            field["displayName"] = payload["displayName"]
+                                            field["description"] = payload["description"]
+                                            factoryID = factory["id"]
 
             update_data = { 
                 '$set': hierarchy[0]
             }
 
             where = {
-                "id": factory["id"]
+                "id": factoryID
             }
 
             return self.db.update_one(self.collection, update_data, where)
         except:
             return False
+
+    def delete_field(self, payload):
+        hierarchy = self.get_all()
+        factoryID = ""
+
+        for factory in hierarchy:
+            del factory['_id']
+            for pl in factory["productionLines"]:
+                for machine in pl["machines"]:
+                    for component in machine["contents"]:
+                        if component["@type"] == "Component":
+                            for sensor in component["sensors"]:
+                                for field in sensor["fields"]:
+                                    if field["@id"] == payload["id"]:
+                                        sensor["fields"].remove(field)
+                                        factoryID = factory["id"]
+
+        update_data = {
+            '$set': hierarchy[0]
+        }
+
+        where = {
+            "id": factoryID
+        }
+
+        if not factoryID:
+            return False
+
+        return self.db.update_one(self.collection, update_data, where)
 
     def is_item_already_exists(self, item):
         data = self.db.find(self.collection)
@@ -338,21 +636,30 @@ class DigitalTwinModel():
         isExists = False
 
         for factory in json_data:
+            if factory["id"] == item:
+                isExists = True
+                break
             for pl in factory["productionLines"]:
+                if pl["@id"] == item:
+                    isExists = True
+                    break
                 for machine in pl['machines']:
-                    if machine["name"] == item:
+                    if machine["@id"] == item:
                         isExists = True
                         break
                     for component in machine['contents']:
                         if component['@type'] == 'Component':
-                            if component["name"] == item:
+                            if component["@id"] == item:
                                 isExists = True
                                 break
                             for sensor in component['sensors']:
-                                if sensor['name'] == item:
+                                if sensor['@id'] == item:
                                     isExists = True
                                     break
-        
+                                for field in sensor["fields"]:
+                                    if field["@id"] == item:
+                                        isExists = True
+                                        break
         return isExists
 
     def retire(self, payload):
@@ -373,11 +680,10 @@ class DigitalTwinModel():
             '$set' : {
                 "id" : "Ermetal",
                 "description" : "Ermetal A.Ş , sac parça şekillendirme ve montajı konusunda tecrübeli çalışanları ve yapmakta olduğu yeni yatırımlar ile Türk Otomotiv Sanayisinin öncü kuruluşlarından birisidir.",
-                "factoryId" : "Ermetal",
                 "factoryName" : "Ermetal Otomotiv A.Ş",
                 "name" : "Ermetal",
                 "type" : "Factory",
-                "zone" : "Dumlupınar / Osmangazi, Bursa",
+                "location" : "Dumlupınar / Osmangazi, Bursa",
                 "bucket": "Ermetal",
                 "productionLines": [
                     {
@@ -793,29 +1099,33 @@ class DigitalTwinModel():
                                                 "unit" : "double",
                                                 "displayName" : "Pres Ana Hava Akış",
                                                 "description" : "degreeCelcius",
-                                                "status" : "Working",
+                                                "status" : "enable",
                                                 "fields": [
                                                     {
+                                                        "@id": "Robot_hava_debi_act",
                                                         "name": "Robot_hava_debi_act",
-                                                        "unit": "double",
                                                         "minValue": 10,
                                                         "maxValue": 20,
                                                         "parent": "presAnaHavaAkis",
                                                         "type": "Field",
-                                                        "dataSource" : "sensors_data",
+                                                        "displayName": "Robot_hava_debi_act",
+                                                        "description": "Robot_hava_debi_act",
+                                                        "measurement": "Press031",
+                                                        "dataSource": "Robot_hava_debi_act"
                                                     },
                                                     {
+                                                        "@id": "Robot_hava_sic_act",
                                                         "name": "Robot_hava_sic_act",
-                                                        "unit": "double",
                                                         "minValue": 5,
                                                         "maxValue": 100,
                                                         "parent": "presAnaHavaAkis",
                                                         "type": "Field",
-                                                        "dataSource" : "sensors_data",
+                                                        "displayName": "Robot_hava_sic_act",
+                                                        "description": "Robot_hava_sic_act",
+                                                        "measurement": "Press031",
+                                                        "dataSource": "Robot_hava_sic_act"
                                                     }
                                                 ],
-                                                "minValue" : 10,
-                                                "maxValue" : 70,
                                                 "visual" : {
                                                     "isRender" : False,
                                                     "geometryType" : "BoxGeometry",
@@ -852,27 +1162,31 @@ class DigitalTwinModel():
                                                 "unit" : "double",
                                                 "displayName" : "sensor1",
                                                 "description" : "degreeCelcius",
-                                                "status" : "Working",
-                                                "minValue" : 30,
-                                                "maxValue" : 60,
+                                                "status" : "enable",
                                                 "fields": [
                                                     {
+                                                        "@id": "Ana_hava_debi_act",
                                                         "name": "Ana_hava_debi_act",
-                                                        "unit": "double",
                                                         "minValue": 10,
                                                         "maxValue": 20,
                                                         "parent": "sensor1",
                                                         "type": "Field",
-                                                        "dataSource" : "sensors_data"
+                                                        "displayName": "Ana_hava_debi_act",
+                                                        "description": "Ana_hava_debi_act",
+                                                        "measurement": "Press031",
+                                                        "dataSource": "Ana_hava_debi_act"
                                                     },
                                                     {
+                                                        "@id": "Ana_hava_sic_act",
                                                         "name": "Ana_hava_sic_act",
-                                                        "unit": "double",
                                                         "minValue": 5,
                                                         "maxValue": 100,
                                                         "parent": "sensor1",
                                                         "type": "Field",
-                                                        "dataSource" : "sensors_data"
+                                                        "displayName": "Ana_hava_sic_act",
+                                                        "description": "Ana_hava_sic_act",
+                                                        "measurement": "Press031",
+                                                        "dataSource": "Ana_hava_sic_act"
                                                     }
                                                 ],
                                                 "visual" : {
@@ -911,29 +1225,33 @@ class DigitalTwinModel():
                                                 "unit" : "double",
                                                 "displayName" : "sensor2",
                                                 "description" : "degreeCelcius",
-                                                "status" : "Working",
+                                                "status" : "enable",
                                                 "fields": [
                                                     {
+                                                        "@id": "Deng_hava_bas_act",
                                                         "name": "Deng_hava_bas_act",
-                                                        "unit": "double",
                                                         "minValue": 10,
                                                         "maxValue": 20,
                                                         "parent": "sensor2",
                                                         "type": "Field",
-                                                        "dataSource" : "sensors_data"
+                                                        "displayName": "Deng_hava_bas_act",
+                                                        "description": "Deng_hava_bas_act",
+                                                        "measurement": "Press031",
+                                                        "dataSource": "Deng_hava_bas_act"
                                                     },
                                                     {
+                                                        "@id": "Deng_hava_debi_act",
                                                         "name": "Deng_hava_debi_act",
-                                                        "unit": "double",
                                                         "minValue": 5,
                                                         "maxValue": 100,
                                                         "parent": "sensor2",
                                                         "type": "Field",
-                                                        "dataSource" : "sensors_data"
+                                                        "displayName": "Deng_hava_debi_act",
+                                                        "description": "Deng_hava_debi_act",
+                                                        "measurement": "Press031",
+                                                        "dataSource": "Deng_hava_debi_act"
                                                     }
                                                 ],
-                                                "minValue" : -100,
-                                                "maxValue" : 100,
                                                 "visual" : {
                                                     "geometryType" : "BoxGeometry",
                                                     "isRender" : False,

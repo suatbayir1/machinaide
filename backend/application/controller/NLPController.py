@@ -16,6 +16,8 @@ from core.nlp.Helper import Helper
 from core.nlp.NLPStarter import nlp, matcher, stat_matcher
 from core.nlp.NLPHandler import NLPHandler
 from core.nlp.JsonToText import JsonToText
+from application.classes.SentenceSimilarityCalculator import SentenceSimilarityCalculator
+from application.classes.Validator import Validator
 import config
 
 nlpserver = Blueprint("nlp", __name__)
@@ -28,29 +30,17 @@ mongoManager = MongoManager()
 questionCorrector = QuestionCorrector()
 helper = Helper()
 jsonToText = JsonToText()
-
+sentenceSimilarityCalculator = SentenceSimilarityCalculator()
+validator = Validator()
 
 @nlpserver.route("/postQuestion", methods = ["POST"])
 @token_required(roles = ["admin", "member", "editor"])
 def postQuestion(token):
     try:
         question = request.json["question"]
-        
-        print("question", question)
-
 
         fixed_question, is_question_fixed = questionCorrector.fixed_question(question)
-
-        print("fixed_question", fixed_question)
-        print("is_question_fixed", is_question_fixed)
-
-
-
         in_mongodb = handler.check_in_training_data(fixed_question)
-
-        print("in_mongodb", in_mongodb)
-
-
 
         if(in_mongodb["exists"]):
             query_result = in_mongodb["query"]
@@ -68,18 +58,13 @@ def postQuestion(token):
             mongo_template = result["mongoTextcat"]
             graph_overlay = result["graphOverlay"]
 
-        print("textcat_labels[0]", textcat_labels[0])
-
         if(textcat_labels[0] == "influxdb"):
             payload2 = "{\"query\": \"" + query_result + "\",\"type\": \"flux\"}"
-            print("query_result", query_result)
             # url = "http://localhost:8086/api/v2/query?orgID=" + config.influx["orgID"]
             url = config.influx["host"] + "/api/v2/query?orgID=" + config.influx["orgID"]
             headers = {'Authorization': 'Token '+ config.influx["dbtoken"],'Content-Type': 'application/json'}
             api_response = requests.request('POST', url, headers=headers, data=payload2)
 
-            print("api_response", api_response)
-            
             if('json' in api_response.headers.get('Content-Type')):
                 return jsonify(
                     error=api_response.json()["message"], 
@@ -125,7 +110,6 @@ def postQuestion(token):
                 resultText=text
             )
     except:
-        print("except")
         return jsonify(
             error= "An unexpected error has occurred",
             entities="", 
@@ -147,3 +131,29 @@ def wordFrequency(token):
 def postTrainData(token):
     res = mongoManager.post_train_data(request.json)
     return jsonify(msg="Train data added.")
+
+@nlpserver.route('/similarQuestions', methods = ['POST'])
+@token_required(roles = ["admin", "member", "editor"])
+def similarQuestions(token):
+    try: 
+        message, confirm = validator.check_request_params(request.json, ["question"])
+
+        if not confirm:
+            return return_response(success = False, message = message, code = 400), 400
+
+        questions = model.get_questions({"question": 1, "_id": 0})
+        
+        if not questions:
+            return return_response(data = [], success = False, message = "There are no questions in the database", code = 403), 403
+
+        questions = [question["question"] for question in questions]
+
+        similarity_table = sentenceSimilarityCalculator.calculate_jaccard_similarity(request.json["question"], questions)
+        # similarity_table = sentenceSimilarityCalculator.calculate_cosine_similarity(request.json["question"], questions)
+        # similarity_table = sentenceSimilarityCalculator.calculate_similarity_with_spacy(request.json["question"], questions)
+        # similarity_table = sentenceSimilarityCalculator.sentence_transformer_semantic_search(request.json["question"], questions)
+
+        print(similarity_table)
+        return return_response(data = similarity_table, success = True, message = "Questions were brought to the 5 most similar questions to the question")
+    except:
+        return return_response(success = False, message = "Unexpected error occurred", code = 403), 403

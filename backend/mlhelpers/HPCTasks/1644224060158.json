@@ -1,0 +1,1 @@
+{"id": "1644224060158", "type": "train", "framework": "Tensorflow", "database": "machinaide", "features": {"Press031": ["Ana_hava_debi_act"]}, "optional": {"lower": "2022-02-07T08:00:00.005Z", "upper": "2022-02-07T09:00:00.475Z"}, "job_specs": {"partition": "Local", "nodes": "1", "cpus": "1", "ntasks_per_node": "1", "cpus_per_task": "1"}, "_id": 

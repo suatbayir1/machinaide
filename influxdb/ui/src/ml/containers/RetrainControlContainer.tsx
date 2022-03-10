@@ -11,6 +11,17 @@ import TaskSection from '../components/TaskSection'
 import * as api from '../components/api'
 import MLBucketSelector from '../components/MLBucketSelector';
 
+let partitionSpecs = [
+    {"Partition Name": "Local"},
+    {"Partition Name": "partition1",
+     "State": "UP",
+     "Total CPUs": 1818,
+     "Total Nodes": 5,
+     "Minimum Nodes": 1,
+     "Maximum Timeout": "15-01:00:00",
+     "Default Timeout": "15:00:00"
+    }
+]
 
 interface Props {}
 
@@ -20,6 +31,7 @@ interface State {
     dropdownData: any[],
     databases: any[],
     partitionSpecs: any[],
+    mltasks: any[],
     measurementToSensors: Object,
     selectedPartitionSpecs: Object,
     selectedModelObject: any,
@@ -56,7 +68,8 @@ class RetrainControlPage extends PureComponent<Props, State> {
             measurements: [],
             dropdownData: [],
             databases: [],
-            partitionSpecs: [],
+            mltasks: [],
+            partitionSpecs: partitionSpecs,
             measurementToSensors: {},
             selectedPartitionSpecs: {},
             from: "",
@@ -141,12 +154,15 @@ class RetrainControlPage extends PureComponent<Props, State> {
     }
 
     componentDidMount() {
+        api.getTasks().then(tasks => {
+            this.setState({mltasks: tasks})
+        })
         console.log(this.props);
 
-        api.getPartitionSpecs().then(partitionSpecs => {
-            console.log(partitionSpecs)
-            this.setState({partitionSpecs: partitionSpecs})
-        })
+        // api.getPartitionSpecs().then(partitionSpecs => {
+        //     console.log(partitionSpecs)
+        //     this.setState({partitionSpecs: partitionSpecs})
+        // })
         // this.getModels();
     }
 
@@ -195,6 +211,10 @@ class RetrainControlPage extends PureComponent<Props, State> {
            this.state.selectedDatabase !== "" && Object.keys(this.state.measurementToSensors).length != 0) {
                return true
            }
+        else if (this.state.selectedPartition === "Local" && this.state.selectedFramework !== "" &&
+                this.state.selectedDatabase !== "" && Object.keys(this.state.measurementToSensors).length != 0) {
+                    return true
+                }
         
         return false
     }
@@ -325,6 +345,7 @@ class RetrainControlPage extends PureComponent<Props, State> {
         let task = {
             id: Date.now().toString(),
             type: "train",
+            Status: "idle",
             framework: this.state.selectedFramework,
             database: this.state.selectedDatabase,
             features: this.state.measurementToSensors,
@@ -340,7 +361,11 @@ class RetrainControlPage extends PureComponent<Props, State> {
 
         // console.log(task)
 
-        api.createTask(task)
+        api.createTask(task).then(() => {
+            api.getTasks().then(tasks => {
+                this.setState({mltasks: tasks})
+            })
+        })
     }
 
     private get optionsComponents(): JSX.Element {
@@ -402,7 +427,7 @@ class RetrainControlPage extends PureComponent<Props, State> {
 
             <Page.Contents fullWidth={true} scrollable={true}>
                 <Grid>
-                    <Grid.Row>
+                    <>
                         <Grid.Column
                             widthXS={Columns.Four}
                             widthSM={Columns.Four}
@@ -480,6 +505,7 @@ class RetrainControlPage extends PureComponent<Props, State> {
                                                             active={active}
                                                             onClick={onClick}
                                                             color={ComponentColor.Secondary}
+                                                            status={this.state.selectedPartition === "Local" ? (ComponentStatus.Disabled):(ComponentStatus.Default)}
                                                             testID="dropdown-button--gen-token">
                                                                 {this.state.selectedScheduler}
                                                             </Dropdown.Button>
@@ -527,6 +553,7 @@ class RetrainControlPage extends PureComponent<Props, State> {
                                                     type={InputType.Number}
                                                     value={this.state.nodeCount}
                                                     onChange={(e) => this.setState({nodeCount: Number(e.target.value)})}
+                                                    status={this.state.selectedPartition === "Local" ? (ComponentStatus.Disabled):(ComponentStatus.Default)}
                                                     testID="bucket-form-nodecount"
                                                 />
                                                 </Table.Cell>
@@ -549,6 +576,7 @@ class RetrainControlPage extends PureComponent<Props, State> {
                                                     type={InputType.Number}
                                                     value={this.state.cpuCount}
                                                     onChange={(e) => this.setState({cpuCount: Number(e.target.value)})}
+                                                    status={this.state.selectedPartition === "Local" ? (ComponentStatus.Disabled):(ComponentStatus.Default)}
                                                     testID="bucket-form-cpucount"
                                                 />
                                                 </Table.Cell>
@@ -560,6 +588,7 @@ class RetrainControlPage extends PureComponent<Props, State> {
                                                     type={InputType.Number}
                                                     value={this.state.taskPerNode}
                                                     onChange={(e) => this.setState({taskPerNode: Number(e.target.value)})}
+                                                    status={this.state.selectedPartition === "Local" ? (ComponentStatus.Disabled):(ComponentStatus.Default)}
                                                     testID="bucket-form-nodetask"
                                                 />
                                                 </Table.Cell>
@@ -571,6 +600,7 @@ class RetrainControlPage extends PureComponent<Props, State> {
                                                     type={InputType.Number}
                                                     value={this.state.cpusPerTask}
                                                     onChange={(e) => this.setState({cpusPerTask: Number(e.target.value)})}
+                                                    status={this.state.selectedPartition === "Local" ? (ComponentStatus.Disabled):(ComponentStatus.Default)}
                                                     testID="bucket-form-taskcpu"
                                                 />
                                                 </Table.Cell>
@@ -794,12 +824,12 @@ class RetrainControlPage extends PureComponent<Props, State> {
                                 
                             </Panel>
                         </Grid.Column>
-                        <Grid.Row>
                                 <Grid.Column
-                                    widthXS={Columns.Three}
-                                    widthSM={Columns.Three}
-                                    widthMD={Columns.Three}
-                                    widthLG={Columns.Three}>
+                                    widthXS={Columns.Five}
+                                    widthSM={Columns.Five}
+                                    widthMD={Columns.Five}
+                                    widthLG={Columns.Five}
+                                    style={{ marginTop: '20px' }}>
                                         <Panel>
                                         <DapperScrollbars
                                         autoHide={true}
@@ -807,14 +837,15 @@ class RetrainControlPage extends PureComponent<Props, State> {
                                         className="data-loading--scroll-content"
                                         >
                                             <Panel.Body style={{height: '480px'}}>
-                                                <TaskSection/>
+                                                <TaskSection
+                                                tasks={this.state.mltasks}/>
                                             </Panel.Body>
                                         </DapperScrollbars>
                                                 
                                         </Panel>
                                 </Grid.Column>
-                        </Grid.Row>
-                        </Grid.Row></Grid></Page.Contents></Page>
+                        </>
+                        </Grid></Page.Contents></Page>
     }
 
 }

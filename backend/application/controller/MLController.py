@@ -259,6 +259,30 @@ def changeStatus():
     mongo_model.update_experiment({"experimentName": experiment_name}, {'$set': {'experimentStatus': "COMPLETED"}})
     return {"msg": "Status of experiment " + experiment_name + " is changed to COMPLETED"}
 
+@mlserver.route('/createTask', methods=['POST'])
+def createTask():
+    task_data = request.get_json()
+    # print(task_data)
+    task_id = task_data["id"]
+
+    if not os.path.isdir(config.TASK_DIRECTORY):
+        os.makedirs(config.TASK_DIRECTORY)
+
+    mongo_model.post_task(task_data)
+
+    with open(config.TASK_DIRECTORY + str(task_id) + ".json", "w") as f:
+        if '_id' in task_data:
+            del task_data['_id']
+        json.dump(task_data, f)
+
+    return "CREATED"
+
+@mlserver.route('/getTasks', methods=['GET'])
+def getTasks():
+    task_data = mongo_model.get_tasks()
+    return dumps(task_data)
+
+
 # @mlserver.route('/getAutomlSettings', methods=['GET'])
 # def getAutomlSettings():
 #     setting = mongo_model.get_settings()

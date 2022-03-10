@@ -106,12 +106,14 @@ class FailureAlarmInformationBox extends PureComponent<Props, State> {
         const { objects, selectedObject } = this.props;
         let foundPart;
 
+        console.log("selectedObject", selectedObject);
+
         objects[0]["productionLines"].forEach(pl => {
             pl["machines"].forEach(machine => {
                 machine["contents"].forEach(component => {
                     if (component["@type"] === "Component") {
-                        if (component["visual"] !== undefined) {
-                            component["visual"].forEach(async visual => {
+                        if (component["visual"] !== undefined && component["visual"] !== "") {
+                            component["visual"]["objects"].forEach(async visual => {
                                 if (visual["name"] === selectedObject) {
                                     foundPart = `${machine["name"]}.${component["name"]}`;
                                     return;
@@ -120,11 +122,13 @@ class FailureAlarmInformationBox extends PureComponent<Props, State> {
                         }
 
                         component["sensors"].forEach(async sensor => {
-                            if (sensor["visual"] !== undefined) {
-                                if (sensor["visual"]["name"] === selectedObject) {
-                                    foundPart = `${machine["name"]}.${component["name"]}.${sensor["name"]}`;
-                                    return;
-                                }
+                            if (sensor["visual"] !== undefined && sensor["visual"] !== "") {
+                                sensor["visual"]["objects"].forEach(async sensorVisual => {
+                                    if (sensorVisual["name"] === selectedObject) {
+                                        foundPart = `${machine["name"]}.${component["name"]}.${sensor["name"]}`;
+                                        return;
+                                    }
+                                })
                             }
                         })
                     }

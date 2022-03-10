@@ -1,23 +1,29 @@
 // Libraries
 import React, { PureComponent } from 'react'
+import { connect, ConnectedProps } from 'react-redux'
+import { ColladaLoader } from "three/examples/jsm/loaders/ColladaLoader";
 
 // Components
 import {
-    Page, Grid, Columns, Panel, ComponentSize, Form, Input, InputType,
-    FlexBox, ColorPicker, Button, ButtonType, IconFont, ComponentColor,
-    ComponentStatus, QuestionMarkTooltip, FlexDirection, DapperScrollbars,
-    List, Gradients, Notification, Dropdown, Overlay, InfluxColors,
+    Page, Grid, Columns, Panel, ComponentSize,
 } from '@influxdata/clockface'
-import TabbedPageTabs from 'src/shared/tabbedPage/TabbedPageTabs'
-import { TabbedPageTab } from 'src/shared/tabbedPage/TabbedPageTabs'
+
+import PageTitle from "src/objectCreator/components/PageTitle";
+import EditObjectFrom from "src/objectCreator/components/EditObjectForm";
+import Buttons from "src/objectCreator/components/Buttons";
+import ImportComponentOverlay from "src/objectCreator/components/ImportComponentOverlay";
+import SaveComponentOverlay from "src/objectCreator/components/SaveComponentOverlay";
+import TextureOverlay from "src/objectCreator/components/TextureOverlay";
+import ModelFile from "src/objectCreator/components/ModelFile";
+
+// Services
+import ObjectService from "src/shared/services/ObjectService";
 
 // Constants
-import {
-    tipStyle, dtManagementPage, objectOpacity, objectTexture, objectUpdateRemove, objectSelectDT,
-    addTexture, objectImportComponent, objectSaveAndSaveAs,
-} from 'src/shared/constants/tips';
-import { BACKEND } from "src/config";
+import { generalSuccessMessage } from 'src/shared/copy/notifications'
 
+// Actions
+import { notify as notifyAction } from 'src/shared/actions/notifications'
 
 // Utilities
 var THREE = require("three");
@@ -27,29 +33,12 @@ var initializeDomEvents = require('threex-domevents')
 var THREEx = {}
 initializeDomEvents(THREE, THREEx)
 var camera, controls, scene, renderer, domEvents, transformControl;
+var dae, kinematics;
 
-
-interface Props { }
+interface OwnProps { }
 interface State {
-    objectName: string
-    boxMeasureX: number
-    boxMeasureY: number
-    boxMeasureZ: number
-    positionX: number
-    positionY: number
-    positionZ: number
-    rotationX: number
-    rotationY: number
-    rotationZ: number
-    color: string
-    opacity: number
-    selectedObject: object
-    selectedFile: string
     textures: object[]
-    selectedTexture: object
-    notificationVisible: boolean
-    notificationType: string
-    notificationMessage: string
+    modelFiles: object[]
     dtList: object[]
     selectedDT: object
     componentName: string
@@ -57,39 +46,25 @@ interface State {
     registeredDT: object[]
     visibleImportComponent: boolean
     registeredObjectList: object[]
-    selectedImportObject: object
     visibleSaveComponent: boolean
-    activeTab: string
-    saveAsComponentName: string
     visibleFileUpload: boolean
-    addObjectType: object[]
-    textureFileName: string
+    visibleModelFile: boolean
 }
 
+type ReduxProps = ConnectedProps<typeof connector>
+type Props = OwnProps & ReduxProps
+
+
 class ObjectCreatorPage extends PureComponent<Props, State> {
+    private refEditObjectForm: React.RefObject<EditObjectFrom>;
+
     constructor(props) {
         super(props)
+        this.refEditObjectForm = React.createRef();
 
         this.state = {
-            objectName: "",
-            boxMeasureX: 0,
-            boxMeasureY: 0,
-            boxMeasureZ: 0,
-            positionX: 0,
-            positionY: 0,
-            positionZ: 0,
-            rotationX: 0,
-            rotationY: 0,
-            rotationZ: 0,
-            color: "#eeeff2",
-            opacity: 0.1,
-            selectedObject: {},
-            selectedFile: "",
             textures: [],
-            selectedTexture: {},
-            notificationVisible: false,
-            notificationType: '',
-            notificationMessage: '',
+            modelFiles: [],
             dtList: [],
             selectedDT: {},
             componentName: "",
@@ -97,90 +72,66 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
             registeredDT: [],
             visibleImportComponent: false,
             registeredObjectList: [],
-            selectedImportObject: {},
             visibleSaveComponent: false,
-            activeTab: "save",
-            saveAsComponentName: "",
             visibleFileUpload: false,
-            addObjectType: [
-                { text: 'Add Cube', value: 'cube' },
-                { text: 'Add Sphere', value: 'sphere' },
-                { text: 'Add Cylinder', value: 'cylinder' },
-                { text: 'Add Torus', value: 'torus' },
-            ],
-            textureFileName: "",
+            visibleModelFile: false,
         }
     }
 
-    handleChangeInput = (e): void => {
-        if (Object.keys(this.state).includes(e.target.name)) {
-            this.setState({ [e.target.name]: e.target.value } as Pick<State, keyof State>);
-        }
+    async componentDidMount(): Promise<void> {
+        await this.createScene();
+        await this.getTextureFiles();
+        await this.getModelFiles();
+        await this.getDigitalTwinObjects();
+        await this.getObjectList();
+        await this.responsiveConfiguration();
+        await this.addLightsToScene();
     }
 
-    handleColorChange = (e) => {
-        this.setState({
-            color: e
-        })
-    }
+    public changeObjectProperties = (object: object): void => {
+        scene.children.forEach(async (child) => {
+            await transformControl.detach(child);
 
-    changeObjectProperties = () => {
-        scene.children.forEach((child) => {
-            transformControl.detach(child);
+            console.log("color", object["color"])
 
-            if (child["name"] === this.state.objectName) {
-                new THREE.TextureLoader().load(
-                    `../../assets/images/textures/${this.state.selectedTexture["file"]}`,
-                    texture => {
-                        child.material.map = texture;
-                        child.material.needsUpdate = true;
-                        child.texture = this.state.selectedTexture;
-                        renderer.render(scene, camera);
-                    },
-                    _ => {
-                    },
-                    _ => {
-                    }
-                )
+            if (child["name"] === object["objectName"]) {
+                if (child["type"] == 'ColladaFile') {
+                    child.traverse(function (child) {
+                        if (child.isMesh) {
+                            child.material.flatShading = true;
+                            child.material.color.set(object["color"]);
+                            child.material.opacity = object["opacity"];
+                        }
+                    });
+                } else {
+                    new THREE.TextureLoader().load(
+                        `../../assets/images/textures/${object["selectedTexture"]["file"]}`,
+                        texture => {
+                            child.material.map = texture;
+                            child.material.needsUpdate = true;
+                            child.texture = object["selectedTexture"];
+                            renderer.render(scene, camera);
+                        },
+                        _ => {
+                        },
+                        _ => {
+                        }
+                    )
 
-                child.material.color.set(this.state.color);
-                child.material.opacity = this.state.opacity;
+                    child.material.color.set(object["color"]);
+                    child.material.opacity = object["opacity"];
+                }
+
                 renderer.render(scene, camera);
             }
         })
     }
 
-    removeObjectFromMongo = async (object) => {
-        const payload = {
-            "name": object["name"]
-        }
+    public removeObjectFromScene = (objectName: string) => {
+        const { notify } = this.props;
 
-        const url = `${BACKEND.API_URL}object/removeObject`;
-        const request = fetch(url, {
-            method: 'DELETE',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
-                'token': window.localStorage.getItem("token")
-            },
-            body: JSON.stringify(payload),
-        })
-
-        try {
-            const response = await request;
-            await response.json();
-            return true;
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-    removeObjectFromScene = () => {
         const tempNewObjects = this.state.newObjects.filter(item =>
-            item["name"] !== this.state.objectName
+            item["name"] !== objectName
         )
 
         this.setState({
@@ -188,32 +139,27 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         });
 
         scene.children.forEach(async (child) => {
-            if (child["name"] === this.state.objectName) {
-                transformControl.detach(child);
+            if (child["name"] === objectName) {
+                await transformControl.detach(child);
                 child.geometry = undefined;
                 child.material = undefined;
                 scene.remove(child);
                 renderer.render(scene, camera);
 
-                this.setState({
-                    notificationVisible: true,
-                    notificationType: "success",
-                    notificationMessage: 'Selected object has been successfully removed from the scene'
-                })
+                notify(generalSuccessMessage("Selected object has been successfully removed from the scene"));
             }
         })
     }
 
-    async componentDidMount(): Promise<void> {
-        await this.createScene();
-        await this.getTextureFiles();
-        await this.getDigitalTwinObjects();
-        await this.getObjectList();
-        await this.responsiveConfiguration();
-        // await this.renderGLTFModel();
+    public getObjectList = async (): Promise<void> => {
+        const result = await ObjectService.getObjectList();
+
+        this.setState({
+            registeredObjectList: result,
+        })
     }
 
-    responsiveConfiguration = () => {
+    public responsiveConfiguration = () => {
         if (document.querySelector("#visualizeGraph") !== null) {
             renderer.setSize(document.querySelector("#visualizeGraph").clientWidth - 30, 700);
             renderer.render(scene, camera);
@@ -226,140 +172,48 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         });
     }
 
-    // renderGLTFModel = async () => {
-    //     const loader = new GLTFLoader();
-    //     const dracoLoader = new DRACOLoader();
+    public getDigitalTwinObjects = async () => {
+        const result = await ObjectService.getDigitalTwinObjects();
 
-    //     dracoLoader.setDecoderPath("../../node_modules/three/examples/js/libs/draco/");
-    //     loader.setDRACOLoader(dracoLoader);
+        if (result == undefined) {
+            return;
+        }
 
-    //     await loader.load(
-    //         '../../assets/images/model/ermetal.glb',
+        const dtList = [];
 
-    //         async function (gltf) {
-    //             gltf.scene.scale.set(0.01, 0.01, 0.01);
-    //             gltf.scene.position.set(0, 0, 0)
-    //             renderer.setClearColor(0xbfe3dd);
-    //             await scene.add(gltf.scene);
-
-    //             await renderer.render(scene, camera);
-    //         },
-
-    //         function (xhr) {
-    //         },
-
-    //         function (error) {
-    //         }
-    //     );
-    //     await renderer.render(scene, camera);
-    // }
-
-    getDigitalTwinObjects = async () => {
-        const url = `${BACKEND.API_URL}dt/`;
-
-        const request = fetch(url, {
-            method: 'GET',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
-                'token': window.localStorage.getItem("token")
-            }
+        result["productionLines"].forEach(pl => {
+            pl["machines"].forEach(machine => {
+                dtList.push({ "text": machine["name"], "value": machine["name"] });
+            })
         })
 
-        try {
-            const response = await request;
-            const res = await response.json();
-
-            if (res.data.success !== true) return;
-            const result = JSON.parse(res.data.data)[0];
-
-            const dtList = [];
-
-            result["productionLines"].forEach(pl => {
-                pl["machines"].forEach(machine => {
-                    dtList.push({ "text": machine["name"], "value": machine["name"] });
-                })
-            })
-
-            let machines = [];
-            result["productionLines"].forEach(pl => {
-                machines = machines.concat(pl["machines"]);
-            })
-
-            this.setState({
-                dtList,
-                selectedDT: dtList[0],
-                registeredDT: machines,
-            });
-
-            await this.handleChangeDT(dtList[0]);
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-    getObjectList = async () => {
-        const url = `${BACKEND.API_URL}object/getObjectPool`;
-
-        const request = fetch(url, {
-            method: 'GET',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
-                'token': window.localStorage.getItem("token")
-            }
+        let machines = [];
+        result["productionLines"].forEach(pl => {
+            machines = machines.concat(pl["machines"]);
         })
 
-        try {
-            const response = await request;
-            const res = await response.json();
+        this.setState({
+            dtList,
+            selectedDT: dtList[0],
+            registeredDT: machines,
+        });
 
-            if (res.data.success !== true) return;
-            const result = JSON.parse(res.data.data);
-
-            this.setState({
-                registeredObjectList: result,
-            })
-        } catch (err) {
-            console.error(err);
-        }
+        await this.handleChangeDT(dtList[0]);
     }
 
-    getTextureFiles = async () => {
-        const url = `${BACKEND.API_URL}dt/getFileInfo`;
+    public getTextureFiles = async () => {
+        const textures = await ObjectService.getTextureFiles();
 
-        const request = fetch(url, {
-            method: 'GET',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
-                'token': window.localStorage.getItem("token")
-            },
-        })
-
-        try {
-            const response = await request;
-            const res = await response.json();
-            const result = JSON.parse(res.data.data);
-
-            this.setState({
-                textures: result
-            });
-        } catch (err) {
-            console.error(err);
-        }
+        this.setState({ textures });
     }
 
-    randomTextGenerator = (length) => {
+    public getModelFiles = async () => {
+        const modelFiles = await ObjectService.getModelFiles();
+
+        this.setState({ modelFiles });
+    }
+
+    private randomTextGenerator = (length) => {
         let result = '';
         let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         for (let i = 0; i < length; i++) {
@@ -368,7 +222,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         return `object_${result}`;
     }
 
-    addCube = (type, item, render = false) => {
+    private addCube = (type, item, render = false) => {
         if (type === 'loaded') {
             if (item.texture !== undefined && item.texture !== null) { // if adding previously saved cube with texture
                 let geometry = new THREE.BoxGeometry(
@@ -450,7 +304,6 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                     renderer.render(scene, camera);
                 }
             }
-
         } else { // if a new cube is added to the scene
             const geometry = new THREE.BoxGeometry(1, 1, 1);
             const material = new THREE.MeshBasicMaterial({ color: '#ffffff' });
@@ -462,7 +315,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         }
     }
 
-    addSphere = (type, item, render = false) => {
+    private addSphere = (type, item, render = false) => {
         if (type === 'loaded') {
             if (item.texture !== undefined && item.texture !== null) { // if adding previously saved object with texture
                 let geometry = new THREE.SphereGeometry(
@@ -551,7 +404,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         }
     }
 
-    addCylinder = (type, item, render = false) => {
+    private addCylinder = (type, item, render = false) => {
         if (type === 'loaded') {
             if (item.texture !== undefined && item.texture !== null) { // if adding previously saved object with texture
                 let geometry = new THREE.CylinderGeometry(
@@ -642,7 +495,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         }
     }
 
-    addTorus = (type, item, render = false) => {
+    private addTorus = (type, item, render = false) => {
         if (type === 'loaded') {
             if (item.texture !== undefined && item.texture !== null) { // if adding previously saved object with texture
                 let geometry = new THREE.TorusGeometry(
@@ -733,7 +586,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         }
     }
 
-    addToSceneAndClickEvent = (object, type) => {
+    public addToSceneAndClickEvent = (object, type) => {
         if (type === "new") {
             this.setState({
                 newObjects: [...this.state.newObjects, object]
@@ -754,7 +607,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         renderer.render(scene, camera);
     }
 
-    createScene = () => {
+    public createScene = () => {
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(
             70,
@@ -763,12 +616,18 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
             1000
         );
 
+        camera.position.x = 13.6;
+        camera.position.y = 5.2;
+        camera.position.z = 1.5;
+        camera.rotation.x = -1.5;
+        camera.rotation.y = 1.1;
+        camera.rotation.z = 1.5;
 
-        camera.position.set(7.5, 3.1, 2);
-        camera.quaternion.set(0.6, -0.04, 0.7, 0.04);
-        camera.rotation.set(-2.6, 1.3, 2.6);
+        // camera.position.set(7.5, 3.1, 2);
+        // camera.quaternion.set(0.6, -0.04, 0.7, 0.04);
+        // camera.rotation.set(-2.6, 1.3, 2.6);
 
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
+        // camera.lookAt(new THREE.Vector3(0, 0, 0));
 
         // Renderer
         renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -780,10 +639,10 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         document.getElementById("sceneArea").appendChild(renderer.domElement);
 
         // Light
-        scene.add(new THREE.HemisphereLight(0xffffff, 0x000000, 0.4));
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-        dirLight.position.set(5, 2, 8);
-        scene.add(dirLight);
+        // scene.add(new THREE.HemisphereLight(0xffffff, 0x000000, 0.4));
+        // const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+        // dirLight.position.set(5, 2, 8);
+        // scene.add(dirLight);
 
         domEvents = new THREEx.DomEvents(camera, renderer.domElement)
 
@@ -802,7 +661,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         // object moving control
         transformControl = new TransformControls(camera, renderer.domElement);
         transformControl.addEventListener('change', () => {
-            this.changeSelectedObject(this.state.selectedObject);
+            this.changeSelectedObject(this.refEditObjectForm.current.state.selectedObject);
             renderer.render(scene, camera);
         })
         transformControl.addEventListener('dragging-changed', function (event) {
@@ -830,286 +689,35 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         })
     }
 
-    changeSelectedObject = (cube) => {
-        this.setState({
-            selectedObject: cube,
-            objectName: cube.name,
-            boxMeasureX: cube.scale.x,
-            boxMeasureY: cube.scale.y,
-            boxMeasureZ: cube.scale.z,
-            positionX: cube.position.x,
-            positionY: cube.position.y,
-            positionZ: cube.position.z,
-            rotationX: cube.rotation.x,
-            rotationY: cube.rotation.y,
-            rotationZ: cube.rotation.z,
-            color: `#${cube.material.color.getHexString()}`,
-            opacity: cube.material.opacity,
-            selectedTexture: cube.texture !== undefined ? cube.texture : {}
-        })
+    public addLightsToScene = () => {
+        // grid
+        let grid = new THREE.GridHelper(20, 20, 0x888888, 0x444444);
+        grid["name"] = "grid";
+        scene.add(grid);
+
+        // lights
+        let light = new THREE.HemisphereLight(0xffeeee, 0x111122);
+        light["name"] = "light";
+        scene.add(light);
+
+        renderer.render(scene, camera);
     }
 
-    handleFileUpload = async (event) => {
-        event.preventDefault();
-
-        const inputFile = document.getElementById("inputFile");
-        const formData = new FormData();
-        formData.append('file', inputFile["files"][0]);
-        formData.append('filename', this.state.textureFileName);
-
-        if (inputFile["files"][0] === undefined) {
-            this.setState({
-                notificationVisible: true,
-                notificationType: "error",
-                notificationMessage: 'Please select file first'
-            })
-            return;
-        }
-
-        if (this.state.textureFileName.trim() === "") {
-            this.setState({
-                notificationVisible: true,
-                notificationType: "error",
-                notificationMessage: 'Texture Name cannot be empty'
-            })
-            return;
-        }
-
-        const url = `${BACKEND.API_URL}dt/fileUpload`;
-
-        const request = fetch(url, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-                // 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
-                'token': window.localStorage.getItem("token")
-            },
-            body: formData,
-        })
-
-        try {
-            const response = await request;
-            const res = await response.json();
-            if (res.data.message.text === 'File_Already_Exists') {
-                this.setState({
-                    notificationVisible: true,
-                    notificationType: "error",
-                    notificationMessage: 'Selected file already exists'
-                })
-            } else if (res.data.message.text === 'File_Uploaded_Successfully') {
-                this.setState({
-                    visibleFileUpload: false,
-                    notificationVisible: true,
-                    notificationType: "success",
-                    notificationMessage: 'Selected file has been uploaded successfully'
-                })
-                this.getTextureFiles();
-            }
-        } catch (err) {
-            console.error(err);
-        }
+    public changeSelectedObject = (cube) => {
+        this.refEditObjectForm.current.changeSelectedObject(cube);
     }
 
-    handleClickTexture = (texture) => {
-        this.setState({
-            selectedTexture: texture
-        })
-    }
-
-    saveComponentObjects = async () => {
-        if (this.state.newObjects.length < 1) {
-            this.setState({
-                notificationVisible: true,
-                notificationType: "error",
-                notificationMessage: 'Please add a new object first'
-            })
-            return;
-        }
-
-        if (this.state.componentName.trim() === "") {
-            this.setState({
-                notificationVisible: true,
-                notificationType: "error",
-                notificationMessage: 'Component name cannot be empty'
-            })
-            return;
-        }
-
-        const objects = [];
-
-        this.state.newObjects.forEach((child) => {
-            if (child["type"] === 'Mesh') {
-                let object = {
-                    "isRender": true,
-                    "name": child["name"],
-                    "geometryType": child["geometry"]["type"],
-                    "boxMeasure": child["geometry"]["parameters"],
-                    "scale": {
-                        "x": child["scale"]["x"],
-                        "y": child["scale"]["y"],
-                        "z": child["scale"]["z"],
-                    },
-                    "position": {
-                        "x": child["position"]["x"],
-                        "y": child["position"]["y"],
-                        "z": child["position"]["z"],
-                    },
-                    "rotate": {
-                        "x": child["rotation"]["x"],
-                        "y": child["rotation"]["y"],
-                        "z": child["rotation"]["z"],
-                    },
-                    "color": `#${child["material"]["color"].getHexString()}`,
-                    "opacity": child["material"]["opacity"],
-                    "texture": child["material"]["map"] !== undefined && child["material"]["map"] !== null ? child["material"]["map"]["image"]["currentSrc"] : null,
-                }
-                objects.push(object);
-            }
-        })
-
-        const payload = {
-            "name": this.state.componentName,
-            "children": objects
-        }
-
-        const url = `${BACKEND.API_URL}object/saveComponentObject`;
-
-        const request = fetch(url, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
-                'token': window.localStorage.getItem("token")
-            },
-            body: JSON.stringify(payload),
-        })
-
-        try {
-            const response = await request;
-            const res = await response.json();
-            if (res.data.message.text === 'All_Objects_Saved_Successfully') {
-                this.setState({
-                    visibleSaveComponent: false,
-                    notificationVisible: true,
-                    notificationType: "success",
-                    notificationMessage: 'Component saved successfully',
-                })
-                this.getObjectList();
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-    saveAsComponentObjects = async () => {
-        if (this.state.newObjects.length < 1) {
-            this.setState({
-                notificationVisible: true,
-                notificationType: "error",
-                notificationMessage: 'Please add a new object first'
-            })
-            return;
-        }
-
-        if (this.state.saveAsComponentName.trim() === "") {
-            this.setState({
-                notificationVisible: true,
-                notificationType: "error",
-                notificationMessage: 'Component name cannot be empty'
-            })
-            return;
-        }
-
-        const objects = [];
-
-        this.state.newObjects.forEach((child) => {
-            if (child["type"] === 'Mesh') {
-                let object = {
-                    "isRender": true,
-                    "name": child["name"],
-                    "geometryType": child["geometry"]["type"],
-                    "boxMeasure": child["geometry"]["parameters"],
-                    "scale": {
-                        "x": child["scale"]["x"],
-                        "y": child["scale"]["y"],
-                        "z": child["scale"]["z"],
-                    },
-                    "position": {
-                        "x": child["position"]["x"],
-                        "y": child["position"]["y"],
-                        "z": child["position"]["z"],
-                    },
-                    "rotate": {
-                        "x": child["rotation"]["x"],
-                        "y": child["rotation"]["y"],
-                        "z": child["rotation"]["z"],
-                    },
-                    "color": `#${child["material"]["color"].getHexString()}`,
-                    "opacity": child["material"]["opacity"],
-                    "texture": child["material"]["map"] !== undefined && child["material"]["map"] !== null ? child["material"]["map"]["image"]["currentSrc"] : null,
-                }
-                objects.push(object);
-            }
-        })
-
-        const payload = {
-            "name": this.state.saveAsComponentName,
-            "children": objects
-        }
-
-        const url = `${BACKEND.API_URL}object/saveAsComponentObject`;
-
-        const request = fetch(url, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
-                'token': window.localStorage.getItem("token")
-            },
-            body: JSON.stringify(payload),
-        })
-
-        try {
-            const response = await request;
-            const res = await response.json();
-            if (res.data.message.text === 'All_Objects_Saved_Successfully') {
-                this.setState({
-                    visibleSaveComponent: false,
-                    componentName: this.state.saveAsComponentName,
-                    notificationVisible: true,
-                    notificationType: "success",
-                    notificationMessage: 'Component saved successfully',
-                })
-                this.getObjectList();
-            } else if (res.data.message.text === 'Object_Already_Exists') {
-                this.setState({
-                    notificationVisible: true,
-                    notificationType: "error",
-                    notificationMessage: 'This component name already exists'
-                })
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-    removeAllObjectFromScene = async () => {
+    public removeAllObjectFromScene = async () => {
         if (scene !== undefined) {
             let obj;
             for (var i = scene.children.length - 1; i >= 0; i--) {
+                if (["GridHelper", "HemisphereLight", "DirectonalLight"].includes(scene.children[i]["type"])) {
+                    continue;
+                }
                 obj = scene.children[i];
+                await transformControl.detach(obj);
                 obj.material = undefined;
                 obj.geometry = undefined;
-                transformControl.detach(obj);
                 await scene.remove(obj);
             }
             renderer.render(scene, camera);
@@ -1118,48 +726,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         return false;
     }
 
-    handleUpdateName = (value) => {
-        if (this.state.objectName === "" || this.state.objectName === null) {
-            this.setState({
-                notificationVisible: true,
-                notificationType: "error",
-                notificationMessage: "Please select an object first"
-            })
-        } else {
-            let isExists = false;
-            scene.children.forEach(child => {
-                if (child["name"] === value) {
-                    isExists = true;
-                }
-            })
-
-            if (!isExists) {
-                scene.children.forEach(child => {
-                    if (child["name"] === this.state.objectName) {
-                        child["name"] = value;
-
-                        this.setState({
-                            objectName: value
-                        })
-
-                        this.setState({
-                            notificationVisible: true,
-                            notificationType: "success",
-                            notificationMessage: "The name of the selected object has been successfully changed"
-                        })
-                    }
-                })
-            } else {
-                this.setState({
-                    notificationVisible: true,
-                    notificationType: "error",
-                    notificationMessage: "This object name already exists"
-                })
-            }
-        }
-    }
-
-    handleChangeDT = async (selectedDT) => {
+    public handleChangeDT = async (selectedDT) => {
         await this.removeAllObjectFromScene();
 
         this.setState({
@@ -1172,13 +739,17 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
             if (machine["name"] === selectedDT["value"]) {
                 machine["contents"].forEach(component => {
                     if (component["@type"] === "Component") {
-                        component["visual"].forEach(visual => {
-                            objects.push(visual);
-                        })
+                        if (component["visual"] !== undefined && component["visual"] !== "") {
+                            component["visual"]["objects"].forEach(visual => {
+                                objects.push(visual);
+                            })
+                        }
 
-                        component["sensors"].forEach(sensorVisual => {
-                            if (sensorVisual["visual"] !== undefined) {
-                                objects.push(sensorVisual["visual"]);
+                        component["sensors"].forEach(sensor => {
+                            if (sensor["visual"] !== undefined && sensor["visual"] !== "") {
+                                sensor["visual"]["objects"].forEach(sensorVisual => {
+                                    objects.push(sensorVisual);
+                                })
                             }
                         })
                     }
@@ -1189,37 +760,62 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         objects.forEach(item => {
             if (item["geometryType"] === "BoxGeometry") {
                 this.addCube('loaded', item);
+            } else if (item["geometryType"] === "SphereGeometry") {
+                this.addSphere('loaded', item);
+            } else if (item["geometryType"] === "CylinderGeometry") {
+                this.addCylinder('loaded', item);
+            } else if (item["geometryType"] === 'TorusGeometry') {
+                this.addTorus('loaded', item);
+            } else if (item["geometryType"] === 'ColladaFile') {
+                this.addColladaFile('loaded', item);
             }
+        })
+    }
 
-            if (item.children !== undefined) {
-                item.children.forEach(child => {
-                    if (child["geometryType"] === "BoxGeometry") {
-                        this.addCube('loaded', child);
-                    } else if (child["geometryType"] === "SphereGeometry") {
-                        this.addSphere('loaded', child);
-                    } else if (child["geometryType"] === "CylinderGeometry") {
-                        this.addCylinder('loaded', child);
-                    } else if (child["geometryType"] === 'TorusGeometry') {
-                        this.addTorus('loaded', child);
+    public addColladaFile = async (type, item, render = true) => {
+        const loader = new ColladaLoader();
+
+        let vm = this;
+        await loader.load(`../../assets/images/model/${item['fileName']}`, async function (collada) {
+            dae = collada.scene;
+            dae.traverse(function (child) {
+                if (child.isMesh) {
+                    child.material.flatShading = true;
+
+                    if (item["color"] !== undefined || item["opacity"] !== undefined) {
+                        child.material.color.set(item["color"]);
+                        child.material.opacity = item["opacity"];
                     }
-                })
+                }
+            });
+
+            dae.scale.x = type === 'loaded' ? item["boxMeasure"]["x"] : 4;
+            dae.scale.y = type === 'loaded' ? item["boxMeasure"]["y"] : 4;
+            dae.scale.z = type === 'loaded' ? item["boxMeasure"]["z"] : 4;
+            dae.position.x = type === 'loaded' ? item["position"]["x"] : 1;
+            dae.position.y = type === 'loaded' ? item["position"]["y"] : 0;
+            dae.position.z = type === 'loaded' ? item["position"]["z"] : 1;
+            dae.name = type === 'loaded' ? dae["name"] : vm.randomTextGenerator(10);
+            dae.type = 'ColladaFile';
+            dae.fileName = item["fileName"];
+            dae.updateMatrix();
+            kinematics = collada.kinematics;
+
+            Object.keys(collada.library.materials).forEach(material => {
+                collada.library.materials[material].build.wireframe = render;
+            })
+
+            if (render) {
+                scene.add(dae);
+                renderer.render(scene, camera);
+            } else {
+                vm.addToSceneAndClickEvent(dae, "new");
             }
-        })
+        });
+        await renderer.render(scene, camera);
     }
 
-    handleImportComponentToScene = () => {
-        this.setState({
-            visibleImportComponent: true,
-        })
-    }
-
-    handleDismissImportComponent = () => {
-        this.setState({
-            visibleImportComponent: false
-        })
-    }
-
-    removeNewObjectsFromScene = async () => {
+    public removeNewObjectsFromScene = async (): Promise<void> => {
         const newObjectsId = [];
         this.state.newObjects.forEach(newItem => {
             if (newItem["uuid"] !== undefined) {
@@ -1232,9 +828,9 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
             for (var i = scene.children.length - 1; i >= 0; i--) {
                 if (newObjectsId.includes(scene.children[i]["uuid"])) {
                     obj = scene.children[i];
+                    await transformControl.detach(obj);
                     obj.material = undefined;
                     obj.geometry = undefined;
-                    transformControl.detach(obj);
                     await scene.remove(obj);
                 }
             }
@@ -1245,106 +841,31 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         })
     }
 
-    handleSaveImportComponent = async () => {
-        if (Object.keys(this.state.selectedImportObject).length === 0) {
+    public handleSaveImportComponent = async (component: object): Promise<void> => {
+        component["children"].forEach(item => {
             this.setState({
-                notificationVisible: true,
-                notificationType: "error",
-                notificationMessage: 'Please select component first'
+                newObjects: [...this.state.newObjects, item]
             })
-            return;
-        }
-
-        await this.removeNewObjectsFromScene();
-
-        if (this.state.selectedImportObject["children"] !== undefined) {
-            this.state.selectedImportObject["children"].forEach(item => {
-                this.setState({
-                    newObjects: [...this.state.newObjects, item]
-                })
-                if (item["geometryType"] === "BoxGeometry") {
-                    this.addCube('loaded', item, true);
-                } else if (item["geometryType"] === "SphereGeometry") {
-                    this.addSphere('loaded', item, true);
-                } else if (item["geometryType"] === "CylinderGeometry") {
-                    this.addCylinder('loaded', item, true);
-                } else if (item["geometryType"] === 'TorusGeometry') {
-                    this.addTorus('loaded', item, true);
-                }
-            })
-        } else {
-            this.setState({
-                newObjects: [...this.state.newObjects, this.state.selectedImportObject]
-            })
-            if (this.state.selectedImportObject["geometryType"] === "BoxGeometry") {
-                this.addCube('loaded', this.state.selectedImportObject, true);
-            } else if (this.state.selectedImportObject["geometryType"] === "SphereGeometry") {
-                this.addSphere('loaded', this.state.selectedImportObject, true);
-            } else if (this.state.selectedImportObject["geometryType"] === "CylinderGeometry") {
-                this.addCylinder('loaded', this.state.selectedImportObject, true);
-            } else if (this.state.selectedImportObject["geometryType"] === 'TorusGeometry') {
-                this.addTorus('loaded', this.state.selectedImportObject, true);
+            if (item["geometryType"] === "BoxGeometry") {
+                this.addCube('loaded', item, true);
+            } else if (item["geometryType"] === "SphereGeometry") {
+                this.addSphere('loaded', item, true);
+            } else if (item["geometryType"] === "CylinderGeometry") {
+                this.addCylinder('loaded', item, true);
+            } else if (item["geometryType"] === 'TorusGeometry') {
+                this.addTorus('loaded', item, true);
+            } else if (item["geometryType"] === 'ColladaFile') {
+                this.addColladaFile('loaded', item, false);
             }
-        }
+        })
 
         this.setState({
-            componentName: this.state.selectedImportObject["name"],
-            saveAsComponentName: this.state.selectedImportObject["name"],
+            componentName: component["name"],
             visibleImportComponent: false,
-            notificationVisible: true,
-            notificationType: "success",
-            notificationMessage: 'Component successfully added to the scene'
         })
     }
 
-    handleSelectImportComponent = (object) => {
-        this.setState({
-            selectedImportObject: object,
-        })
-    }
-
-    handleSaveComponentOverlay = () => {
-        this.setState({
-            visibleSaveComponent: true,
-        })
-    }
-
-    handleDismissSaveComponent = () => {
-        this.setState({
-            visibleSaveComponent: false
-        })
-    }
-
-    handleSaveSaveComponent = () => {
-        switch (this.state.activeTab) {
-            case 'save':
-                this.saveComponentObjects();
-                break;
-            case 'saveas':
-                this.saveAsComponentObjects();
-                break;
-        }
-    }
-
-    handleOnTabClick = (activeTab) => {
-        this.setState({
-            activeTab,
-        })
-    }
-
-    handleFileUploadOverlay = () => {
-        this.setState({
-            visibleFileUpload: true
-        })
-    }
-
-    handleDismissFileUpload = () => {
-        this.setState({
-            visibleFileUpload: false
-        })
-    }
-
-    handleClickAddObject = (type) => {
+    public handleClickAddObject = (type) => {
         switch (type["value"]) {
             case 'cube':
                 this.addCube('', {});
@@ -1361,720 +882,142 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         }
     }
 
-    private get headerChildren(): JSX.Element[] {
-        return [
-            <QuestionMarkTooltip
-                diameter={20}
-                tooltipStyle={{ width: '400px' }}
-                color={ComponentColor.Secondary}
-                tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
-                    <div style={{ color: InfluxColors.Star }}>{"How to add texture:"}
-                        <hr style={tipStyle} />
-                    </div>
-                    {addTexture}
-                </div>}
-            />
-        ]
+    public handleSaveImportModel = async (model: object): Promise<void> => {
+        const item = { "fileName": model["file"] }
+        this.addColladaFile('', item, false);
     }
 
     public render(): JSX.Element {
-        const dtList = this.state.dtList.map(item => {
-            return (
-                <Dropdown.Item
-                    testID="dropdown-item generate-token--read-write"
-                    id={item['value']}
-                    key={item['value']}
-                    value={item}
-                    onClick={this.handleChangeDT}
-                >
-                    {item['text']}
-                </Dropdown.Item>
-            )
-        })
-
-        const textureList = this.state.textures.map(texture => {
-            return (
-                <Dropdown.Item
-                    id={texture['filename']}
-                    key={texture['filename']}
-                    value={texture}
-                    onClick={this.handleClickTexture}
-                >
-                    {texture['filename']}
-                </Dropdown.Item>
-            )
-        })
-
-        const addObjectType = this.state.addObjectType.map(item => {
-            return (
-                <Dropdown.Item
-                    id={item['text']}
-                    key={item['text']}
-                    value={item}
-                    onClick={this.handleClickAddObject}
-                >
-                    {item['text']}
-                </Dropdown.Item>
-            )
-        })
-
-        const tabs: TabbedPageTab[] = [
-            {
-                text: 'Save',
-                id: 'save',
-            },
-            {
-                text: 'Save as',
-                id: 'saveas',
-            },
-        ]
+        const {
+            visibleImportComponent, visibleSaveComponent, componentName, newObjects,
+            registeredObjectList, visibleFileUpload, textures, visibleModelFile, modelFiles
+        } = this.state;
 
         return (
-            <Page className="show-only-pc">
-                <Page.Header fullWidth={true}>
-                    <Page.Title title={"Digital Twin Management"}></Page.Title>
-                    <QuestionMarkTooltip
-                        style={{ marginBottom: '8px' }}
-                        diameter={30}
-                        tooltipStyle={{ width: '400px' }}
-                        color={ComponentColor.Secondary}
-                        tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
-                            <div style={{ color: InfluxColors.Star }}>{"About the Digital Twin Monitor Page:"}
-                                <hr style={tipStyle} />
-                            </div>
-                            {dtManagementPage}
-                        </div>}
-                    />
-                </Page.Header>
-                <Page.Contents fullWidth={true} scrollable={true}>
-                    <Grid>
-                        <Grid.Row>
-                            {/* Left Side */}
-                            <Grid.Column
-                                widthXS={Columns.Twelve}
-                                widthSM={Columns.Twelve}
-                                widthMD={Columns.Three}
-                                widthLG={Columns.Two}
-                                style={{ marginTop: '20px' }}
-                            >
-                                <Panel>
-                                    <Panel.Header size={ComponentSize.ExtraSmall}>
-                                        <Grid>
-                                            <Grid.Row>
-                                                <Grid.Column
-                                                    widthXS={Columns.Twelve}
-                                                    widthSM={Columns.Six}
-                                                    widthMD={Columns.Twelve}
-                                                    widthLG={Columns.Twelve}
-                                                >
-                                                    <Form.Element label="Component name">
-                                                        <Input
-                                                            name="componentName"
-                                                            placeholder="Component name.."
-                                                            onChange={this.handleChangeInput}
-                                                            value={this.state.componentName}
-                                                            status={ComponentStatus.Disabled}
-                                                        />
-                                                    </Form.Element>
-                                                </Grid.Column>
-                                                <Grid.Column
-                                                    widthXS={Columns.Twelve}
-                                                    widthSM={Columns.Six}
-                                                    widthMD={Columns.Twelve}
-                                                    widthLG={Columns.Twelve}
-                                                >
-                                                    <Form.Element label="Box Measure">
-                                                        <FlexBox margin={ComponentSize.Small}>
-                                                            <Input
-                                                                name="boxMeasureX"
-                                                                placeholder="x"
-                                                                onChange={this.handleChangeInput}
-                                                                value={this.state.boxMeasureX}
-                                                                type={InputType.Number}
-                                                                status={ComponentStatus.Disabled}
-                                                            />
+            <>
+                <ImportComponentOverlay
+                    visible={visibleImportComponent}
+                    onClose={() => {
+                        this.setState({
+                            visibleImportComponent: false
+                        })
+                    }}
+                    removeNewObjectsFromScene={this.removeNewObjectsFromScene}
+                    handleSaveImportComponent={this.handleSaveImportComponent}
+                    registeredObjectList={registeredObjectList}
+                    getObjectList={this.getObjectList}
+                />
 
-                                                            <Input
-                                                                name="boxMeasureY"
-                                                                placeholder="y"
-                                                                onChange={this.handleChangeInput}
-                                                                value={this.state.boxMeasureY}
-                                                                type={InputType.Number}
-                                                                status={ComponentStatus.Disabled}
-                                                            />
+                <SaveComponentOverlay
+                    visible={visibleSaveComponent}
+                    onClose={() => {
+                        this.setState({
+                            visibleSaveComponent: false
+                        })
+                    }}
+                    componentName={componentName}
+                    newObjects={newObjects}
+                    getObjectList={this.getObjectList}
+                />
 
-                                                            <Input
-                                                                name="boxMeasureZ"
-                                                                placeholder="z"
-                                                                onChange={this.handleChangeInput}
-                                                                value={this.state.boxMeasureZ}
-                                                                type={InputType.Number}
-                                                                status={ComponentStatus.Disabled}
-                                                            />
-                                                        </FlexBox>
-                                                    </Form.Element>
-                                                </Grid.Column>
-                                                <Grid.Column
-                                                    widthXS={Columns.Twelve}
-                                                    widthSM={Columns.Six}
-                                                    widthMD={Columns.Twelve}
-                                                    widthLG={Columns.Twelve}
-                                                >
-                                                    <Form.Element label="Position">
-                                                        <FlexBox margin={ComponentSize.Small}>
-                                                            <Input
-                                                                name="positionX"
-                                                                placeholder="x"
-                                                                onChange={this.handleChangeInput}
-                                                                value={this.state.positionX}
-                                                                type={InputType.Number}
-                                                                status={ComponentStatus.Disabled}
-                                                            />
+                <TextureOverlay
+                    visible={visibleFileUpload}
+                    onClose={() => {
+                        this.setState({
+                            visibleFileUpload: false
+                        })
+                    }}
+                    getTextureFiles={this.getTextureFiles}
+                    textures={textures}
+                />
 
-                                                            <Input
-                                                                name="positionY"
-                                                                placeholder="y"
-                                                                onChange={this.handleChangeInput}
-                                                                value={this.state.positionY}
-                                                                type={InputType.Number}
-                                                                status={ComponentStatus.Disabled}
-                                                            />
+                <ModelFile
+                    visible={visibleModelFile}
+                    onClose={() => {
+                        this.setState({
+                            visibleModelFile: false
+                        })
+                    }}
+                    modelFiles={modelFiles}
+                    getModelFiles={this.getModelFiles}
+                    removeNewObjectsFromScene={this.removeNewObjectsFromScene}
+                    handleSaveImportModel={this.handleSaveImportModel}
+                />
 
-                                                            <Input
-                                                                name="positionZ"
-                                                                placeholder="z"
-                                                                onChange={this.handleChangeInput}
-                                                                value={this.state.positionZ}
-                                                                status={ComponentStatus.Disabled}
-                                                                type={InputType.Number}
-                                                            />
-                                                        </FlexBox>
-                                                    </Form.Element>
-                                                </Grid.Column>
-                                                <Grid.Column
-                                                    widthXS={Columns.Twelve}
-                                                    widthSM={Columns.Six}
-                                                    widthMD={Columns.Twelve}
-                                                    widthLG={Columns.Twelve}
-                                                >
-                                                    <Form.Element label="Rotation">
-                                                        <FlexBox margin={ComponentSize.Small}>
-                                                            <Input
-                                                                name="rotationX"
-                                                                placeholder="x"
-                                                                onChange={this.handleChangeInput}
-                                                                value={this.state.rotationX}
-                                                                status={ComponentStatus.Disabled}
-                                                                type={InputType.Number}
-                                                            />
+                <Page className="show-only-pc">
+                    <PageTitle />
 
-                                                            <Input
-                                                                name="rotationY"
-                                                                placeholder="y"
-                                                                onChange={this.handleChangeInput}
-                                                                value={this.state.rotationY}
-                                                                status={ComponentStatus.Disabled}
-                                                                type={InputType.Number}
-                                                            />
-
-                                                            <Input
-                                                                name="rotationZ"
-                                                                placeholder="z"
-                                                                onChange={this.handleChangeInput}
-                                                                value={this.state.rotationZ}
-                                                                status={ComponentStatus.Disabled}
-                                                                type={InputType.Number}
-                                                            />
-                                                        </FlexBox>
-                                                    </Form.Element>
-                                                </Grid.Column>
-                                                <Grid.Column
-                                                    widthXS={Columns.Twelve}
-                                                    widthSM={Columns.Six}
-                                                    widthMD={Columns.Twelve}
-                                                    widthLG={Columns.Twelve}
-                                                >
-                                                    <Form.Element label="Color">
-                                                        <ColorPicker
-                                                            color={this.state.color}
-                                                            onChange={this.handleColorChange}
-                                                        />
-                                                    </Form.Element>
-                                                </Grid.Column>
-                                                <Grid.Column
-                                                    widthXS={Columns.Twelve}
-                                                    widthSM={Columns.Six}
-                                                    widthMD={Columns.Twelve}
-                                                    widthLG={Columns.Twelve}
-                                                >
-                                                    <FlexBox margin={ComponentSize.Medium}>
-                                                        <Form.Element label="Texture">
-                                                            <Dropdown
-                                                                button={(active, onClick) => (
-                                                                    <Dropdown.Button
-                                                                        active={active}
-                                                                        onClick={onClick}
-                                                                        color={ComponentColor.Secondary}
-                                                                    >
-                                                                        {
-                                                                            Object.keys(this.state.selectedTexture).length === 0
-                                                                                ? 'No texture selected'
-                                                                                : this.state.selectedTexture['filename']
-                                                                        }
-                                                                    </Dropdown.Button>
-                                                                )}
-                                                                menu={onCollapse => (
-                                                                    <Dropdown.Menu onCollapse={onCollapse}>
-                                                                        <DapperScrollbars
-                                                                            autoHide={false}
-                                                                            autoSizeHeight={true} style={{ maxHeight: '150px' }}
-                                                                            className="data-loading--scroll-content"
-                                                                        >
-                                                                            {
-                                                                                textureList
-                                                                            }
-                                                                        </DapperScrollbars>
-                                                                    </Dropdown.Menu>
-                                                                )}
-                                                            />
-                                                        </Form.Element>
-                                                        <QuestionMarkTooltip
-                                                            style={{ marginTop: '8px' }}
-                                                            diameter={20}
-                                                            tooltipStyle={{ width: '400px' }}
-                                                            color={ComponentColor.Secondary}
-                                                            tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
-                                                                <div style={{ color: InfluxColors.Star }}>{"Texture:"}
-                                                                    <hr style={tipStyle} />
-                                                                </div>
-                                                                {objectTexture}
-                                                            </div>}
-                                                        />
-                                                    </FlexBox>
-                                                </Grid.Column>
-                                                <Grid.Column widthSM={Columns.Six}>
-                                                    <Form.Element label="Opacity">
-                                                        <FlexBox
-                                                            direction={FlexDirection.Row}
-                                                            margin={ComponentSize.Small}
-                                                        >
-                                                            <Input
-                                                                name="opacity"
-                                                                placeholder="Opacity.."
-                                                                onChange={this.handleChangeInput}
-                                                                value={this.state.opacity}
-                                                                type={InputType.Number}
-                                                                maxLength={1}
-                                                                max={1}
-                                                                min={0.1}
-                                                                step={0.1}
-                                                            />
-                                                            <QuestionMarkTooltip
-                                                                diameter={20}
-                                                                tooltipStyle={{ width: '400px' }}
-                                                                color={ComponentColor.Secondary}
-                                                                tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
-                                                                    <div style={{ color: InfluxColors.Star }}>{"Opacity:"}
-                                                                        <hr style={tipStyle} />
-                                                                    </div>
-                                                                    {objectOpacity}
-                                                                </div>}
-                                                            />
-                                                        </FlexBox>
-                                                    </Form.Element>
-                                                </Grid.Column>
-                                            </Grid.Row>
-                                        </Grid>
-                                    </Panel.Header>
-
-                                    <Panel.Body size={ComponentSize.ExtraSmall}>
-                                        <Grid.Row>
-                                            <div className="object-creator-info-buttons">
-                                                <QuestionMarkTooltip
-                                                    diameter={20}
-                                                    tooltipStyle={{ width: '400px' }}
-                                                    color={ComponentColor.Secondary}
-                                                    tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
-                                                        <div style={{ color: InfluxColors.Star }}>{"Update - Remove:"}
-                                                            <hr style={tipStyle} />
-                                                        </div>
-                                                        {objectUpdateRemove}
-                                                    </div>}
-                                                />
-                                                <Button
-                                                    text="Remove"
-                                                    onClick={this.removeObjectFromScene}
-                                                    type={ButtonType.Button}
-                                                    icon={IconFont.Remove}
-                                                    color={ComponentColor.Danger}
-                                                />
-                                                <Button
-                                                    text="Update"
-                                                    onClick={this.changeObjectProperties}
-                                                    type={ButtonType.Button}
-                                                    icon={IconFont.Checkmark}
-                                                    color={ComponentColor.Success}
-                                                />
-                                            </div>
-                                        </Grid.Row>
-                                    </Panel.Body>
-                                </Panel>
-                            </Grid.Column>
-
-                            {/* Right Side */}
-                            <Grid.Column
-                                widthXS={Columns.Twelve}
-                                widthSM={Columns.Twelve}
-                                widthMD={Columns.Nine}
-                                widthLG={Columns.Ten}
-                                style={{ marginTop: '20px' }}
-                            >
-                                <Panel>
-                                    <Panel.Header size={ComponentSize.ExtraSmall}>
-                                        <Grid>
-                                            <Grid.Row>
-                                                <FlexBox margin={ComponentSize.Small} className="object-creator-flex-container">
-                                                    <div className="object-creator-left-buttons">
-                                                        <Dropdown
-                                                            style={{ width: '150px' }}
-                                                            button={(active, onClick) => (
-                                                                <Dropdown.Button
-                                                                    // style={{ maxWidth: '150px' }}
-                                                                    icon={IconFont.Plus}
-                                                                    active={active}
-                                                                    onClick={onClick}
-                                                                    color={ComponentColor.Secondary}
-                                                                >
-                                                                    {"Add Object"}
-                                                                </Dropdown.Button>
-                                                            )}
-                                                            menu={onCollapse => (
-                                                                <Dropdown.Menu
-                                                                    style={{ maxWidth: '150px' }}
-                                                                    onCollapse={onCollapse}
-                                                                >
-                                                                    {
-                                                                        addObjectType
-                                                                    }
-                                                                </Dropdown.Menu>
-                                                            )}
-                                                        />
-                                                        <Button
-                                                            text="Texture Upload"
-                                                            icon={IconFont.Export}
-                                                            onClick={this.handleFileUploadOverlay}
-                                                            type={ButtonType.Button}
-                                                            color={ComponentColor.Primary}
-                                                        />
-                                                        <Button
-                                                            text="Import Component"
-                                                            icon={IconFont.Import}
-                                                            onClick={this.handleImportComponentToScene}
-                                                            type={ButtonType.Button}
-                                                            color={ComponentColor.Primary}
-                                                        />
-                                                        <Button
-                                                            text="Save Component"
-                                                            icon={IconFont.Checkmark}
-                                                            onClick={this.handleSaveComponentOverlay}
-                                                            type={ButtonType.Button}
-                                                            color={ComponentColor.Success}
-                                                        />
-                                                    </div>
-
-                                                    <div className="tabbed-page--header-right">
-                                                        <QuestionMarkTooltip
-                                                            diameter={20}
-                                                            tooltipStyle={{ width: '400px' }}
-                                                            color={ComponentColor.Secondary}
-                                                            tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
-                                                                <div style={{ color: InfluxColors.Star }}>{"Select Digital Twin:"}
-                                                                    <hr style={tipStyle} />
-                                                                </div>
-                                                                {objectSelectDT}
-                                                            </div>}
-                                                        />
-                                                        <Dropdown
-                                                            style={{ width: '150px' }}
-                                                            button={(active, onClick) => (
-                                                                <Dropdown.Button
-                                                                    active={active}
-                                                                    onClick={onClick}
-                                                                    color={ComponentColor.Primary}
-                                                                >
-                                                                    {this.state.selectedDT['text']}
-                                                                </Dropdown.Button>
-                                                            )}
-                                                            menu={onCollapse => (
-                                                                <Dropdown.Menu
-                                                                    style={{ width: '150px' }}
-                                                                    onCollapse={onCollapse}
-                                                                >
-                                                                    {
-                                                                        dtList
-                                                                    }
-                                                                </Dropdown.Menu>
-                                                            )}
-                                                        />
-                                                    </div>
-                                                </FlexBox>
-                                            </Grid.Row>
-                                        </Grid>
-                                    </Panel.Header>
-
-                                    <Panel.Body size={ComponentSize.Small} id={"visualizeGraph"}>
-                                        <div id="sceneArea"></div>
-                                    </Panel.Body>
-                                </Panel>
-                            </Grid.Column>
-                        </Grid.Row>
-
-                        {/* Notification Component */}
-                        <Notification
-                            key={"id"}
-                            id={"id"}
-                            icon={
-                                this.state.notificationType === 'success'
-                                    ? IconFont.Checkmark
-                                    : IconFont.Alerts
-                            }
-                            duration={5000}
-                            size={ComponentSize.Small}
-                            visible={this.state.notificationVisible}
-                            gradient={
-                                this.state.notificationType === 'success'
-                                    ? Gradients.HotelBreakfast
-                                    : Gradients.DangerDark
-                            }
-                            onTimeout={() => this.setState({ notificationVisible: false })}
-                            onDismiss={() => this.setState({ notificationVisible: false })}
-                        >
-                            <span className="notification--message">{this.state.notificationMessage}</span>
-                        </Notification>
-
-                        {/* Import Component Overlay */}
-                        <Overlay visible={this.state.visibleImportComponent}>
-                            <Overlay.Container maxWidth={600}>
-                                <Overlay.Header
-                                    title="Import Component"
-                                    onDismiss={this.handleDismissImportComponent}
-                                    children={<QuestionMarkTooltip
-                                        diameter={20}
-                                        tooltipStyle={{ width: '400px' }}
-                                        color={ComponentColor.Secondary}
-                                        tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
-                                            <div style={{ color: InfluxColors.Star }}>{"Import Component:"}
-                                                <hr style={tipStyle} />
-                                            </div>
-                                            {objectImportComponent}
-                                        </div>}
-                                    />}
-                                />
-
-                                <Overlay.Body>
-                                    <Form>
-                                        <Grid.Row>
-                                            <Grid.Column widthSM={Columns.Twelve}>
-                                                <Form.Element label="Component">
-                                                    <DapperScrollbars
-                                                        autoHide={false}
-                                                        autoSizeHeight={true} style={{ maxHeight: '200px' }}
-                                                        className="data-loading--scroll-content"
-                                                    >
-                                                        <List>
-                                                            {
-                                                                this.state.registeredObjectList.map((object) => {
-                                                                    return (
-                                                                        <List.Item
-                                                                            key={object["name"]}
-                                                                            value={object["name"]}
-                                                                            onClick={() => this.handleSelectImportComponent(object)}
-                                                                            title={object["name"]}
-                                                                            gradient={Gradients.GundamPilot}
-                                                                            wrapText={true}
-                                                                            selected={this.state.selectedImportObject["name"] === object["name"] ? true : false}
-                                                                        >
-                                                                            <FlexBox
-                                                                                direction={FlexDirection.Row}
-                                                                                margin={ComponentSize.Small}
-                                                                            >
-                                                                                <List.Indicator type="dot" />
-                                                                                <List.Indicator type="checkbox" />
-                                                                                <div className="selectors--item-value selectors--item__measurement">
-                                                                                    {object["name"]}
-                                                                                </div>
-                                                                            </FlexBox>
-                                                                        </List.Item>
-                                                                    )
-                                                                })
-                                                            }
-                                                        </List>
-                                                    </DapperScrollbars>
-                                                </Form.Element>
-                                            </Grid.Column>
-                                        </Grid.Row>
-
-                                        <Form.Footer>
-                                            <Button
-                                                text="Cancel"
-                                                icon={IconFont.Remove}
-                                                onClick={this.handleDismissImportComponent}
-                                            />
-
-                                            <Button
-                                                text="Import"
-                                                icon={IconFont.Import}
-                                                color={ComponentColor.Success}
-                                                type={ButtonType.Submit}
-                                                onClick={this.handleSaveImportComponent}
-                                            />
-                                        </Form.Footer>
-                                    </Form>
-                                </Overlay.Body>
-                            </Overlay.Container>
-                        </Overlay>
-
-                        {/* Save Component Overlay */}
-                        <Overlay visible={this.state.visibleSaveComponent}>
-                            <Overlay.Container maxWidth={400}>
-                                <Overlay.Header
-                                    title="Save Component"
-                                    onDismiss={this.handleDismissSaveComponent}
-                                    children={
-                                        <QuestionMarkTooltip
-                                            diameter={20}
-                                            tooltipStyle={{ width: '400px' }}
-                                            color={ComponentColor.Secondary}
-                                            tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
-                                                <div style={{ color: InfluxColors.Star }}>{"Save Component:"}
-                                                    <hr style={tipStyle} />
-                                                </div>
-                                                {objectSaveAndSaveAs}
-                                            </div>}
-                                        />
-                                    }
-                                />
-
-                                <Overlay.Body>
-                                    <TabbedPageTabs
-                                        tabs={tabs}
-                                        activeTab={this.state.activeTab}
-                                        onTabClick={this.handleOnTabClick}
+                    <Page.Contents fullWidth={true} scrollable={true}>
+                        <Grid>
+                            <Grid.Row>
+                                <Grid.Column
+                                    widthXS={Columns.Twelve}
+                                    widthSM={Columns.Twelve}
+                                    widthMD={Columns.Three}
+                                    widthLG={Columns.Two}
+                                    style={{ marginTop: '20px' }}
+                                >
+                                    <EditObjectFrom
+                                        ref={this.refEditObjectForm}
+                                        changeObjectProperties={this.changeObjectProperties}
+                                        removeObjectFromScene={this.removeObjectFromScene}
+                                        textures={textures}
                                     />
-                                    <br />
-                                    {
-                                        this.state.activeTab === "save"
-                                            ? (
-                                                <Grid.Row>
-                                                    <Grid.Column widthXS={Columns.Twelve}>
-                                                        <Form.Element label="Component name">
-                                                            <Input
-                                                                name="componentName"
-                                                                placeholder="Component name.."
-                                                                onChange={this.handleChangeInput}
-                                                                value={this.state.componentName}
-                                                                status={ComponentStatus.Disabled}
-                                                            />
-                                                        </Form.Element>
-                                                    </Grid.Column>
-                                                </Grid.Row>
-                                            )
-                                            : (
-                                                <Grid.Row>
-                                                    <Grid.Column widthXS={Columns.Twelve}>
-                                                        <Form.Element label="Component name">
-                                                            <Input
-                                                                name="saveAsComponentName"
-                                                                placeholder="Component name.."
-                                                                onChange={this.handleChangeInput}
-                                                                value={this.state.saveAsComponentName}
-                                                            />
-                                                        </Form.Element>
-                                                    </Grid.Column>
-                                                </Grid.Row>
-                                            )
-                                    }
-                                    <Form>
-                                        <Form.Footer>
-                                            <Button
-                                                text="Cancel"
-                                                icon={IconFont.Remove}
-                                                onClick={this.handleDismissSaveComponent}
-                                            />
+                                </Grid.Column>
 
-                                            <Button
-                                                text="Save"
-                                                icon={IconFont.Checkmark}
-                                                color={ComponentColor.Success}
-                                                type={ButtonType.Submit}
-                                                onClick={this.handleSaveSaveComponent}
-                                            />
-                                        </Form.Footer>
-                                    </Form>
-                                </Overlay.Body>
-                            </Overlay.Container>
-                        </Overlay>
+                                <Grid.Column
+                                    widthXS={Columns.Twelve}
+                                    widthSM={Columns.Twelve}
+                                    widthMD={Columns.Nine}
+                                    widthLG={Columns.Ten}
+                                    style={{ marginTop: '20px' }}
+                                >
+                                    <Panel>
+                                        <Buttons
+                                            handleClickAddObject={this.handleClickAddObject}
+                                            handleChangeDT={this.handleChangeDT}
+                                            handleFileUploadOverlay={() => {
+                                                this.setState({
+                                                    visibleFileUpload: true
+                                                })
+                                            }}
+                                            handleImportComponentToScene={() => {
+                                                this.setState({
+                                                    visibleImportComponent: true,
+                                                })
+                                            }}
+                                            handleSaveComponentOverlay={() => {
+                                                this.setState({
+                                                    visibleSaveComponent: true,
+                                                })
+                                            }}
+                                            handleOpenModelFile={() => {
+                                                this.setState({
+                                                    visibleModelFile: true,
+                                                })
+                                            }}
+                                            selectedDT={this.state.selectedDT}
+                                            dtList={this.state.dtList}
+                                        />
 
-                        {/* File Upload Overlay */}
-                        <Overlay visible={this.state.visibleFileUpload}>
-                            <Overlay.Container maxWidth={400}>
-                                <Overlay.Header
-                                    title="Texture Upload"
-                                    onDismiss={this.handleDismissFileUpload}
-                                    children={this.headerChildren}
-                                />
-
-                                <Overlay.Body>
-                                    <Form>
-                                        <Grid.Row>
-                                            <Grid.Column widthSM={Columns.Twelve}>
-                                                <Form.Element label="Texture Name">
-                                                    <Input
-                                                        name="textureFileName"
-                                                        placeholder="Texture name.."
-                                                        onChange={this.handleChangeInput}
-                                                        value={this.state.textureFileName}
-                                                    />
-                                                </Form.Element>
-                                            </Grid.Column>
-                                        </Grid.Row>
-                                        <Grid.Row>
-                                            <Grid.Column widthSM={Columns.Twelve}>
-                                                <Form.Element label="File Upload">
-                                                    <input
-                                                        name="file"
-                                                        type="file"
-                                                        id="inputFile"
-                                                        accept=".jpg, .jpeg, .png, .svg"
-                                                    />
-                                                </Form.Element>
-                                            </Grid.Column>
-                                        </Grid.Row>
-
-                                        <Form.Footer>
-                                            <Button
-                                                text="Cancel"
-                                                icon={IconFont.Remove}
-                                                onClick={this.handleDismissFileUpload}
-                                            />
-
-                                            <Button
-                                                text="Upload"
-                                                icon={IconFont.Export}
-                                                color={ComponentColor.Success}
-                                                type={ButtonType.Submit}
-                                                onClick={this.handleFileUpload}
-                                            />
-                                        </Form.Footer>
-                                    </Form>
-                                </Overlay.Body>
-                            </Overlay.Container>
-                        </Overlay>
-                    </Grid>
-                </Page.Contents>
-            </Page>
+                                        <Panel.Body size={ComponentSize.Small} id={"visualizeGraph"}>
+                                            <div id="sceneArea"></div>
+                                        </Panel.Body>
+                                    </Panel>
+                                </Grid.Column>
+                            </Grid.Row>
+                        </Grid>
+                    </Page.Contents>
+                </Page>
+            </>
         )
     }
 }
 
-export default ObjectCreatorPage;
+const mdtp = {
+    notify: notifyAction,
+}
+
+const connector = connect(null, mdtp)
+
+export default connector(ObjectCreatorPage);

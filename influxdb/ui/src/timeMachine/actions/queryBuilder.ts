@@ -1,12 +1,12 @@
 // APIs
-import {normalize} from 'normalizr'
-import {queryBuilderFetcher} from 'src/timeMachine/apis/QueryBuilderFetcher'
+import { normalize } from 'normalizr'
+import { queryBuilderFetcher } from 'src/timeMachine/apis/QueryBuilderFetcher'
 import * as api from 'src/client'
-import {get} from 'lodash'
-import {fetchDemoDataBuckets} from 'src/cloud/apis/demodata'
+import { get } from 'lodash'
+import { fetchDemoDataBuckets } from 'src/cloud/apis/demodata'
 
 // Utils
-import {event} from 'src/cloud/utils/reporting'
+import { event } from 'src/cloud/utils/reporting'
 
 // Types
 import {
@@ -17,17 +17,17 @@ import {
   RemoteDataState,
   ResourceType,
 } from 'src/types'
-import {Dispatch} from 'react'
+import { Dispatch } from 'react'
 import {
   Action as AlertBuilderAction,
   setEvery,
 } from 'src/alerting/actions/alertBuilder'
 
 // Selectors
-import {getOrg} from 'src/organizations/selectors'
-import {getAll} from 'src/resources/selectors'
-import {getStatus} from 'src/resources/selectors'
-import {getTimeRangeWithTimezone} from 'src/dashboards/selectors'
+import { getOrg } from 'src/organizations/selectors'
+import { getAll } from 'src/resources/selectors'
+import { getStatus } from 'src/resources/selectors'
+import { getTimeRangeWithTimezone } from 'src/dashboards/selectors'
 import {
   getActiveQuery,
   getActiveTimeMachine,
@@ -35,15 +35,15 @@ import {
 } from 'src/timeMachine/selectors'
 
 //Actions
-import {editActiveQueryWithBuilderSync} from 'src/timeMachine/actions'
-import {setBuckets} from 'src/buckets/actions/creators'
+import { editActiveQueryWithBuilderSync } from 'src/timeMachine/actions'
+import { setBuckets } from 'src/buckets/actions/creators'
 
 // Constants
-import {LIMIT} from 'src/resources/constants'
-import {AGG_WINDOW_AUTO} from 'src/timeMachine/constants/queryBuilder'
+import { LIMIT } from 'src/resources/constants'
+import { AGG_WINDOW_AUTO } from 'src/timeMachine/constants/queryBuilder'
 
 // Schemas
-import {arrayOfBuckets} from 'src/schemas'
+import { arrayOfBuckets } from 'src/schemas'
 
 export type Action =
   | ReturnType<typeof setBuilderAggregateFunctionType>
@@ -70,32 +70,32 @@ export const setBuilderAggregateFunctionType = (
   index: number
 ) => ({
   type: 'SET_BUILDER_AGGREGATE_FUNCTION_TYPE' as 'SET_BUILDER_AGGREGATE_FUNCTION_TYPE',
-  payload: {builderAggregateFunctionType, index},
+  payload: { builderAggregateFunctionType, index },
 })
 
 const setBuilderBucketsStatus = (bucketsStatus: RemoteDataState) => ({
   type: 'SET_BUILDER_BUCKETS_STATUS' as 'SET_BUILDER_BUCKETS_STATUS',
-  payload: {bucketsStatus},
+  payload: { bucketsStatus },
 })
 
 export const setBuilderBuckets = (buckets: string[]) => ({
   type: 'SET_BUILDER_BUCKETS' as 'SET_BUILDER_BUCKETS',
-  payload: {buckets},
+  payload: { buckets },
 })
 
 const setBuilderBucket = (bucket: string, resetSelections: boolean) => ({
   type: 'SET_BUILDER_BUCKET_SELECTION' as 'SET_BUILDER_BUCKET_SELECTION',
-  payload: {bucket, resetSelections},
+  payload: { bucket, resetSelections },
 })
 
 export const setBuilderTagsStatus = (status: RemoteDataState) => ({
   type: 'SET_BUILDER_TAGS_STATUS' as 'SET_BUILDER_TAGS_STATUS',
-  payload: {status},
+  payload: { status },
 })
 
 const setBuilderTagKeys = (index: number, keys: string[]) => ({
   type: 'SET_BUILDER_TAG_KEYS' as 'SET_BUILDER_TAG_KEYS',
-  payload: {index, keys},
+  payload: { index, keys },
 })
 
 export const setBuilderTagKeysStatus = (
@@ -103,27 +103,27 @@ export const setBuilderTagKeysStatus = (
   status: RemoteDataState
 ) => ({
   type: 'SET_BUILDER_TAG_KEYS_STATUS' as 'SET_BUILDER_TAG_KEYS_STATUS',
-  payload: {index, status},
+  payload: { index, status },
 })
 
 const setBuilderTagValues = (index: number, values: string[]) => ({
   type: 'SET_BUILDER_TAG_VALUES' as 'SET_BUILDER_TAG_VALUES',
-  payload: {index, values},
+  payload: { index, values },
 })
 
 const setBuilderTagValuesStatus = (index: number, status: RemoteDataState) => ({
   type: 'SET_BUILDER_TAG_VALUES_STATUS' as 'SET_BUILDER_TAG_VALUES_STATUS',
-  payload: {index, status},
+  payload: { index, status },
 })
 
 const setBuilderTagKeySelection = (index: number, key: string) => ({
   type: 'SET_BUILDER_TAG_KEY_SELECTION' as 'SET_BUILDER_TAG_KEY_SELECTION',
-  payload: {index, key},
+  payload: { index, key },
 })
 
 const setBuilderTagValuesSelection = (index: number, values: string[]) => ({
   type: 'SET_BUILDER_TAG_VALUES_SELECTION' as 'SET_BUILDER_TAG_VALUES_SELECTION',
-  payload: {index, values},
+  payload: { index, values },
 })
 
 const addTagSelectorSync = () => ({
@@ -132,32 +132,32 @@ const addTagSelectorSync = () => ({
 
 const removeTagSelectorSync = (index: number) => ({
   type: 'REMOVE_TAG_SELECTOR' as 'REMOVE_TAG_SELECTOR',
-  payload: {index},
+  payload: { index },
 })
 
 export const setFunctions = (functions: string[]) => ({
   type: 'SELECT_BUILDER_FUNCTION' as 'SELECT_BUILDER_FUNCTION',
-  payload: {functions},
+  payload: { functions },
 })
 
 export const setAggregateWindow = (period: string) => ({
   type: 'SET_AGGREGATE_WINDOW' as 'SET_AGGREGATE_WINDOW',
-  payload: {period},
+  payload: { period },
 })
 
 export const setAggregateFillValues = (fillValues: boolean) => ({
   type: 'SET_AGGREGATE_FILL_VALUES' as 'SET_AGGREGATE_FILL_VALUES',
-  payload: {fillValues},
+  payload: { fillValues },
 })
 
 export const setValuesSearchTerm = (index: number, searchTerm: string) => ({
   type: 'SET_BUILDER_VALUES_SEARCH_TERM' as 'SET_BUILDER_VALUES_SEARCH_TERM',
-  payload: {index, searchTerm},
+  payload: { index, searchTerm },
 })
 
 export const setKeysSearchTerm = (index: number, searchTerm: string) => ({
   type: 'SET_BUILDER_KEYS_SEARCH_TERM' as 'SET_BUILDER_KEYS_SEARCH_TERM',
-  payload: {index, searchTerm},
+  payload: { index, searchTerm },
 })
 
 export const setWindowPeriodSelectionMode = (mode: 'custom' | 'auto') => (
@@ -197,7 +197,7 @@ export const loadBuckets = () => async (
   dispatch(setBuilderBucketsStatus(RemoteDataState.Loading))
 
   try {
-    const resp = await api.getBuckets({query: {orgID, limit: LIMIT}})
+    const resp = await api.getBuckets({ query: { orgID, limit: LIMIT } })
 
     if (resp.status !== 200) {
       throw new Error(resp.data.message)
@@ -234,7 +234,7 @@ export const loadBuckets = () => async (
       {
         time: startTime,
       },
-      {duration: Date.now() - startTime}
+      { duration: Date.now() - startTime }
     )
   } catch (e) {
     if (e.name === 'CancellationError') {
@@ -260,7 +260,7 @@ export const loadTagSelector = (index: number) => async (
 ) => {
   const startTime = Date.now()
 
-  const {buckets, tags} = getActiveQuery(getState()).builderConfig
+  const { buckets, tags } = getActiveQuery(getState()).builderConfig
 
   if (!tags[index] || !buckets[0]) {
     return
@@ -294,7 +294,7 @@ export const loadTagSelector = (index: number) => async (
       timeRange,
     })
 
-    const {key} = tags[index]
+    const { key } = tags[index]
 
     if (!key) {
       let defaultKey: string
@@ -319,7 +319,7 @@ export const loadTagSelector = (index: number) => async (
       {
         time: startTime,
       },
-      {duration: Date.now() - startTime}
+      { duration: Date.now() - startTime }
     )
   } catch (e) {
     if (e.name === 'CancellationError') {
@@ -338,7 +338,7 @@ const loadTagSelectorValues = (index: number) => async (
   const startTime = Date.now()
 
   const state = getState()
-  const {buckets, tags} = getActiveQuery(state).builderConfig
+  const { buckets, tags } = getActiveQuery(state).builderConfig
   const tagsSelections = tags.slice(0, index)
   const queryURL = state.links.query.self
 
@@ -370,7 +370,7 @@ const loadTagSelectorValues = (index: number) => async (
       timeRange,
     })
 
-    const {values: selectedValues} = tags[index]
+    const { values: selectedValues } = tags[index]
 
     for (const selectedValue of selectedValues) {
       // Even if the selected values didn't come back in the results, let them
@@ -387,7 +387,7 @@ const loadTagSelectorValues = (index: number) => async (
       {
         time: startTime,
       },
-      {duration: Date.now() - startTime}
+      { duration: Date.now() - startTime }
     )
   } catch (e) {
     if (e.name === 'CancellationError') {
@@ -405,7 +405,7 @@ export const selectTagValue = (index: number, value: string) => (
 ) => {
   const state = getState()
   const {
-    timeMachines: {activeTimeMachineID},
+    timeMachines: { activeTimeMachineID },
   } = state
   const tags = getActiveQuery(state).builderConfig.tags
   const currentTag = tags[index]
@@ -442,7 +442,7 @@ export const multiSelectBuilderFunction = (name: string) => (
   dispatch: Dispatch<Action>,
   getState: GetState
 ) => {
-  const {draftQueries, activeQueryIndex} = getActiveTimeMachine(getState())
+  const { draftQueries, activeQueryIndex } = getActiveTimeMachine(getState())
   const functions = draftQueries[activeQueryIndex].builderConfig.functions
 
   const functionNames = functions.map(f => f.name)
@@ -463,7 +463,7 @@ export const singleSelectBuilderFunction = (name: string) => (
   dispatch: Dispatch<Action>,
   getState: GetState
 ) => {
-  const {draftQueries, activeQueryIndex} = getActiveTimeMachine(getState())
+  const { draftQueries, activeQueryIndex } = getActiveTimeMachine(getState())
   const functions = draftQueries[activeQueryIndex].builderConfig.functions
 
   const functionNames = functions.map(f => f.name)

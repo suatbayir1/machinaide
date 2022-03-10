@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 // Components
 import {
     Page, Grid, Columns, SpinnerContainer, TechnoSpinner, RemoteDataState, QuestionMarkTooltip,
-    InfluxColors, ComponentColor,
+    InfluxColors, ComponentColor, EmptyState, ComponentSize, Button, ButtonType, IconFont,
 } from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
@@ -44,15 +44,19 @@ class AllFactories extends PureComponent<Props, State> {
 
     getAllFactories = async () => {
         const factories = await FactoryService.getFactories();
+        console.log("factories", factories);
+
         this.setState({
-            factory: factories[0],
+            factory: factories?.[0],
             spinnerLoading: RemoteDataState.Done,
             isLoading: true,
         });
     }
 
     render() {
-        const { spinnerLoading, isLoading } = this.state;
+        const { spinnerLoading, isLoading, factory } = this.state;
+
+        console.log("factory", this.state.factory)
 
         return (
             <Page>
@@ -92,30 +96,48 @@ class AllFactories extends PureComponent<Props, State> {
                             {/* </div> */}
 
                             <Page.Contents fullWidth={true} scrollable={true}>
-                                <Grid>
-                                    <Grid.Row>
-                                        <Grid.Column
-                                            widthMD={Columns.Six}
-                                            widthLG={Columns.Five}
-                                            offsetLG={Columns.One}
-                                        >
-                                            <FactoryCard
-                                                factory={this.state.factory}
-                                                orgID={this.props["match"].params.orgID}
-                                            />
-                                        </Grid.Column>
+                                {
+                                    factory ?
+                                        <Grid>
+                                            <Grid.Row>
+                                                <Grid.Column
+                                                    widthMD={Columns.Six}
+                                                    widthLG={Columns.Five}
+                                                    offsetLG={Columns.One}
+                                                >
+                                                    <FactoryCard
+                                                        factory={this.state.factory}
+                                                        orgID={this.props["match"].params.orgID}
+                                                    />
+                                                </Grid.Column>
 
-                                        <Grid.Column
-                                            widthMD={Columns.Six}
-                                            widthLG={Columns.Five}
-                                        >
-                                            <ProductionLineCards
-                                                factory={this.state.factory}
-                                                orgID={this.props["match"].params.orgID}
+                                                <Grid.Column
+                                                    widthMD={Columns.Six}
+                                                    widthLG={Columns.Five}
+                                                >
+                                                    <ProductionLineCards
+                                                        factory={this.state.factory}
+                                                        orgID={this.props["match"].params.orgID}
+                                                    />
+                                                </Grid.Column>
+                                            </Grid.Row>
+                                        </Grid>
+                                        :
+                                        <EmptyState size={ComponentSize.Large}>
+                                            <EmptyState.Text>
+                                                No <b>Factory</b> record has been created, why not create
+                                                one?
+                                            </EmptyState.Text>
+                                            <Button
+                                                text="Create Factory"
+                                                type={ButtonType.Button}
+                                                icon={IconFont.Plus}
+                                                color={ComponentColor.Primary}
+                                                titleText={"Go to digital twin page and create factory"}
+                                                onClick={() => this.props["history"].push(`/orgs/${this.props["match"].params["orgID"]}/dt`)}
                                             />
-                                        </Grid.Column>
-                                    </Grid.Row>
-                                </Grid>
+                                        </EmptyState>
+                                }
                             </Page.Contents>
                         </React.Fragment>
                     )

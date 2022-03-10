@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import {
     Page, Grid, Columns, IconFont, Input, SpinnerContainer, TechnoSpinner, RemoteDataState, InfluxColors,
     Table, DapperScrollbars, BorderType, ComponentSize, QuestionMarkTooltip, ComponentColor, Form,
+    EmptyState, Button, ButtonType,
 } from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
@@ -164,58 +165,58 @@ class SensorsTable extends PureComponent<Props, State> {
                                     widthLG={Columns.Ten}
                                     offsetLG={Columns.One}
                                 >
-                                    <Grid style={{ marginTop: "50px", marginBottom: '100px', background: '#292933', padding: '20px' }}>
-                                        <Grid.Row style={{ marginTop: '20px' }}>
-                                            <Grid.Column
-                                                widthXS={Columns.Twelve}
-                                                widthSM={Columns.Four}
-                                                widthMD={Columns.Three}
-                                                widthLG={Columns.Two}
-                                            >
-                                                <Form.Element label="Filter by name">
-                                                    <Input
-                                                        icon={IconFont.Search}
-                                                        name="filterName"
-                                                        onChange={this.handleChangeInput}
-                                                        value={this.state.filterName}
-                                                    />
-                                                </Form.Element>
-                                            </Grid.Column>
-                                            <Grid.Column
-                                                widthXS={Columns.Twelve}
-                                                widthSM={Columns.Four}
-                                                widthMD={Columns.Three}
-                                                widthLG={Columns.Two}
-                                            >
-                                                <Form.Element label="Filter by type">
-                                                    <Input
-                                                        icon={IconFont.Search}
-                                                        name="filterType"
-                                                        onChange={this.handleChangeInput}
-                                                        value={this.state.filterType}
-                                                    />
-                                                </Form.Element>
-                                            </Grid.Column>
-                                            <Grid.Column
-                                                widthXS={Columns.Twelve}
-                                                widthSM={Columns.Four}
-                                                widthMD={Columns.Three}
-                                                widthLG={Columns.Two}
-                                            >
-                                                <Form.Element label="Filter by status">
-                                                    <Input
-                                                        icon={IconFont.Search}
-                                                        name="filterSensorStatus"
-                                                        onChange={this.handleChangeInput}
-                                                        value={this.state.filterSensorStatus}
-                                                    />
-                                                </Form.Element>
-                                            </Grid.Column>
-                                        </Grid.Row>
+                                    {
+                                        filteredRows.length > 0 ?
+                                            <Grid style={{ marginTop: "50px", marginBottom: '100px', background: '#292933', padding: '20px' }}>
+                                                <Grid.Row style={{ marginTop: '20px' }}>
+                                                    <Grid.Column
+                                                        widthXS={Columns.Twelve}
+                                                        widthSM={Columns.Four}
+                                                        widthMD={Columns.Three}
+                                                        widthLG={Columns.Two}
+                                                    >
+                                                        <Form.Element label="Filter by name">
+                                                            <Input
+                                                                icon={IconFont.Search}
+                                                                name="filterName"
+                                                                onChange={this.handleChangeInput}
+                                                                value={this.state.filterName}
+                                                            />
+                                                        </Form.Element>
+                                                    </Grid.Column>
+                                                    <Grid.Column
+                                                        widthXS={Columns.Twelve}
+                                                        widthSM={Columns.Four}
+                                                        widthMD={Columns.Three}
+                                                        widthLG={Columns.Two}
+                                                    >
+                                                        <Form.Element label="Filter by type">
+                                                            <Input
+                                                                icon={IconFont.Search}
+                                                                name="filterType"
+                                                                onChange={this.handleChangeInput}
+                                                                value={this.state.filterType}
+                                                            />
+                                                        </Form.Element>
+                                                    </Grid.Column>
+                                                    <Grid.Column
+                                                        widthXS={Columns.Twelve}
+                                                        widthSM={Columns.Four}
+                                                        widthMD={Columns.Three}
+                                                        widthLG={Columns.Two}
+                                                    >
+                                                        <Form.Element label="Filter by status">
+                                                            <Input
+                                                                icon={IconFont.Search}
+                                                                name="filterSensorStatus"
+                                                                onChange={this.handleChangeInput}
+                                                                value={this.state.filterSensorStatus}
+                                                            />
+                                                        </Form.Element>
+                                                    </Grid.Column>
+                                                </Grid.Row>
 
-                                        <Grid.Row style={{ marginTop: '10px' }}>
-                                            {
-                                                filteredRows.length > 0 ? (
+                                                <Grid.Row style={{ marginTop: '10px' }}>
                                                     <DapperScrollbars
                                                         autoHide={false}
                                                         autoSizeHeight={true}
@@ -278,12 +279,24 @@ class SensorsTable extends PureComponent<Props, State> {
                                                             </Table.Body>
                                                         </Table>
                                                     </DapperScrollbars>
-                                                ) : (
-                                                    <h1>A sensor for the specified conditions was not found</h1>
-                                                )
-                                            }
-                                        </Grid.Row>
-                                    </Grid>
+                                                </Grid.Row>
+                                            </Grid>
+                                            :
+                                            <EmptyState size={ComponentSize.Large}>
+                                                <EmptyState.Text>
+                                                    No <b>Sensor</b> record has been created, why not create
+                                                    one?
+                                                </EmptyState.Text>
+                                                <Button
+                                                    text="Create Sensor"
+                                                    type={ButtonType.Button}
+                                                    icon={IconFont.Plus}
+                                                    color={ComponentColor.Primary}
+                                                    titleText={"Go to digital twin page and create sensor"}
+                                                    onClick={() => this.props["history"].push(`/orgs/${this.props["match"].params["orgID"]}/dt`)}
+                                                />
+                                            </EmptyState>
+                                    }
                                 </Grid.Column>
                             </Page.Contents>
                         </React.Fragment>

@@ -10,6 +10,29 @@ let MONGO_URL = "https://vmi474601.contaboserver.net/api/v1.0/metadata"
 let ALERT_URL = "http://localhost:9632"
 let HPC_URL = "https://vmi474601.contaboserver.net/api/v1.0/hpc"
 
+export const createTask = async(pkg) => {
+    let url = BASE_URL + '/createTask'
+
+    const response = await AJAX({
+        url: url,
+        method: 'POST',
+        data: pkg
+    })
+
+    console.log(response.statusText)
+}
+
+export const getTasks = async () => {
+    let url = BASE_URL + '/getTasks'
+
+    const response = await AJAX({
+        url: url,
+        method: 'GET'
+    })
+
+    return response.data
+} 
+
 
 export const cancelTraining = (sessionID, modelID) => AJAX({
     url: BASE_URL + '/stop_training/' + sessionID + '/' + modelID,

@@ -150,6 +150,13 @@ class FactoryModel():
 
         return self.db.find(collection, where)
 
+    def get_machine_actions_by_condition(self, where):
+        try:
+            collection = "machine_actions"
+            return cursor_to_json(self.db.find(collection, where))
+        except:
+            return False
+
     def update_machine_action(self, payload):
         collection = "machine_actions"
 

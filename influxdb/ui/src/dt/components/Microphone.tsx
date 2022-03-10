@@ -21,10 +21,11 @@ recognition.maxAlternatives = 5;
 interface State {
     isSpeaking: boolean
     predictiveSentences: object[]
+    lastSentence: string
 }
 interface Props {
     getTextQuery: (text) => void
-    getSpeechRecognitionAlternatives: (alternatives) => void
+    getSpeechRecognitionAlternatives: (alternatives, lastSentence) => void
 }
 
 export default class Microphone extends PureComponent<Props, State> {
@@ -34,6 +35,7 @@ export default class Microphone extends PureComponent<Props, State> {
         this.state = {
             isSpeaking: false,
             predictiveSentences: [],
+            lastSentence: "",
         }
     }
 
@@ -43,7 +45,7 @@ export default class Microphone extends PureComponent<Props, State> {
         recognition.onresult = function (event) {
             var current = event.resultIndex;
             var transcript = event.results[current][0].transcript;
-            vm.setState({ predictiveSentences: event.results[current] })
+            vm.setState({ predictiveSentences: event.results[current], lastSentence: transcript })
             vm.props.getTextQuery(transcript);
         };
 
@@ -69,11 +71,11 @@ export default class Microphone extends PureComponent<Props, State> {
     }
 
     stop = () => {
-        const { predictiveSentences } = this.state;
+        const { predictiveSentences, lastSentence } = this.state;
 
         recognition.stop();
         this.setState({ isSpeaking: false });
-        this.props.getSpeechRecognitionAlternatives(predictiveSentences);
+        this.props.getSpeechRecognitionAlternatives(predictiveSentences, lastSentence);
     }
 
     render() {

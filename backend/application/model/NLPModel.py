@@ -7,3 +7,6 @@ class NLPModel():
     def __init__(self):
         self.db = MongoDB()
         self.collection = "nlp_questions"
+
+    def get_questions(self, columns):
+        return cursor_to_json(self.db.find_by_columns(self.collection, {}, columns))

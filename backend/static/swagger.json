@@ -51,6 +51,10 @@
         {
             "name": "General",
             "description": "General operations such as creating reports and sending e-mails are grouped under this class."
+        },
+        {
+            "name": "Influx",
+            "description": "Operations that require direct communication with InfluxDB, such as querying InfluxDB and writing data, are collected in this class."
         }
     ],
     "schemes": [
@@ -1566,6 +1570,50 @@
                 }
             }
         },
+        "/factory/getMetadataByProcessId": {
+            "post": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "This method has been developed for searching and listing results in a mobile applications.",
+                "description": "This method has been developed for searching and listing results in a mobile applications.",
+                "operationId": "getMetadataByProcessId",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GetMetadataByProcessId"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
         "/failure/getAllFailures": {
             "get": {
                 "tags": [
@@ -2506,6 +2554,50 @@
                     }
                 }
             }
+        },
+        "/influx/query": {
+            "post": {
+                "tags": [
+                    "Influx"
+                ],
+                "summary": "This method is used to querying InfluxDB.",
+                "description": "This method is used to querying InfluxDB",
+                "operationId": "queryInfluxDB",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/InfluxQuery"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
         }
     },
     "securityDefinitions": {
@@ -3165,6 +3257,100 @@
                     "type": "string",
                     "example": "johndoe",
                     "description": "Unique id of the user who created report"
+                }
+            }
+        },
+        "InfluxQuery": {
+            "type": "object",
+            "required": [
+                "bucket",
+                "measurements",
+                "fields",
+                "startTimestamp",
+                "endTimestamp",
+                "period",
+                "function"
+            ],
+            "properties": {
+                "bucket": {
+                    "type": "string",
+                    "example": "Ermetal",
+                    "description": "The name of the bucket which the data will be fetched. You can find the bucket in the results from the method /dt"
+                },
+                "measurements": {
+                    "type": "list",
+                    "example": [
+                        "Press030",
+                        "Press031"
+                    ],
+                    "description": "This fields keeps the list of measurements. You can find the measurements in the results from the method /dt"
+                },
+                "fields": {
+                    "type": "list",
+                    "example": [
+                        "Robot_hava_debi_act",
+                        "Ana_hava_debi_act",
+                        "Ana_hava_sic_act"
+                    ],
+                    "description": "This fields keeps the list of fields. You can find the fields in the results from the method /dt."
+                },
+                "startTimestamp": {
+                    "type": "string",
+                    "example": "1644825708",
+                    "description": "Start timestamp of requested data."
+                },
+                "endTimestamp": {
+                    "type": "string",
+                    "example": "1644912258",
+                    "description": "End timestamp of requested data."
+                },
+                "period": {
+                    "type": "string",
+                    "example": "1h",
+                    "description": "Specifies at what intervals the data will be grouped. The period must use one of the time types in this list [s, m, h, d]"
+                },
+                "function": {
+                    "type": "string",
+                    "example": "mean",
+                    "description": "Specifies which mathematical formula to apply when grouping data. The function must use one of the mathematical forumalas in this list [mean, median, last, count, mode, sum, min, max]"
+                }
+            }
+        },
+        "GetMetadataByProcessId": {
+            "type": "object",
+            "required": [
+                "processId",
+                "searchText"
+            ],
+            "properties": {
+                "processId": {
+                    "type": "integer",
+                    "example": 5,
+                    "enum": [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6,
+                        7
+                    ],
+                    "description": "It is the id information that specifies the type of operation to be performed. The transactions and their corresponding id information are defined below. \n - 1 => Production Line\n - 2 => Machine\n - 3 => Component\n - 4 => Sensor\n - 5 => Machine Action\n - 6 => Report\n - 7 => Detail Sensor Information"
+                },
+                "searchText": {
+                    "type": "string",
+                    "example": "sdfg",
+                    "description": "Refers to the substring to be searched for. It's content should be changed according to processId"
+                },
+                "startDate": {
+                    "type": "string",
+                    "example": "2020-05-05T12:17",
+                    "description": "Start date of desired machine action records"
+                },
+                "endDate": {
+                    "type": "string",
+                    "example": "2022-05-05T12:17",
+                    "description": "End date of desired machine action records"
                 }
             }
         }

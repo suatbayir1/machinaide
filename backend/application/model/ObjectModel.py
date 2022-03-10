@@ -2,6 +2,7 @@ from core.database.MongoDB import MongoDB
 from bson.json_util import loads, dumps
 import json
 from application.helpers.Helper import cursor_to_json
+from bson import ObjectId
 
 class ObjectModel():
     def __init__(self):
@@ -71,3 +72,13 @@ class ObjectModel():
 
                     self.db.delete_one(self.collection, where)
         return True
+
+    def delete_component_model(self, payload):
+        try:
+            where = {
+                "_id": ObjectId(payload["id"])
+            }
+
+            return self.db.delete_one(self.collection, where)
+        except:
+            return False

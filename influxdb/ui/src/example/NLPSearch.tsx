@@ -70,6 +70,7 @@ interface State {
     mongoTextcat: string
     speaking: boolean
     speechRecognitionAlternatives: object[]
+    similarQuestions: object[]
     visibleSpeechRecognitionAlternativesOverlay: boolean
 }
 
@@ -208,6 +209,7 @@ class NLPSearch extends PureComponent<Props, State>{
         mongoTextcat: "",
         speaking: false,
         speechRecognitionAlternatives: [],
+        similarQuestions: [],
         visibleSpeechRecognitionAlternativesOverlay: false,
     }
 
@@ -279,8 +281,17 @@ class NLPSearch extends PureComponent<Props, State>{
         this.setState({ speaking: false })
     }
 
-    getSpeechRecognitionAlternatives = async (alternatives) => {
+    getSpeechRecognitionAlternatives = async (alternatives, lastSentence) => {
+        console.log("last sentence", lastSentence);
+
         const wordFrequency = await NLPService.getWordFrequency();
+        const payload = { "question": lastSentence }
+        const res = await NLPService.getSimilarQuestions(payload);
+
+        const similarQuestions = JSON.parse(res.data.data);
+
+        console.log("similarQuestions", similarQuestions);
+
         const new_alternatives = [];
 
         Object.keys(alternatives).map(alternative => {
@@ -313,6 +324,7 @@ class NLPSearch extends PureComponent<Props, State>{
 
         this.setState({
             speechRecognitionAlternatives: new_alternatives,
+            similarQuestions: similarQuestions,
             visibleSpeechRecognitionAlternativesOverlay: true,
         })
     }
@@ -729,6 +741,7 @@ class NLPSearch extends PureComponent<Props, State>{
                     visible={this.state.visibleSpeechRecognitionAlternativesOverlay}
                     dismiss={this.dismissSpeechRecognitionAlternativesOverlay}
                     speechRecognitionAlternatives={this.state.speechRecognitionAlternatives}
+                    similarQuestions={this.state.similarQuestions}
                     handleSelectAlternative={this.handleSelectAlternative}
                 />
                 <Grid.Row>

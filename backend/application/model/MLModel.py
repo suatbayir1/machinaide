@@ -16,3 +16,9 @@ class MLModel():
 
     def get_experiment(self, filter={}):
         return self.db.find_one("experiments", filter)
+
+    def post_task(self, task):
+        return self.db.insert_one("tasks", task)
+
+    def get_tasks(self):
+        return self.db.find("tasks")

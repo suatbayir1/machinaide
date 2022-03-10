@@ -8,9 +8,12 @@ export const tipStyle = {
 
 export const addNewNodeHeader = `This window was created to add a new digital twin object to the system. 
 You need to fill in the form completely by clicking the 
+ - factory button to add a factory,
+ - production line button to add a production line,
  - machine button to add a machine, 
  - component button to add a component and 
- - sensor button to add a sensor.`
+ - sensor button to add a sensor
+ - field button to add a field.`
 
 export const addNewMachine = `To add a new machine, you must first select the production line you want to add from the dropdown menu on the left. Then you can add a unique name and optionally a description of the machine you will add.`
 
@@ -103,3 +106,13 @@ export const failureAlarmScene = `In this scene, it is visually seen which parts
  - If you just want to see the list of errors on the part you want. please right click on the part you want on the scene`
 
 export const failureTimerange = `Faults occurring between two dates selected by the calendar on the side are displayed.`
+
+export const bucketConfirmationText = 'You want to change the bucket information of the selected factory. If you change the bucket information, the measurement and field settings related to the machine and sensors inside the factory may be corrupted and you may need to set them again. Please confirm if you want to continue processing.'
+export const deleteFactoryConfirmationText = 'You want to delete the selected factory. It can be production line, machine, component and sensor registration attached to the factory. If you delete the factory record, you will also lose this information. Do you want to continue?'
+export const deleteProductionLineConfirmationText = 'You want to delete the selected production line. It can be machine, component and sensor registration attached to the production line. If you delete the production line record, you will also lose this information. Do you want to continue?'
+export const updateMachineConfirmationText = 'You want to change the measurements of the selected machine. If you change the measurements, the field settings related to the sensors inside the factory may be corrupted and you may need to set them again. Please confirm if you want to continue proccessing.'
+export const deleteMachineConfirmationText = 'You want to delete the selected machine. It can be component and sensor registration attached to the machine. If you delete machine record, you will also lose this information. Do you want to continue?'
+export const deleteComponentConfirmationText = 'You want to delete the selected component. It can be sensor registration attached to the component. If you delete component record, you will also lose this information. Do you want to continue?'
+export const deleteSensorConfirmationText = 'You want to delete the selected sensor. It can be field registration attached to the sensor. If you delete sensor record, you will also lose this information. Do you want to continue?'
+export const updateFieldConfirmationText = 'You want to change the measurement and data source of the selected field. If you change the measurement and data source, there may be distortions in the relevant places you have previously set and you may need to change them again. Do you want to continue?'
+export const deleteFieldConfirmationText = 'You want to delete the selected field. If you delete field record, you will also lose the associated information. Do you want to continue?'

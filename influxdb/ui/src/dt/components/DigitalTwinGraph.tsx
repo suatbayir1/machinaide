@@ -34,6 +34,7 @@ interface Props {
     showAllSensorValues: boolean
     refreshGraph: boolean
     orgID: string
+    generalInfo: string[]
 }
 
 interface State {
@@ -134,12 +135,9 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
             await this.createGraph();
 
             if (Object.keys(this.props.selectedGraphNode).length > 0) {
-                console.log("selected", this.props.selectedGraphNode);
-                console.log("prunedTree", this.state.prunedTree);
                 this.state.prunedTree["nodes"].map(n => {
                     if (n["id"] === this.props.selectedGraphNode["id"]) {
                         this.props.handleNodeClick(n);
-                        console.log("triggered")
                     }
                 })
             }
@@ -214,7 +212,7 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
 
                 pl["machines"].map(machine => {
                     nodes.push(Object.assign({
-                        id: machine?.displayName,
+                        id: machine?.name,
                         color: "red",
                         size: 400,
                         symbolType: "circle",
@@ -223,7 +221,7 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
 
                     links.push({
                         source: machine?.parent,
-                        target: machine?.displayName
+                        target: machine?.name
                     });
 
                     machine["contents"].map(component => {
@@ -307,8 +305,139 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
         })
 
         this.graphRef.zoom(2, 1000);
-        this.graphRef.d3Force('collide', d3.forceCollide(4));
+        this.graphRef.d3Force('collide', d3.forceCollide(5));
     }
+
+    // createGraph = async () => {
+    //     const graphInfo = await DTService.getAllDT();
+
+    //     this.setState({
+    //         constantJsonData: graphInfo
+    //     });
+
+    //     const nodes = [];
+    //     const links = [];
+
+    //     graphInfo.map(factory => {
+    //         nodes.push(Object.assign({
+    //             id: factory?.factoryName,
+    //             color: "blue",
+    //             size: 500,
+    //             src: "../../assets/images/graph/ermetal.png",
+    //             symbolType: "star",
+    //         }, factory));
+
+    //         factory["productionLines"].map(pl => {
+    //             nodes.push(Object.assign({
+    //                 id: pl?.name,
+    //                 color: "red",
+    //                 size: 400,
+    //                 symbolType: "circle",
+    //                 src: "../../assets/images/graph/pl.jpg",
+    //             }, pl));
+
+    //             links.push({
+    //                 source: pl?.parent,
+    //                 target: pl?.name
+    //             });
+
+    //             pl["machines"].map(machine => {
+    //                 nodes.push(Object.assign({
+    //                     id: machine?.name,
+    //                     color: "red",
+    //                     size: 400,
+    //                     symbolType: "circle",
+    //                     src: "../../assets/images/graph/machine.jpg",
+    //                 }, machine));
+
+    //                 links.push({
+    //                     source: machine?.parent,
+    //                     target: machine?.name
+    //                 });
+
+    //                 machine["contents"].map(component => {
+    //                     if (component["@type"] !== "Component") {
+    //                         return;
+    //                     }
+
+    //                     nodes.push(Object.assign({
+    //                         id: component?.name,
+    //                         color: "green",
+    //                         size: 300,
+    //                         symbolType: "square",
+    //                         src: "../../assets/images/graph/component.png",
+    //                     }, component))
+
+    //                     links.push({
+    //                         source: component?.parent,
+    //                         target: component?.name
+    //                     })
+
+    //                     component["sensors"].map(sensor => {
+    //                         nodes.push(Object.assign({
+    //                             id: sensor?.name,
+    //                             color: "orange",
+    //                             size: 300,
+    //                             symbolType: "triangle",
+    //                             src: "../../assets/images/graph/sensor.jpg",
+    //                         }, sensor))
+
+    //                         links.push({
+    //                             source: sensor?.parent,
+    //                             target: sensor?.name
+    //                         })
+
+    //                         sensor["fields"].map(field => {
+    //                             nodes.push(Object.assign({
+    //                                 id: field?.["name"],
+    //                                 color: "orange",
+    //                                 size: 300,
+    //                                 symbolType: "triangle",
+    //                                 src: "../../assets/images/graph/measurement.jpg",
+    //                             }, field))
+
+    //                             links.push({
+    //                                 source: field?.parent,
+    //                                 target: field?.name
+    //                             })
+    //                         })
+    //                     })
+    //                 })
+    //             })
+    //         })
+    //     })
+
+    //     const returnData = {
+    //         nodes,
+    //         links
+    //     }
+
+    //     // Set NodesById for collapse / expand
+    //     const rootId = "Ermetal"
+    //     const nodesById = Object.fromEntries(
+    //         returnData["nodes"].map((node) => [node.id, node])
+    //     );
+
+    //     returnData["nodes"].forEach((node) => {
+    //         node["collapsed"] = node.id !== rootId;
+    //         node["childLinks"] = [];
+    //     });
+
+    //     returnData["links"].forEach((link) => {
+    //         nodesById[link.source]["childLinks"].push(link)
+    //     });
+
+    //     this.setState({
+    //         data: returnData,
+    //         prunedTree: returnData,
+    //         constantData: returnData,
+    //         nodesById: nodesById,
+    //         spinnerLoading: RemoteDataState.Done
+    //     })
+
+    //     this.graphRef.zoom(2, 1000);
+    //     this.graphRef.d3Force('collide', d3.forceCollide(4));
+    // }
 
     onChangeInput = (e) => {
         this.setState({ queryParameter: e.target.value })
@@ -531,7 +660,7 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                                 </Grid.Row>
                                 <Grid.Row>
                                     <Grid.Column widthXS={Columns.Twelve}>
-                                        <div className="dt-graph-buttons ">
+                                        <div className="dt-graph-buttons">
                                             {
                                                 ["admin"].includes(localStorage.getItem("userRole")) &&
                                                 <Button
@@ -693,6 +822,8 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                             refreshGeneralInfo={this.props.refreshGeneralInfo}
                             refreshVisualizePage={this.props.refreshVisualizePage}
                             handleChangeNotification={this.handleChangeNotification}
+                            orgID={this.props.orgID}
+                            generalInfo={this.props.generalInfo}
                         />
 
                     </Panel.Body>

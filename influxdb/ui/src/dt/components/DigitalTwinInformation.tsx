@@ -1,21 +1,22 @@
 // Libraries
 import React, { PureComponent } from 'react'
+import { connect, ConnectedProps } from 'react-redux'
 
 // Components
 import {
-    Panel, Form, ComponentSize, Grid, Columns, Label, InfluxColors, List, Gradients, Button,
-    SpinnerContainer, TechnoSpinner, RemoteDataState, FlexBox, SlideToggle, ButtonType,
-    DapperScrollbars, ComponentColor, ConfirmationButton, IconFont, Appearance,
-    Notification, SelectDropdown, Input, InputType, ComponentStatus, QuestionMarkTooltip,
+    Panel, ComponentSize, Gradients, SpinnerContainer, TechnoSpinner,
+    RemoteDataState, IconFont, Notification,
 } from '@influxdata/clockface'
+import GeneralInformation from "src/dt/components/GeneralInformation";
+import FactoryInformation from "src/dt/components/FactoryInformation";
+import ProductionLineInformation from "src/dt/components/ProductionLineInformation";
+import MachineInformation from "src/dt/components/MachineInformation";
+import ComponentInformation from "src/dt/components/ComponentInformation";
+import SensorInformation from "src/dt/components/SensorInformation";
+import FieldInformation from "src/dt/components/FieldInformation";
 
 // Styles
 import "src/style/custom.css"
-
-// Constants
-import {
-    tipStyle, showAllSensorValues, updateSensor,
-} from 'src/shared/constants/tips';
 
 // Overlays
 import AddBrandsAndModels from "src/shared/overlays/AddBrandsAndModels";
@@ -27,6 +28,11 @@ import MaintenanceService from 'src/maintenance/services/MaintenanceService';
 import FailureService from "src/shared/services/FailureService";
 import DTService from "src/shared/services/DTService";
 
+// Types
+import { AppState, Bucket, ResourceType } from 'src/types'
+
+// Utils
+import { getAll } from 'src/resources/selectors'
 
 interface Props {
     selectedGraphNode: object
@@ -35,25 +41,28 @@ interface Props {
     changeShowAllSensorValues: () => void
     refreshGraph: () => void
     refreshVisualizePage: () => void
+    refreshGeneralInfo: () => void
     showAllSensorValues: boolean
+    orgID: string
 }
 
 interface State {
     notificationVisible: boolean
     notificationType: string
     notificationMessage: string
-    sSelectedDataSource: string
-    sMinValue: number
-    sMaxValue: number
     visibleAddBrandsAndModels: boolean
     brands: object[]
     visibleBMFInformation: boolean
     maintenances: object[]
     failures: object[]
     oldParts: object[]
+    objectList: object[]
 }
 
-class DigitalTwinInformation extends PureComponent<Props, State> {
+type ReduxProps = ConnectedProps<typeof connector>
+type IProps = ReduxProps & Props
+
+class DigitalTwinInformation extends PureComponent<IProps, State> {
 
     constructor(props) {
         super(props);
@@ -62,648 +71,28 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
             notificationVisible: false,
             notificationType: '',
             notificationMessage: '',
-            sSelectedDataSource: "",
-            sMinValue: 0,
-            sMaxValue: 0,
             visibleAddBrandsAndModels: false,
             brands: [],
             visibleBMFInformation: false,
             maintenances: [],
             failures: [],
             oldParts: [],
+            objectList: [],
         }
     }
 
-    async componentDidUpdate(prevProps) {
-        if (prevProps.selectedGraphNode !== this.props.selectedGraphNode) {
-            await this.handleChangeSelectedGraphNode(this.props.selectedGraphNode);
-        }
+    async componentDidMount(): Promise<void> {
+        this.getObjectList();
     }
 
-    handleChangeSelectedGraphNode = async (node) => {
-        if (node["type"] === "Field") {
-            this.setState({
-                sSelectedDataSource: node["dataSource"],
-                sMinValue: node["minValue"],
-                sMaxValue: node["maxValue"]
-            })
-        }
+    private getObjectList = async () => {
+        const result = await DTService.getObjectList();
+        this.setState({
+            objectList: result
+        })
     }
 
-    private get factoryElements(): JSX.Element[] {
-        const { selectedGraphNode } = this.props;
-
-        return [
-            <Form key={selectedGraphNode["id"]}>
-                <Grid>
-                    <Grid.Row>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Six}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Type">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["type"]}
-                                    description="Node type"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["type"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Six}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Factory Name">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["factoryName"]}
-                                    description="Factory Name"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["factoryName"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column widthXS={Columns.Twelve}>
-                            <Form.Element label={`Production Line List (${selectedGraphNode["productionLines"].length})`}>
-                                <DapperScrollbars
-                                    autoHide={false}
-                                    autoSizeHeight={true}
-                                    style={{ maxHeight: '150px' }}
-                                    className="data-loading--scroll-content"
-                                >
-                                    {
-                                        selectedGraphNode["productionLines"].map(pl => {
-                                            return (
-                                                <List.Item
-                                                    key={pl["@id"]}
-                                                    value={pl["displayName"]}
-                                                    title="Production Line Name"
-                                                    gradient={Gradients.GundamPilot}
-                                                    wrapText={true}
-                                                >
-                                                    <List.Indicator type="dot" />
-                                                    <div className="selectors--item-value selectors--item__measurement">
-                                                        {pl["displayName"]}
-                                                    </div>
-                                                </List.Item>
-                                            )
-                                        })
-                                    }
-                                </DapperScrollbars>
-                            </Form.Element>
-                        </Grid.Column>
-                    </Grid.Row>
-                </Grid>
-            </Form>
-        ]
-    }
-
-    private get productionLineElements(): JSX.Element[] {
-        const { selectedGraphNode } = this.props;
-
-        return [
-            <Form key={selectedGraphNode["id"]}>
-                <Grid>
-                    <Grid.Row>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Six}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Type">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["type"]}
-                                    description="Node type"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["type"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Six}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Production Line">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["displayName"]}
-                                    description="Production Line Name"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["displayName"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column
-                            widthXS={Columns.Twelve}
-                        >
-                            <Form.Element label={`Machine List (${selectedGraphNode["machines"].length})`}>
-                                <DapperScrollbars
-                                    autoHide={false}
-                                    autoSizeHeight={true}
-                                    style={{ maxHeight: '150px' }}
-                                    className="data-loading--scroll-content"
-                                >
-                                    {
-                                        selectedGraphNode["machines"].map(machine => {
-                                            return (
-                                                <List.Item
-                                                    key={machine["@id"]}
-                                                    value={machine["displayName"]}
-                                                    title="Machine Name"
-                                                    gradient={Gradients.GundamPilot}
-                                                    wrapText={true}
-                                                >
-                                                    <List.Indicator type="dot" />
-                                                    <div className="selectors--item-value selectors--item__measurement">
-                                                        {machine["displayName"]}
-                                                    </div>
-                                                </List.Item>
-                                            )
-                                        })
-                                    }
-                                </DapperScrollbars>
-                            </Form.Element>
-                        </Grid.Column>
-                    </Grid.Row>
-                </Grid>
-            </Form>
-        ]
-    }
-
-    private get machineElements(): JSX.Element[] {
-        const { selectedGraphNode } = this.props;
-
-        return [
-            <Form key={selectedGraphNode["id"]}>
-                <Grid>
-                    <Grid.Row>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Four}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Type">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["type"]}
-                                    description="Node type"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["type"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Four}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Display Name">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["displayName"]}
-                                    description="Display Name"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["displayName"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column
-                            widthXS={Columns.Twelve}
-                            widthSM={Columns.Four}
-                            widthMD={Columns.Twelve}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Parent">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["parent"]}
-                                    description="Parent"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["parent"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column widthXS={Columns.Twelve}>
-                            <Form.Element label={`Component List (${this.getComponentCount(selectedGraphNode["contents"])})`}>
-                                <DapperScrollbars
-                                    autoHide={false}
-                                    autoSizeHeight={true}
-                                    style={{ maxHeight: '150px' }}
-                                    className="data-loading--scroll-content"
-                                >
-                                    {
-                                        selectedGraphNode["contents"].map((component, idx) => {
-                                            return (
-                                                <List.Item
-                                                    key={idx}
-                                                    value={component.displayName}
-                                                    title="Component Name"
-                                                    gradient={Gradients.GundamPilot}
-                                                    wrapText={true}
-                                                >
-                                                    <List.Indicator type="dot" />
-                                                    <div className="selectors--item-value selectors--item__measurement">
-                                                        {component.displayName}
-                                                    </div>
-                                                </List.Item>
-                                            )
-                                        })
-                                    }
-                                </DapperScrollbars>
-                            </Form.Element>
-                        </Grid.Column>
-                    </Grid.Row>
-                </Grid>
-            </Form>
-        ]
-    }
-
-    private get componentElements(): JSX.Element[] {
-        const { selectedGraphNode } = this.props;
-
-        return [
-            <Form key={selectedGraphNode["id"]}>
-                <Grid>
-                    <Grid.Row>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Three}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Type">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["type"]}
-                                    description="Node type"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["type"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Three}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Display Name">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["displayName"]}
-                                    description="Display Name"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["displayName"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Three}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Description">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["description"]}
-                                    description="Description"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["description"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Three}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Parent">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["parent"]}
-                                    description="Parent"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["parent"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column widthXS={Columns.Twelve}>
-                            <Form.Element label={`Sensor List (${selectedGraphNode["sensors"].length})`}>
-                                <DapperScrollbars
-                                    autoHide={false}
-                                    autoSizeHeight={true}
-                                    style={{ maxHeight: '150px' }}
-                                    className="data-loading--scroll-content"
-                                >
-                                    {
-                                        selectedGraphNode["sensors"].map((sensor, idx) => {
-                                            return (
-                                                <List.Item
-                                                    key={idx}
-                                                    value={sensor.displayName}
-                                                    title="Sensor Name"
-                                                    gradient={Gradients.GundamPilot}
-                                                    wrapText={true}
-                                                >
-                                                    <List.Indicator type="dot" />
-                                                    <div className="selectors--item-value selectors--item__measurement">
-                                                        {sensor.displayName}
-                                                    </div>
-                                                </List.Item>
-                                            )
-                                        })
-                                    }
-                                </DapperScrollbars>
-                            </Form.Element>
-                        </Grid.Column>
-                    </Grid.Row>
-                </Grid>
-            </Form>
-        ]
-    }
-
-    private get sensorElements(): JSX.Element[] {
-        const { selectedGraphNode } = this.props;
-
-        return [
-            <Form key={selectedGraphNode["@id"]}>
-                <Grid>
-                    <Grid.Row>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Three}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Type">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["type"]}
-                                    description="Node type"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["type"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Three}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Display Name">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["displayName"]}
-                                    description="Display Name"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["displayName"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Three}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Parent">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["parent"]}
-                                    description="Parent"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["parent"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Three}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Unit">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["unit"]}
-                                    description="Unit"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["unit"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column widthXS={Columns.Twelve}>
-                            <Form.Element label="Data Type">
-                                {
-                                    selectedGraphNode["@type"].map(type => {
-                                        return (
-                                            <List.Item
-                                                key={type}
-                                                value={type}
-                                                title="Type"
-                                                gradient={Gradients.GundamPilot}
-                                                wrapText={true}
-                                            >
-                                                <List.Indicator type="dot" />
-                                                <div className="selectors--item-value selectors--item__measurement">
-                                                    {type}
-                                                </div>
-                                            </List.Item>
-                                        )
-                                    })
-                                }
-                            </Form.Element>
-                        </Grid.Column>
-                    </Grid.Row>
-                </Grid>
-            </Form>
-        ]
-    }
-
-    private get fieldElements(): JSX.Element[] {
-        const { selectedGraphNode } = this.props;
-
-        return [
-            <Form key={selectedGraphNode["name"]}>
-                <Grid>
-                    <Grid.Row>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Three}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Type">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["type"]}
-                                    description="Node type"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["type"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Three}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Name">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["name"]}
-                                    description="Name"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["name"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Three}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Parent">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["parent"]}
-                                    description="Parent"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["parent"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Three}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Unit">
-                                <Label
-                                    size={ComponentSize.Small}
-                                    name={selectedGraphNode["unit"]}
-                                    description="Unit"
-                                    color={InfluxColors.Ocean}
-                                    id={selectedGraphNode["unit"]}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column
-                            widthXS={Columns.Six}
-                            widthSM={Columns.Three}
-                            widthMD={Columns.Twelve}
-                            widthLG={Columns.Twelve}
-                        >
-                            <Form.Element label="Data Source">
-                                <SelectDropdown
-                                    buttonStatus={["admin"].includes(localStorage.getItem("userRole")) ? ComponentStatus.Valid : ComponentStatus.Disabled}
-                                    options={["sensors_data"]}
-                                    selectedOption={this.state.sSelectedDataSource}
-                                    onSelect={(e) => this.setState({ sSelectedDataSource: e })}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column
-                            widthXS={Columns.Three}
-                            widthSM={Columns.Three}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Six}
-                        >
-                            <Form.Element label="Min Value">
-                                <Input
-                                    name="sMinValue"
-                                    onChange={this.handleChangeInput}
-                                    value={this.state.sMinValue}
-                                    type={InputType.Number}
-                                    status={["admin"].includes(localStorage.getItem("userRole")) ? ComponentStatus.Default : ComponentStatus.Disabled}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                        <Grid.Column
-                            widthXS={Columns.Three}
-                            widthSM={Columns.Three}
-                            widthMD={Columns.Six}
-                            widthLG={Columns.Six}
-                        >
-                            <Form.Element label="Max Value">
-                                <Input
-                                    name="sMaxValue"
-                                    onChange={this.handleChangeInput}
-                                    value={this.state.sMaxValue}
-                                    type={InputType.Number}
-                                    status={["admin"].includes(localStorage.getItem("userRole")) ? ComponentStatus.Default : ComponentStatus.Disabled}
-                                />
-                            </Form.Element>
-                        </Grid.Column>
-                    </Grid.Row>
-                </Grid>
-            </Form>
-        ]
-    }
-
-    getComponentCount = (content) => {
-        let components = content.filter(c => c?.["@type"] === "Component");
-        return components.length;
-    }
-
-    handleDeleteNode = async () => {
-        const payload = {
-            "type": this.props.selectedGraphNode["type"],
-            "name": this.props.selectedGraphNode["name"]
-        }
-
-        const result = await DTService.deleteDT(payload);
-
-        if (result.data.message.text === "component_deleted_successfully") {
-            this.handleChangeNotification("success", "Component deleted successfully");
-        } else if (result.data.message.text === "sensor_deleted_successfully") {
-            this.handleChangeNotification("success", "Sensor deleted successfully");
-        } else if (result.data.message.text === "machine_deleted_successfully") {
-            this.handleChangeNotification("success", "Machine deleted successfully");
-        }
-
-        this.props.refreshGraph();
-        this.props.refreshVisualizePage();
-    }
-
-    handleUpdateSensor = async () => {
-        const payload = {
-            "name": this.props.selectedGraphNode["name"],
-            "dataSource": this.state.sSelectedDataSource,
-            "minValue": Number(this.state.sMinValue),
-            "maxValue": Number(this.state.sMaxValue)
-        }
-
-        const result = await DTService.updateSensor(payload);
-
-        if (result.data.summary.code === 200) {
-            this.handleChangeNotification("success", "Sensor updated successfully");
-            this.props.refreshGraph();
-            this.props.refreshVisualizePage();
-        } else {
-            this.handleChangeNotification("error", result.data.message.text);
-        }
-    }
-
-    handleChangeNotification = (type, message) => {
+    public handleChangeNotification = (type, message) => {
         this.setState({
             notificationVisible: true,
             notificationType: type,
@@ -711,19 +100,13 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
         })
     }
 
-    handleChangeInput = (e): void => {
-        if (Object.keys(this.state).includes(e.target.name)) {
-            this.setState({ [e.target.name]: e.target.value } as Pick<State, keyof State>);
-        }
-    }
-
-    clickBrands = async () => {
+    public clickBrands = async () => {
         await this.getBrands();
 
         this.setState({ visibleAddBrandsAndModels: true });
     }
 
-    getBrands = async () => {
+    public getBrands = async () => {
         const { selectedGraphNode } = this.props;
 
         const payload = {
@@ -732,12 +115,10 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
 
         const brands = await BrandService.get(payload);
 
-        console.log(brands);
-
         this.setState({ brands, });
     }
 
-    getMaintenances = async () => {
+    public getMaintenances = async () => {
         const { selectedGraphNode } = this.props;
 
         const payload = {
@@ -751,12 +132,10 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
 
         const maintenances = await MaintenanceService.getByCondition(payload);
 
-        console.log("maintenances", maintenances)
-
         this.setState({ maintenances })
     }
 
-    getFailures = async () => {
+    public getFailures = async () => {
         const { selectedGraphNode } = this.props;
 
         const payload = {
@@ -770,20 +149,17 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
 
         const failures = await FailureService.getByCondition(payload);
 
-        console.log("failures", failures)
         this.setState({ failures })
     }
 
-    getOldParts = async () => {
+    public getOldParts = async () => {
         const { selectedGraphNode } = this.props;
         const oldParts = await DTService.getRetired({ "name": selectedGraphNode["name"] });
-
-        console.log("oldParts information component", oldParts);
 
         this.setState({ oldParts });
     }
 
-    clickPartDetail = async () => {
+    public clickPartDetail = async () => {
         await this.getMaintenances();
         await this.getFailures();
         await this.getBrands();
@@ -793,8 +169,8 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
     }
 
     public render() {
-        const { selectedGraphNode, generalInfo, spinnerLoading } = this.props;
-        const { visibleAddBrandsAndModels, brands, visibleBMFInformation, maintenances, failures, oldParts } = this.state;
+        const { selectedGraphNode, generalInfo, spinnerLoading, bucketNames, orgID } = this.props;
+        const { visibleAddBrandsAndModels, brands, visibleBMFInformation, maintenances, failures, oldParts, objectList } = this.state;
 
         return (
             <>
@@ -846,306 +222,89 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
 
                     <SpinnerContainer loading={spinnerLoading} spinnerComponent={<TechnoSpinner />} />
                     <Panel.Header size={ComponentSize.ExtraSmall}>
-                        <Grid>
-                            <Grid.Row>
-                                <Grid.Column
-                                    widthXS={Columns.Six}
-                                    widthSM={Columns.Three}
-                                    widthMD={Columns.Six}
-                                    widthLG={Columns.Twelve}
-                                >
-                                    <Form.Element label="Factory">
-                                        <Label
-                                            size={ComponentSize.Small}
-                                            name={generalInfo["factory"]}
-                                            description="Factory Name"
-                                            color={InfluxColors.Viridian}
-                                            id={generalInfo["factoryName"]}
-                                        />
-                                    </Form.Element>
-                                </Grid.Column>
-                                <Grid.Column
-                                    widthXS={Columns.Six}
-                                    widthSM={Columns.Three}
-                                    widthMD={Columns.Six}
-                                    widthLG={Columns.Four}
-                                >
-                                    <Form.Element label="Machine Count">
-                                        <Label
-                                            size={ComponentSize.Small}
-                                            name={generalInfo["machineCount"]}
-                                            description="Machine Count"
-                                            color={InfluxColors.Viridian}
-                                            id={generalInfo["machineCount"]}
-                                        />
-                                    </Form.Element>
-                                </Grid.Column>
-                                <Grid.Column
-                                    widthXS={Columns.Six}
-                                    widthSM={Columns.Three}
-                                    widthMD={Columns.Six}
-                                    widthLG={Columns.Four}
-                                >
-                                    <Form.Element label="Component Count">
-                                        <Label
-                                            size={ComponentSize.Small}
-                                            name={generalInfo["componentCount"]}
-                                            description="Component Count"
-                                            color={InfluxColors.Viridian}
-                                            id={generalInfo["componentCount"]}
-                                        />
-                                    </Form.Element>
-                                </Grid.Column>
-                                <Grid.Column
-                                    widthXS={Columns.Six}
-                                    widthSM={Columns.Three}
-                                    widthMD={Columns.Six}
-                                    widthLG={Columns.Four}
-                                >
-                                    <Form.Element label="Sensor Count">
-                                        <Label
-                                            size={ComponentSize.Small}
-                                            name={generalInfo["sensorCount"]}
-                                            description="Sensor Count"
-                                            color={InfluxColors.Viridian}
-                                            id={generalInfo["sensorCount"]}
-                                        />
-                                    </Form.Element>
-                                </Grid.Column>
-                            </Grid.Row>
-
-                            <Grid.Row>
-                                <div
-                                    style={{
-                                        marginTop: '10px',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        display: 'flex',
-                                    }}
-                                >
-                                    <FlexBox
-                                        margin={ComponentSize.Large}
-                                    >
-                                        <h5>Show All Sensor Values</h5>
-                                        <SlideToggle
-                                            active={this.props.showAllSensorValues}
-                                            size={ComponentSize.Small}
-                                            color={ComponentColor.Success}
-                                            onChange={this.props.changeShowAllSensorValues}
-                                        />
-                                        <QuestionMarkTooltip
-                                            diameter={20}
-                                            tooltipStyle={{ width: '400px' }}
-                                            color={ComponentColor.Secondary}
-                                            tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
-                                                <div style={{ color: InfluxColors.Star }}>{"Show all sensor values:"}
-                                                    <hr style={tipStyle} />
-                                                </div>
-                                                {showAllSensorValues}
-                                            </div>}
-                                        />
-                                    </FlexBox>
-                                </div>
-                            </Grid.Row>
-                        </Grid>
+                        <GeneralInformation
+                            info={generalInfo}
+                            showAllSensorValues={this.props.showAllSensorValues}
+                            changeShowAllSensorValues={this.props.changeShowAllSensorValues}
+                        />
                     </Panel.Header>
                     <Panel.Body size={ComponentSize.ExtraSmall}>
                         {
-                            this.props.selectedGraphNode["type"] === "Factory" && this.factoryElements
+                            this.props.selectedGraphNode["type"] === "Factory" &&
+                            <FactoryInformation
+                                selectedGraphNode={this.props.selectedGraphNode}
+                                bucketNames={bucketNames}
+                                handleChangeNotification={this.handleChangeNotification}
+                                refreshGraph={this.props.refreshGraph}
+                                refreshVisualizePage={this.props.refreshVisualizePage}
+                                refreshGeneralInfo={this.props.refreshGeneralInfo}
+                            />
                         }
 
                         {
-                            this.props.selectedGraphNode["type"] === "ProductionLine" && this.productionLineElements
+                            this.props.selectedGraphNode["type"] === "ProductionLine" &&
+                            <ProductionLineInformation
+                                selectedGraphNode={this.props.selectedGraphNode}
+                                handleChangeNotification={this.handleChangeNotification}
+                                refreshGraph={this.props.refreshGraph}
+                                refreshVisualizePage={this.props.refreshVisualizePage}
+                                refreshGeneralInfo={this.props.refreshGeneralInfo}
+                            />
                         }
 
                         {
-                            this.props.selectedGraphNode["type"] === "Machine" && this.machineElements
+                            this.props.selectedGraphNode["type"] === "Machine" &&
+                            <MachineInformation
+                                selectedGraphNode={this.props.selectedGraphNode}
+                                handleChangeNotification={this.handleChangeNotification}
+                                refreshGraph={this.props.refreshGraph}
+                                refreshVisualizePage={this.props.refreshVisualizePage}
+                                clickPartDetail={this.clickPartDetail}
+                                clickBrands={this.clickBrands}
+                                orgID={orgID}
+                                refreshGeneralInfo={this.props.refreshGeneralInfo}
+                            />
                         }
 
                         {
-                            this.props.selectedGraphNode["type"] === "Component" && this.componentElements
+                            this.props.selectedGraphNode["type"] === "Component" &&
+                            <ComponentInformation
+                                selectedGraphNode={this.props.selectedGraphNode}
+                                handleChangeNotification={this.handleChangeNotification}
+                                refreshGraph={this.props.refreshGraph}
+                                refreshVisualizePage={this.props.refreshVisualizePage}
+                                clickPartDetail={this.clickPartDetail}
+                                clickBrands={this.clickBrands}
+                                refreshGeneralInfo={this.props.refreshGeneralInfo}
+                                objectList={objectList}
+                            />
                         }
 
                         {
-                            this.props.selectedGraphNode["type"] === "Sensor" && this.sensorElements
+                            this.props.selectedGraphNode["type"] === "Sensor" &&
+                            <SensorInformation
+                                selectedGraphNode={this.props.selectedGraphNode}
+                                handleChangeNotification={this.handleChangeNotification}
+                                refreshGraph={this.props.refreshGraph}
+                                refreshVisualizePage={this.props.refreshVisualizePage}
+                                clickPartDetail={this.clickPartDetail}
+                                clickBrands={this.clickBrands}
+                                refreshGeneralInfo={this.props.refreshGeneralInfo}
+                                objectList={objectList}
+                            />
                         }
 
                         {
-                            this.props.selectedGraphNode["type"] === "Field" && this.fieldElements
+                            this.props.selectedGraphNode["type"] === "Field" &&
+                            <FieldInformation
+                                selectedGraphNode={this.props.selectedGraphNode}
+                                handleChangeNotification={this.handleChangeNotification}
+                                refreshGraph={this.props.refreshGraph}
+                                refreshVisualizePage={this.props.refreshVisualizePage}
+                                orgID={orgID}
+                                refreshGeneralInfo={this.props.refreshGeneralInfo}
+                            />
                         }
-
-                        <Grid.Row>
-                            <div className="center-the-children">
-                                <FlexBox margin={ComponentSize.Medium}>
-                                    {
-                                        Object.keys(selectedGraphNode).length !== 0 &&
-                                        selectedGraphNode["type"] === "Field" &&
-                                        <>
-                                            <QuestionMarkTooltip
-                                                diameter={20}
-                                                tooltipStyle={{ width: '400px' }}
-                                                color={ComponentColor.Secondary}
-                                                tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
-                                                    <div style={{ color: InfluxColors.Star }}>{"Update sensor:"}
-                                                        <hr style={tipStyle} />
-                                                    </div>
-                                                    {updateSensor}
-                                                </div>}
-                                            />
-                                            {/* <div style={{ float: 'right' }}> */}
-                                            {
-                                                ["admin"].includes(localStorage.getItem("userRole")) &&
-                                                <ConfirmationButton
-                                                    icon={IconFont.Checkmark}
-                                                    onConfirm={this.handleUpdateSensor}
-                                                    text={"Update"}
-                                                    popoverColor={ComponentColor.Success}
-                                                    popoverAppearance={Appearance.Outline}
-                                                    color={ComponentColor.Success}
-                                                    confirmationLabel="Do you want to update ?"
-                                                    confirmationButtonColor={ComponentColor.Success}
-                                                    confirmationButtonText="Yes"
-                                                />
-                                            }
-                                            {/* </div> */}
-                                        </>
-                                    }
-
-                                    {
-                                        Object.keys(selectedGraphNode).length !== 0 &&
-                                        ["Machine", "Component", "Sensor"].includes(selectedGraphNode["type"]) &&
-                                        <div style={{ float: 'right' }}>
-                                            {
-                                                <FlexBox margin={ComponentSize.Medium}>
-                                                    <Button
-                                                        text=""
-                                                        icon={IconFont.CogThick}
-                                                        onClick={this.clickPartDetail}
-                                                        type={ButtonType.Button}
-                                                        color={ComponentColor.Primary}
-                                                    />
-
-                                                    <Button
-                                                        text="Brands"
-                                                        icon={IconFont.Plus}
-                                                        onClick={this.clickBrands}
-                                                        type={ButtonType.Button}
-                                                        color={ComponentColor.Secondary}
-                                                    />
-                                                </FlexBox>
-                                            }
-                                        </div>
-                                    }
-
-                                    {
-                                        Object.keys(selectedGraphNode).length !== 0 &&
-                                        selectedGraphNode["type"] !== "Factory" &&
-                                        <div style={{ float: 'right' }}>
-                                            {
-                                                ["admin"].includes(localStorage.getItem("userRole")) &&
-                                                <ConfirmationButton
-                                                    icon={IconFont.Remove}
-                                                    onConfirm={this.handleDeleteNode}
-                                                    text={"Delete"}
-                                                    popoverColor={ComponentColor.Danger}
-                                                    popoverAppearance={Appearance.Outline}
-                                                    color={ComponentColor.Danger}
-                                                    confirmationLabel="Do you want to delete ?"
-                                                    confirmationButtonColor={ComponentColor.Success}
-                                                    confirmationButtonText="Yes"
-                                                />
-                                            }
-                                        </div>
-                                    }
-                                </FlexBox>
-                            </div>
-                        </Grid.Row>
-
-                        {/* <Grid.Row>
-                            <FlexBox margin={ComponentSize.Medium} style={{ float: 'right' }}>
-                                {
-                                    Object.keys(selectedGraphNode).length !== 0 &&
-                                    selectedGraphNode["type"] === "Field" &&
-                                    <>
-                                        <QuestionMarkTooltip
-                                            diameter={20}
-                                            tooltipStyle={{ width: '400px' }}
-                                            color={ComponentColor.Secondary}
-                                            tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
-                                                <div style={{ color: InfluxColors.Star }}>{"Update sensor:"}
-                                                    <hr style={tipStyle} />
-                                                </div>
-                                                {updateSensor}
-                                            </div>}
-                                        />
-                                        <div style={{ float: 'right' }}>
-                                            {
-                                                ["admin"].includes(localStorage.getItem("userRole")) &&
-                                                <ConfirmationButton
-                                                    icon={IconFont.Checkmark}
-                                                    onConfirm={this.handleUpdateSensor}
-                                                    text={"Update"}
-                                                    popoverColor={ComponentColor.Success}
-                                                    popoverAppearance={Appearance.Outline}
-                                                    color={ComponentColor.Success}
-                                                    confirmationLabel="Do you want to update ?"
-                                                    confirmationButtonColor={ComponentColor.Success}
-                                                    confirmationButtonText="Yes"
-                                                />
-                                            }
-                                        </div>
-                                    </>
-                                }
-
-                                {
-                                    Object.keys(selectedGraphNode).length !== 0 &&
-                                    ["Machine", "Component", "Sensor"].includes(selectedGraphNode["type"]) &&
-                                    <div style={{ float: 'right' }}>
-                                        {
-                                            <FlexBox margin={ComponentSize.Medium}>
-                                                <Button
-                                                    text="Snapshot"
-                                                    icon={IconFont.CogThick}
-                                                    onClick={this.clickPartDetail}
-                                                    type={ButtonType.Button}
-                                                    color={ComponentColor.Primary}
-                                                />
-
-                                                <Button
-                                                    text="Brands"
-                                                    icon={IconFont.Plus}
-                                                    onClick={this.clickBrands}
-                                                    type={ButtonType.Button}
-                                                    color={ComponentColor.Secondary}
-                                                />
-                                            </FlexBox>
-                                        }
-                                    </div>
-                                }
-
-                                {
-                                    Object.keys(selectedGraphNode).length !== 0 &&
-                                    selectedGraphNode["type"] !== "Factory" &&
-                                    <div style={{ float: 'right' }}>
-                                        {
-                                            ["admin"].includes(localStorage.getItem("userRole")) &&
-                                            <ConfirmationButton
-                                                icon={IconFont.Remove}
-                                                onConfirm={this.handleDeleteNode}
-                                                text={"Delete"}
-                                                popoverColor={ComponentColor.Danger}
-                                                popoverAppearance={Appearance.Outline}
-                                                color={ComponentColor.Danger}
-                                                confirmationLabel="Do you want to delete ?"
-                                                confirmationButtonColor={ComponentColor.Success}
-                                                confirmationButtonText="Yes"
-                                            />
-                                        }
-                                    </div>
-                                }
-                            </FlexBox>
-                        </Grid.Row> */}
-
                     </Panel.Body>
                 </Panel>
             </>
@@ -1153,4 +312,13 @@ class DigitalTwinInformation extends PureComponent<Props, State> {
     }
 }
 
-export default DigitalTwinInformation
+const mstp = (state: AppState) => {
+    const buckets = getAll<Bucket>(state, ResourceType.Buckets)
+    const bucketNames = buckets.map(bucket => bucket.name || '')
+
+    return { bucketNames }
+}
+
+const connector = connect(mstp, null)
+
+export default connector(DigitalTwinInformation)

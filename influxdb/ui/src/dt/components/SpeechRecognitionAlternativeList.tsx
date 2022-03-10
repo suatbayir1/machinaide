@@ -1,9 +1,11 @@
 // Libraries
 import React, { PureComponent } from 'react'
+import uuid from "uuid"
 
 // Components
 import {
     Grid, Overlay, Gradients, List, Button, IconFont, ComponentColor, ButtonType,
+    ComponentSize,
 } from '@influxdata/clockface'
 
 interface State {
@@ -13,6 +15,7 @@ interface Props {
     visible: boolean
     dismiss: () => void
     speechRecognitionAlternatives: object[]
+    similarQuestions: object[]
     handleSelectAlternative: (alternative) => void
 }
 
@@ -34,7 +37,8 @@ class SpeechRecognitionAlternativeList extends PureComponent<Props, State> {
     }
 
     render() {
-        const { speechRecognitionAlternatives } = this.props
+        const { speechRecognitionAlternatives, similarQuestions } = this.props
+
         return (
             <Overlay visible={this.props.visible}>
                 <Overlay.Container maxWidth={750} style={{ minHeight: "300px" }}>
@@ -63,6 +67,24 @@ class SpeechRecognitionAlternativeList extends PureComponent<Props, State> {
                                                 <List.Indicator type="dot" />
                                                 <div className="selectors--item-name">{speechRecognitionAlternatives[alternative].transcript}</div>
                                                 <div className="selectors--item-type">{speechRecognitionAlternatives[alternative].score}</div>
+                                            </List.Item>
+                                        ))
+                                    }
+                                    <List.Divider size={ComponentSize.Small} text="Similar 5 Questions" />
+                                    {
+                                        similarQuestions.map(question => (
+                                            <List.Item
+                                                key={uuid.v4()}
+                                                value={question["question"]}
+                                                onClick={() => this.setState({ selectedAlternative: question["question"] })}
+                                                selected={this.state.selectedAlternative === question["question"]}
+                                                title={question["question"]}
+                                                gradient={Gradients.GundamPilot}
+                                                wrapText={true}
+                                            >
+                                                <List.Indicator type="dot" />
+                                                <div className="selectors--item-name">{question["question"]}</div>
+                                                <div className="selectors--item-type">{question["score"].toFixed(2)}</div>
                                             </List.Item>
                                         ))
                                     }

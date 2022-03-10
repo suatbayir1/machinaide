@@ -1,9 +1,11 @@
 // Libraries
 import React, { PureComponent } from "react";
+import { withRouter, RouteComponentProps } from 'react-router-dom'
 
 // Components
 import {
-    Panel, ResourceCard, DapperScrollbars,
+    Panel, ResourceCard, DapperScrollbars, EmptyState, ComponentSize,
+    Button, ButtonType, IconFont, ComponentColor,
 } from '@influxdata/clockface'
 import { Link } from "react-router-dom";
 import "src/side_nav/components/constants/factoryDashboard.css";
@@ -16,7 +18,10 @@ interface Props {
 interface State {
 }
 
-class ProductionLineCards extends PureComponent<Props, State> {
+type IProps = RouteComponentProps<{ orgID: string }> & Props
+
+
+class ProductionLineCards extends PureComponent<IProps, State> {
     constructor(props) {
         super(props);
         this.state = {
@@ -39,7 +44,9 @@ class ProductionLineCards extends PureComponent<Props, State> {
     }
 
     render() {
-        const { factory } = this.props;
+        const { factory, orgID } = this.props;
+
+        console.log("props", this.props);
 
         return (
             <>
@@ -51,34 +58,50 @@ class ProductionLineCards extends PureComponent<Props, State> {
                         className="data-loading--scroll-content"
                     >
                         {
-                            factory?.["productionLines"].map(pl =>
-                                <Link
-                                    key={pl["@id"]}
-                                    to={`production-line/${factory["id"]}/${pl["@id"]}`}
-                                    className={"routingCard"}
-                                    style={{ marginBottom: '40px', cursor: 'pointer' }}
-                                >
-                                    <ResourceCard
-                                        // key={pl["@id"]}
-                                        testID="dashboard-card"
-                                        style={this.getCardStyle(pl)}
+                            factory["productionLines"]
+                                && factory["productionLines"].length > 0 ?
+                                factory["productionLines"].map(pl =>
+                                    <Link
+                                        key={pl["@id"]}
+                                        to={`production-line/${factory["id"]}/${pl["@id"]}`}
+                                        className={"routingCard"}
+                                        style={{ marginBottom: '40px', cursor: 'pointer' }}
                                     >
-                                        <ResourceCard.Name
-                                            onClick={() => { }}
-                                            name={pl["displayName"]}
-                                            testID="dashboard-card--name"
-                                        />
-                                        <ResourceCard.Description
-                                            description={"This production line has been running for 4 hours and 27 minutes and was last maintenance 2 days ago"}
-                                        />
-                                        <ResourceCard.Meta>
-                                            <>{`Machine Counts: 6`}</>
-                                            <>{`Productivity: %70`}</>
-                                            <>{`Number of Products Processed: 789`}</>
-                                        </ResourceCard.Meta>
-                                    </ResourceCard>
-                                </Link>
-                            )
+                                        <ResourceCard
+                                            // key={pl["@id"]}
+                                            testID="dashboard-card"
+                                            style={this.getCardStyle(pl)}
+                                        >
+                                            <ResourceCard.Name
+                                                onClick={() => { }}
+                                                name={pl["displayName"]}
+                                                testID="dashboard-card--name"
+                                            />
+                                            <ResourceCard.Description
+                                                description={"This production line has been running for 4 hours and 27 minutes and was last maintenance 2 days ago"}
+                                            />
+                                            <ResourceCard.Meta>
+                                                <>{`Machine Counts: 6`}</>
+                                                <>{`Productivity: %70`}</>
+                                                <>{`Number of Products Processed: 789`}</>
+                                            </ResourceCard.Meta>
+                                        </ResourceCard>
+                                    </Link>
+                                ) :
+                                <EmptyState size={ComponentSize.Large}>
+                                    <EmptyState.Text>
+                                        No <b>Production Line</b> record has been created, why not create
+                                        one?
+                                    </EmptyState.Text>
+                                    <Button
+                                        text="Create Production Line"
+                                        type={ButtonType.Button}
+                                        icon={IconFont.Plus}
+                                        color={ComponentColor.Primary}
+                                        titleText={"Go to digital twin page and create production line"}
+                                        onClick={() => this.props["history"].push(`/orgs/${orgID}/dt`)}
+                                    />
+                                </EmptyState>
                         }
                     </DapperScrollbars>
                 </Panel>
@@ -87,4 +110,4 @@ class ProductionLineCards extends PureComponent<Props, State> {
     }
 }
 
-export default ProductionLineCards;
+export default withRouter(ProductionLineCards);

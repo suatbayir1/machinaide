@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import {
     Page, Grid, Columns, FlexBox, ResourceCard, ComponentSize, FlexDirection, InfluxColors,
     SpinnerContainer, TechnoSpinner, RemoteDataState, QuestionMarkTooltip, ComponentColor,
+    EmptyState, Button, ButtonType, IconFont,
 } from '@influxdata/clockface'
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
@@ -99,6 +100,8 @@ class MachinesPanel extends PureComponent<Props, State> {
 
     render() {
         const { machines, spinnerLoading, isLoading } = this.state;
+
+        console.log("props", this.props);
 
         return (
             <Page>
@@ -223,7 +226,7 @@ class MachinesPanel extends PureComponent<Props, State> {
                                                                                                         </div>
                                                                                                         <span>
                                                                                                             Show Snapshots
-                                                                                                    </span>
+                                                                                                        </span>
                                                                                                     </Link>
                                                                                                 </li>
                                                                                             }
@@ -301,9 +304,22 @@ class MachinesPanel extends PureComponent<Props, State> {
                                                         </div>
                                                     </Grid.Column>
                                                 )
-                                            }) : (
-                                                <h1>No machines found for this factory</h1>
-                                            )
+                                            })
+                                                :
+                                                <EmptyState size={ComponentSize.Large}>
+                                                    <EmptyState.Text>
+                                                        No <b>Machine</b> record has been created, why not create
+                                                        one?
+                                                    </EmptyState.Text>
+                                                    <Button
+                                                        text="Create Machine"
+                                                        type={ButtonType.Button}
+                                                        icon={IconFont.Plus}
+                                                        color={ComponentColor.Primary}
+                                                        titleText={"Go to digital twin page and create machine"}
+                                                        onClick={() => this.props["history"].push(`/orgs/${this.props["match"].params["orgID"]}/dt`)}
+                                                    />
+                                                </EmptyState>
                                         }
                                     </Grid.Row>
                                 </Grid>

@@ -23,11 +23,11 @@ class ProductionLineCard extends PureComponent<Props, State> {
         super(props);
         this.state = {
             shortcutCards: [
-                { link: `/orgs/${this.props.orgID}/dashboard-router/${this.props.factory["factoryId"]}`, icon: '../../../assets/icons/dashboards-icon.png', name: 'Show Dashboards', width: '80px', height: '80px', marginTop: '0px' },
+                { link: `/orgs/${this.props.orgID}/dashboard-router/${this.props.factory["id"]}`, icon: '../../../assets/icons/dashboards-icon.png', name: 'Show Dashboards', width: '80px', height: '80px', marginTop: '0px' },
                 { link: `/orgs/${this.props.orgID}/dt`, icon: '../../../assets/icons/tree-icon.png', name: 'Show Sensor Tree', width: '60px', height: '60px', marginTop: '20px' },
-                { link: `/orgs/${this.props.orgID}/machines/${this.props.factory["factoryId"]}/all`, icon: '../../../assets/icons/machine-list-icon.png', name: `Show Machines`, width: '60px', height: '60px', marginTop: '20px' },
+                { link: `/orgs/${this.props.orgID}/machines/${this.props.factory["id"]}/all`, icon: '../../../assets/icons/machine-list-icon.png', name: `Show Machines`, width: '60px', height: '60px', marginTop: '20px' },
                 { link: `/orgs/${this.props.orgID}/alerting`, icon: '../../../assets/icons/alerts-icon.png', name: 'Show Alerts', width: '60px', height: '60px', marginTop: '20px' },
-                { link: `/orgs/${this.props.orgID}/failures/${this.props.factory["factoryId"]}`, icon: '../../../assets/icons/failure-icon.png', name: 'Show Failures', width: '60px', height: '60px', marginTop: '20px' },
+                { link: `/orgs/${this.props.orgID}/failures/${this.props.factory["id"]}`, icon: '../../../assets/icons/failure-icon.png', name: 'Show Failures', width: '60px', height: '60px', marginTop: '20px' },
             ]
         };
     }
@@ -60,7 +60,7 @@ class ProductionLineCard extends PureComponent<Props, State> {
                         <FlexBox margin={ComponentSize.Small}>
                             <LocationOnIcon style={{ marginLeft: '35px', marginBottom: '5px' }} />
                             <h5 style={{ margin: '0px' }}>
-                                {factory["zone"]}
+                                {factory["location"] ? factory["location"] : "Unknown"}
                             </h5>
                         </FlexBox>
                     </Grid.Column>
