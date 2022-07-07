@@ -64,6 +64,7 @@ import RetrainControlContainer from "src/ml/containers/RetrainControlContainer"
 
 // AutoML
 import AutoML from "src/ml/containers/AutoML";
+import AutoMLPage from "src/health/components/AutoMLPage"
 
 
 import PermittedRoute from 'src/shared/middleware/PermittedRoute';
@@ -84,6 +85,9 @@ import ExamplePage from 'src/example/Example'
 import AnomalyMonitorPage from 'src/example/anomalyMonitor/AnomalyMonitorPage'
 import POFMonitorPage from 'src/example/pofMonitor/POFMonitorPage'
 import RULMonitorPage from 'src/example/rulMonitor/RULMonitorPage'
+
+// Health Assessment
+import MachineHealthPage from 'src/health/containers/MachineHealthPage'
 
 // Types
 import { AppState, Organization, ResourceType } from 'src/types'
@@ -204,7 +208,8 @@ const SetOrg: FC<Props> = ({
         <Route exact path={`${orgPath}/ml`} component={MLContainer} />
         <Route exact path={`${orgPath}/advanced-ml`} component={MLAdvancedContainer} />
         <Route exact path={`${orgPath}/retrain`} component={RetrainControlContainer} />
-        <Route exact path={`${orgPath}/automl/:experimentName/:tab`} component={AutoML} />
+        {/* <Route exact path={`${orgPath}/automl/:experimentName/:tab`} component={AutoML} /> */}
+        <Route exact path={`${orgPath}/automl/:experimentName/:tab`} component={AutoMLPage} />
 
         {/* User Manual */}
         <PermittedRoute exact path={`${orgPath}/user-manual`} component={UserManualContainer} allowedRoles={["member", "admin", "editor"]} />
@@ -224,7 +229,10 @@ const SetOrg: FC<Props> = ({
         <Route path={`${orgPath}/anomaly-monitor`} component={AnomalyMonitorPage} />
         <Route path={`${orgPath}/pof-monitor`} component={POFMonitorPage} />
         <Route path={`${orgPath}/rul-monitor`} component={RULMonitorPage} />
-        
+
+        {/* HEALTH ASSESSMENT */}
+        <Route path={`${orgPath}/health/:FID/:PLID/:MID/:CID`} component={MachineHealthPage} />
+        <Route path={`${orgPath}/health/:FID/:PLID/:MID`} component={MachineHealthPage} />               
 
         {/* Data Explorer */}
         <Route path={`${orgPath}/data-explorer`} component={DataExplorerPage} />

@@ -63,6 +63,7 @@ def getSessions():
 @metadataserver.route('/postSession', methods=['POST'])
 def post_session():
     session = request.json
+    session["sessionID"] = str(session["sessionID"])
     model.db.insert_one("ml_sessions", session)
     # mongo.db.ml_sessions.insert_one(session)
 
@@ -84,6 +85,7 @@ def update_retrain():
 @metadataserver.route('/postModelData', methods=['POST'])
 def post_model_data():
     model_data = request.json
+    print(model_data)
     model.db.insert_one("model_data", model_data)
     # mongo.db.model_data.insert_one(model_data)
 
@@ -93,9 +95,12 @@ def post_model_data():
 @metadataserver.route('/getModelData/<session_id>', methods=['GET'])
 def get_model_data(session_id):
     model_data = model.db.find("model_data", {"sessionID": session_id})
+    # model_data = model.db.find("ml_sessions")
+
+    to_return = json.dumps(list(model_data), cls=JSONEncoder)
     # model_data = mongo.db.model_data.find({"sessionID": session_id})
 
-    return json.dumps(list(model_data), cls=JSONEncoder)
+    return to_return
 
 
 @metadataserver.route('/getCellData/<session_id>/<model_id>', methods=['GET'])

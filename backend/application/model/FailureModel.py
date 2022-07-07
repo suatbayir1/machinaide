@@ -11,6 +11,9 @@ class FailureModel():
 
     def get_all_failures(self):
         return self.db.find(self.collection)
+    
+    def get_failures(self, filter={}):
+        return self.db.find(self.collection, filter)
 
     def add_failure(self, payload):
         return self.db.insert_one(self.collection, payload)

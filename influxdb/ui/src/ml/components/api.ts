@@ -206,6 +206,7 @@ export const getSessions = async () => {
         //isWithCredentials: true
     })
 
+    console.log(response)
     return response.data
 }
 
@@ -239,12 +240,16 @@ export const acceptModel = async (modelObj) => AJAX({
 
 
 export const getCellCount = async (sessionID) => {
+    console.log(MONGO_URL + '/getModelData/' + sessionID)
     const response = await AJAX({
         url: MONGO_URL + '/getModelData/' + sessionID,
         //excludeBasePath: true,
         method: 'GET'
     })
 
+
+    console.log(response)
+    console.log(response.data)
     return response.data
 }
 

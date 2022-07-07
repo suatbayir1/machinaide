@@ -99,4 +99,27 @@ export const SELECTABLE_TIME_RANGES: SelectableDurationTimeRange[] = [
   pastThirtyDaysTimeRange,
 ]
 
+export const ANOMALY_GRAPH_SELECTABLE_TIME_RANGES: SelectableDurationTimeRange[] = [
+  {
+    seconds: 300,
+    lower: 'now() - 5m',
+    upper: null,
+    label: 'Past 5m',
+    duration: '5m',
+    type: 'selectable-duration',
+    windowPeriod: 10000, // 10s
+  },
+  pastFifteenMinTimeRange,
+  pastHourTimeRange,
+  {
+    seconds: 14400,
+    lower: 'now() - 4h',
+    upper: null,
+    label: 'Past 4h',
+    duration: '4h',
+    type: 'selectable-duration',
+    windowPeriod: 60000, // 1m
+  },
+]
+
 export const DEFAULT_TIME_RANGE: TimeRange = pastHourTimeRange

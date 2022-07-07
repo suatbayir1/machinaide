@@ -6,7 +6,7 @@ import {
     Form, ComponentSize, Grid, Columns, Label, InfluxColors,
     SelectDropdown, ComponentStatus, DapperScrollbars, List,
     Gradients, ConfirmationButton, IconFont, ComponentColor,
-    Appearance, Input, TextArea,
+    Appearance, Input, TextArea, TextBlock
 } from '@influxdata/clockface'
 import DangerConfirmationOverlay from "src/shared/overlays/DangerConfirmationOverlay";
 
@@ -183,11 +183,18 @@ class FactoryInformation extends PureComponent<Props, State> {
                                     errorMessage={handleValidation(factoryName)}
                                     required={true}
                                 >
-                                    <Input
+                                    {/* <Input
                                         name="factoryName"
                                         placeholder="Factory Name.."
                                         onChange={this.handleChangeInput}
                                         value={factoryName}
+                                    /> */}
+                                    <Label
+                                        size={ComponentSize.Small}
+                                        name={factoryName}
+                                        description="Factory Name"
+                                        color={InfluxColors.Ocean}
+                                        id={factoryName}
                                     />
                                 </Form.Element>
                             </Grid.Column>
@@ -202,11 +209,25 @@ class FactoryInformation extends PureComponent<Props, State> {
                                     errorMessage={handleValidation(location)}
                                     required={true}
                                 >
-                                    <Input
+                                    {/* <Input
                                         name="location"
                                         placeholder="Location.."
                                         onChange={this.handleChangeInput}
                                         value={location}
+                                    /> */}
+                                    {/* <Label
+                                        size={ComponentSize.Small}
+                                        name={location}
+                                        description="Location"
+                                        color={InfluxColors.Ocean}
+                                        id={location}
+                                    /> */}
+                                    <TextArea
+                                        name="location"
+                                        value={location}
+                                        placeholder="Location.."
+                                        rows={2}
+                                        status={ComponentStatus.Disabled}
                                     />
                                 </Form.Element>
                             </Grid.Column>
@@ -217,7 +238,7 @@ class FactoryInformation extends PureComponent<Props, State> {
                                 widthLG={Columns.Twelve}
                             >
                                 <Form.Element label="Bucket">
-                                    <SelectDropdown
+                                    {/* <SelectDropdown
                                         buttonStatus={["admin"].includes(localStorage.getItem("userRole"))
                                             ? ComponentStatus.Valid
                                             : ComponentStatus.Disabled
@@ -225,6 +246,13 @@ class FactoryInformation extends PureComponent<Props, State> {
                                         options={bucketNames}
                                         selectedOption={bucket}
                                         onSelect={(e) => this.setState({ bucket: e })}
+                                    /> */}
+                                    <Label
+                                        size={ComponentSize.Small}
+                                        name={bucket}
+                                        description="Bucket"
+                                        color={InfluxColors.Ocean}
+                                        id={bucket}
                                     />
                                 </Form.Element>
                             </Grid.Column>
@@ -239,8 +267,8 @@ class FactoryInformation extends PureComponent<Props, State> {
                                         name="description"
                                         value={description}
                                         placeholder="Description.."
-                                        onChange={this.handleChangeInput}
                                         rows={4}
+                                        status={ComponentStatus.Disabled}
                                     />
                                 </Form.Element>
                             </Grid.Column>
@@ -278,7 +306,7 @@ class FactoryInformation extends PureComponent<Props, State> {
                                 </Form.Element>
                             </Grid.Column>
                         </Grid.Row>
-                        <Grid.Row>
+                        {/* <Grid.Row>
                             <div className="dt-information-buttons">
                                 {
                                     ["admin"].includes(localStorage.getItem("userRole")) &&
@@ -317,7 +345,7 @@ class FactoryInformation extends PureComponent<Props, State> {
                                     />
                                 }
                             </div>
-                        </Grid.Row>
+                        </Grid.Row> */}
                     </Grid>
                 </Form>
             </>

@@ -25,13 +25,26 @@ class SentenceSimilarityCalculator:
         """
         similarity_table = []
 
-        for Y in corpus:
-            intersection = set(X).intersection(set(Y))
-            union = set(X).union(set(Y))
+        print("queestion", question)
+        print("corpus", questions)
+
+        for Y in questions:
+            print("a")
+            intersection = set(question).intersection(set(Y))
+            print("a1")
+
+            union = set(question).union(set(Y))
+            print("a2")
+            
             jaccard_similarity = len(intersection) / len(union)
+            print("a3")
+            
             similarity_table.append({"question": Y, "score": jaccard_similarity})
+            print("a4")
 
         similarity_table = sorted(similarity_table, key = lambda x: x['score'], reverse = True)
+
+        print("similarity_table", similarity_table)
 
         return similarity_table[:5]
 

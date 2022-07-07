@@ -134,6 +134,25 @@ class FactoryModel():
 
         return sensors
 
+    def get_fields(self, payload):
+        data = self.convert_data_to_json()
+        fields = []
+
+        for factory in data:
+            if factory["id"] == payload["factoryId"]:
+                for pl in factory["productionLines"]:
+                    if pl["@id"] == payload["plId"]:
+                        for machine in pl["machines"]:
+                            if machine["@id"] == payload["machineId"]:
+                                for component in machine["contents"]:
+                                    if component["@type"] == "Component" and component["@id"] == payload["componentId"]:
+                                        for sensor in component["sensors"]:
+                                            if sensor["@id"] == payload["sensorId"]:
+                                                for field in sensor["fields"]:
+                                                    fields.append(field)
+
+        return fields
+
     def add_machine_action(self, payload):
         collection = "machine_actions"
         return self.db.insert_one(collection, payload)

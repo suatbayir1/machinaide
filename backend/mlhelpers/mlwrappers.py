@@ -1,3 +1,4 @@
+import subprocess
 import time
 import datetime
 import requests
@@ -32,6 +33,7 @@ from config import (
     BASICURL,
     PUTBASICURL,
     MODELDIR,
+    # MLSESSIONDIR,
     POSTTRAININGINSERTURL,
     VAEHPSDIR,
     VAESENSORDIR,
@@ -133,8 +135,8 @@ class MLSession(Process):
         self.session_id = settings['sessionID']
         self.creator = settings['creator']
         self.db_settings = settings['dbSettings']
-        self.start_time = '%d' % (time.mktime(datetime.datetime.strptime(settings['startTime'], "%Y-%m-%dT%H:%M:%S.%fZ").timetuple()) * 1000000000)
-        self.end_time = '%d' % (time.mktime(datetime.datetime.strptime(settings['endTime'], "%Y-%m-%dT%H:%M:%S.%fZ").timetuple()) * 1000000000)
+        self.start_time = '%d' % (time.mktime(datetime.datetime.strptime(settings['startTime'], "%Y-%m-%dT%H:%M:%S.%fZ").timetuple()))
+        self.end_time = '%d' % (time.mktime(datetime.datetime.strptime(settings['endTime'], "%Y-%m-%dT%H:%M:%S.%fZ").timetuple()))
         self.measurement_sensor_dict = settings['sensors']
         self.kill_sig_queue = kill_sig_queue
 
@@ -206,6 +208,7 @@ class MLSession(Process):
                 "Parameters": params,
                 "username": self.creator,
             }
+        print(CELLURL)
         requests.post(url=CELLURL, json=pkg)
 
         meta = {
@@ -219,19 +222,24 @@ class MLSession(Process):
 
 
     def start_training(self, dataframe):
-        print(self.params)
         for i, alg in enumerate(self.algs):
-            if alg == "LSTM":
-                lstm_model = MLLSTM(dataframe, self.input_columns, self.output_columns, self.session_id, self.model_IDs[i], self.params[alg], self.db_settings)
-                self._train_futures[self.model_IDs[i]] = lstm_model.run()
-            self._post_info(alg, self.model_IDs[i], self.params[alg], self.creator)
+            if alg == "SemiSupervisedVAE" and self.semi_available is False:
+                continue
+            pkg = {
+                "input": self.input_columns,
+                "output": self.output_columns,
+                "params": self.params[alg],
+                "dbsettings": self.db_settings
+            }
+            t_dir = MLSESSIONDIR + str(self.session_id) + "/" + str(self.model_IDs[i])
+            os.makedirs(t_dir)
+            with open(t_dir + "/sessioninfo.json", 'w') as fp:
+                json.dump(pkg, fp)
+            cmd = " python3 ./mlhelpers/mlsession.py -t train -s " + str(self.session_id) + \
+                " -m " + self.model_IDs[i] + " -a " + alg
+            process = subprocess.Popen(cmd.split(), close_fds=True)
 
-        for future in self._train_futures.values():
-            try:
-                print(future.result())
-            except Exception as e:
-                print(future.cancelled())
-                print(e)
+            self._post_info(alg, self.model_IDs[i], self.params[alg], self.creator)
 
 
     def start_session(self):

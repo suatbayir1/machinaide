@@ -13,9 +13,10 @@ interface Props {
   properties: SingleStatViewProperties
   stat: number
   theme: Theme
+  style?: object
 }
 
-const SingleStat: SFC<Props> = ({stat, properties}) => {
+const SingleStat: SFC<Props> = ({stat, properties, style}) => {
   const {prefix, suffix, colors, decimalPlaces} = properties
 
   const {bgColor: backgroundColor, textColor} = generateThresholdsListHexs({
@@ -29,7 +30,7 @@ const SingleStat: SFC<Props> = ({stat, properties}) => {
   return (
     <div
       className="single-stat"
-      style={{backgroundColor}}
+      style={{backgroundColor, ...style}}
       data-testid="single-stat"
     >
       <div className="single-stat--resizer">

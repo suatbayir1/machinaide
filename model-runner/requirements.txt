@@ -1,0 +1,14 @@
+APScheduler==3.8.1
+tensorflow==2.6.2
+Flask==2.0.3
+Flask-Cors==3.0.10
+pymongo==4.0.2
+Flask-PyMongo==2.3.0
+influxdb-client==1.30.0
+pandas==1.4.1
+numpy==1.21.5
+scikit-learn==0.24.2
+requests==2.27.1
+evalml==0.51.0
+composeml==0.8.0
+featuretools==1.9.0

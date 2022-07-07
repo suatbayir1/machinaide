@@ -90,23 +90,25 @@ function CellSection({
                         }
                     })}
                     <ResourceCard.Meta>
-                        {model.Status === "training" ? <TechnoSpinner style={{ width: "30px", height: "30px" }}/> : [
+                        {model.Status === "train" ? <TechnoSpinner style={{ width: "30px", height: "30px" }}/> : [
                             <Button
                                 color={ComponentColor.Primary}
                                 // text="Start Session"
                                 titleText="Start model"
                                 icon={IconFont.Play}
                                 type={ButtonType.Button}
-                                onClick={() => console.log("click action")}
-                                status={model.Status === "running" ? ComponentStatus.Disabled : ComponentStatus.Valid}/>,
+                                onClick={() => console.log("click")}
+                                status={model.Status === "running" ? ComponentStatus.Disabled : ComponentStatus.Valid}
+                            />,
                             <Button
                                 color={ComponentColor.Danger}
                                 // text="Stop Session"
                                 titleText="Stop model"
                                 icon={IconFont.Pause}
                                 type={ButtonType.Button}
-                                onClick={() => console.log("click action")}
-                                status={model.Status === "running" ? ComponentStatus.Valid : ComponentStatus.Disabled}/>
+                                onClick={() => console.log("click")}
+                                status={model.Status === "running" ? ComponentStatus.Valid : ComponentStatus.Disabled}
+                            />
                         ]}
                     </ResourceCard.Meta>
                 </ResourceCard>
@@ -122,23 +124,25 @@ function CellSection({
                         tabs={[{
                             text: 'Parameters',
                             id: 'tab1',
-                        },
-                        {
-                            text: 'Meta Information',
-                            id: 'tab2',
-                        }, {
-                            text: 'Success Metrics',
-                            id: 'tab3',
                         }]}
+                        // },
+                        // {
+                        //     text: 'Meta Information',
+                        //     id: 'tab2',
+                        // }, {
+                        //     text: 'Success Metrics',
+                        //     id: 'tab3',
+                        // }]}
                         activeTab={activeTab}
                         onTabClick={(e) => setActiveTab(e)}
                         />
                         <br />
-                        <div>{activeTab === "tab1" ? Object.keys(model.Parameters).map(param => {
-                            return <p style={{ fontSize: '16px', fontWeight: 600 }}>{param + ": " + model.Parameters[param]}</p>
-                        }) : Object.keys(model.MetaInfo).map(meta => {
-                            return <p style={{ fontSize: '16px', fontWeight: 600 }}>{meta + ": " + model.MetaInfo[meta]}</p>
+                        <div>{Object.keys(model.Parameters).map(param => {
+                            return <p style={{ fontSize: '16px', fontWeight: 600 }}>{param + ": " + model.Parameters[param]["Value"]}</p>
                         })}</div>
+                        {/* // }) : Object.keys(model.MetaInfo).map(meta => { */}
+                        {/* //     return <p style={{ fontSize: '16px', fontWeight: 600 }}>{meta + ": " + model.MetaInfo[meta]}</p> */}
+                        {/* // })}</div> */}
                     </Overlay.Body>
                     </Overlay.Container>
                 </Overlay>
@@ -154,11 +158,13 @@ export default function ModelSection({
     cellDataReceived,
     // sessionPhase
 }) {
+    console.log(sessionID)
     if (models.length === 0) {
         useInterval(async () => {
             let obj = await api.getCellCount(sessionID)
+            console.log(obj)
             setCellCountAndIDs(obj)
-        }, 10000)
+        }, 3000) //10000
     } else {
         useInterval(null, 0)
     }
@@ -170,13 +176,19 @@ export default function ModelSection({
     // }
     return (
         <Grid>
-            {models.map((model: any) => {
+            {models.length !== 0 ? (models.map((model: any) => {
                 return (
                     <CellSection
                         model={model}
                         cellDataReceived={cellDataReceived}/>
                 )
-            })}
+                
+            })) : (<TechnoSpinner style={{
+                position: 'absolute', left: '50%', top: '50%',
+                transform: 'translate(-50%, -50%)',
+                height: "100px",
+                width: "100px"
+            }}/>)}
         </Grid>
     )
 }

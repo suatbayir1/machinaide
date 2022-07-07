@@ -6,8 +6,11 @@ import {
     Form, ComponentSize, Grid, Columns, Label, InfluxColors,
     ConfirmationButton, IconFont, ComponentColor, Appearance,
     SelectDropdown, ComponentStatus, InputType, Input, TextArea,
+    SlideToggle, FlexBox, InputLabel
 } from '@influxdata/clockface'
 import DangerConfirmationOverlay from "src/shared/overlays/DangerConfirmationOverlay";
+import Autocomplete from '@material-ui/lab/Autocomplete'
+import TextField from '@material-ui/core/TextField';
 
 // Services
 import DTService from "src/shared/services/DTService";
@@ -19,6 +22,7 @@ import { handleValidation } from "src/shared/helpers/FormValidator";
 
 // Constants
 import { updateFieldConfirmationText, deleteFieldConfirmationText } from 'src/shared/constants/tips';
+import { DEFAULT_VAL_FUNCTIONS } from 'src/shared/constants/defaultValueFunctions'
 
 type Props = {
     selectedGraphNode: object
@@ -41,6 +45,11 @@ type State = {
     description: string
     operationType: "update" | "delete"
     visibleConfirmationOverlay: boolean
+    isFillNullActive: boolean
+    defaultValue: string
+    isOperationActive: boolean
+    operation: string
+    operationValue: string
 }
 
 class FieldInformation extends PureComponent<Props, State> {
@@ -59,6 +68,11 @@ class FieldInformation extends PureComponent<Props, State> {
             description: "",
             operationType: "update",
             visibleConfirmationOverlay: false,
+            isFillNullActive: false,
+            defaultValue: "0",
+            isOperationActive: false,
+            operation: "*",
+            operationValue: "1"
         }
     }
 
@@ -123,6 +137,11 @@ class FieldInformation extends PureComponent<Props, State> {
             measurement: selectedGraphNode["measurement"],
             minValue: selectedGraphNode["minValue"],
             maxValue: selectedGraphNode["maxValue"],
+            isFillNullActive: selectedGraphNode["isFillNullActive"] ? selectedGraphNode["isFillNullActive"] : false,
+            defaultValue: selectedGraphNode["defaultValue"] ? selectedGraphNode["defaultValue"] : "0",
+            isOperationActive: selectedGraphNode["isOperationActive"] ? selectedGraphNode["isOperationActive"] : false,
+            operation: selectedGraphNode["operation"] ? selectedGraphNode["operation"] : "*",
+            operationValue: selectedGraphNode["operationValue"] ? selectedGraphNode["operationValue"] : "1",
         }, () => { this.handleChangeMeasurement() })
     }
 
@@ -146,7 +165,8 @@ class FieldInformation extends PureComponent<Props, State> {
 
     private updateFieldConfirmed = async (): Promise<void> => {
         const { selectedGraphNode, handleChangeNotification, refreshGraph, refreshVisualizePage, refreshGeneralInfo } = this.props;
-        const { displayName, description, dataSource, minValue, maxValue, measurement } = this.state;
+        const { displayName, description, dataSource, minValue, maxValue, measurement,
+            isFillNullActive, defaultValue, isOperationActive, operation, operationValue } = this.state;
 
         const payload = {
             "id": selectedGraphNode["@id"],
@@ -155,7 +175,12 @@ class FieldInformation extends PureComponent<Props, State> {
             measurement,
             dataSource,
             "minValue": Number(minValue),
-            "maxValue": Number(maxValue)
+            "maxValue": Number(maxValue),
+            "isFillNullActive": isFillNullActive,
+            "defaultValue": defaultValue,
+            "isOperationActive": isOperationActive,
+            "operation": operation,
+            "operationValue": operationValue
         }
 
         const updatedResult = await DTService.updateField(payload);
@@ -174,7 +199,7 @@ class FieldInformation extends PureComponent<Props, State> {
 
     private updateField = async (): Promise<void> => {
         const { selectedGraphNode, handleChangeNotification } = this.props;
-        const { displayName, dataSource, minValue, maxValue, measurement } = this.state;
+        const { displayName, dataSource, minValue, maxValue, measurement} = this.state;
 
         if (
             displayName.trim() == "" ||
@@ -234,7 +259,8 @@ class FieldInformation extends PureComponent<Props, State> {
         const { selectedGraphNode } = this.props;
         const {
             dataSource, minValue, maxValue, measurements, measurement, fields,
-            displayName, description, operationType, visibleConfirmationOverlay
+            displayName, description, operationType, visibleConfirmationOverlay,
+            isFillNullActive, defaultValue, isOperationActive, operation, operationValue
         } = this.state;
 
         return (
@@ -288,16 +314,19 @@ class FieldInformation extends PureComponent<Props, State> {
                                 widthMD={Columns.Twelve}
                                 widthLG={Columns.Twelve}
                             >
-                                <Form.Element
-                                    label="Display Name"
-                                    errorMessage={handleValidation(displayName)}
-                                    required={true}
-                                >
-                                    <Input
+                                <Form.Element label="Display Name">
+                                    {/* <Input
                                         name="displayName"
                                         placeholder="Display Name.."
                                         onChange={this.handleChangeInput}
                                         value={displayName}
+                                    /> */}
+                                    <Label
+                                        size={ComponentSize.Small}
+                                        name={displayName}
+                                        description="Display Name"
+                                        color={InfluxColors.Ocean}
+                                        id={displayName}
                                     />
                                 </Form.Element>
                             </Grid.Column>
@@ -308,7 +337,7 @@ class FieldInformation extends PureComponent<Props, State> {
                                 widthLG={Columns.Twelve}
                             >
                                 <Form.Element label="Measurement">
-                                    <SelectDropdown
+                                    {/* <SelectDropdown
                                         buttonStatus={["admin"].includes(localStorage.getItem("userRole"))
                                             ? ComponentStatus.Valid
                                             : ComponentStatus.Disabled
@@ -316,6 +345,13 @@ class FieldInformation extends PureComponent<Props, State> {
                                         options={measurements}
                                         selectedOption={measurement}
                                         onSelect={(e) => { this.setState({ measurement: e }, () => this.handleChangeMeasurement()) }}
+                                    /> */}
+                                    <Label
+                                        size={ComponentSize.Small}
+                                        name={measurement}
+                                        description="Measurement"
+                                        color={InfluxColors.Ocean}
+                                        id={measurement}
                                     />
                                 </Form.Element>
                             </Grid.Column>
@@ -326,7 +362,7 @@ class FieldInformation extends PureComponent<Props, State> {
                                 widthLG={Columns.Twelve}
                             >
                                 <Form.Element label="Data Source">
-                                    <SelectDropdown
+                                    {/* <SelectDropdown
                                         buttonStatus={["admin"].includes(localStorage.getItem("userRole"))
                                             ? ComponentStatus.Valid
                                             : ComponentStatus.Disabled
@@ -334,6 +370,13 @@ class FieldInformation extends PureComponent<Props, State> {
                                         options={fields}
                                         selectedOption={dataSource}
                                         onSelect={(e) => this.setState({ dataSource: e })}
+                                    /> */}
+                                    <Label
+                                        size={ComponentSize.Small}
+                                        name={dataSource}
+                                        description="Data Source"
+                                        color={InfluxColors.Ocean}
+                                        id={dataSource}
                                     />
                                 </Form.Element>
                             </Grid.Column>
@@ -344,7 +387,7 @@ class FieldInformation extends PureComponent<Props, State> {
                                 widthLG={Columns.Six}
                             >
                                 <Form.Element label="Min Value">
-                                    <Input
+                                    {/* <Input
                                         name="minValue"
                                         onChange={this.handleChangeInput}
                                         value={minValue}
@@ -353,6 +396,13 @@ class FieldInformation extends PureComponent<Props, State> {
                                             ? ComponentStatus.Default
                                             : ComponentStatus.Disabled
                                         }
+                                    /> */}
+                                    <Label
+                                        size={ComponentSize.Small}
+                                        name={minValue ? minValue.toString() : "-"}
+                                        description="Min Value"
+                                        color={InfluxColors.Ocean}
+                                        id={minValue ? minValue.toString() : "noMinValue"}
                                     />
                                 </Form.Element>
                             </Grid.Column>
@@ -363,7 +413,7 @@ class FieldInformation extends PureComponent<Props, State> {
                                 widthLG={Columns.Six}
                             >
                                 <Form.Element label="Max Value">
-                                    <Input
+                                    {/* <Input
                                         name="maxValue"
                                         onChange={this.handleChangeInput}
                                         value={maxValue}
@@ -372,9 +422,128 @@ class FieldInformation extends PureComponent<Props, State> {
                                             ? ComponentStatus.Default
                                             : ComponentStatus.Disabled
                                         }
+                                    /> */}
+                                    <Label
+                                        size={ComponentSize.Small}
+                                        name={maxValue ? maxValue.toString() : "-"}
+                                        description="Max Value"
+                                        color={InfluxColors.Ocean}
+                                        id={maxValue ? maxValue.toString() : "noMaxValue"}
                                     />
                                 </Form.Element>
                             </Grid.Column>
+                            <Grid.Row>
+                                <Grid.Column
+                                    widthXS={Columns.Three}
+                                    widthSM={Columns.Three}
+                                    widthMD={Columns.Six}
+                                    widthLG={Columns.Six}
+                                >
+                                    <FlexBox margin={ComponentSize.Small}>
+                                        <InputLabel>Do Operation on Data</InputLabel>
+                                        <SlideToggle
+                                            active={isOperationActive}
+                                            size={ComponentSize.ExtraSmall}
+                                            onChange={() => this.setState({ isOperationActive: !this.state.isOperationActive })}
+                                            testID="rule-card--slide-toggle"
+                                            disabled={true}
+                                        />
+                                    </FlexBox>
+                                </Grid.Column>
+                            </Grid.Row>                            
+                            {isOperationActive && <Grid.Row><br/><Grid.Column
+                                    widthXS={Columns.Three}
+                                    widthSM={Columns.Three}
+                                    widthMD={Columns.Six}
+                                    widthLG={Columns.Six}
+                                >
+                                    <Form.Element label="Operation">
+                                        {/* <SelectDropdown
+                                            options={["+", "-", "/", "*"]}
+                                            selectedOption={operation}
+                                            onSelect={(e) => this.setState({ operation: e })}
+                                        /> */}
+                                        <Label
+                                            size={ComponentSize.Small}
+                                            name={operation}
+                                            description="Operation"
+                                            color={InfluxColors.Ocean}
+                                            id={operation}
+                                        />
+                                    </Form.Element>
+                                </Grid.Column>
+                                <Grid.Column
+                                    widthXS={Columns.Three}
+                                    widthSM={Columns.Three}
+                                    widthMD={Columns.Six}
+                                    widthLG={Columns.Six}
+                                >
+                                    <Form.Element label="Value">
+                                        {/* <Input
+                                            name="operationValue"
+                                            onChange={this.handleChangeInput}
+                                            value={operationValue}
+                                            type={InputType.Text}
+                                            status={["admin"].includes(localStorage.getItem("userRole"))
+                                                ? ComponentStatus.Default
+                                                : ComponentStatus.Disabled
+                                            }
+                                        /> */}
+                                        <Label
+                                            size={ComponentSize.Small}
+                                            name={operationValue}
+                                            description="Operation Value"
+                                            color={InfluxColors.Ocean}
+                                            id={operationValue}
+                                        />
+                                    </Form.Element>
+                                </Grid.Column>
+                            </Grid.Row>}
+                            <Grid.Row>
+                                <Grid.Column
+                                    widthXS={Columns.Three}
+                                    widthSM={Columns.Three}
+                                    widthMD={Columns.Six}
+                                    widthLG={Columns.Six}
+                                >
+                                    <FlexBox margin={ComponentSize.Small}>
+                                        <InputLabel>Fill Nan Values</InputLabel>
+                                        <SlideToggle
+                                            active={isFillNullActive}
+                                            size={ComponentSize.ExtraSmall}
+                                            onChange={() => this.setState({ isFillNullActive: !this.state.isFillNullActive })}
+                                            testID="rule-card--slide-toggle"
+                                            disabled={true}
+                                        />
+                                    </FlexBox>
+                                </Grid.Column>
+                            </Grid.Row>                            
+                            {isFillNullActive && (
+                                <Grid.Row><br/>
+                                    <Grid.Column
+                                        widthXS={Columns.Three}
+                                        widthSM={Columns.Three}
+                                        widthMD={Columns.Six}
+                                        widthLG={Columns.Six}
+                                    >
+                                        <Form.Element label="Default Value">
+                                            <Label
+                                                size={ComponentSize.Small}
+                                                name={defaultValue}
+                                                description="Default Value"
+                                                color={InfluxColors.Ocean}
+                                                id={defaultValue}
+                                            />
+                                        </Form.Element>
+                                            {/* <SelectDropdown
+                                                options={[DEFAULT_VAL_FUNCTIONS.LAST, DEFAULT_VAL_FUNCTIONS.AVG, DEFAULT_VAL_FUNCTIONS.MAX, DEFAULT_VAL_FUNCTIONS.MIN,
+                                                    DEFAULT_VAL_FUNCTIONS.DAVG, DEFAULT_VAL_FUNCTIONS.DMAX, DEFAULT_VAL_FUNCTIONS.DMIN]}
+                                                selectedOption={defaultValue}
+                                                onSelect={(e) => this.setState({ defaultValue: e })}
+                                            /> */}
+                                    </Grid.Column>
+                                </Grid.Row>
+                            )}
                             <Grid.Column
                                 widthXS={Columns.Twelve}
                                 widthSM={Columns.Twelve}
@@ -382,17 +551,24 @@ class FieldInformation extends PureComponent<Props, State> {
                                 widthLG={Columns.Twelve}
                             >
                                 <Form.Element label="Description">
-                                    <TextArea
+                                    {/* <TextArea
                                         name="description"
                                         value={description}
                                         placeholder="Description.."
                                         onChange={this.handleChangeInput}
                                         rows={4}
+                                    /> */}
+                                    <Label
+                                        size={ComponentSize.Small}
+                                        name={description}
+                                        description="Description"
+                                        color={InfluxColors.Ocean}
+                                        id={description}
                                     />
                                 </Form.Element>
                             </Grid.Column>
                         </Grid.Row>
-                        <Grid.Row>
+                        {/* <Grid.Row>
                             <div className="dt-information-buttons">
                                 {
                                     ["admin"].includes(localStorage.getItem("userRole")) &&
@@ -431,7 +607,7 @@ class FieldInformation extends PureComponent<Props, State> {
                                     />
                                 }
                             </div>
-                        </Grid.Row>
+                        </Grid.Row> */}
                     </Grid>
                 </Form>
             </>

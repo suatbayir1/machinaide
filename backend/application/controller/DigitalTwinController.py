@@ -1093,7 +1093,7 @@ def insertField(token):
     try:
         message, confirm = validator.check_request_params(
             request.json, 
-            ["@id", "name", "parent", "displayName", "type", "minValue", "maxValue"]
+            ["@id", "name", "parent", "displayName", "type", "minValue", "maxValue", "isFillNullActive", "defaultValue", "isOperationActive", "operation", "operationValue"]
         )
 
         if not confirm:
@@ -1135,7 +1135,7 @@ def updateField(token):
     try:
         message, confirm = validator.check_request_params(
             request.json, 
-            ["id", "dataSource", "minValue", "maxValue", "measurement", "displayName"]
+            ["id", "dataSource", "minValue", "maxValue", "measurement", "displayName", "isFillNullActive", "defaultValue", "isOperationActive", "operation", "operationValue"]
         )
 
         if not confirm:

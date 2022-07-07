@@ -130,6 +130,7 @@
 @import 'src/shared/styles/responsive.scss';
 @import 'src/example/monitorComponents/ReportWrapper.scss';
 @import 'src/example/anomalyMonitor/AnomalyOverview.scss';
+@import 'src/health/style/ModelsCardGrid.scss';
 
 // External
 @import '../../node_modules/@influxdata/react-custom-scrollbars/dist/styles.css';

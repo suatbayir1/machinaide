@@ -226,6 +226,13 @@ $context-menu--arrow-size: 8px;
   @include contextListThemeModifier($c-pineapple, $c-thunder);
 }
 
+.context-menu--toggle.context-menu--warning {
+  @include contextToggleThemeModifier($c-pineapple, $c-thunder);
+}
+.context-menu--list.context-menu--warning {
+  @include contextListThemeModifier($c-pineapple, $c-thunder);
+}
+
 .context-menu--toggle.context-menu--danger {
   @include contextToggleThemeModifier($c-curacao, $c-dreamsicle);
 }

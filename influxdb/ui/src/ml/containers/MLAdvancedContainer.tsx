@@ -549,7 +549,8 @@ export default class MLAdvancedContainer extends PureComponent<Props, State> {
                                                     <ModelSection
                                                         models={this.state.models}
                                                         sessionID={this.state.sessionID}
-                                                        setCellCountAndIDs={this.setCellCountAndIDs}/>
+                                                        setCellCountAndIDs={this.setCellCountAndIDs}
+                                                        cellDataReceived={this.cellDataReceived}/>
                                                 </Panel.Body>
                                             </DapperScrollbars>
                                                 

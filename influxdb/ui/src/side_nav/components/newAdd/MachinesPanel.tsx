@@ -284,6 +284,14 @@ class MachinesPanel extends PureComponent<Props, State> {
                                                                                                     Show Failures
                                                                                                 </Link>
                                                                                             </li>
+                                                                                            <li className="links">
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/health/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${machine["id"]}`}>
+                                                                                                    <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+                                                                                                        <div><img src="../../../assets/icons/sidenav-masstrain-icon.png" className="li-icon" /></div>
+                                                                                                    </div>
+                                                                                                    Health Assessment
+                                                                                                </Link>
+                                                                                            </li>
                                                                                         </ul>
                                                                                     </FlexBox>
                                                                                 </Grid.Column>

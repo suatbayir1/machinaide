@@ -52,26 +52,29 @@ max_epochs = 5
 max_trials = 10
 executions_per_trial = 1
 
-flaskserver = "localhost" # "flaskserver"
-flask_port = 9632
+flaskserver = "vmi474601.contaboserver.net" # "flaskserver"
+flask_port = "/api/v1.0/metadata"
+health_port = "/api/v1.0/health"
 influx_port = 8086
 bootstrap_server = 'localhost:9094'
 
 
 METAURL = "http://{}:{}/addModelMeta".format(flaskserver, flask_port)
-CELLURL = "http://{}:{}/postModelData".format(flaskserver, flask_port)
+CELLURL = "https://{}:{}/postModelData".format(flaskserver, flask_port)
 BASICURL = "http://{}:{}/postBasicModel".format(flaskserver, flask_port)
 PUTBASICURL = "http://{}:{}/updateBasicModel/".format(flaskserver, flask_port)
 UPDATECELLURL = "http://{}:{}/updateModelData".format(flaskserver, flask_port)
 AUTOML_POST_TRIAL_URL = "http://{}:{}/postTrial".format(flaskserver, flask_port)
 AUTOML_POST_EXPERIMENT_URL = "http://{}:{}/postExperiment".format(flaskserver, flask_port)
 AUTOML_UPDATE_EXPERIMENT_URL = "http://{}:{}/updateExperiment".format(flaskserver, flask_port)
+TESTINFERENCEURL= "http://{}:{}/testInference".format(flaskserver, flask_port)
 AUTOML_CHANGE_STATUS_URL = "http://{}:{}/changeStatus".format(flaskserver, flask_port)
 UPDATEROWURL ='http://{}:{}/updateBasicRow'.format(flaskserver, flask_port)
 POSTTRAININGURL = "http://{}:{}/getPostTrainingData/".format(flaskserver, flask_port)
 POSTTRAININGINSERTURL= "http://{}:{}/insertPostTrainingData".format(flaskserver, flask_port)
 GETFAILURESURL = "http://{}:{}/returnFailures/".format(flaskserver, flask_port)
 GETSENSORFROMMAPPING = "http://{}:{}/getSensorFromMapping/".format(flaskserver, flask_port)
+POSTREALANOMALYURL= "http://{}:{}/addAnomalyToMachine/".format(flaskserver, health_port)
 GETBASICMODEL = 'http://{}:{}/getBasicModel/'.format(flaskserver, flask_port)
 UPDATEBASICROW = 'http://{}:{}/updateBasicRow'.format(flaskserver, flask_port)
 ANOMALYURL = 'http://{}:{}/anomaly'.format(flaskserver, flask_port)
@@ -91,6 +94,7 @@ VAESENSORDIR = os.getcwd() +  "/mlhelpers/VAESettings/sensors/"
 ADHPSDIR = os.getcwd() + "/mlhelpers/ADSettings/hps/"
 ADSENSORDIR = os.getcwd() + "/mlhelpers/ADSettings/sensors/"
 REPORTDIR = os.getcwd() + "/alerthelpers/printFiles/"
+MLSESSIONDIR = os.getcwd() + "/mlhelpers/SessionSettings/"
 
 TICK_SETTINGS = {
   "LAST": "last value",

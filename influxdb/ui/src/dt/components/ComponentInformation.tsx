@@ -6,7 +6,7 @@ import {
     Form, ComponentSize, Grid, Columns, Label, InfluxColors,
     DapperScrollbars, List, Gradients, ConfirmationButton,
     IconFont, ComponentColor, Appearance, Button, ButtonType,
-    Input, TextArea, FlexBox, FlexDirection,
+    Input, TextArea, FlexBox, FlexDirection, ComponentStatus
 } from '@influxdata/clockface'
 import DangerConfirmationOverlay from "src/shared/overlays/DangerConfirmationOverlay";
 
@@ -125,6 +125,7 @@ class ComponentInformation extends PureComponent<Props, State> {
     public render() {
         const { selectedGraphNode, clickPartDetail, clickBrands, objectList } = this.props;
         const { displayName, description, visibleConfirmationOverlay, selectedObject } = this.state;
+        const selectedObjectName = objectList.find(x=>selectedObject === x["_id"]["$oid"])
 
         return (
             <>
@@ -188,11 +189,18 @@ class ComponentInformation extends PureComponent<Props, State> {
                                         errorMessage={handleValidation(displayName)}
                                         required={true}
                                     >
-                                        <Input
+                                        {/* <Input
                                             name="displayName"
                                             placeholder="Display Name.."
                                             onChange={this.handleChangeInput}
                                             value={displayName}
+                                        /> */}
+                                        <Label
+                                            size={ComponentSize.Small}
+                                            name={displayName}
+                                            description="Display Name"
+                                            color={InfluxColors.Ocean}
+                                            id={displayName}
                                         />
                                     </Form.Element>
                                 </Grid.Column>
@@ -207,14 +215,21 @@ class ComponentInformation extends PureComponent<Props, State> {
                                             name="description"
                                             value={description}
                                             placeholder="Description.."
-                                            onChange={this.handleChangeInput}
+                                            status={ComponentStatus.Disabled}
                                             rows={4}
                                         />
                                     </Form.Element>
                                 </Grid.Column>
                                 <Grid.Column widthSM={Columns.Twelve}>
                                     <Form.Element label="Visual">
-                                        {
+                                        <Label
+                                            size={ComponentSize.Small}
+                                            name={selectedObjectName ? selectedObjectName["name"] : "-"}
+                                            description="Visual"
+                                            color={InfluxColors.Ocean}
+                                            id={selectedObjectName ? selectedObjectName["name"] : "noVisual"}
+                                        />
+                                        {/* {
                                             objectList.length > 0 ?
                                                 < DapperScrollbars
                                                     autoHide={false}
@@ -255,7 +270,7 @@ class ComponentInformation extends PureComponent<Props, State> {
                                                     </List>
                                                 </DapperScrollbars>
                                                 : <h6>No visual record found</h6>
-                                        }
+                                        } */}
                                     </Form.Element>
                                 </Grid.Column>
                                 <Grid.Column widthXS={Columns.Twelve}>
@@ -293,7 +308,7 @@ class ComponentInformation extends PureComponent<Props, State> {
                                 </Grid.Column>
                             </DapperScrollbars>
                         </Grid.Row>
-                        <Grid.Row>
+                        {/* <Grid.Row>
                             <div className="dt-information-buttons">
                                 <Button
                                     text="Summary"
@@ -343,7 +358,7 @@ class ComponentInformation extends PureComponent<Props, State> {
                                     />
                                 }
                             </div>
-                        </Grid.Row>
+                        </Grid.Row> */}
                     </Grid>
                 </Form>
             </>

@@ -587,6 +587,11 @@ class DigitalTwinModel():
                                             field["measurement"] = payload["measurement"]
                                             field["displayName"] = payload["displayName"]
                                             field["description"] = payload["description"]
+                                            field["isFillNullActive"] = payload["isFillNullActive"]
+                                            field["defaultValue"] = payload["defaultValue"]
+                                            field["isOperationActive"] = payload["isOperationActive"]
+                                            field["operation"] = payload["operation"]
+                                            field["operationValue"] = payload["operationValue"]
                                             factoryID = factory["id"]
 
             update_data = { 

@@ -108,8 +108,8 @@ class MLSession(Process):
         self.session_id = settings['sessionID']
         self.creator = settings['creator']
         self.db_settings = settings['dbSettings']
-        self.start_time = '%d' % (time.mktime(datetime.datetime.strptime(settings['startTime'], "%Y-%m-%dT%H:%M").timetuple()) * 1000000000)
-        self.end_time = '%d' % (time.mktime(datetime.datetime.strptime(settings['endTime'], "%Y-%m-%dT%H:%M").timetuple()) * 1000000000)
+        self.start_time = '%d' % (time.mktime(datetime.datetime.strptime(settings['startTime'], "%Y-%m-%dT%H:%M").timetuple()))
+        self.end_time = '%d' % (time.mktime(datetime.datetime.strptime(settings['endTime'], "%Y-%m-%dT%H:%M").timetuple()))
         self.measurement_sensor_dict = settings['sensors']
         self.kill_sig_queue = kill_sig_queue
 

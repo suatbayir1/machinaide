@@ -11,12 +11,13 @@ import numpy as np
 import statistics
 import pickle
 from pebble import concurrent
-from config import MODELDIR, UPDATECELLURL, POSTTRAININGINSERTURL
+from config import MODELDIR, UPDATECELLURL, POSTTRAININGINSERTURL, TESTINFERENCEURL, POSTREALANOMALYURL
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import Model
 import tensorflow as tf
 from kafka import KafkaConsumer, KafkaProducer
 from mlhelpers.kerasmanager import KerasManager
+from datetime import datetime
 from config import bootstrap_server
 
 producer = KafkaProducer(bootstrap_servers=[bootstrap_server],
@@ -167,78 +168,270 @@ class MLLSTM:
 
 class LSTMRunner:
     def __init__(self, settings):
+        self.algorithm = settings["Algorithm"]
         self.model_id = settings["modelID"]
         self.session_id = settings["sessionID"]
         self.directory = settings["Directory"]
         self.input_columns = settings["InputColumns"]
         self.output_columns = settings["OutputColumns"]
+        self.db_settings = settings["Settings"]
         self.vector_length = settings["Optional"]["VectorLength"]
-        self.error_means = settings["Optional"]["ErrorMeans"]
-        self.error_stds = settings["Optional"]["ErrorStds"]
+        self.error_means = json.loads(settings["Optional"]["ErrorMeans"])
+        self.error_stds = json.loads(settings["Optional"]["ErrorStds"])
         self.input_means = settings["Optional"]["InputMeans"]
         self.input_stds = settings["Optional"]["InputStds"]
         self.output_means = settings["Optional"]["OutputMeans"]
         self.output_stds = settings["Optional"]["OutputStds"]
 
-        self.KAFKA_VERSION = (10, 0)
+        # self.KAFKA_VERSION = (10, 0)
 
         self.consumer = KafkaConsumer(
-            'cimtas_jco3',
-            bootstrap_servers=['127.0.0.1:9094'],
+            self.db_settings["db"],
+            bootstrap_servers=[bootstrap_server],
             auto_offset_reset='latest',
             enable_auto_commit=True,
             group_id=self.model_id,
-            api_version=self.KAFKA_VERSION,
+            # api_version=self.KAFKA_VERSION,
             value_deserializer=lambda x: x.decode('utf-8')
         )
-        
+
+    def prepare_vis_data(self, window, anomaly_date, ano_id):
+        vis_data = {
+            "data": [],
+            "anomalyDate": anomaly_date,
+            "anoID": ano_id
+        }
+        data_list = list()
+        for i, col in enumerate(self.input_columns):
+            col_list = []
+            for j, val in enumerate(window):
+                inner_obj = {
+                    "x": j,
+                    "y": val[i]
+                }
+                col_list.append(inner_obj)
+            obj = {
+                "id": col,
+                "data": col_list
+            }
+            data_list.append(obj)
+
+        vis_data["data"] = data_list
+        return vis_data
+
+    def post_anomaly(self, obs, pred, machine):
+        anomaly_date = datetime.now().timestamp()
+        # ano_id = uuid4().hex
+        # vis_data = self.prepare_vis_data(window, anomaly_date, ano_id)
+        # requests.post(url=POSTANOMALYVISURL, json=vis_data)
+
+        # obs_dict = {}
+        # pred_dict = {}
+        # diff_dict = {}
+        # nonpoint_cols = list()
+        # for i, col in enumerate(self.input_columns):
+        #     nonpoint_list = col.split(".")
+        #     temp_str = ""
+        #     for colval in nonpoint_list:
+        #         temp_str += colval + "_"
+        #     nonpoint_cols.append(temp_str)
+
+        #     obs_dict[temp_str] = str(obs)
+        #     pred_dict[temp_str] = str(pred)
+        #     diff_dict[temp_str] = {
+        #         "Absolute": abs(pred - obs),
+        #         "Percentage": ((pred - obs) * 100) / obs
+        #     }
+            
+        anomaly = {
+            "anomaly": {
+                "timestamp": anomaly_date,
+                "code": "LSTM anomaly",
+                "type": "model",
+                "feedback": "tp"
+            }
+        }
+
+        requests.put(url=POSTREALANOMALYURL + self.db_settings["db"] + "/" + self.model_id, json=anomaly)
+
+        return
+
+
+    def check_anomaly(self, pred, output, value_list):
+        for i, key in enumerate(self.error_means.keys()):
+            mu = float(self.error_means[key])
+            sig = float(self.error_stds[key])
+            # requests.post(url=TESTINFERENCEURL, json={"state": "obs_pred"})
+            obs = output[i]
+            # requests.post(url=TESTINFERENCEURL, json={"state": "obs_out"})
+            prediction = pred[i][0]
+            # requests.post(url=TESTINFERENCEURL, json={"state": "obs_pred_out"})
+            if (obs / prediction) > mu + (3*sig) or (obs / prediction) < mu - (3*sig):
+                # requests.post(url=TESTINFERENCEURL, json={"state": "check_ano", "val": obs / prediction, "threshold1": mu + (3*sig), "threshold2": mu - (3*sig)})
+                self.post_anomaly(obs, prediction, value_list)
+
+
     
     def run(self):
         value_list = list()
+        value_list_send = list()
         model = manager.KerasModel()
-        print("model")
+        # print("model")
         try:
             model.initialize(path=self.directory + "model.h5")
+            # requests.post(url=TESTINFERENCEURL, json={"state": "init"})
         except Exception as e:
             print(e, "init")
-        for message in self.consumer: 
+            exit()
+        if self.algorithm == "LSTMOnline":
+            label_list = list()
+        for message in self.consumer:
             m_list = message.value.split(",")
             inner_list = list()
+            inner_list_send = list()
             for m in m_list:
                 for i, col in enumerate(self.input_columns):
                     if col in m:
                         if " " in m:
-                            value = float(m.split(" ")[1].split("=")[1])
+                            try:
+                                value = float(m.split(" ")[1].split("=")[1])
+                            except:
+                                value = float(m.split(" ")[0].split("=")[1])
+                            # requests.post(url=TESTINFERENCEURL, json={"state": m.split(" ")[1].split("=")})
                         else:
-                            value = float(m.split("-")[1])
+                            value = float(m.split("=")[1])
+                            # requests.post(url=TESTINFERENCEURL, json={"state": m.split("=")})
                         inner_list.append(transform_value(value, self.input_means[i], self.input_stds[i]))
-            value_list.append(inner_list)
+                        inner_list_send.append(value)
+            if len(inner_list) == 1:
+                value_list.append(np.asarray(inner_list).astype('float32'))
+                value_list_send.append(inner_list_send)
             if len(value_list) < self.vector_length:
+                # requests.post(url=TESTINFERENCEURL, json={"state": "len" + str(len(value_list))})
                 continue
+            # requests.post(url=TESTINFERENCEURL, json={"state": value_list_send})
             output_list = list()
             for m in m_list:
                 for j, col in enumerate(self.output_columns):
                     if col in m:
                         if " " in m:
-                            value = float(m.split(" ")[1].split("=")[1])
+                            try:
+                                value = float(m.split(" ")[1].split("=")[1])
+                            except:
+                                value = float(m.split(" ")[0].split("=")[1])
                         else:
                             value = float(m.split("=")[1])
                         output_list.append(value)
+                        if self.algorithm == "LSTMOnline":
+                            label_list.append(value)
+            # if self.algorithm == "LSTMOnline":
+            #     if len(label_list) == 100:
+            #         pkg = {
+            #             "modelID": self.model_id,
+            #             "list": label_list
+            #         }
+
+            #         requests.post(url=POSTLABELINGURL, json=pkg)
+            #         label_list = list()
             try:
-                value_list_np = np.asarray(value_list).reshape(1, self.vector_length, len(self.input_columns))
-                pred = model.predict_once(value_list_np)
+                value_list_np = np.asarray(value_list, dtype=object)
+                value_list_np = value_list_np.reshape(1, self.vector_length, len(self.input_columns))
+                pred = model.predict_once(np.asarray(value_list_np).astype('float32'))
+                # requests.post(url=TESTINFERENCEURL, json={"pred0": list(pred[0])})
+                # requests.post(url=TESTINFERENCEURL, json={"pred": pred[0][0]})
                 inverse_transform_output(pred, self.output_means, self.output_stds)
-                kafka_pkg = {
-                    "Prediction": pred.tolist(),
-                    "Observation": output_list,
-                    "ErrorMeans": self.error_means,
-                    "ErrorStds": self.error_stds
-                }
-                producer.send('cimtasjco3alerts', value=kafka_pkg)
+                # requests.post(url=TESTINFERENCEURL, json={"inverse_Transform":pred[0][0]})
+                self.check_anomaly(pred, np.asarray(output_list), value_list_send)
+                
+                # requests.post(url=TESTINFERENCEURL, json=kafka_pkg)
+                # post_training_info = post_training_info.json()
+                # producer.send('cimtasjco3alerts', value=kafka_pkg)
                 value_list.pop(0)
+                value_list_send.pop(0)
+                
             except Exception as e:
-                print(e)
+                # requests.post(url=TESTINFERENCEURL, json={"state": "err"})
+                # requests.post(url=TESTINFERENCEURL, json={"state": str(e)})
+                print(str(e))
                 exit()
+
+
+
+
+# class LSTMRunner:
+#     def __init__(self, settings):
+#         self.model_id = settings["modelID"]
+#         self.session_id = settings["sessionID"]
+#         self.directory = settings["Directory"]
+#         self.input_columns = settings["InputColumns"]
+#         self.output_columns = settings["OutputColumns"]
+#         self.vector_length = settings["Optional"]["VectorLength"]
+#         self.error_means = settings["Optional"]["ErrorMeans"]
+#         self.error_stds = settings["Optional"]["ErrorStds"]
+#         self.input_means = settings["Optional"]["InputMeans"]
+#         self.input_stds = settings["Optional"]["InputStds"]
+#         self.output_means = settings["Optional"]["OutputMeans"]
+#         self.output_stds = settings["Optional"]["OutputStds"]
+
+#         self.KAFKA_VERSION = (10, 0)
+
+#         self.consumer = KafkaConsumer(
+#             'cimtas_jco3',
+#             bootstrap_servers=['127.0.0.1:9094'],
+#             auto_offset_reset='latest',
+#             enable_auto_commit=True,
+#             group_id=self.model_id,
+#             api_version=self.KAFKA_VERSION,
+#             value_deserializer=lambda x: x.decode('utf-8')
+#         )
+        
+    
+#     def run(self):
+#         value_list = list()
+#         model = manager.KerasModel()
+#         print("model")
+#         try:
+#             model.initialize(path=self.directory + "model.h5")
+#         except Exception as e:
+#             print(e, "init")
+#         for message in self.consumer: 
+#             m_list = message.value.split(",")
+#             inner_list = list()
+#             for m in m_list:
+#                 for i, col in enumerate(self.input_columns):
+#                     if col in m:
+#                         if " " in m:
+#                             value = float(m.split(" ")[1].split("=")[1])
+#                         else:
+#                             value = float(m.split("-")[1])
+#                         inner_list.append(transform_value(value, self.input_means[i], self.input_stds[i]))
+#             value_list.append(inner_list)
+#             if len(value_list) < self.vector_length:
+#                 continue
+#             output_list = list()
+#             for m in m_list:
+#                 for j, col in enumerate(self.output_columns):
+#                     if col in m:
+#                         if " " in m:
+#                             value = float(m.split(" ")[1].split("=")[1])
+#                         else:
+#                             value = float(m.split("=")[1])
+#                         output_list.append(value)
+#             try:
+#                 value_list_np = np.asarray(value_list).reshape(1, self.vector_length, len(self.input_columns))
+#                 pred = model.predict_once(value_list_np)
+#                 inverse_transform_output(pred, self.output_means, self.output_stds)
+#                 kafka_pkg = {
+#                     "Prediction": pred.tolist(),
+#                     "Observation": output_list,
+#                     "ErrorMeans": self.error_means,
+#                     "ErrorStds": self.error_stds
+#                 }
+#                 producer.send('cimtasjco3alerts', value=kafka_pkg)
+#                 value_list.pop(0)
+#             except Exception as e:
+#                 print(e)
+#                 exit()
             
         
         

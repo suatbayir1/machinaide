@@ -9,16 +9,17 @@ class KafkaConsumer():
     def getMessage(self, topic):
         print(f"Consumer ===> {topic}")
         for i in self.client.topics[topic].get_simple_consumer(
-            auto_offset_reset=OffsetType.LATEST,
+            auto_offset_reset=OffsetType.EARLIEST,
             reset_offset_on_start=True
         ):
-            print(i.value.decode())
+            # print(i.value.decode())
+            print(i)
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Parameters that can be sent')
     parser.add_argument('--host', type=str, required=False, default='localhost', help='Hostname of Kafka')
     parser.add_argument('--port', type=int, required=False, default=9092, help='Port of Kafka')
-    parser.add_argument('--topic', type=str, required=False, default='Press030ToPress031', help='Topic name to send data')
+    parser.add_argument('--topic', type=str, required=False, default='sensors_data', help='Topic name to send data')
     return parser.parse_args()
 
 
