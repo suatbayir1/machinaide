@@ -1,0 +1,91 @@
+{
+    "_id": {
+      "$oid": "62d6a94e8989abdd27292098"
+    },
+    "algorithm": "LSTM",
+    "task": "pof",
+    "enabled": false,
+    "modelID": "b6e2ddf5046c4be1bee327c04463f0da",
+    "sessionID": "auto1658235195288",
+    "creator": "machinaide",
+    "modelName": "pof-test-19-07",
+    "assetName": "Press031",
+    "dataInfo": {
+      "fields": [
+        {
+          "@id": "Ana_hava_debi_act",
+          "name": "Ana_hava_debi_act",
+          "minValue": 10,
+          "maxValue": 20,
+          "parent": "sensor1",
+          "type": "Field",
+          "displayName": "Ana_hava_debi_act",
+          "description": "Ana_hava_debi_act",
+          "measurement": "Press031",
+          "dataSource": "Ana_hava_debi_act",
+          "database": "Ermetal"
+        },
+        {
+          "@id": "Ana_hava_sic_act",
+          "name": "Ana_hava_sic_act",
+          "minValue": 5,
+          "maxValue": 100,
+          "parent": "sensor1",
+          "type": "Field",
+          "displayName": "Ana_hava_sic_act",
+          "description": "Ana_hava_sic_act",
+          "measurement": "Press031",
+          "dataSource": "Ana_hava_sic_act",
+          "database": "Ermetal"
+        },
+        {
+          "@id": "Deng_hava_bas_act",
+          "name": "Deng_hava_bas_act",
+          "minValue": 10,
+          "maxValue": 20,
+          "parent": "sensor2",
+          "type": "Field",
+          "displayName": "Deng_hava_bas_act",
+          "description": "Deng_hava_bas_act",
+          "measurement": "Press031",
+          "dataSource": "Deng_hava_bas_act",
+          "database": "Ermetal"
+        },
+        {
+          "@id": "Deng_hava_debi_act",
+          "name": "Deng_hava_debi_act",
+          "minValue": 5,
+          "maxValue": 100,
+          "parent": "sensor2",
+          "type": "Field",
+          "displayName": "Deng_hava_debi_act",
+          "description": "Deng_hava_debi_act",
+          "measurement": "Press031",
+          "dataSource": "Deng_hava_debi_act",
+          "isFillNullActive": true,
+          "defaultValue": "25",
+          "isOperationActive": true,
+          "operation": "/",
+          "operationValue": "1",
+          "database": "Ermetal"
+        }
+      ],
+      "asset": "Press031",
+      "optimizer": "val_loss",
+      "customMetricEquation": "-",
+      "customMetricDirection": "-"
+    },
+    "inputColumns": [
+      "id",
+      "time",
+      "Press031.Ana_hava_debi_act",
+      "Press031.Ana_hava_sic_act",
+      "Press031.Deng_hava_bas_act",
+      "Press031.Deng_hava_debi_act"
+    ],
+    "outputColumns": [
+      "alpha",
+      "beta"
+    ],
+    "trainingDone": true
+  }

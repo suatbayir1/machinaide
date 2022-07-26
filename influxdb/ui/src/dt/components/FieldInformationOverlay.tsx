@@ -132,8 +132,6 @@ class FieldInformationOverlay extends PureComponent<Props, State> {
     private setForm = () => {
         const { selectedGraphNode } = this.props;
 
-        console.log("selectedGraphNode", selectedGraphNode);
-
         this.setState({
             description: selectedGraphNode["description"],
             displayName: selectedGraphNode["displayName"],
@@ -205,7 +203,7 @@ class FieldInformationOverlay extends PureComponent<Props, State> {
 
     private updateField = async (): Promise<void> => {
         const { selectedGraphNode, handleChangeNotification } = this.props;
-        const { displayName, dataSource, minValue, maxValue, measurement} = this.state;
+        const { displayName, dataSource, minValue, maxValue, measurement } = this.state;
 
         if (
             displayName.trim() == "" ||
@@ -276,7 +274,7 @@ class FieldInformationOverlay extends PureComponent<Props, State> {
                         <Overlay.Header
                             title="Edit Field"
                             onDismiss={handleDismissFieldInformationOverlay}
-                            //children={this.headerChildren}
+                        //children={this.headerChildren}
                         />
                         <Overlay.Body>
                             <DangerConfirmationOverlay
@@ -312,7 +310,7 @@ class FieldInformationOverlay extends PureComponent<Props, State> {
                                                 />
                                             </Form.Element>
                                         </Grid.Column>
-                                    </Grid.Row>  
+                                    </Grid.Row>
                                     <Grid.Row>
                                         <Grid.Column widthXS={Columns.Six}>
                                             <Form.Element
@@ -341,7 +339,7 @@ class FieldInformationOverlay extends PureComponent<Props, State> {
                                                 />
                                             </Form.Element>
                                         </Grid.Column>
-                                    </Grid.Row> 
+                                    </Grid.Row>
                                     <Grid.Row>
                                         <Grid.Column widthXS={Columns.Twelve}>
                                             <Form.Element label="Data Source">
@@ -356,7 +354,7 @@ class FieldInformationOverlay extends PureComponent<Props, State> {
                                                 />
                                             </Form.Element>
                                         </Grid.Column>
-                                    </Grid.Row>    
+                                    </Grid.Row>
                                     <Grid.Row>
                                         <Grid.Column widthXS={Columns.Six}>
                                             <Form.Element label="Min Value">
@@ -399,8 +397,8 @@ class FieldInformationOverlay extends PureComponent<Props, State> {
                                                 />
                                             </FlexBox>
                                         </Grid.Column>
-                                    </Grid.Row>                            
-                                    {isOperationActive && 
+                                    </Grid.Row>
+                                    {isOperationActive &&
                                         <Grid.Row>
                                             <Grid.Column widthXS={Columns.Six}>
                                                 <Form.Element label="Operation">
@@ -439,7 +437,7 @@ class FieldInformationOverlay extends PureComponent<Props, State> {
                                                 />
                                             </FlexBox>
                                         </Grid.Column>
-                                    </Grid.Row>                            
+                                    </Grid.Row>
                                     {isFillNullActive && (
                                         <Grid.Row>
                                             <Grid.Column widthXS={Columns.Six}>
@@ -451,7 +449,7 @@ class FieldInformationOverlay extends PureComponent<Props, State> {
                                                             value={"Numeric Value"}
                                                             active={isDefaultValueNumeric}
                                                             titleText="Set Y-Axis to Linear Scale"
-                                                            onClick={()=>this.setState({isDefaultValueNumeric: true})}
+                                                            onClick={() => this.setState({ isDefaultValueNumeric: true })}
                                                         >
                                                             Numeric Value
                                                         </SelectGroup.Option>
@@ -461,11 +459,11 @@ class FieldInformationOverlay extends PureComponent<Props, State> {
                                                             value={"Function"}
                                                             active={!isDefaultValueNumeric}
                                                             titleText="Set Y-Axis to Logarithmic Scale"
-                                                            onClick={()=>this.setState({isDefaultValueNumeric: false})}
+                                                            onClick={() => this.setState({ isDefaultValueNumeric: false })}
                                                         >
                                                             Function
                                                         </SelectGroup.Option>
-                                                    </SelectGroup>                                                    
+                                                    </SelectGroup>
                                                 </Form.Element>
                                             </Grid.Column>
                                             <Grid.Column widthXS={Columns.Six}>
@@ -481,12 +479,12 @@ class FieldInformationOverlay extends PureComponent<Props, State> {
                                                     ) : (
                                                         <SelectDropdown
                                                             options={[DEFAULT_VAL_FUNCTIONS.LAST, DEFAULT_VAL_FUNCTIONS.AVG, DEFAULT_VAL_FUNCTIONS.MAX, DEFAULT_VAL_FUNCTIONS.MIN,
-                                                                DEFAULT_VAL_FUNCTIONS.DAVG, DEFAULT_VAL_FUNCTIONS.DMAX, DEFAULT_VAL_FUNCTIONS.DMIN]}
+                                                            DEFAULT_VAL_FUNCTIONS.DAVG, DEFAULT_VAL_FUNCTIONS.DMAX, DEFAULT_VAL_FUNCTIONS.DMIN]}
                                                             selectedOption={defaultValue}
                                                             onSelect={(e) => this.setState({ defaultValue: e })}
                                                         />
                                                     )}
-                                                </Form.Element>                                                
+                                                </Form.Element>
                                             </Grid.Column>
                                         </Grid.Row>
                                     )}
@@ -502,7 +500,7 @@ class FieldInformationOverlay extends PureComponent<Props, State> {
                                                 />
                                             </Form.Element>
                                         </Grid.Column>
-                                    </Grid.Row> 
+                                    </Grid.Row>
                                     <Grid.Row>
                                         <div className="dt-information-buttons">
                                             {

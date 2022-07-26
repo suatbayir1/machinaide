@@ -69,7 +69,6 @@ class MachineInformation extends PureComponent<Props, State> {
 
     private setForm = (): void => {
         const { selectedGraphNode } = this.props;
-        console.log("selectedGraphNode", selectedGraphNode);
 
         this.setState({
             displayName: selectedGraphNode["displayName"],

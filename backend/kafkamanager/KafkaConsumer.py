@@ -9,7 +9,7 @@ class KafkaConsumer():
     def getMessage(self, topic):
         print(f"Consumer ===> {topic}")
         for i in self.client.topics[topic].get_simple_consumer(
-            auto_offset_reset=OffsetType.EARLIEST,
+            auto_offset_reset=OffsetType.LATEST,
             reset_offset_on_start=True
         ):
             # print(i.value.decode())

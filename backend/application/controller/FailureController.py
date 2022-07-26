@@ -29,7 +29,8 @@ def get_failures(token):
     message = "get_failures"
     logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
     # return dumps({"sourceName": source_name, "token": token})
-    return dumps(result), 200
+    # return dumps(result), 200
+    return return_response(data = result, success = True, message = message), 200
 
 @failure.route("/getTokenTest", methods = ["POST"])
 @token_required(roles = ["admin", "member", "editor"])

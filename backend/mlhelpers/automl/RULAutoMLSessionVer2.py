@@ -258,7 +258,7 @@ class RULAutoMLSession:
         requests.put(url=AUTOML_UPDATE_EXPERIMENT_URL, json=json.dumps(pkg, default=numpy_converter))
 
         obj = {
-            "directory": t_dir,
+            # "directory": t_dir,
             "optional": {
                 "vectorLength": seq_len,
             }
@@ -593,6 +593,7 @@ class RULAutoMLSession:
                         "enabled": False,
                         "modelID": self.model_ID,
                         "sessionID": "auto" + str(self.session_ID),
+                        "startTime": self.start_time,
                         # "Settings": self.db_settings,
                         "creator": self.creator,
                         "modelName": self.experiment_name,

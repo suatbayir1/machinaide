@@ -913,11 +913,13 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
       pl["machines"].forEach((machine) => {
         if (machine["contents"] !== undefined) {
           machine["contents"].forEach((component) => {
-            if (component["visual"] !== undefined && component["visual"] !== "") {
-              component["visual"]["objects"].forEach((visualObject) => {
-                wireframe = visualObject["isRender"] ? false : true;
-                this.handleAddObjectType(visualObject, wireframe);
-              });
+            if (component["@type"] === "Component") {
+              if (component["visual"] !== undefined && component["visual"] !== "") {
+                component["visual"]["objects"].forEach((visualObject) => {
+                  wireframe = visualObject["isRender"] ? false : true;
+                  this.handleAddObjectType(visualObject, wireframe);
+                });
+              }
 
               component["sensors"].forEach((sensor) => {
                 if (sensor["visual"] !== undefined && sensor["visual"] !== "") {

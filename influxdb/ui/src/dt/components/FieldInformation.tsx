@@ -128,8 +128,6 @@ class FieldInformation extends PureComponent<Props, State> {
     private setForm = () => {
         const { selectedGraphNode } = this.props;
 
-        console.log("selectedGraphNode", selectedGraphNode);
-
         this.setState({
             description: selectedGraphNode["description"],
             displayName: selectedGraphNode["displayName"],
@@ -199,7 +197,7 @@ class FieldInformation extends PureComponent<Props, State> {
 
     private updateField = async (): Promise<void> => {
         const { selectedGraphNode, handleChangeNotification } = this.props;
-        const { displayName, dataSource, minValue, maxValue, measurement} = this.state;
+        const { displayName, dataSource, minValue, maxValue, measurement } = this.state;
 
         if (
             displayName.trim() == "" ||
@@ -450,28 +448,28 @@ class FieldInformation extends PureComponent<Props, State> {
                                         />
                                     </FlexBox>
                                 </Grid.Column>
-                            </Grid.Row>                            
-                            {isOperationActive && <Grid.Row><br/><Grid.Column
-                                    widthXS={Columns.Three}
-                                    widthSM={Columns.Three}
-                                    widthMD={Columns.Six}
-                                    widthLG={Columns.Six}
-                                >
-                                    <Form.Element label="Operation">
-                                        {/* <SelectDropdown
+                            </Grid.Row>
+                            {isOperationActive && <Grid.Row><br /><Grid.Column
+                                widthXS={Columns.Three}
+                                widthSM={Columns.Three}
+                                widthMD={Columns.Six}
+                                widthLG={Columns.Six}
+                            >
+                                <Form.Element label="Operation">
+                                    {/* <SelectDropdown
                                             options={["+", "-", "/", "*"]}
                                             selectedOption={operation}
                                             onSelect={(e) => this.setState({ operation: e })}
                                         /> */}
-                                        <Label
-                                            size={ComponentSize.Small}
-                                            name={operation}
-                                            description="Operation"
-                                            color={InfluxColors.Ocean}
-                                            id={operation}
-                                        />
-                                    </Form.Element>
-                                </Grid.Column>
+                                    <Label
+                                        size={ComponentSize.Small}
+                                        name={operation}
+                                        description="Operation"
+                                        color={InfluxColors.Ocean}
+                                        id={operation}
+                                    />
+                                </Form.Element>
+                            </Grid.Column>
                                 <Grid.Column
                                     widthXS={Columns.Three}
                                     widthSM={Columns.Three}
@@ -517,9 +515,9 @@ class FieldInformation extends PureComponent<Props, State> {
                                         />
                                     </FlexBox>
                                 </Grid.Column>
-                            </Grid.Row>                            
+                            </Grid.Row>
                             {isFillNullActive && (
-                                <Grid.Row><br/>
+                                <Grid.Row><br />
                                     <Grid.Column
                                         widthXS={Columns.Three}
                                         widthSM={Columns.Three}
@@ -535,7 +533,7 @@ class FieldInformation extends PureComponent<Props, State> {
                                                 id={defaultValue}
                                             />
                                         </Form.Element>
-                                            {/* <SelectDropdown
+                                        {/* <SelectDropdown
                                                 options={[DEFAULT_VAL_FUNCTIONS.LAST, DEFAULT_VAL_FUNCTIONS.AVG, DEFAULT_VAL_FUNCTIONS.MAX, DEFAULT_VAL_FUNCTIONS.MIN,
                                                     DEFAULT_VAL_FUNCTIONS.DAVG, DEFAULT_VAL_FUNCTIONS.DMAX, DEFAULT_VAL_FUNCTIONS.DMIN]}
                                                 selectedOption={defaultValue}

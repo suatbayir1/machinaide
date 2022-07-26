@@ -471,6 +471,7 @@ class CreateModelOverlay extends PureComponent<Props, State>{
         const test = await HealthAssessmentService.startRULRegAutoMLSession(settings)
         console.log("test token res:", test)
       }
+      this.props.closeOverlay()
       
   }
 

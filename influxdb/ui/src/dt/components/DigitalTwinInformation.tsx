@@ -261,7 +261,7 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                                 <Button
                                     text="Edit"
                                     icon={IconFont.Pencil}
-                                    onClick={()=>{this.setState({factoryInformationOverlay: !this.state.factoryInformationOverlay})}}
+                                    onClick={() => { this.setState({ factoryInformationOverlay: !this.state.factoryInformationOverlay }) }}
                                     type={ButtonType.Button}
                                     color={ComponentColor.Secondary}
                                     className="show-only-pc"
@@ -282,7 +282,7 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                                 <Button
                                     text="Edit"
                                     icon={IconFont.Pencil}
-                                    onClick={()=>{this.setState({productionLineInformationOverlay: !this.state.productionLineInformationOverlay})}}
+                                    onClick={() => { this.setState({ productionLineInformationOverlay: !this.state.productionLineInformationOverlay }) }}
                                     type={ButtonType.Button}
                                     color={ComponentColor.Secondary}
                                     className="show-only-pc"
@@ -306,12 +306,12 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                                 <Button
                                     text="Edit"
                                     icon={IconFont.Pencil}
-                                    onClick={()=>{this.setState({machineInformationOverlay: !this.state.machineInformationOverlay})}}
+                                    onClick={() => { this.setState({ machineInformationOverlay: !this.state.machineInformationOverlay }) }}
                                     type={ButtonType.Button}
                                     color={ComponentColor.Secondary}
                                     className="show-only-pc"
                                 />
-                            </>                            
+                            </>
                         }
 
                         {
@@ -330,7 +330,7 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                                 <Button
                                     text="Edit"
                                     icon={IconFont.Pencil}
-                                    onClick={()=>{this.setState({componentInformationOverlay: !this.state.componentInformationOverlay})}}
+                                    onClick={() => { this.setState({ componentInformationOverlay: !this.state.componentInformationOverlay }) }}
                                     type={ButtonType.Button}
                                     color={ComponentColor.Secondary}
                                     className="show-only-pc"
@@ -354,12 +354,12 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                                 <Button
                                     text="Edit"
                                     icon={IconFont.Pencil}
-                                    onClick={()=>{this.setState({sensorInformationOverlay: !this.state.sensorInformationOverlay})}}
+                                    onClick={() => { this.setState({ sensorInformationOverlay: !this.state.sensorInformationOverlay }) }}
                                     type={ButtonType.Button}
                                     color={ComponentColor.Secondary}
                                     className="show-only-pc"
                                 />
-                            </>                            
+                            </>
                         }
 
                         {
@@ -376,7 +376,7 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                                 <Button
                                     text="Edit"
                                     icon={IconFont.Pencil}
-                                    onClick={()=>{this.setState({fieldInformationOverlay: !this.state.fieldInformationOverlay})}}
+                                    onClick={() => { this.setState({ fieldInformationOverlay: !this.state.fieldInformationOverlay }) }}
                                     type={ButtonType.Button}
                                     color={ComponentColor.Secondary}
                                     className="show-only-pc"
@@ -385,7 +385,7 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                         }
                         <FactoryInformationOverlay
                             isFactoryInformationOverlayVisible={this.state.factoryInformationOverlay}
-                            handleDismissFactoryInformationOverlay={()=>this.setState({factoryInformationOverlay: !this.state.factoryInformationOverlay})}
+                            handleDismissFactoryInformationOverlay={() => this.setState({ factoryInformationOverlay: !this.state.factoryInformationOverlay })}
                             selectedGraphNode={this.props.selectedGraphNode}
                             bucketNames={bucketNames}
                             handleChangeNotification={this.handleChangeNotification}
@@ -395,7 +395,7 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                         />
                         <ProductionLineInformationOverlay
                             isProductionLineInformationOverlayVisible={this.state.productionLineInformationOverlay}
-                            handleDismissProductionLineInformationOverlay={()=>this.setState({productionLineInformationOverlay: !this.state.productionLineInformationOverlay})}
+                            handleDismissProductionLineInformationOverlay={() => this.setState({ productionLineInformationOverlay: !this.state.productionLineInformationOverlay })}
                             selectedGraphNode={this.props.selectedGraphNode}
                             handleChangeNotification={this.handleChangeNotification}
                             refreshGraph={this.props.refreshGraph}
@@ -404,7 +404,7 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                         />
                         <MachineInformationOverlay
                             isMachineInformationOverlayVisible={this.state.machineInformationOverlay}
-                            handleDismissMachineInformationOverlay={()=>this.setState({machineInformationOverlay: !this.state.machineInformationOverlay})}
+                            handleDismissMachineInformationOverlay={() => this.setState({ machineInformationOverlay: !this.state.machineInformationOverlay })}
                             selectedGraphNode={this.props.selectedGraphNode}
                             handleChangeNotification={this.handleChangeNotification}
                             refreshGraph={this.props.refreshGraph}
@@ -416,7 +416,7 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                         />
                         <ComponentInformationOverlay
                             isComponentInformationOverlayVisible={this.state.componentInformationOverlay}
-                            handleDismissComponentInformationOverlay={()=>this.setState({componentInformationOverlay: !this.state.componentInformationOverlay})}
+                            handleDismissComponentInformationOverlay={() => this.setState({ componentInformationOverlay: !this.state.componentInformationOverlay })}
                             selectedGraphNode={this.props.selectedGraphNode}
                             handleChangeNotification={this.handleChangeNotification}
                             refreshGraph={this.props.refreshGraph}
@@ -428,7 +428,7 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                         />
                         <SensorInformationOverlay
                             isSensorInformationOverlayVisible={this.state.sensorInformationOverlay}
-                            handleDismissSensorInformationOverlay={()=>this.setState({sensorInformationOverlay: !this.state.sensorInformationOverlay})}
+                            handleDismissSensorInformationOverlay={() => this.setState({ sensorInformationOverlay: !this.state.sensorInformationOverlay })}
                             selectedGraphNode={this.props.selectedGraphNode}
                             handleChangeNotification={this.handleChangeNotification}
                             refreshGraph={this.props.refreshGraph}
@@ -440,7 +440,7 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                         />
                         <FieldInformationOverlay
                             isFieldInformationOverlayVisible={this.state.fieldInformationOverlay}
-                            handleDismissFieldInformationOverlay={()=>this.setState({fieldInformationOverlay: !this.state.fieldInformationOverlay})}
+                            handleDismissFieldInformationOverlay={() => this.setState({ fieldInformationOverlay: !this.state.fieldInformationOverlay })}
                             selectedGraphNode={this.props.selectedGraphNode}
                             handleChangeNotification={this.handleChangeNotification}
                             refreshGraph={this.props.refreshGraph}
@@ -448,14 +448,6 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                             orgID={orgID}
                             refreshGeneralInfo={this.props.refreshGeneralInfo}
                         />
-                        {/* <FieldInformation
-                                selectedGraphNode={this.props.selectedGraphNode}
-                                handleChangeNotification={this.handleChangeNotification}
-                                refreshGraph={this.props.refreshGraph}
-                                refreshVisualizePage={this.props.refreshVisualizePage}
-                                orgID={orgID}
-                                refreshGeneralInfo={this.props.refreshGeneralInfo}
-                            /> */}
                     </Panel.Body>
                 </Panel>
             </>

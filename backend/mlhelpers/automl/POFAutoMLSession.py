@@ -139,6 +139,7 @@ class POFAutoMLSession:
             "enabled": False,
             "modelID": self.model_ID,
             "sessionID": "auto" + str(self.session_ID),
+            "startTime": self.start_time,
             # "Settings": self.db_settings,
             "creator": self.creator,
             "modelName": self.experiment_name,
@@ -506,7 +507,7 @@ class POFAutoMLSession:
                 # df = df.fillna(0)
                 print("nan", df.isnull().sum(), df.shape)
                 print("inf", np.isinf(df).values.sum())
-                df.to_csv("./pof_flux_df_out_sensor-fill.csv") 
+                # df.to_csv("./pof_flux_df_out_sensor-fill.csv") 
                 # print(df)
                 sequence_cols = list(df.columns.values)
                 """ with open('/root/BackUp_Pianism/pianism/backend/mlhelpers/pof_output_colnames2.txt', 'w') as writefile:

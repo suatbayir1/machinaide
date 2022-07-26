@@ -65,6 +65,7 @@ import RetrainControlContainer from "src/ml/containers/RetrainControlContainer"
 // AutoML
 import AutoML from "src/ml/containers/AutoML";
 import AutoMLPage from "src/health/components/AutoMLPage"
+import RULRegAutoMLPage from 'src/health/components/RULRegAutoMLPage'
 
 
 import PermittedRoute from 'src/shared/middleware/PermittedRoute';
@@ -210,6 +211,7 @@ const SetOrg: FC<Props> = ({
         <Route exact path={`${orgPath}/retrain`} component={RetrainControlContainer} />
         {/* <Route exact path={`${orgPath}/automl/:experimentName/:tab`} component={AutoML} /> */}
         <Route exact path={`${orgPath}/automl/:experimentName/:tab`} component={AutoMLPage} />
+        <Route exact path={`${orgPath}/rulreg-automl/:pipelineID/:tab`} component={RULRegAutoMLPage} />
 
         {/* User Manual */}
         <PermittedRoute exact path={`${orgPath}/user-manual`} component={UserManualContainer} allowedRoles={["member", "admin", "editor"]} />

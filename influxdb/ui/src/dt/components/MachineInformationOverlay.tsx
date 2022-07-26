@@ -71,7 +71,6 @@ class MachineInformationOverlay extends PureComponent<Props, State> {
 
     private setForm = (): void => {
         const { selectedGraphNode } = this.props;
-        console.log("selectedGraphNode", selectedGraphNode);
 
         this.setState({
             displayName: selectedGraphNode["displayName"],
@@ -89,6 +88,10 @@ class MachineInformationOverlay extends PureComponent<Props, State> {
     public getMeasurements = async (): Promise<void> => {
         const { selectedGraphNode, orgID } = this.props;
 
+        if (Object.keys(selectedGraphNode).length === 0) {
+            return;
+        }
+
         const treeStructure = await DTService.getAllDT();
 
         let bucket;
@@ -99,6 +102,8 @@ class MachineInformationOverlay extends PureComponent<Props, State> {
                 }
             })
         })
+
+        console.log({ bucket })
 
         const query = `
         from(bucket: "${bucket}")
@@ -185,7 +190,7 @@ class MachineInformationOverlay extends PureComponent<Props, State> {
     }
 
     private getComponentCount = (content): number => {
-        if(content){
+        if (content) {
             let components = content.filter(c => c?.["@type"] === "Component");
             return components.length;
         }
@@ -221,7 +226,7 @@ class MachineInformationOverlay extends PureComponent<Props, State> {
                         <Overlay.Header
                             title="Edit Machine"
                             onDismiss={handleDismissMachineInformationOverlay}
-                            //children={this.headerChildren}
+                        //children={this.headerChildren}
                         />
                         <Overlay.Body>
                             <DangerConfirmationOverlay
@@ -296,7 +301,7 @@ class MachineInformationOverlay extends PureComponent<Props, State> {
                                                 />
                                             </Form.Element>
                                         </Grid.Column>
-                                    </Grid.Row>    
+                                    </Grid.Row>
                                     <Grid.Row>
                                         <Grid.Column widthXS={Columns.Twelve}>
                                             <Form.Element label={`Component List (${this.getComponentCount(selectedGraphNode["contents"])})`}>

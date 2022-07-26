@@ -208,7 +208,7 @@ class POFHyperband(kt.Hyperband):
         print(probability_distance)
         one_trial["probability_distance"] = probability_distance
 
-        requests.post(url=AUTOML_POST_TRIAL_URL, json={'experiment_name': exp, 'trial': json.dumps(change_nan_pof(one_trial), default=numpy_converter)}) 
+        requests.post(url=AUTOML_POST_TRIAL_URL, json={'experimentName': exp, 'trial': json.dumps(change_nan_pof(one_trial), default=numpy_converter)}) 
 
 
 class POFRandomSearch(kt.RandomSearch):
@@ -277,7 +277,7 @@ class POFRandomSearch(kt.RandomSearch):
         print(probability_distance)
         one_trial["probability_distance"] = probability_distance
 
-        requests.post(url=AUTOML_POST_TRIAL_URL,json={'experiment_name': exp, 'trial': json.dumps(change_nan_pof(one_trial), default=numpy_converter)}) 
+        requests.post(url=AUTOML_POST_TRIAL_URL,json={'experimentName': exp, 'trial': json.dumps(change_nan_pof(one_trial), default=numpy_converter)}) 
 
 class POFBayesianOptimization(kt.BayesianOptimization):
     def __init__(self, train_x, train_y, windowed_y, *args, **kw):
@@ -345,4 +345,4 @@ class POFBayesianOptimization(kt.BayesianOptimization):
         print(probability_distance)
         one_trial["probability_distance"] = probability_distance
 
-        requests.post(url=AUTOML_POST_TRIAL_URL, json={'experiment_name': exp, 'trial': json.dumps(change_nan_pof(one_trial), default=numpy_converter)}) 
+        requests.post(url=AUTOML_POST_TRIAL_URL, json={'experimentName': exp, 'trial': json.dumps(change_nan_pof(one_trial), default=numpy_converter)}) 

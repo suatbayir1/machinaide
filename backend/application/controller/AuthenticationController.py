@@ -54,6 +54,7 @@ def loginWithLDAP():
         con.protocol_version = ldap.VERSION3
         con.set_option(ldap.OPT_REFERRALS, 0)
 
+        # dc=Ermetal.local
         result = con.search_s(f'dc=example,dc=com', ldap.SCOPE_SUBTREE, f"(uid={username})")   
 
         if not result:

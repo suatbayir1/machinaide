@@ -569,8 +569,10 @@ class RULRegressionSession:
                 "modelID": self.model_ID,
                 "pipelineID": self.model_ID + str(order),
                 "sessionID": self.session_ID,
-                "Directory": self.dir_name,
-                "Settings": {
+                "startTime": self.start_time,
+                "endTime": time.time(),
+                # "Directory": self.dir_name,
+                "settings": {
                     "timeout": self.timeout,
                     "productID": self.product_id,
                     "minDataPoints": self.min_data_points,
@@ -585,7 +587,7 @@ class RULRegressionSession:
                     "fields": self.fields,
                     "assetName": self.asset_name
                 },
-                "Optional": {
+                "optional": {
                     "cols": features_names,
                     "features": features_obj
                 }

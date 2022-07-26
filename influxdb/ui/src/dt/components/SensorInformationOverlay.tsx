@@ -77,11 +77,11 @@ class SensorInformationOverlay extends PureComponent<Props, State> {
         const { selectedGraphNode } = this.props;
 
         this.setState({
-            unit: selectedGraphNode["unit"],
-            status: selectedGraphNode["status"],
-            type: selectedGraphNode["@type"][1],
-            displayName: selectedGraphNode["displayName"],
-            description: selectedGraphNode["description"],
+            unit: selectedGraphNode?.["unit"],
+            status: selectedGraphNode?.["status"],
+            type: selectedGraphNode?.["@type"]?.[1],
+            displayName: selectedGraphNode?.["displayName"],
+            description: selectedGraphNode?.["description"],
             selectedObject: selectedGraphNode["visual"] !== "" && selectedGraphNode["visual"] !== undefined ? selectedGraphNode["visual"]["id"] : "",
         })
     }
@@ -156,7 +156,7 @@ class SensorInformationOverlay extends PureComponent<Props, State> {
                         <Overlay.Header
                             title="Edit Sensor"
                             onDismiss={handleDismissSensorInformationOverlay}
-                            //children={this.headerChildren}
+                        //children={this.headerChildren}
                         />
                         <Overlay.Body>
                             <DangerConfirmationOverlay
@@ -241,7 +241,7 @@ class SensorInformationOverlay extends PureComponent<Props, State> {
                                                 />
                                             </Form.Element>
                                         </Grid.Column>
-                                    </Grid.Row>        
+                                    </Grid.Row>
                                     <Grid.Row>
                                         <Grid.Column widthXS={Columns.Twelve}>
                                             <Form.Element label="Description">
@@ -254,7 +254,7 @@ class SensorInformationOverlay extends PureComponent<Props, State> {
                                                 />
                                             </Form.Element>
                                         </Grid.Column>
-                                    </Grid.Row>        
+                                    </Grid.Row>
                                     <Grid.Row>
                                         <Grid.Column widthXS={Columns.Twelve}>
                                             <Form.Element label="Visual">
@@ -302,7 +302,7 @@ class SensorInformationOverlay extends PureComponent<Props, State> {
                                                 }
                                             </Form.Element>
                                         </Grid.Column>
-                                    </Grid.Row>        
+                                    </Grid.Row>
                                     <Grid.Row>
                                         <Grid.Column widthXS={Columns.Twelve}>
                                             <Form.Element label={`Field List (${selectedGraphNode["fields"] ? selectedGraphNode["fields"].length : 0})`}>

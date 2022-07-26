@@ -3,10 +3,11 @@ import { connect, ConnectedProps } from 'react-redux'
 
 import { Link } from "react-router-dom";
 import {
-    Page, Grid, Columns, Panel, Notification, ResourceCard, TechnoSpinner, RemoteDataState,
-    ComponentColor, ComponentSize, Gradients, IconFont, Icon, InfluxColors, WaitingText,
+    Page, Grid, Columns, Panel, Notification, ResourceCard, TechnoSpinner, RemoteDataState, InputType, Input,
+    ComponentColor, ComponentSize, Gradients, IconFont, Icon, InfluxColors, WaitingText, QuestionMarkTooltip,
     Button, ButtonType, SelectDropdown, Alignment, ButtonBase, ButtonShape, ButtonBaseRef, SparkleSpinner,
-    BorderType, Table, DapperScrollbars, SlideToggle, InputLabel, Label, SquareButton, CTAButton, GridColumn
+    BorderType, Table, DapperScrollbars, SlideToggle, InputLabel, Label, SquareButton, CTAButton, GridColumn,
+    AlignItems, InputToggleType, Toggle, FlexBox
 } from '@influxdata/clockface'
 import TimeRangeDropdown from 'src/shared/components/TimeRangeDropdown'
 import TabbedPageTabs from 'src/shared/tabbedPage/TabbedPageTabs'
@@ -19,6 +20,7 @@ import AnomalyBrushGraph from 'src/health/components/AnomalyBrushGraph'
 import { FACTORY_NAME } from 'src/config';
 import AnomalyGraphTimeRangeDropdown from 'src/health/components/AnomalyGraphTimeRangeDropdown';
 import HealthAssessmentService from 'src/shared/services/HealthAssessmentService'
+import ModelLogGraphOverlay from 'src/health/components/ModelLogGraphOverlay';
 // Flux query
 import {runQuery, RunQueryResult} from 'src/shared/apis/query'
 import {fromFlux} from '@influxdata/giraffe'
@@ -72,6 +74,7 @@ interface State {
     machine: string
     activeAnomalyModel: string
     models: object[]
+    displayedModels: object[]
     createModelOverlay: boolean
     rootCauseAnalysisOverlay: boolean
     gaugeProperties: GaugeViewProperties
@@ -94,6 +97,9 @@ interface State {
     notificationVisible: boolean
     notificationType: string
     notificationMessage: string
+    showEnabledModels: boolean
+    modelLogGraphOverlay: boolean
+    selectedModel: object
 }
 
 const aggregatePeriods = ["5s", "10s", "20s", "30s", "60s"]
@@ -140,6 +146,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
             machine: "Ermetal",
             activeAnomalyModel: "",
             models:[],
+            displayedModels:[],
             createModelOverlay: false,
             rootCauseAnalysisOverlay: false,
             gaugeProperties: {
@@ -190,6 +197,9 @@ class MachineHealthPage extends PureComponent<Props, State>{
             notificationVisible: false,
             notificationType: '',
             notificationMessage: '',
+            showEnabledModels: false,
+            modelLogGraphOverlay: false,
+            selectedModel: null,
         }
     }
     
@@ -206,12 +216,35 @@ class MachineHealthPage extends PureComponent<Props, State>{
             let assetName = `${this.props.match.params.MID}.${this.props.match.params.CID}`
             const models = await HealthAssessmentService.getMLModels({"assetName": assetName})
             console.log("ml models: ", this.props.match.params.MID, this.props.match.params.CID, models)
-            this.setState({models: [...sampleModels, ...models]})
+            let allModels = [...sampleModels, ...models]
+            let enabledModels = []
+            let disabledModels = []
+            allModels.map(model => {
+                if(model["enabled"]){
+                    enabledModels.push(model)
+                }
+                else{
+                    disabledModels.push(model)
+                }
+            })
+            this.setState({models: [...enabledModels, ...disabledModels], displayedModels: [...enabledModels, ...disabledModels]})
         }
         else{
             const models = await HealthAssessmentService.getMLModels({"assetName": this.props.match.params.MID})
             console.log("ml models: ", this.props.match.params.MID, models)
-            this.setState({models: [...sampleModels, ...models]})
+            // this.setState({models: [...sampleModels, ...models]})
+            let allModels = [...sampleModels, ...models]
+            let enabledModels = []
+            let disabledModels = []
+            allModels.map(model => {
+                if(model["enabled"]){
+                    enabledModels.push(model)
+                }
+                else{
+                    disabledModels.push(model)
+                }
+            })
+            this.setState({models: [...enabledModels, ...disabledModels], displayedModels: [...enabledModels, ...disabledModels]})
         }
     }
 
@@ -556,22 +589,31 @@ class MachineHealthPage extends PureComponent<Props, State>{
         return false
     }
 
-    contextMenu = (experiment_name) =>{
+    contextMenu = (modelName, enabled, modelTask, model) =>{
         return (
           <Context>
             <Context.Menu
-              icon={IconFont.Stop}
+              icon={enabled ? IconFont.Stop : IconFont.Play}
               color={ComponentColor.Warning}
             >
-              <Context.Item
+              {enabled ? <Context.Item
                 label="Stop Model"
-                action={() => console.log("stop click")}
-              />
+                action={() => {
+                    HealthAssessmentService.startStopModel({"modelName": modelName, "enabled": false})
+                    this.getMLModels()
+                }}
+              /> : <Context.Item
+                label="Start Model"
+                action={() =>{
+                    HealthAssessmentService.startStopModel({"modelName": modelName, "enabled": true})
+                    this.getMLModels()
+                }}
+                />}
             </Context.Menu>
             <Context.Menu icon={IconFont.GraphLine}>
               <Context.Item
                 label="View Log Chart"
-                action={() => console.log("log click")}
+                action={() => this.setState({modelLogGraphOverlay: true, selectedModel: model})}
               />
             </Context.Menu>
             <Context.Menu
@@ -581,8 +623,12 @@ class MachineHealthPage extends PureComponent<Props, State>{
               <Context.Item
                 label="View AutoML results"
                 action={() => {
-                    console.log("automl click", `/orgs/${this.props["match"]["params"]["orgID"]}/automl/${experiment_name}/duration`)
-                    this.props["history"].push(`/orgs/${this.props["match"]["params"]["orgID"]}/automl/${experiment_name}/duration`)
+                    if(modelTask === "rulreg"){
+                        this.props["history"].push(`/orgs/${this.props["match"]["params"]["orgID"]}/rulreg-automl/${model["pipelineID"]}/duration`)
+                    }
+                    else{
+                        this.props["history"].push(`/orgs/${this.props["match"]["params"]["orgID"]}/automl/${modelName}/duration`)
+                    }
                 }}
               />
             </Context.Menu>
@@ -971,7 +1017,45 @@ class MachineHealthPage extends PureComponent<Props, State>{
                         >
                             <Page.Header fullWidth={false}>
                                 <Page.Title title="ML Models" />
+                                <div className="tabbed-page--header-right">
+                                    {/* <Input
+                                        onChange={() => this.setState({ showEnabledModels: !this.state.showEnabledModels})}
+                                        name="showEnabledModels"
+                                        type={InputType.Checkbox}
+                                        checked={this.state.showEnabledModels}
+                                    />
+                                    <InputLabel>Show only enabled models</InputLabel> */}
+                                    <FlexBox
+                                        alignItems={AlignItems.Center}
+                                        margin={ComponentSize.Small}
+                                        className="view-options--checkbox"
+                                        key={uuid.v4()}
+                                    >
+                                        <Toggle
+                                            id="prefixoptional"
+                                            checked={this.state.showEnabledModels}
+                                            name={"showEnabledModels"}
+                                            type={InputToggleType.Checkbox}
+                                            onChange={() => {
+                                                if(this.state.showEnabledModels){
+                                                    this.setState({displayedModels: this.state.models, showEnabledModels: false})
+                                                }
+                                                else{
+                                                    let enabledModels = this.state.models.filter(m=>m["enabled"])
+                                                    this.setState({displayedModels: enabledModels, showEnabledModels: true})
+                                                }
+                                            }}
+                                            size={ComponentSize.ExtraSmall}
+                                        />
+                                        <InputLabel>Show only enabled models</InputLabel>
+                                    </FlexBox>
+                                </div>                                
                             </Page.Header>
+                            <ModelLogGraphOverlay
+                                modelLogGraphOverlay={this.state.modelLogGraphOverlay}
+                                closeOverlay={()=>this.setState({modelLogGraphOverlay: !this.state.modelLogGraphOverlay})}
+                                model={this.state.selectedModel}
+                            />
                             <Page.Contents
                                 className="models-index__page-contents"
                                 fullWidth={false}
@@ -979,15 +1063,18 @@ class MachineHealthPage extends PureComponent<Props, State>{
                             >
                                 <div style={{ height: '100%'}}> {/* , display: 'grid' */} 
                                     <div className="models-card-grid">
-                                        {this.state.models.map((model, i) => (
+                                        {this.state.displayedModels.map((model, i) => (
                                             <ResourceCard
                                                 key={uuid.v4()}
-                                                contextMenu={this.contextMenu(model["modelName"])}
+                                                contextMenu={this.contextMenu(model["modelName"], model["enabled"], model["task"], model)}
+                                                style={model["enabled"] ? {background: "#afdf80", color:"red !important"} : {}}
                                             >
                                                 <ResourceCard.Name
-                                                    name={model["modelName"] + "/" + model["task"]}
-                                                    children={<div>Test children</div>}
-                                                />
+                                                    name={`Task: ${model["task"]}`}
+                                                    style={{color: "red !important"}}
+                                                >
+                                                    <div>Test children</div>
+                                                </ResourceCard.Name>
                                                 {("trainingDone" in model) && !model["trainingDone"] && (<>
                                                     <SparkleSpinner style={{alignSelf: "center"}} loading={RemoteDataState.Loading} />
                                                     <WaitingText style={{textAlign: "center"}} text="Training process is running" />
@@ -1011,7 +1098,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
                                                         text="Healthy"
                                                         type={ButtonType.Button}
                                                         onClick={() => console.log("click action")}
-                                                        style={{top: "30%", height: "50px"}}
+                                                        style={{marginTop: "12.5%", marginBottom: "12.5%", height: "50px"}}
                                                     />)
                                                 } 
                                                 {model["trainingDone"] && (model["task"] === "rulreg" )&& 
@@ -1106,9 +1193,33 @@ class MachineHealthPage extends PureComponent<Props, State>{
                                                         </Grid>
                                                     </>
                                                 }                                                   
-                                                {/* <ResourceCard.Meta>
-                                                    Card Meta Info
-                                                </ResourceCard.Meta> */}
+                                                <ResourceCard.Meta>
+                                                    <QuestionMarkTooltip
+                                                        diameter={15}
+                                                        /* tooltipStyle={{ width: '400px' }} */
+                                                        color={ComponentColor.Secondary}
+                                                        tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                                            <div style={{ color: InfluxColors.Star }}>{"Model Meta Data"}
+                                                                <hr style={{ borderStyle: 'none none solid none', borderWidth: '2px', borderColor: '#BE2EE4', boxShadow: '0 0 5px 0 #8E1FC3', margin: '3px' }} />
+                                                            </div>
+                                                            <div>
+                                                                <span style={{color: InfluxColors.Pool}}>
+                                                                    Model Name:
+                                                                </span> {model["modelName"] ? model["modelName"] : "-"}
+                                                            </div>
+                                                            <div>
+                                                                <span style={{color: InfluxColors.Rainforest}}>
+                                                                    Creator: 
+                                                                </span> {model["creator"] ? model["creator"] : "-"}
+                                                            </div>
+                                                            <div>
+                                                                <span style={{color: InfluxColors.Topaz}}>
+                                                                    Algorithm: 
+                                                                </span> {model["algorithm"] ? model["algorithm"] : "-"}
+                                                            </div>
+                                                        </div>}
+                                                    />
+                                                </ResourceCard.Meta>
                                             </ResourceCard>
                                         ))}
                                     </div>
@@ -1117,13 +1228,13 @@ class MachineHealthPage extends PureComponent<Props, State>{
                         </Page>
                         <Grid.Row style={{marginTop: "20px"}}>
                             <Grid.Column widthXS={Columns.Two}>
-                                <Button
+                                {/* <Button
                                     color={ComponentColor.Secondary}
                                     titleText="Test token"
                                     text="Submit"
                                     type={ButtonType.Button}
                                     onClick={() => this.testToken()}
-                                />
+                                /> */}
                             </Grid.Column>
                             <Grid.Column widthXS={Columns.Eight}/>
                             <Grid.Column widthXS={Columns.Two}>

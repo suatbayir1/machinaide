@@ -293,7 +293,6 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
         });
 
         returnData["links"].forEach((link) => {
-            console.log("link", link);
             nodesById[link.source]["childLinks"].push(link)
         });
 

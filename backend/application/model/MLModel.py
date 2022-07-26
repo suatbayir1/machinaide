@@ -37,3 +37,12 @@ class MLModel():
     
     def get_ml_models(self, filter={}):
         return self.db.find("basic_models", filter)
+    
+    def get_model_logs(self, filter={}):
+        return self.db.find("model_logs", filter)
+    
+    def post_model_logs(self, model_logs_object):
+        return self.db.insert_one("model_logs", model_logs_object)
+
+    def update_model_log(self, where, log):
+        return self.db.update_one("model_logs", log, where, upsert=False)

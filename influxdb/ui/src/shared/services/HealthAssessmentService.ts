@@ -312,6 +312,37 @@ class HealthAssessmentService {
         }
     }
 
+    startStopModel = async (settings) => {
+        const url = `${BACKEND.API_URL}ml/startStopModel`;
+        
+        const request = fetch(url, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
+            },
+            body: JSON.stringify(settings),
+        })
+
+        try {
+            const response = await request;
+            const res = await response.json();
+
+            if (response.status !== 200) {
+                throw new Error(res.data.message.text);
+            }
+            console.log(res)
+            return res;
+        } catch (err) {
+            alert(err);
+            console.error(err);
+        }
+    }
+
 }
 
 export default new HealthAssessmentService();

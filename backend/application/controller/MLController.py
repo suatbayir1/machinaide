@@ -218,13 +218,6 @@ def getTasks():
     task_data = mongo_model.get_tasks()
     return dumps(task_data)
 
-@mlserver.route('/postTrial', methods=['POST'])
-def postTrial():
-    experiment_name = request.json['experiment_name']
-    one_trial = json.loads(request.json['trial'])
-    mongo_model.update_experiment({"experimentName": experiment_name}, {'$push': {'trials': one_trial}})
-    return {"msg": "Trial is added to experiment " + experiment_name}
-
 
 # @mlserver.route('/getAutomlSettings', methods=['GET'])
 # def getAutomlSettings():
@@ -579,7 +572,7 @@ def updateExperiment():
 @mlserver.route('/updateMLModel/<modelID>', methods=['PUT'])
 def updateMLModel(modelID):
     query = {"modelID": modelID}
-    update_set = {"trainingDone": True}
+    update_set = {"trainingDone": True, "endTime": time.time()}
     for key in request.json:
         update_set[key] = request.json[key]
 
@@ -653,11 +646,19 @@ def getMLModels():
     models = mongo_model.get_ml_models({"assetName": {"$regex" :settings["assetName"]}})
     return json.dumps(list(models), cls=JSONEncoder)
 
+@mlserver.route('/startStopModel', methods=['POST'])
+def startStopModel():
+    model_name = request.json["modelName"]
+    enabled = request.json["enabled"]
+    mongo_model.update_ml_model({"modelName": model_name}, {"$set": {"enabled": enabled}})
+    return {"msg": "model is updated"}
+
+
 ## AutoML APIs
 @mlserver.route('/getExperiment', methods=['POST'])
 def getExperiment():
     settings = request.json
-    experiment = mongo_model.get_experiment({"experimentName": settings["experimentName"]})
+    experiment = mongo_model.get_experiment({"modelID": settings["modelID"]})
     return json.dumps(experiment, cls=JSONEncoder)
 
 @mlserver.route('/getTrialsFromDB', methods=['POST'])
@@ -741,6 +742,50 @@ def getTrialsFromDirectory():
             trial_result["status"] = detail["status"]
             result.append(trial_result)
         return jsonify(trials=dumps(result))
+
+@mlserver.route('/postTrial', methods=['POST'])
+def postTrial():
+    experiment_name = request.json['experimentName']
+    one_trial = json.loads(request.json['trial'])
+    mongo_model.update_experiment({"experimentName": experiment_name}, {'$push': {'trials': one_trial}})
+    return {"msg": "Trial is added to experiment " + experiment_name}
+
+@mlserver.route('/postModelLog', methods=['POST'])
+def postModelLog():
+    # if modelid in db add to logs array else add with one
+    modelID = request.json["modelID"]
+    print("modelID ", modelID)
+    logs = mongo_model.get_model_logs({"modelID": modelID})
+    if(logs.count() == 0):
+        # create one 
+        print("create new-------------")
+        log = request.json["log"]
+        mongo_model.post_model_logs({"modelID": modelID, "logs": [log]})
+        return {"msg": "Model " + modelID + " logs object is created."}
+    else:
+        # add to existing one
+        print("push one -------------")
+        log = request.json["log"]
+        update_set = {"logs": log}
+        data = {"$push": update_set}
+        mongo_model.update_model_log({"modelID": modelID}, data)
+        return {"msg": "Model " + modelID + " log is added."}  
+
+@mlserver.route('/updateLastDataPoint/<modelID>', methods=['PUT'])
+def updateLastDataPoint(modelID):
+    query = {"modelID": modelID}
+    last_data_point = request.json["lastDataPoint"]
+    update_set = {"lastDataPoint": last_data_point}
+    data = {"$set": update_set}
+    mongo_model.update_ml_model(query, data)
+    return jsonify(msg="Last data point is updated"), 200 
+
+@mlserver.route('/getModelLogs/<model_id>', methods=['GET'])
+def getModelLogs(model_id):
+    model_logs = mongo_model.get_model_logs({"modelID": model_id})
+    if(model_logs.count() == 0):
+        return dumps([]), 200
+    return dumps(model_logs[0]["logs"]), 200
 # @mlserver.route('/experiments', methods=['GET'])
 # def get_experiments():
 #     exps = mongo_model.get_experiments()

@@ -1,0 +1,85 @@
+{
+    "_id": {
+      "$oid": "62d5454c8565359eebc976e2"
+    },
+    "algorithm": "LSTM",
+    "task": "rul",
+    "enabled": true,
+    "modelID": "6e2fecdc7fc34f80a1db7446adfc4af4",
+    "sessionID": "auto1658144056956",
+    "creator": "machinaide",
+    "modelName": "rul-test-18-07",
+    "assetName": "Press031",
+    "dataInfo": {
+      "fields": [
+        {
+          "@id": "Ana_hava_debi_act",
+          "name": "Ana_hava_debi_act",
+          "minValue": 10,
+          "maxValue": 20,
+          "parent": "sensor1",
+          "type": "Field",
+          "displayName": "Ana_hava_debi_act",
+          "description": "Ana_hava_debi_act",
+          "measurement": "Press031",
+          "dataSource": "Ana_hava_debi_act",
+          "database": "Ermetal"
+        },
+        {
+          "@id": "Ana_hava_sic_act",
+          "name": "Ana_hava_sic_act",
+          "minValue": 5,
+          "maxValue": 100,
+          "parent": "sensor1",
+          "type": "Field",
+          "displayName": "Ana_hava_sic_act",
+          "description": "Ana_hava_sic_act",
+          "measurement": "Press031",
+          "dataSource": "Ana_hava_sic_act",
+          "database": "Ermetal"
+        },
+        {
+          "@id": "Deng_hava_bas_act",
+          "name": "Deng_hava_bas_act",
+          "minValue": 10,
+          "maxValue": 20,
+          "parent": "sensor2",
+          "type": "Field",
+          "displayName": "Deng_hava_bas_act",
+          "description": "Deng_hava_bas_act",
+          "measurement": "Press031",
+          "dataSource": "Deng_hava_bas_act",
+          "database": "Ermetal"
+        },
+        {
+          "@id": "Deng_hava_debi_act",
+          "name": "Deng_hava_debi_act",
+          "minValue": 5,
+          "maxValue": 100,
+          "parent": "sensor2",
+          "type": "Field",
+          "displayName": "Deng_hava_debi_act",
+          "description": "Deng_hava_debi_act",
+          "measurement": "Press031",
+          "dataSource": "Deng_hava_debi_act",
+          "isFillNullActive": true,
+          "defaultValue": "25",
+          "isOperationActive": true,
+          "operation": "/",
+          "operationValue": "1",
+          "database": "Ermetal"
+        }
+      ],
+      "asset": "Press031",
+      "sequenceLength": 49,
+      "windowLength": "30",
+      "optimizer": "val_accuracy",
+      "customMetricEquation": "-",
+      "customMetricDirection": "-"
+    },
+    "directory": "/home/machinaide/backend/models/6e2fecdc7fc34f80a1db7446adfc4af4/",
+    "optional": {
+      "vectorLength": 49
+    },
+    "trainingDone": true
+  }
