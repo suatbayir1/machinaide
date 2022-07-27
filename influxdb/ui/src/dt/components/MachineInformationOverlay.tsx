@@ -88,9 +88,9 @@ class MachineInformationOverlay extends PureComponent<Props, State> {
     public getMeasurements = async (): Promise<void> => {
         const { selectedGraphNode, orgID } = this.props;
 
-        if (Object.keys(selectedGraphNode).length === 0) {
-            return;
-        }
+        // if (Object.keys(selectedGraphNode).length === 0) {
+        //     return;
+        // }
 
         const treeStructure = await DTService.getAllDT();
 

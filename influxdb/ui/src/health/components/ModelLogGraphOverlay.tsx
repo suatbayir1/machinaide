@@ -1,11 +1,14 @@
 import React, { PureComponent } from 'react'
 
 import _ from 'lodash'
+import uuid from 'uuid'
+import {TimeRange} from 'src/types'
 import RULModelLogGraph from "src/health/components/RULModelLogGraph"
 import RULRegModelLogGraph from "src/health/components/RULRegModelLogGraph"
 import POFModelLogGraph from "src/health/components/POFModelLogGraph"
 import FailureService from 'src/shared/services/FailureService'
 import AutoMLService from 'src/shared/services/AutoMLService'
+import ModelLogGraphTimeRangeDropdown from 'src/health/components/ModelLogGraphTimeRangeDropdown'
 
 import { Overlay, Grid,
     ButtonType, Button, ComponentColor, Columns, SelectDropdown,
@@ -20,6 +23,7 @@ interface Props {
 }
 
 interface State {
+    timeRange: TimeRange
     assetFailurePoints: object[]
     modelData: any[]
     loadingModelData: boolean
@@ -29,18 +33,27 @@ class ModelLogGraphOverlay extends PureComponent<Props, State>{
     state ={
         assetFailurePoints: [],
         modelData: [],
-        loadingModelData: true
+        loadingModelData: true,
+        timeRange: {
+          seconds: 43200,
+          lower: "now() - 12h",
+          upper: null,
+          label: "Past 12h",
+          duration: "12h",
+          type: "selectable-duration",
+          windowPeriod: 120000
+      },
     }
 
     async componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
       if(prevProps.model){
           if(prevProps.model["modelID"] !== this.props.model["modelID"]){
-            this.getModelData()
+            this.setState({modelData: []}, ()=>this.getModelData())            
           }
       }
       else{
           if(this.props.model){
-            this.getModelData()
+            this.setState({modelData: []}, ()=>this.getModelData())
           }
       }
     }
@@ -208,7 +221,89 @@ class ModelLogGraphOverlay extends PureComponent<Props, State>{
         return graphData
     }
 
+    handleChooseTimeRange = (timeRange: TimeRange) => {
+      this.setState({ timeRange: timeRange })
+      console.log("TIME", timeRange)
+    }
+
+    getDataInRange = (task) => {
+      let data = this.state.modelData
+      console.log("----------", data)
+      const {timeRange} = this.state
+
+      let upperTimeRange = null
+      let lowerTimeRange = null
+
+      if(timeRange.type === "selectable-duration"){
+        upperTimeRange = new Date()
+        lowerTimeRange = new Date(new Date().getTime() - timeRange.seconds*1000)
+      }
+      else{
+        upperTimeRange = new Date(timeRange.upper)
+        lowerTimeRange = new Date(timeRange.lower)
+      }
+
+      if(task === "rul" || task === "pof" || task === "rulreg"){
+        // line graph data format
+        if(data.length){
+          let allData = data
+          let inRangeData = []
+
+          for(let d of allData){
+            let dTime = new Date(d["x"])
+            if(dTime<=upperTimeRange && dTime>=lowerTimeRange){
+              inRangeData.push(d)
+            }
+          }
+          console.log("*****", inRangeData)
+          if(task === "pof"){
+            return [{
+              "id": "pof",
+              "color": "hsl(330, 70%, 50%)",
+              "data": inRangeData
+            }]
+          }
+          else if(task === "rul" || task === "rulreg"){
+            return [{
+              "id": "rul",
+              "color": "hsl(330, 70%, 50%)",
+              "data": inRangeData
+            }]
+          }
+          
+        }
+        else{
+          return []
+        }        
+      }
+      else if(task === "ad"){
+        let allData = data
+        let inRangeData = []
+        for(let d of allData){
+          let dTime = new Date(d["time"])
+          if(dTime<=upperTimeRange && dTime>=lowerTimeRange){
+            inRangeData.push(d)
+          }
+        }
+        return inRangeData
+      }
+    }
+
     render(): React.ReactNode {
+        const {model} = this.props
+        let gdata = []
+        if(model && model["task"] === "ad"){
+          gdata = this.getDataInRange("ad")
+        }
+        else if(model && model["task"] === "rul"){
+          gdata = this.getDataInRange("rul")
+        }
+        else if(model && model["task"] === "pof"){
+          gdata = this.getDataInRange("pof")
+        }
+        else if(model && model["task"] === "rulreg"){
+          gdata = this.getDataInRange("rulreg")
+        }
         return(
         <Overlay visible={this.props.modelLogGraphOverlay}>
             <Overlay.Container maxWidth={800}>
@@ -218,28 +313,48 @@ class ModelLogGraphOverlay extends PureComponent<Props, State>{
                 />
                 <Overlay.Body>
                     <Grid>
-                        <Grid.Row>
-                            <Grid.Column widthXS={Columns.Twelve} style={{height: "500px"}}>
-                                {this.props.model && this.props.model["task"] === "pof" && 
-                                  <POFModelLogGraph 
-                                    modelLogDataPoints={this.state.modelData} 
-                                    annotations={this.state.assetFailurePoints}
-                                  />
-                                }
-                                {this.props.model && this.props.model["task"] === "rul" && 
-                                  <RULModelLogGraph 
-                                    modelLogDataPoints={this.state.modelData} 
-                                    annotations={this.state.assetFailurePoints}
-                                  />
-                                }
-                                {this.props.model && this.props.model["task"] === "rulreg" && 
-                                  <RULRegModelLogGraph 
-                                    modelLogDataPoints={this.state.modelData} 
-                                    annotations={this.state.assetFailurePoints}
-                                  />
-                                }
-                            </Grid.Column>
-                        </Grid.Row>
+                      <Grid.Row>
+                        <Grid.Column widthXS={Columns.Twelve}>
+                          <div className="tabbed-page--header-right">
+                            <Label
+                                size={ComponentSize.Small}
+                                name={"Time Range"}
+                                description={""}
+                                color={InfluxColors.Pool}
+                                id={"icon-label"} 
+                            />
+                            <ModelLogGraphTimeRangeDropdown
+                                onSetTimeRange={this.handleChooseTimeRange}
+                                timeRange={this.state.timeRange}
+                            />
+                          </div>                          
+                        </Grid.Column>
+                      </Grid.Row>
+                      <Grid.Row>
+                          <Grid.Column widthXS={Columns.Twelve} style={{height: "500px"}}>
+                              {this.props.model && this.props.model["task"] === "pof" && gdata.length && 
+                                <POFModelLogGraph 
+                                  key={uuid.v4()}
+                                  modelLogDataPoints={gdata} 
+                                  annotations={this.state.assetFailurePoints}
+                                />
+                              }
+                              {this.props.model && this.props.model["task"] === "rul" && gdata.length && 
+                                <RULModelLogGraph 
+                                  key={uuid.v4()}
+                                  modelLogDataPoints={gdata} 
+                                  annotations={this.state.assetFailurePoints}
+                                />
+                              }
+                              {this.props.model && this.props.model["task"] === "rulreg" && gdata.length && 
+                                <RULRegModelLogGraph 
+                                  key={uuid.v4()}
+                                  modelLogDataPoints={gdata} 
+                                  annotations={this.state.assetFailurePoints}
+                                />
+                              }
+                          </Grid.Column>
+                      </Grid.Row>
                     </Grid>
                 </Overlay.Body>
             </Overlay.Container>

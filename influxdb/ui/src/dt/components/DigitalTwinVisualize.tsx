@@ -58,6 +58,7 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
 
   async componentDidUpdate(prevProps) {
     if (prevProps.cubeInfo !== this.props.selectedGraphNode) {
+      console.log("update graph node");
       if (scene === undefined) { return; }
 
       if (Object.keys(this.props.selectedGraphNode).length > 0) {
@@ -75,6 +76,8 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
     }
 
     if (prevProps.refreshVisualizePage !== this.props.refreshVisualizePage) {
+      // console.log("update visualize page");
+
       await this.removeAllObjectFromScene();
       const cubeInfo = await DTService.getAllDT();
       const renderedCubeInfo = await this.renderInitialCubeInfo(cubeInfo);

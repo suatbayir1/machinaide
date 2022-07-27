@@ -162,7 +162,8 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                                     >
                                                                         <div>
                                                                             <img
-                                                                                src='https://cdn1.iconfinder.com/data/icons/cars-components-3/24/gears_gear_car_component_part-512.png'
+                                                                                // src='https://cdn1.iconfinder.com/data/icons/cars-components-3/24/gears_gear_car_component_part-512.png'
+                                                                                src='../../../assets/icons/component-card.png'
                                                                                 className="component-image"
                                                                             />
                                                                         </div>
