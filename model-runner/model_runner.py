@@ -284,7 +284,7 @@ def check_last_data_point(last_stored_point, last_data_point, modelID):
     print(last_stored_point, last_data_point)
     if(last_stored_point == last_data_point):
         # if data point has not changed
-        now = datetime.datetime.now().isoformat()
+        now = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
         log = {"modelID":modelID, "log": {"time": now, "prediction": None}}
         requests.post(url=POST_MODEL_LOG, json=log)
         return True
@@ -299,7 +299,7 @@ def compare_last_data_point(last_stored_point, last_data_point, modelID):
     print(last_stored_point, last_data_point)
     if(last_stored_point == last_data_point):
         # if data point has not changed
-        now = datetime.datetime.now().isoformat()
+        now = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
         log = {"modelID":modelID, "log": {"time": now, "prediction": None}}
         requests.post(url=POST_MODEL_LOG, json=log)
         return True
@@ -376,7 +376,7 @@ class RULRegModelRunner:
             df = pd.DataFrame(data)
             data_points = []
             if(not df.empty):
-                print("here")
+                # print("here")
                 filler = FillNanValues(operator, operator_value, is_numeric, default_value)
                 measurement = field["measurement"]
                 field_source = field["dataSource"]
@@ -449,8 +449,8 @@ class RULRegModelRunner:
     def predict(self, predict_data):
         if(self.features):
             es = self.make_entityset(predict_data)
-            print(predict_data)
-            print(self.features)
+            # print(predict_data)
+            # print(self.features)
 
             fm = ft.calculate_feature_matrix(
                 entityset=es,
@@ -462,7 +462,7 @@ class RULRegModelRunner:
             predictions = self.model.predict(X)
             print(predictions)
             if(len(predictions) and predictions.iloc[0]):
-                now = datetime.datetime.now().isoformat()
+                now = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
                 log = {"modelID": self.pipelineID, "log": {"time": now, "prediction": round(predictions.iloc[0])}}
                 print("log: ", log)
                 requests.post(url=POST_MODEL_LOG, json=log)
@@ -607,7 +607,7 @@ class RULModelRunner:
         y_pred = (y_pred > 0.5).astype("int32")
         print(y_pred)
         if(len(y_pred) and len(y_pred[0])):
-            now = datetime.datetime.now().isoformat()
+            now = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
             log = {"modelID": self.modelID, "log": {"time": now, "prediction": json.dumps(y_pred[0][0].item())}}
             print("log: ", log)
             requests.post(url=POST_MODEL_LOG, json=log)
@@ -617,7 +617,7 @@ class RULModelRunner:
         print(self.model.summary())
         data = self.prepare_data()
         seq = self.build_data(data)
-        print(seq)
+        # print(seq)
         if(len(seq) != 0):
             self.predict(seq)
 
@@ -637,7 +637,7 @@ class POFModelRunner:
         a_ = ab_pred[:, 0]
         b_ = ab_pred[:, 1]
 
-        print(y_, u_, a_, b_)
+        # print(y_, u_, a_, b_)
         hazard0 = k.pow((y_ + 1e-35) / a_, b_)
         hazard1 = k.pow((y_ + 1) / a_, b_)
 
@@ -773,7 +773,6 @@ class POFModelRunner:
                     one_merged = pd.merge(one_merged, pd.DataFrame(all_data[i]), on=["time"])
             
             if("time" in one_merged):
-                print("YES")
                 cycle = 0
                 for i in range(len(one_merged["time"])):
                     one_merged.loc[i, "time"] = cycle
@@ -811,7 +810,7 @@ class POFModelRunner:
         print(list(prediction[0]))
         if(len(prediction) and len(prediction[0])):
             sent_prediction = [json.dumps(prediction[0][0].item()), json.dumps(prediction[0][1].item())]
-            now = datetime.datetime.now().isoformat()
+            now = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
             log = {"modelID": self.modelID, "log": {"time": now, "prediction": sent_prediction}}
             print("log: ", log)
             requests.post(url=POST_MODEL_LOG, json=log)
@@ -821,7 +820,7 @@ class POFModelRunner:
         print(self.model.summary())
         data = self.prepare_data()
         seq = self.create_seqs(data)
-        print(seq)
+        # print(seq)
         if(len(seq) != 0):
             self.predict(seq)
 

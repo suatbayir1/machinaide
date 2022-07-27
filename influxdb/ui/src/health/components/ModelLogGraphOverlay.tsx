@@ -80,7 +80,7 @@ class ModelLogGraphOverlay extends PureComponent<Props, State>{
           lineStyle: { stroke: '#00A3FF', strokeWidth: 2 },
           legend: ""
       }) */
-      this.setState({ assetFailurePoints: failPoints })
+      this.setState({ assetFailurePoints: failPoints }, ()=>console.log("fail points", failPoints))
       if(model["pipelineID"]){
           AutoMLService.getModelLogs(model["pipelineID"]).then(res=>{
           if(model["task"] === "rulreg"){
@@ -226,9 +226,34 @@ class ModelLogGraphOverlay extends PureComponent<Props, State>{
       console.log("TIME", timeRange)
     }
 
+    getAnnotationsInRange = () => {
+      let annotations = this.state.assetFailurePoints
+      const {timeRange} = this.state
+      let upperTimeRange = null
+      let lowerTimeRange = null
+
+      if(timeRange.type === "selectable-duration"){
+        upperTimeRange = new Date()
+        lowerTimeRange = new Date(new Date().getTime() - timeRange.seconds*1000)
+      }
+      else{
+        upperTimeRange = new Date(timeRange.upper)
+        lowerTimeRange = new Date(timeRange.lower)
+      }
+
+      let annotationsInRange = []
+      for(let anno of annotations){
+        let annoDate = new Date(anno["value"])
+        if(annoDate<=upperTimeRange && annoDate>=lowerTimeRange){
+          annotationsInRange.push(anno)
+        }
+      }
+      return annotationsInRange 
+    }
+
     getDataInRange = (task) => {
       let data = this.state.modelData
-      console.log("----------", data)
+      // console.log("----------", data)
       const {timeRange} = this.state
 
       let upperTimeRange = null
@@ -255,7 +280,7 @@ class ModelLogGraphOverlay extends PureComponent<Props, State>{
               inRangeData.push(d)
             }
           }
-          console.log("*****", inRangeData)
+          // console.log("*****", inRangeData)
           if(task === "pof"){
             return [{
               "id": "pof",
@@ -304,6 +329,7 @@ class ModelLogGraphOverlay extends PureComponent<Props, State>{
         else if(model && model["task"] === "rulreg"){
           gdata = this.getDataInRange("rulreg")
         }
+        let inRangeAnnotations = this.getAnnotationsInRange()
         return(
         <Overlay visible={this.props.modelLogGraphOverlay}>
             <Overlay.Container maxWidth={800}>
@@ -336,21 +362,21 @@ class ModelLogGraphOverlay extends PureComponent<Props, State>{
                                 <POFModelLogGraph 
                                   key={uuid.v4()}
                                   modelLogDataPoints={gdata} 
-                                  annotations={this.state.assetFailurePoints}
+                                  annotations={inRangeAnnotations}
                                 />
                               }
                               {this.props.model && this.props.model["task"] === "rul" && gdata.length && 
                                 <RULModelLogGraph 
                                   key={uuid.v4()}
                                   modelLogDataPoints={gdata} 
-                                  annotations={this.state.assetFailurePoints}
+                                  annotations={inRangeAnnotations}
                                 />
                               }
                               {this.props.model && this.props.model["task"] === "rulreg" && gdata.length && 
                                 <RULRegModelLogGraph 
                                   key={uuid.v4()}
                                   modelLogDataPoints={gdata} 
-                                  annotations={this.state.assetFailurePoints}
+                                  annotations={inRangeAnnotations}
                                 />
                               }
                           </Grid.Column>
