@@ -30,7 +30,7 @@ endif
 
 
 # Test vars can be used by all recursive Makefiles
-export PKG_CONFIG:=/home/machinaide/influxdb/scripts/pkg-config.sh
+export PKG_CONFIG:=/home/machinaide/project/machinaide/influxdb/scripts/pkg-config.sh
 export GOOS=$(shell go env GOOS)
 export GO_BUILD=env GO111MODULE=on go build $(GO_ARGS) -ldflags "$(LDFLAGS)"
 export GO_BUILD_SM=env GO111MODULE=on go build $(GO_ARGS) -ldflags "-s -w $(LDFLAGS)"
@@ -40,7 +40,7 @@ export GO_TEST=env GOTRACEBACK=all GO111MODULE=on go test $(GO_ARGS)
 export GO_GENERATE=go generate $(GO_ARGS)
 export GO_VET=env GO111MODULE=on go vet $(GO_ARGS)
 export GO_RUN=env GO111MODULE=on go run $(GO_ARGS)
-export PATH := /home/machinaide/influxdb/bin/$(GOOS):$(PATH)
+export PATH := /home/machinaide/project/machinaide/influxdb/bin/$(GOOS):$(PATH)
 
 
 # All go source files

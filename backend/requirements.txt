@@ -13,3 +13,9 @@ requests==2.26.0
 scikit-learn==0.24.2
 sklearn==0.0
 tensorflow==2.5.0
+python-ldap==3.3.1
+pandas
+pyspellchecker
+fuzzywuzzy
+dateparser
+spacy==3.0.5

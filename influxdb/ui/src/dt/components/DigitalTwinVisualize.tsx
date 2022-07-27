@@ -877,6 +877,7 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
   }
 
   handleAddObjectType = (object, wireframe) => {
+    console.log({ object });
     switch (object["geometryType"]) {
       case "BoxGeometry":
         this.addCube(object, wireframe);
@@ -897,8 +898,12 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
   }
 
   cubeCreator(payload) {
+    console.log("cubeINFO *****");
+
     let CubeInfo = payload;
     let wireframe;
+
+    console.log(CubeInfo);
 
     if (CubeInfo == undefined) {
       return;

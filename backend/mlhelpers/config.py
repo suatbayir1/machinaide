@@ -15,7 +15,7 @@ authentication = dict(
 )
 
 INFLUXDB_CLIENT = dict(
-    URL = "https://vmi474601.contaboserver.net:8080",
+    URL = "http://localhost:8080",
     TOKEN = "-Y8yuCS19k6ZD0FLiVvpY-zcEK4VhbBe6HC7WPKR7Z5X2bkm-Ag2iMJUSDSBOugpG6klF2XEddhCMkHRuJPbsQ==",
     ORG = "machinaide"
 )
@@ -53,7 +53,8 @@ max_trials = 10
 executions_per_trial = 1
 
 flaskserver = "localhost" # "flaskserver"
-flask_port = 9632
+flask_port = "9632/api/v1.0/metadata"
+health_port = "9632/api/v1.0/health"
 influx_port = 8086
 bootstrap_server = 'localhost:9094'
 
@@ -76,6 +77,8 @@ GETBASICMODEL = 'http://{}:{}/getBasicModel/'.format(flaskserver, flask_port)
 UPDATEBASICROW = 'http://{}:{}/updateBasicRow'.format(flaskserver, flask_port)
 ANOMALYURL = 'http://{}:{}/anomaly'.format(flaskserver, flask_port)
 celldataurl = "http://{}:{}/postCellData".format(flaskserver, flask_port)
+TESTINFERENCEURL= "http://{}:{}/testInference".format(flaskserver, flask_port)
+POSTREALANOMALYURL= "http://{}:{}/addAnomalyToMachine/".format(flaskserver, health_port)
 
 
 models_path = os.getcwd() + "/mlhelpers/Models/"
@@ -91,6 +94,7 @@ VAESENSORDIR = os.getcwd() +  "/mlhelpers/VAESettings/sensors/"
 ADHPSDIR = os.getcwd() + "/mlhelpers/ADSettings/hps/"
 ADSENSORDIR = os.getcwd() + "/mlhelpers/ADSettings/sensors/"
 REPORTDIR = os.getcwd() + "/alerthelpers/printFiles/"
+MLSESSIONDIR = os.getcwd() + "/mlhelpers/SessionSettings/"
 
 TICK_SETTINGS = {
   "LAST": "last value",

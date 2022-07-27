@@ -12,7 +12,7 @@ from application.classes.Validator import Validator
 from application.model.ObjectModel import ObjectModel
 from application.helpers.Helper import cursor_to_json
 
-UPLOAD_FOLDER =  "/home/machinaide/influxdb/ui/assets/images"
+UPLOAD_FOLDER =  "/home/machinaide/project/machinaide/influxdb/ui/assets/images"
 
 dt = Blueprint("dt", __name__)
 
@@ -36,10 +36,15 @@ def get_all(token):
         object_pool = cursor_to_json(objectModel.get_object_pool())
 
         for factory in data:
+            print("1")
             for pl in factory["productionLines"]:
+                print("2")
                 for machine in pl["machines"]:
+                    print("3")
                     for component in machine["contents"]:
+                        print("4")
                         if component["@type"] == "Component":
+                            print("5")
                             if component["visual"] != "":
                                 visual = [visual for visual in object_pool if visual["_id"]["$oid"] == component["visual"]]
 
@@ -50,9 +55,12 @@ def get_all(token):
                                         "id": visual[0]["_id"]["$oid"],
                                         "objects": visual[0]["children"]
                                     }       
+
                             for sensor in component["sensors"]:
                                 if sensor["visual"] != "":
                                     visual = [visual for visual in object_pool if visual["_id"]["$oid"] == sensor["visual"]]
+
+                                    print("visual", visual)
 
                                     if not visual:
                                         sensor["visual"] = ""
@@ -61,7 +69,7 @@ def get_all(token):
                                             "id": visual[0]["_id"]["$oid"],
                                             "objects": visual[0]["children"]
                                         }       
-
+        
         return return_response(data = data, success = True, message = message), 200
     except:
         message = "An expected error has occurred"

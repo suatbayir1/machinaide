@@ -22,15 +22,15 @@ from application.controller.BrandController import brand
 from application.controller.MetaDataController import metadataserver
 from application.controller.HealthAssessmentController import health_assessment
 from application.controller.MLController import mlserver
-from application.controller.NLPController import nlpserver
+#from application.controller.NLPController import nlpserver
 from application.controller.NotificationController import notification
 from application.controller.InfluxController import influx
 
 
 today = datetime.date.today()
-logging.basicConfig(filename=f'/home/machinaide/backend/logs/current.log', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s %(funcName)s %(module)s : %(message)s')
+logging.basicConfig(filename=f'/home/machinaide/project/machinaide/backend/logs/current.log', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s %(funcName)s %(module)s : %(message)s')
 
-UPLOAD_FOLDER =  "/home/machinaide/influxdb/ui/assets/images"
+UPLOAD_FOLDER =  "/home/machinaide/project/machinaide/influxdb/ui/assets/images"
 
 app = Flask(__name__)
 app_prefix = "/api/v1.0"
@@ -47,7 +47,7 @@ app.register_blueprint(general, url_prefix = f"{app_prefix}/general")
 app.register_blueprint(brand, url_prefix = f"{app_prefix}/brand")
 app.register_blueprint(metadataserver, url_prefix = f"{app_prefix}/metadata")
 app.register_blueprint(mlserver, url_prefix = f"{app_prefix}/ml")
-app.register_blueprint(nlpserver, url_prefix = f"{app_prefix}/nlp")
+#app.register_blueprint(nlpserver, url_prefix = f"{app_prefix}/nlp")
 app.register_blueprint(notification, url_prefix = f"{app_prefix}/notification")
 app.register_blueprint(influx, url_prefix = f"{app_prefix}/influx")
 app.register_blueprint(health_assessment, url_prefix = f"{app_prefix}/health")

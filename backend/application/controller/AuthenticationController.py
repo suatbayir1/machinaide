@@ -36,6 +36,7 @@ def loginWithInflux():
 
 @auth.route("/loginWithLDAP", methods = ["POST"])
 def loginWithLDAP():
+    print("test")
     if not request.json:
         message = "username_password_cannot_be_empty"
         logger.add_log("ERROR", request.remote_addr, '', request.method, request.url, "", message,  400)
@@ -50,7 +51,7 @@ def loginWithLDAP():
     password = request.json["password"]
 
     try:
-        con = ldap.initialize('ldap://localhost:10389', bytes_mode=False)
+        con = ldap.initialize('ldap://161.97.67.73:10389', bytes_mode=False)
         con.protocol_version = ldap.VERSION3
         con.set_option(ldap.OPT_REFERRALS, 0)
 

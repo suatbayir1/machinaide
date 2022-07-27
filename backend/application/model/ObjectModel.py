@@ -38,6 +38,7 @@ class ObjectModel():
         collection = "object_pool"
         return self.db.find(collection)
 
+
     def remove_object(self, payload):
         data = cursor_to_json(self.db.find(self.collection))
         new_children = []

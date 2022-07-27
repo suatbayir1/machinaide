@@ -52,9 +52,9 @@ max_epochs = 5
 max_trials = 10
 executions_per_trial = 1
 
-flaskserver = "vmi474601.contaboserver.net" # "flaskserver"
-flask_port = "/api/v1.0/metadata"
-health_port = "/api/v1.0/health"
+flaskserver = "localhost" # "flaskserver"
+flask_port = "9632/api/v1.0/metadata"
+health_port = "9632/api/v1.0/health"
 influx_port = 8086
 bootstrap_server = 'localhost:9094'
 

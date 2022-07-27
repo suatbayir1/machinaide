@@ -35,7 +35,8 @@ class Setup:
                 "photoUrl": row["photo_url"],
                 "location": row["location"],
                 "type": "Factory",
-                "productionLines": []
+                "productionLines": [],
+                "bucket": ""
             }
             
             self.dt.append(factory)
@@ -71,7 +72,8 @@ class Setup:
                             "displayName": row["displayName"],
                             "description": row["description"],
                             "photoUrl": row["photo_url"],
-                            "contents": []
+                            "contents": [],
+                            "measurements": []
                         }
 
                         pl["machines"].append(machine)
@@ -90,7 +92,8 @@ class Setup:
                                 "description": row["description"],
                                 "type": "Component",
                                 "parent": row["parent_id"],
-                                "sensors": []
+                                "sensors": [],
+                                "visual": ""
                             }
 
                             machine["contents"].append(component)
@@ -113,7 +116,8 @@ class Setup:
                                     "displayName": row["displayName"],
                                     "description": row["description"],
                                     "status": "enable",
-                                    "fields": []
+                                    "fields": [],
+                                    "visual": ""
                                 }
 
                                 component["sensors"].append(sensor)
