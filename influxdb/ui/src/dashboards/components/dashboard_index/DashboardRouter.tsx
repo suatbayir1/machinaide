@@ -156,12 +156,20 @@ class DashboardRouter extends Component<Props, State> {
             case "Machine":
                 xAxisCounter = 0;
 
+                console.log("Machine");
+
                 for (let pl of structure[0].productionLines) {
+                    console.log("pl", pl);
                     for (let machine of pl.machines) {
+                        console.log("machine", machine);
                         if (machine["@id"] === this.props["match"].params.id) {
+                            console.log("id matched");
                             for (let comp of machine.contents) {
+                                console.log("comp", comp);
                                 if (comp["@type"] === "Component") {
                                     for (let sensor of comp.sensors) {
+                                        console.log("sensor", sensor);
+
                                         let cellName = `Component: ${comp["name"]}, Sensor: ${sensor["name"]}`
 
                                         if (!existsCells.includes(cellName)) {
@@ -205,6 +213,8 @@ class DashboardRouter extends Component<Props, State> {
                                                 "bucket": structure.bucket,
                                                 "query": query,
                                             }
+
+                                            console.log({ params })
 
                                             await this.createCell(params);
                                             xAxisCounter++;

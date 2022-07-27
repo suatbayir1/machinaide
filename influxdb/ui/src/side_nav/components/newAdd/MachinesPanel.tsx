@@ -101,8 +101,6 @@ class MachinesPanel extends PureComponent<Props, State> {
     render() {
         const { machines, spinnerLoading, isLoading } = this.state;
 
-        console.log("props", this.props);
-
         return (
             <Page>
                 {
