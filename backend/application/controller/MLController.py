@@ -786,6 +786,13 @@ def getModelLogs(model_id):
     if(model_logs.count() == 0):
         return dumps([]), 200
     return dumps(model_logs[0]["logs"]), 200
+
+@mlserver.route('/getModelLastLog/<model_id>', methods=['GET'])
+def getModelLastLog(model_id):
+    model_logs = mongo_model.get_model_logs({"modelID": model_id})
+    if(model_logs.count() == 0):
+        return dumps(None), 200
+    return dumps(model_logs[0]["logs"][-1]), 200
 # @mlserver.route('/experiments', methods=['GET'])
 # def get_experiments():
 #     exps = mongo_model.get_experiments()

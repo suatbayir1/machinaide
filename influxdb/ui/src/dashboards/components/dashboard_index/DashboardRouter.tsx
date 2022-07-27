@@ -142,8 +142,10 @@ class DashboardRouter extends Component<Props, State> {
                             let params = {
                                 dashboardID,
                                 cellName,
+                                "measurements": machine.measurements,
+                                "fields": [],
                                 "xAxis": xAxisCounter % 2 === 0 ? 0 : 6,
-                                "bucket": structure.bucket,
+                                "bucket": structure[0].bucket,
                                 "query": query,
                             }
 
@@ -209,12 +211,14 @@ class DashboardRouter extends Component<Props, State> {
                                             let params = {
                                                 dashboardID,
                                                 cellName,
+                                                "measurements": machine.measurements,
+                                                "fields": sensor.fields.map(f => f["name"]),
                                                 "xAxis": xAxisCounter % 2 === 0 ? 0 : 6,
-                                                "bucket": structure.bucket,
+                                                "bucket": structure[0].bucket,
                                                 "query": query,
                                             }
 
-                                            console.log({ params })
+                                            console.log({ params });
 
                                             await this.createCell(params);
                                             xAxisCounter++;
@@ -274,8 +278,10 @@ class DashboardRouter extends Component<Props, State> {
                                             let params = {
                                                 dashboardID,
                                                 cellName,
+                                                "measurements": machine.measurements,
+                                                "fields": [field["name"]],
                                                 "xAxis": xAxisCounter % 2 === 0 ? 0 : 6,
-                                                "bucket": structure.bucket,
+                                                "bucket": structure[0].bucket,
                                                 "query": query,
                                             }
 
@@ -328,8 +334,10 @@ class DashboardRouter extends Component<Props, State> {
                                                 let params = {
                                                     dashboardID,
                                                     cellName,
+                                                    "measurements": machine.measurements,
+                                                    "fields": [field["name"]],
                                                     "xAxis": xAxisCounter % 2 === 0 ? 0 : 6,
-                                                    "bucket": structure.bucket,
+                                                    "bucket": structure[0].bucket,
                                                     "query": query,
                                                 }
 

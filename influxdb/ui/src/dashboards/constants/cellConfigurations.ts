@@ -120,6 +120,7 @@ export const cellConfiguration = (params) => {
 }
 
 export const viewConfiguration = (params) => {
+    console.log("viewConfiguration", params);
     return {
         "name": params.cellName,
         "status": "Done",
@@ -131,21 +132,23 @@ export const viewConfiguration = (params) => {
                     "editMode": "builder",
                     "builderConfig": {
                         "buckets": [
-                            "Ermetal"
+                            params.bucket
                         ],
                         "tags": [
                             {
                                 "key": "_measurement",
-                                "values": [
-                                    "Press31_DB1"
-                                ],
+                                // "values": [
+                                //     "Press31_DB1"
+                                // ],
+                                "values": params.measurements,
                                 "aggregateFunctionType": "filter"
                             },
                             {
                                 "key": "_field",
-                                "values": [
-                                    "mean_Ana_hava_debi_act"
-                                ],
+                                // "values": [
+                                //     "mean_Ana_hava_debi_act"
+                                // ],
+                                "values": params.fields,
                                 "aggregateFunctionType": "filter"
                             },
                             {

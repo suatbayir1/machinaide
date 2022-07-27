@@ -20,6 +20,7 @@ import AnomalyBrushGraph from 'src/health/components/AnomalyBrushGraph'
 import { FACTORY_NAME } from 'src/config';
 import AnomalyGraphTimeRangeDropdown from 'src/health/components/AnomalyGraphTimeRangeDropdown';
 import HealthAssessmentService from 'src/shared/services/HealthAssessmentService'
+import AutoMLService from 'src/shared/services/AutoMLService'
 import ModelLogGraphOverlay from 'src/health/components/ModelLogGraphOverlay';
 // Flux query
 import {runQuery, RunQueryResult} from 'src/shared/apis/query'
@@ -100,6 +101,7 @@ interface State {
     showEnabledModels: boolean
     modelLogGraphOverlay: boolean
     selectedModel: object
+    modelsLastLogs: object
 }
 
 const aggregatePeriods = ["5s", "10s", "20s", "30s", "60s"]
@@ -200,6 +202,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
             showEnabledModels: false,
             modelLogGraphOverlay: false,
             selectedModel: null,
+            modelsLastLogs: {}
         }
     }
     
@@ -227,7 +230,16 @@ class MachineHealthPage extends PureComponent<Props, State>{
                     disabledModels.push(model)
                 }
             })
-            this.setState({models: [...enabledModels, ...disabledModels], displayedModels: [...enabledModels, ...disabledModels]})
+            let modelsLastLogs = this.state.modelsLastLogs
+            for(let model of allModels){
+                if(model["modelID"]){
+                    let lastLog = await AutoMLService.getModelLastLog(model["modelID"])
+                    if(lastLog){
+                        modelsLastLogs[model["modelID"]] = lastLog
+                    }
+                }                
+            }
+            this.setState({models: [...enabledModels, ...disabledModels], displayedModels: [...enabledModels, ...disabledModels], modelsLastLogs: modelsLastLogs})
         }
         else{
             const models = await HealthAssessmentService.getMLModels({"assetName": this.props.match.params.MID})
@@ -244,7 +256,16 @@ class MachineHealthPage extends PureComponent<Props, State>{
                     disabledModels.push(model)
                 }
             })
-            this.setState({models: [...enabledModels, ...disabledModels], displayedModels: [...enabledModels, ...disabledModels]})
+            let modelsLastLogs = this.state.modelsLastLogs
+            for(let model of allModels){
+                if(model["modelID"]){
+                    let lastLog = await AutoMLService.getModelLastLog(model["modelID"])
+                    if(lastLog){
+                        modelsLastLogs[model["modelID"]] = lastLog
+                    }
+                }                
+            }
+            this.setState({models: [...enabledModels, ...disabledModels], displayedModels: [...enabledModels, ...disabledModels], modelsLastLogs: modelsLastLogs}, ()=>console.log("-->", this.state))
         }
     }
 
