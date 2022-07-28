@@ -9,7 +9,7 @@ import random
 import argparse
 import requests
 import sys
-sys.path.insert(1, '/home/machinaide/backend')
+sys.path.insert(1, '/home/machinaide/project/machinaide/backend')
 from core.nlp.QuestionCorrector import QuestionCorrector
 from core.nlp.MongoManager import MongoManager
 from core.nlp.Helper import Helper

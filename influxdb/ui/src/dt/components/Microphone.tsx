@@ -43,6 +43,7 @@ export default class Microphone extends PureComponent<Props, State> {
         let vm = this;
 
         recognition.onresult = function (event) {
+            console.log(event);
             var current = event.resultIndex;
             var transcript = event.results[current][0].transcript;
             vm.setState({ predictiveSentences: event.results[current], lastSentence: transcript })
@@ -72,6 +73,8 @@ export default class Microphone extends PureComponent<Props, State> {
 
     stop = () => {
         const { predictiveSentences, lastSentence } = this.state;
+
+        console.log({ lastSentence })
 
         recognition.stop();
         this.setState({ isSpeaking: false });
