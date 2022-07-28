@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(1, '/home/machinaide/backend')
+sys.path.insert(1, f'{config.PROJECT_URL}/backend')
 import random
 import json
 from bson.json_util import loads, dumps

@@ -60,7 +60,7 @@ class JSONEncoder(json.JSONEncoder):
 
 @mlserver.route('/getMLReport/<report_path>', methods=['GET'])
 def getMLReport(report_path):
-    reports_path= "/home/machinaide/influxdb/ui/public/"
+    reports_path= f"{config.PROJECT_URL}/influxdb/ui/public/"
     path = reports_path + report_path
     html_file = codecs.open(path, "r", "utf-8")
     file_str = html_file.read()
@@ -421,7 +421,7 @@ def testReadJson():
         settings = json.load(fp)
 
 
-    cmd = "python3 /home/machinaide/backend/mlhelpers/automl/test_read_json.py" 
+    cmd = f"python3 {config.PROJECT_URL}/backend/mlhelpers/automl/test_read_json.py" 
     print(cmd)
     process = subprocess.Popen(cmd.split(), close_fds=True)
 
@@ -478,7 +478,7 @@ def startRULModelTraining():
     username = username.replace(".com", "")
     username = username.replace(".","-") """
     
-    cmd = "python3 /home/machinaide/backend/mlhelpers/automl/rul_automl_runner_ver2.py" + " -en " + experiment_name + " -sid " + session_id 
+    cmd = f"python3 {config.PROJECT_URL}/backend/mlhelpers/automl/rul_automl_runner_ver2.py" + " -en " + experiment_name + " -sid " + session_id 
     print(cmd)
     process = subprocess.Popen(cmd.split(), close_fds=True)
     rul_experiment_process_pool[str(now)] = process
@@ -507,7 +507,7 @@ def startPOFModelTraining():
     with open(settings_dir, 'w') as fp:
         json.dump(request.json, fp)
     
-    cmd = "python3 /home/machinaide/backend/mlhelpers/automl/pof_automl_runner.py" + " -en " + experiment_name + " -sid " + session_id 
+    cmd = f"python3 {config.PROJECT_URL}/backend/mlhelpers/automl/pof_automl_runner.py" + " -en " + experiment_name + " -sid " + session_id 
     print(cmd)
     process = subprocess.Popen(cmd.split(), close_fds=True)
     pof_experiment_process_pool[str(now)] = process

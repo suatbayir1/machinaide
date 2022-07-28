@@ -20,6 +20,7 @@ import requests
 import json
 from bson.json_util import dumps
 import mongo_queries as mongoq
+import config
 
 
 # flask server
@@ -51,8 +52,7 @@ all_maintenance_types = ["Maintenance 1", "Maintenance 2", "Maintenance 3"]
 COMP_NAMES = ["yaglama", "anaMotor", "compName", "sampleComp1", "sampleComp2", "cpu", "diskio"]
 SENS_NAMES = ["pressSens", "usage_system", "io_time"]
 
-# nlp = spacy.load("/home/machinaide/nlp/training/model-best")
-nlp = spacy.load("/home/machinaide/nlp/ner-pipe/training/model-best")
+nlp = spacy.load(f"{config.PROJECT_URL}/nlp/ner-pipe/training/model-best")
 
 """ for pipe in nlp.pipeline:
     print(pipe) """
@@ -61,10 +61,10 @@ nlp = spacy.load("/home/machinaide/nlp/ner-pipe/training/model-best")
 source_nlp = spacy.load("en_core_web_trf")
 
 # the textcat pipeline
-textcat_nlp = spacy.load("/home/machinaide/nlp/textcat-pipe/training/model-best")
+textcat_nlp = spacy.load(f"{config.PROJECT_URL}/nlp/textcat-pipe/training/model-best")
 
 # the mongodb textcat pipeline
-mongo_textcat_nlp = spacy.load("/home/machinaide/nlp/mongo-textcat-pipe/training/model-best")
+mongo_textcat_nlp = spacy.load(f"{config.PROJECT_URL}/nlp/mongo-textcat-pipe/training/model-best")
 
 # print("source pipes",source_nlp.pipe_names)
 nlp.add_pipe("textcat", source=textcat_nlp)

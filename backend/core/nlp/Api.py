@@ -4,7 +4,7 @@ import random
 import argparse
 import requests
 import sys
-sys.path.insert(1, '/home/machinaide/backend')
+sys.path.insert(1, f'{config.PROJECT_URL}/backend')
 from flask import Flask, jsonify, request, Response
 from flask_classful import FlaskView, route
 from flask_cors import CORS

@@ -1,6 +1,7 @@
 import datetime
 import logging
 import time
+import config
 from flask import Flask, request, Response, send_from_directory, jsonify
 from flask_cors import CORS, cross_origin
 from flask_swagger_ui import get_swaggerui_blueprint
@@ -28,9 +29,9 @@ from application.controller.InfluxController import influx
 
 
 today = datetime.date.today()
-logging.basicConfig(filename=f'/home/machinaide/project/machinaide/backend/logs/current.log', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s %(funcName)s %(module)s : %(message)s')
+logging.basicConfig(filename=f'{config.PROJECT_URL}/backend/logs/current.log', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s %(funcName)s %(module)s : %(message)s')
 
-UPLOAD_FOLDER =  "/home/machinaide/project/machinaide/influxdb/ui/assets/images"
+UPLOAD_FOLDER =  f"{config.PROJECT_URL}/influxdb/ui/assets/images"
 
 app = Flask(__name__)
 app_prefix = "/api/v1.0"

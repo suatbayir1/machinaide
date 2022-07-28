@@ -11,7 +11,7 @@ import {
 } from '@influxdata/clockface'
 import TimeRangeDropdown from 'src/shared/components/TimeRangeDropdown'
 import TabbedPageTabs from 'src/shared/tabbedPage/TabbedPageTabs'
-import {TimeRange, AppState} from 'src/types'
+import {TimeRange, AppState, AutoRefreshStatus} from 'src/types'
 import { Context } from 'src/clockface'
 import CreateModelOverlay from '../components/CreateModelOverlay'
 import GaugeChart from 'src/shared/components/GaugeChart'
@@ -22,6 +22,8 @@ import AnomalyGraphTimeRangeDropdown from 'src/health/components/AnomalyGraphTim
 import HealthAssessmentService from 'src/shared/services/HealthAssessmentService'
 import AutoMLService from 'src/shared/services/AutoMLService'
 import ModelLogGraphOverlay from 'src/health/components/ModelLogGraphOverlay';
+import TimeMachineRefreshDropdown from 'src/timeMachine/components/RefreshDropdown'
+import RefreshLogsDropdown from 'src/health/components/RefreshLogsDropdown'
 // Flux query
 import {runQuery, RunQueryResult} from 'src/shared/apis/query'
 import {fromFlux} from '@influxdata/giraffe'
@@ -101,7 +103,9 @@ interface State {
     showEnabledModels: boolean
     modelLogGraphOverlay: boolean
     selectedModel: object
-    modelsLastLogs: object
+    modelsLastLogs: object,
+    autoRefresh: {  status: AutoRefreshStatus
+                    interval: number}
 }
 
 const aggregatePeriods = ["5s", "10s", "20s", "30s", "60s"]
@@ -202,7 +206,8 @@ class MachineHealthPage extends PureComponent<Props, State>{
             showEnabledModels: false,
             modelLogGraphOverlay: false,
             selectedModel: null,
-            modelsLastLogs: {}
+            modelsLastLogs: {},
+            autoRefresh: {status: AutoRefreshStatus.Paused, interval: 10000}
         }
     }
     
@@ -232,7 +237,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
             let assetName = `${this.props.match.params.MID}.${this.props.match.params.CID}`
             const models = await HealthAssessmentService.getMLModels({"assetName": assetName})
             console.log("ml models: ", this.props.match.params.MID, this.props.match.params.CID, models)
-            let allModels = [...sampleModels, ...models]
+            let allModels = [...models] // [...sampleModels, ...models]
             let enabledModels = []
             let disabledModels = []
             allModels.map(model => {
@@ -264,7 +269,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
             const models = await HealthAssessmentService.getMLModels({"assetName": this.props.match.params.MID})
             console.log("ml models: ", this.props.match.params.MID, models)
             // this.setState({models: [...sampleModels, ...models]})
-            let allModels = [...sampleModels, ...models]
+            let allModels = [...models] // [...sampleModels, ...models]
             let enabledModels = []
             let disabledModels = []
             allModels.map(model => {
@@ -277,12 +282,18 @@ class MachineHealthPage extends PureComponent<Props, State>{
             })
             let modelsLastLogs = this.state.modelsLastLogs
             for(let model of allModels){
-                if(model["modelID"]){
+                if(model["pipelineID"]){
+                    let lastLog = await AutoMLService.getModelLastLog(model["pipelineID"])
+                    if(lastLog){
+                        modelsLastLogs[model["pipelineID"]] = lastLog
+                    }
+                }    
+                else if(model["modelID"]){
                     let lastLog = await AutoMLService.getModelLastLog(model["modelID"])
                     if(lastLog){
                         modelsLastLogs[model["modelID"]] = lastLog
                     }
-                }                
+                }               
             }
             this.setState({models: [...enabledModels, ...disabledModels], displayedModels: [...enabledModels, ...disabledModels], modelsLastLogs: modelsLastLogs}, ()=>console.log("-->", this.state))
         }
@@ -627,6 +638,39 @@ class MachineHealthPage extends PureComponent<Props, State>{
             return true
         }
         return false
+    }
+
+    onSetAutoRefresh = (selected) => {
+        console.log("set auto refresh", selected)
+        this.setState({autoRefresh: selected})
+    }
+
+    autoRefresh = () => {
+        console.log("auto refresh is working")
+    }
+
+    private handleChooseAutoRefresh = (interval: number) => {
+    
+        if (interval === 0) {
+          this.onSetAutoRefresh({
+            ...this.state.autoRefresh,
+            status: AutoRefreshStatus.Paused,
+            interval,
+          })
+          return
+        }
+    
+        this.onSetAutoRefresh({
+          ...this.state.autoRefresh,
+          interval,
+          status: AutoRefreshStatus.Active,
+        })
+      
+      console.log("autofresh changed")
+    
+      /* private executeQueries = () => {
+        this.props.onExecuteQueries()
+      } */
     }
 
     contextMenu = (modelName, enabled, modelTask, model) =>{
@@ -1057,7 +1101,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
                         >
                             <Page.Header fullWidth={false}>
                                 <Page.Title title="ML Models" />
-                                <div className="tabbed-page--header-right">
+                                <div className="tabbed-page--header-left">
                                     {/* <Input
                                         onChange={() => this.setState({ showEnabledModels: !this.state.showEnabledModels})}
                                         name="showEnabledModels"
@@ -1065,6 +1109,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
                                         checked={this.state.showEnabledModels}
                                     />
                                     <InputLabel>Show only enabled models</InputLabel> */}
+                                    {/* <TimeMachineRefreshDropdown /> */}
                                     <FlexBox
                                         alignItems={AlignItems.Center}
                                         margin={ComponentSize.Small}
@@ -1089,7 +1134,39 @@ class MachineHealthPage extends PureComponent<Props, State>{
                                         />
                                         <InputLabel>Show only enabled models</InputLabel>
                                     </FlexBox>
-                                </div>                                
+                                </div>        
+                                <div className="tabbed-page--header-right">
+                                <FlexBox
+                                        alignItems={AlignItems.Center}
+                                        margin={ComponentSize.Small}
+                                        className="view-options--checkbox"
+                                        key={uuid.v4()}
+                                    >
+                                        <Toggle
+                                            id="prefixoptional"
+                                            checked={this.state.showEnabledModels}
+                                            name={"showEnabledModels"}
+                                            type={InputToggleType.Checkbox}
+                                            onChange={() => {
+                                                if(this.state.showEnabledModels){
+                                                    this.setState({displayedModels: this.state.models, showEnabledModels: false})
+                                                }
+                                                else{
+                                                    let enabledModels = this.state.models.filter(m=>m["enabled"])
+                                                    this.setState({displayedModels: enabledModels, showEnabledModels: true})
+                                                }
+                                            }}
+                                            size={ComponentSize.ExtraSmall}
+                                        />
+                                        <InputLabel>Show only enabled models</InputLabel>
+                                    </FlexBox>
+                                    <RefreshLogsDropdown
+                                        selected={this.state.autoRefresh}
+                                        onChoose={this.handleChooseAutoRefresh}
+                                        onManualRefresh={()=>console.log("manual refresh")}
+                                        showManualRefresh={true}
+                                    />
+                                </div>                    
                             </Page.Header>
                             <ModelLogGraphOverlay
                                 modelLogGraphOverlay={this.state.modelLogGraphOverlay}
@@ -1164,16 +1241,23 @@ class MachineHealthPage extends PureComponent<Props, State>{
                                                                         hex: "#34BB55",
                                                                         id: "base",
                                                                         name: "rainforest",
-                                                                        value: 7,
-                                                                      },
+                                                                        value: 15,
+                                                                    },
                                                                     {
-                                                                      type: "text",
-                                                                      hex: "#DC4E58",
-                                                                      id: uuid.v4(),
-                                                                      name: "fire",
-                                                                      value: 0,
+                                                                        type: "text",
+                                                                        hex: "#DC4E58",
+                                                                        id: uuid.v4(),
+                                                                        name: "fire",
+                                                                        value: 0,
+                                                                    },
+                                                                    {
+                                                                        type: "text",
+                                                                        hex: "#513CC6",
+                                                                        id: uuid.v4(),
+                                                                        name: "pulsar",
+                                                                        value: -99999999999999,
                                                                     }
-                                                                  ],
+                                                                ],
                                                                 prefix: '',
                                                                 tickPrefix: '',
                                                                 suffix: ' days',

@@ -5,6 +5,7 @@ import json
 import os
 from application.helpers.Helper import return_response, token_required
 from core.logger.MongoLogger import MongoLogger
+import config
 
 general = Blueprint("general", __name__)
 
@@ -38,7 +39,7 @@ def get_reports(token):
 @token_required(roles = ["admin", "member", "editor"])
 def get_created_reports(token):
     try:
-        root_path = "/home/machinaide/influxdb/ui/assets/reports"
+        root_path = f"{config.PROJECT_URL}/influxdb/ui/assets/reports"
         reports_path = os.path.join(root_path, request.json['title'])
 
         reports = [f for f in os.listdir(reports_path) if os.path.isfile(os.path.join(reports_path, f))]

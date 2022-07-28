@@ -2,16 +2,16 @@ import spacy
 from spacy.matcher import Matcher
 import config
 
-nlp = spacy.load("/home/machinaide/nlp/ner-pipe/training/model-best")
+nlp = spacy.load(f"{config.PROJECT_URL}/nlp/ner-pipe/training/model-best")
 
 # The source pipeline with different components
 source_nlp = spacy.load("en_core_web_trf")
 
 # the textcat pipeline
-textcat_nlp = spacy.load("/home/machinaide/nlp/textcat-pipe/training/model-best")
+textcat_nlp = spacy.load(f"{config.PROJECT_URL}/nlp/textcat-pipe/training/model-best")
 
 # the mongodb textcat pipeline
-mongo_textcat_nlp = spacy.load("/home/machinaide/nlp/mongo-textcat-pipe/training/model-best")
+mongo_textcat_nlp = spacy.load(f"{config.PROJECT_URL}/nlp/mongo-textcat-pipe/training/model-best")
 
 nlp.add_pipe("textcat", source=textcat_nlp)
 

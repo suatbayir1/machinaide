@@ -11,8 +11,9 @@ from core.logger.MongoLogger import MongoLogger
 from application.classes.Validator import Validator
 from application.model.ObjectModel import ObjectModel
 from application.helpers.Helper import cursor_to_json
+import config
 
-UPLOAD_FOLDER =  "/home/machinaide/project/machinaide/influxdb/ui/assets/images"
+UPLOAD_FOLDER =  f"{config.PROJECT_URL}/influxdb/ui/assets/images"
 
 dt = Blueprint("dt", __name__)
 

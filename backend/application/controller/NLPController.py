@@ -8,8 +8,9 @@ import time
 import random
 import argparse
 import requests
+import config
 import sys
-sys.path.insert(1, '/home/machinaide/project/machinaide/backend')
+sys.path.insert(1, f'{config.PROJECT_URL}/backend')
 from core.nlp.QuestionCorrector import QuestionCorrector
 from core.nlp.MongoManager import MongoManager
 from core.nlp.Helper import Helper
@@ -18,7 +19,6 @@ from core.nlp.NLPHandler import NLPHandler
 from core.nlp.JsonToText import JsonToText
 from application.classes.SentenceSimilarityCalculator import SentenceSimilarityCalculator
 from application.classes.Validator import Validator
-import config
 
 nlpserver = Blueprint("nlp", __name__)
 
