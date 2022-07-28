@@ -2,6 +2,8 @@ import os
 
 # from mlserver.flask_app_ml.mlconstants import VAE_HPS_DIR
 
+PROJECT_URL = "/home/machinaide"
+
 mongo = dict(
     MONGO_URI = "mongodb://machinaide:erste2020@localhost:27017/",
     DATABASE = "machinaide"

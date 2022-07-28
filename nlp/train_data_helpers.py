@@ -8,6 +8,7 @@ import os
 import schedule
 import time
 import srsly
+import config
  
 mongo = MongoClient('mongodb://machinaide:erste2020@localhost:27017/')
 
@@ -25,10 +26,10 @@ def create_ner_train_data():
         train_data.append([question["question"], {"entities": entities}])
         
 
-    with open('/home/machinaide/nlp/ner-pipe/assets/ner_train_data.json', 'w') as outfile:
+    with open(f'{config.PROJECT_URL}/nlp/ner-pipe/assets/ner_train_data.json', 'w') as outfile:
         outfile.write(
             '[\n\t')
-        for text, annot in srsly.read_json('/home/machinaide/nlp/ner-pipe/assets/train_data.json'):
+        for text, annot in srsly.read_json(f'{config.PROJECT_URL}/nlp/ner-pipe/assets/train_data.json'):
             outfile.write(
             '\n\t["' + text +'", ' + json.dumps(annot) + '],')
         outfile.write('\n\t'+
@@ -54,8 +55,8 @@ def create_texcat_train_data():
         train_data.append(obj)
         
 
-    with open('/home/machinaide/nlp/textcat-pipe/assets/textcat_train_data.jsonl', 'w') as outfile:
-        for line in srsly.read_jsonl('/home/machinaide/nlp/textcat-pipe/assets/train_data.jsonl'):
+    with open(f'{config.PROJECT_URL}/nlp/textcat-pipe/assets/textcat_train_data.jsonl', 'w') as outfile:
+        for line in srsly.read_jsonl(f'{config.PROJECT_URL}/nlp/textcat-pipe/assets/train_data.jsonl'):
             outfile.write(json.dumps(line))
             outfile.write('\n')
         outfile.write('\n'.join(json.dumps(data) for data in train_data))
@@ -89,8 +90,8 @@ def create_mongo_texcat_train_data():
                 train_data.append(obj)
         
 
-    with open('/home/machinaide/nlp/mongo-textcat-pipe/assets/mongo_textcat_train_data.jsonl', 'w') as outfile:
-        for line in srsly.read_jsonl('/home/machinaide/nlp/mongo-textcat-pipe/assets/train_data.jsonl'):
+    with open(f'{config.PROJECT_URL}/nlp/mongo-textcat-pipe/assets/mongo_textcat_train_data.jsonl', 'w') as outfile:
+        for line in srsly.read_jsonl(f'/{config.PROJECT_URL}/nlp/mongo-textcat-pipe/assets/train_data.jsonl'):
             outfile.write(json.dumps(line))
             outfile.write('\n')
         outfile.write('\n'.join(json.dumps(data) for data in train_data))
@@ -100,7 +101,7 @@ def create_mongo_texcat_train_data():
     print("current dir : ", current_dir)
 
 def read_json():
-    for text, annot in srsly.read_json('/home/machinaide/nlp/assets/train_data_test.json'):
+    for text, annot in srsly.read_json(f'{config.PROJECT_URL}/nlp/assets/train_data_test.json'):
         print(text)
         print("---------------------")
         print(annot)

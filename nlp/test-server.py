@@ -20,6 +20,7 @@ import requests
 import json
 from bson.json_util import dumps
 import datetime
+import config
 
 # flask server
 app = Flask(__name__)
@@ -30,7 +31,7 @@ CORS(app,supports_credentials=True)
 mongo = MongoClient('mongodb://machinaide:erste2020@localhost:27017/')# .machinaide
 db = "machinaide"
 
-nlp = spacy.load("/home/machinaide/nlp/mongo-textcat/training/model-best")
+nlp = spacy.load(f"{config.PROJECT_URL}/nlp/mongo-textcat/training/model-best")
 
 @app.route('/findcat', methods=['GET'])
 def which_cat():

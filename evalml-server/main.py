@@ -13,6 +13,7 @@ from ml_config import (
     )
 import evalml
 import featuretools as ft
+import config
 from pymongo import MongoClient
 
 app = Flask(__name__)
@@ -92,7 +93,7 @@ def startRULRegModelTraining():
     with open(settings_dir, 'w') as fp:
         json.dump(request.json, fp)
     
-    cmd = "python3 /home/machinaide/evalml-server/rul_reg_runner_ver2.py" + " -en " + experiment_name + " -sid " + session_id 
+    cmd = F"python3 {config.PROJECT_URL}/evalml-server/rul_reg_runner_ver2.py" + " -en " + experiment_name + " -sid " + session_id 
     print(cmd)
     process = subprocess.Popen(cmd.split(), close_fds=True)
     reg_rul_process_pool[str(now)] = process

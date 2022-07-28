@@ -3,7 +3,8 @@ import time
 import random
 import argparse
 import sys
-sys.path.insert(1, '/home/machinaide/backend')
+import config
+sys.path.insert(1, f'{config.PROJECT_URL}/backend')
 from application.model.DigitalTwinModel import DigitalTwinModel
 from flask import Flask, jsonify, request, Response
 from flask_classful import FlaskView, route
