@@ -155,6 +155,55 @@ class DashboardRouter extends Component<Props, State> {
                     }
                 }
                 break;
+            case "ProductionLine":
+                xAxisCounter = 0;
+
+                for (let pl of structure[0].productionLines) {
+                    if (pl["@id"] === this.props["match"].params.id) {
+                        for (let machine of pl.machines) {
+                            let cellName = `Production Line: ${pl["name"]}, Machine: ${machine["name"]}`
+
+                            if (!existsCells.includes(cellName)) {
+                                let measurements = "";
+
+                                machine.measurements.map((m, idx) => {
+                                    measurements += `r[\"_measurement\"] == \"${m}\"`;
+                                    if (idx !== machine.measurements.length - 1) {
+                                        measurements += " or ";
+                                    }
+                                })
+
+                                measurements = machine.measurements.length > 0 ? `|> filter(fn: (r) => ${measurements})\n` : ""
+
+                                let query;
+                                if (machine.measurements.length > 0) {
+                                    query = `from(bucket: \"${structure[0].bucket}\")\n  
+                                    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  
+                                    ${measurements}
+                                    |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  
+                                    |> yield(name: \"mean\")
+                                `
+                                } else {
+                                    query = "";
+                                }
+
+                                let params = {
+                                    dashboardID,
+                                    cellName,
+                                    "measurements": machine.measurements,
+                                    "fields": [],
+                                    "xAxis": xAxisCounter % 2 === 0 ? 0 : 6,
+                                    "bucket": structure[0].bucket,
+                                    "query": query,
+                                }
+
+                                await this.createCell(params);
+                                xAxisCounter++;
+                            }
+                        }
+                    }
+                }
+                break;
             case "Machine":
                 xAxisCounter = 0;
 

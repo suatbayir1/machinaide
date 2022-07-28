@@ -214,6 +214,19 @@ class MachineHealthPage extends PureComponent<Props, State>{
         // this.setState({})
     }
 
+    findProbability = (alpha, beta, days=30) => {
+        if(alpha !== 0 || alpha !== "0"){
+            alpha = parseFloat(alpha)
+            beta = parseFloat(beta)
+            let probability = 1 - Math.E ** (-1 * (days/alpha)**beta)
+            return probability
+        }
+        else{
+            let probability = 0
+            return probability
+        }
+    }
+
     getMLModels = async () => {
         if(this.isComponent()){
             let assetName = `${this.props.match.params.MID}.${this.props.match.params.CID}`
@@ -231,13 +244,19 @@ class MachineHealthPage extends PureComponent<Props, State>{
                 }
             })
             let modelsLastLogs = this.state.modelsLastLogs
-            for(let model of allModels){
-                if(model["modelID"]){
+            for(let model of allModels){ 
+                if(model["pipelineID"]){
+                    let lastLog = await AutoMLService.getModelLastLog(model["pipelineID"])
+                    if(lastLog){
+                        modelsLastLogs[model["pipelineID"]] = lastLog
+                    }
+                }    
+                else if(model["modelID"]){
                     let lastLog = await AutoMLService.getModelLastLog(model["modelID"])
                     if(lastLog){
                         modelsLastLogs[model["modelID"]] = lastLog
                     }
-                }                
+                }            
             }
             this.setState({models: [...enabledModels, ...disabledModels], displayedModels: [...enabledModels, ...disabledModels], modelsLastLogs: modelsLastLogs})
         }
@@ -677,7 +696,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
             tickSuffix,
             decimalPlaces,
           } = this.state.gaugeProperties */
-
+        const {modelsLastLogs} = this.state
         return(
             <Page
                 titleTag="Health Assessment"
@@ -1101,7 +1120,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
                                                     <WaitingText style={{textAlign: "center"}} text="Training process is running" />
                                                 </>) }
                                                 {model["trainingDone"] && (model["task"] === "rul") && 
-                                                    (parseInt(model["lastLog"]) === 1 ? <Button
+                                                    (modelsLastLogs[model["modelID"]] ? parseInt(modelsLastLogs[model["modelID"]]["prediction"]) === 1 ? <Button
                                                         shape={ButtonShape.Default}
                                                         color={ComponentColor.Danger}
                                                         titleText=""
@@ -1120,13 +1139,22 @@ class MachineHealthPage extends PureComponent<Props, State>{
                                                         type={ButtonType.Button}
                                                         onClick={() => console.log("click action")}
                                                         style={{marginTop: "12.5%", marginBottom: "12.5%", height: "50px"}}
-                                                    />)
+                                                    /> : <Button
+                                                            shape={ButtonShape.Default}
+                                                            color={ComponentColor.Default}
+                                                            titleText=""
+                                                            icon={IconFont.Clock}
+                                                            text="No Log Found"
+                                                            type={ButtonType.Button}
+                                                            onClick={() => console.log("click action")}
+                                                            style={{marginTop: "12.5%", marginBottom: "12.5%", height: "50px"}}
+                                                        />)
                                                 } 
                                                 {model["trainingDone"] && (model["task"] === "rulreg" )&& 
                                                     <div style={{ width: 'auto', height: '150px' }}>
                                                         <SingleStat
                                                             key={uuid.v4()}
-                                                            stat={parseInt(model["lastLog"]) ? parseInt(model["lastLog"]) : 0}
+                                                            stat={modelsLastLogs[model["pipelineID"]] ? modelsLastLogs[model["pipelineID"]]["prediction"] : "-"}
                                                             style={{width: "90%", height: "90%", top: "auto", bottom: "-5px", right: "auto", left: "auto"}}
                                                             properties={{
                                                                 queries: [],
@@ -1166,7 +1194,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
                                                         <div style={{ width: 'auto', height: '150px' }}>
                                                             <GaugeChart
                                                                 key={uuid.v4()}
-                                                                value={parseFloat(model["lastLog"]) ? parseFloat(model["lastLog"]) : ""}
+                                                                value={modelsLastLogs[model["modelID"]] ? this.findProbability(modelsLastLogs[model["modelID"]]["prediction"][0], modelsLastLogs[model["modelID"]]["prediction"][1]) : ""}
                                                                 properties={this.state.gaugeProperties}
                                                                 theme={'dark'}
                                                                 style={{height: "150px", width: "auto"}}
