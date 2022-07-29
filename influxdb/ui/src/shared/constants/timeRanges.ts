@@ -99,4 +99,86 @@ export const SELECTABLE_TIME_RANGES: SelectableDurationTimeRange[] = [
   pastThirtyDaysTimeRange,
 ]
 
+export const ANOMALY_GRAPH_SELECTABLE_TIME_RANGES: SelectableDurationTimeRange[] = [
+  {
+    seconds: 300,
+    lower: 'now() - 5m',
+    upper: null,
+    label: 'Past 5m',
+    duration: '5m',
+    type: 'selectable-duration',
+    windowPeriod: 10000, // 10s
+  },
+  pastFifteenMinTimeRange,
+  pastHourTimeRange,
+  {
+    seconds: 14400,
+    lower: 'now() - 4h',
+    upper: null,
+    label: 'Past 4h',
+    duration: '4h',
+    type: 'selectable-duration',
+    windowPeriod: 60000, // 1m
+  },
+]
+
+export const MODEL_LOG_GRAPH_SELECTABLE_TIME_RANGES: SelectableDurationTimeRange[] = [
+  pastHourTimeRange,
+  {
+    seconds: 14400,
+    lower: 'now() - 4h',
+    upper: null,
+    label: 'Past 4h',
+    duration: '4h',
+    type: 'selectable-duration',
+    windowPeriod: 60000, // 1m
+  },
+  {
+    seconds: 21600,
+    lower: 'now() - 6h',
+    upper: null,
+    label: 'Past 6h',
+    duration: '6h',
+    type: 'selectable-duration',
+    windowPeriod: 60000, // 1m
+  },
+  {
+    seconds: 43200,
+    lower: 'now() - 12h',
+    upper: null,
+    label: 'Past 12h',
+    duration: '12h',
+    type: 'selectable-duration',
+    windowPeriod: 120000, // 2m
+  },
+  {
+    seconds: 86400,
+    lower: 'now() - 24h',
+    upper: null,
+    label: 'Past 24h',
+    duration: '24h',
+    type: 'selectable-duration',
+    windowPeriod: 240000, // 4m
+  },
+  {
+    seconds: 172800,
+    lower: 'now() - 2d',
+    upper: null,
+    label: 'Past 2d',
+    duration: '2d',
+    type: 'selectable-duration',
+    windowPeriod: 600000, // 10m
+  },
+  {
+    seconds: 604800,
+    lower: 'now() - 7d',
+    upper: null,
+    label: 'Past 7d',
+    duration: '7d',
+    type: 'selectable-duration',
+    windowPeriod: 1800000, // 30 min
+  },
+  pastThirtyDaysTimeRange,
+]
+
 export const DEFAULT_TIME_RANGE: TimeRange = pastHourTimeRange

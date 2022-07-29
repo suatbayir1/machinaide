@@ -4,9 +4,11 @@ import { connect, ConnectedProps } from 'react-redux'
 
 // Components
 import {
-    Form, Button, IconFont, ComponentColor, ButtonType, Grid, Input,
-    Columns, TextArea, SelectDropdown, InputType,
+    Form, Button, IconFont, ComponentColor, ButtonType, Grid, Input, FlexBox,
+    Columns, TextArea, SelectDropdown, InputType, SlideToggle, ComponentSize, InputLabel
 } from "@influxdata/clockface"
+import Autocomplete from '@material-ui/lab/Autocomplete'
+import TextField from '@material-ui/core/TextField';
 
 // Utils
 import { handleValidation } from "src/shared/helpers/FormValidator";
@@ -27,6 +29,7 @@ import {
     generalSuccessMessage,
     generalErrorMessage,
 } from 'src/shared/copy/notifications'
+import { DEFAULT_VAL_FUNCTIONS } from 'src/shared/constants/defaultValueFunctions'
 
 
 type Props = {
@@ -51,6 +54,11 @@ type State = {
     bucket: string
     fields: string[]
     field: string
+    isFillNullActive: boolean
+    defaultValue: string
+    isOperationActive: boolean
+    operation: string
+    operationValue: string
 }
 
 type ReduxProps = ConnectedProps<typeof connector>
@@ -72,6 +80,11 @@ class CreateField extends PureComponent<IProps, State> {
             bucket: "",
             fields: [],
             field: "",
+            isFillNullActive: false,
+            defaultValue: "0",
+            isOperationActive: false,
+            operation: "*",
+            operationValue: "1"
         }
     }
 
@@ -138,7 +151,8 @@ class CreateField extends PureComponent<IProps, State> {
     }
 
     private create = async (): Promise<void> => {
-        const { id, minValue, maxValue, sensor, field, displayName, measurement, description } = this.state;
+        const { id, minValue, maxValue, sensor, field, displayName, measurement, description,
+                isFillNullActive, defaultValue, isOperationActive, operation, operationValue } = this.state;
         const {
             handleDismissAddNode, refreshGraph, notify,
             refreshGeneralInfo, refreshVisualizePage
@@ -168,6 +182,11 @@ class CreateField extends PureComponent<IProps, State> {
             "measurement": measurement,
             "description": description,
             "displayName": displayName,
+            "isFillNullActive": isFillNullActive,
+            "defaultValue": defaultValue,
+            "isOperationActive": isOperationActive,
+            "operation": operation,
+            "operationValue": operationValue
         }
 
         const insertResult = await DTService.insertField(payload);
@@ -193,7 +212,8 @@ class CreateField extends PureComponent<IProps, State> {
 
     public render(): JSX.Element {
         const { onDismiss, sensorList } = this.props;
-        const { id, sensor, displayName, minValue, maxValue, description, measurements, measurement, fields, field } = this.state;
+        const { id, sensor, displayName, minValue, maxValue, description, measurements, measurement, 
+            fields, field, defaultValue, operation, operationValue, isFillNullActive, isOperationActive } = this.state;
 
         return (
             <>
@@ -289,6 +309,97 @@ class CreateField extends PureComponent<IProps, State> {
                                                 />
                                             </Form.Element>
                                         </Grid.Column>
+                                    </Grid.Row>
+                                    <Grid.Row>
+                                        <Grid.Column widthSM={Columns.Three}>
+                                            <FlexBox margin={ComponentSize.Small}>
+                                                <InputLabel>Do Operation on Data</InputLabel>
+                                                <SlideToggle
+                                                    active={isOperationActive}
+                                                    size={ComponentSize.ExtraSmall}
+                                                    onChange={() => this.setState({ isOperationActive: !this.state.isOperationActive })}
+                                                    testID="rule-card--slide-toggle"
+                                                />
+                                            </FlexBox>
+                                        </Grid.Column>        
+                                        <Grid.Column widthSM={Columns.Three}></Grid.Column>                                
+                                        <Grid.Column widthSM={Columns.Three}>
+                                            <FlexBox margin={ComponentSize.Small}>
+                                                <InputLabel>Fill Nan Values</InputLabel>
+                                                <SlideToggle
+                                                    active={isFillNullActive}
+                                                    size={ComponentSize.ExtraSmall}
+                                                    onChange={() => this.setState({ isFillNullActive: !this.state.isFillNullActive })}
+                                                    testID="rule-card--slide-toggle"
+                                                />
+                                            </FlexBox>
+                                            {/* <Form.Element label="Fill Nan Values">
+                                                
+                                            </Form.Element> */}
+                                        </Grid.Column>
+                                        <Grid.Column widthSM={Columns.Three}></Grid.Column>    
+                                    </Grid.Row>
+                                    <Grid.Row>
+                                        {isOperationActive ? <>
+                                            <Grid.Column widthSM={Columns.Three}>
+                                                <Form.Element label="Operation">
+                                                    <SelectDropdown
+                                                        options={["+", "-", "/", "*"]}
+                                                        selectedOption={operation}
+                                                        onSelect={(e) => this.setState({ operation: e })}
+                                                    />
+                                                </Form.Element>
+                                            </Grid.Column>
+                                            <Grid.Column widthSM={Columns.Three}>
+                                                <Form.Element label="Operation Value">
+                                                    <Input
+                                                        name="operationValue"
+                                                        onChange={this.handleChangeInput}
+                                                        value={operationValue}
+                                                        type={InputType.Text}
+                                                    />
+                                                </Form.Element>
+                                            </Grid.Column>
+                                        </> : <Grid.Column widthSM={Columns.Six}></Grid.Column>    }
+                                        {isFillNullActive ? <Grid.Column widthSM={Columns.Three}>
+                                            <Form.Element label="Default Value">
+                                                {/* <SelectDropdown
+                                                    options={[DEFAULT_VAL_FUNCTIONS.LAST, DEFAULT_VAL_FUNCTIONS.AVG, DEFAULT_VAL_FUNCTIONS.MAX, DEFAULT_VAL_FUNCTIONS.MIN,
+                                                        DEFAULT_VAL_FUNCTIONS.DAVG, DEFAULT_VAL_FUNCTIONS.DMAX, DEFAULT_VAL_FUNCTIONS.DMIN]}
+                                                    selectedOption={defaultValue}
+                                                    onSelect={(e) => this.setState({ defaultValue: e })}
+                                                /> */}
+                                                <Autocomplete
+                                                    id="default-value"
+                                                    freeSolo
+                                                    //classes={this.classes}
+                                                    disableClearable
+                                                    value={defaultValue}
+                                                    // inputValue={defaultValue}
+                                                    options={[DEFAULT_VAL_FUNCTIONS.LAST, DEFAULT_VAL_FUNCTIONS.AVG, DEFAULT_VAL_FUNCTIONS.MAX, DEFAULT_VAL_FUNCTIONS.MIN,
+                                                        DEFAULT_VAL_FUNCTIONS.DAVG, DEFAULT_VAL_FUNCTIONS.DMAX, DEFAULT_VAL_FUNCTIONS.DMIN]}
+                                                    //renderOption={(props, option) => <li {...props}>{option}</li>}
+                                                    renderInput={(params) => {
+                                                        console.log(params)
+                                                        return (
+                                                            <div ref={params.InputProps.ref}>
+                                                                <Input
+                                                                    {...params.inputProps}
+                                                                    autoFocus
+                                                                />
+                                                            </div>                                                        
+                                                        )}}
+                                                    onChange={(e, v) => { console.log(e, v); this.setState({ defaultValue: v }) }}
+                                                    style={{ backgroundColor: '#383846', width: '200px', borderRadius: '5px' }}
+                                                    size='small'
+                                                />
+                                                
+                                                        {/* <TextField 
+                                                            {...params} margin="normal" variant="outlined" 
+                                                            onChange={({ target }) => this.setState({ defaultValue: target.value })} 
+                                                        /> */}
+                                            </Form.Element>
+                                        </Grid.Column> : <Grid.Column widthSM={Columns.Six}></Grid.Column>    }
                                     </Grid.Row>
                                     <Grid.Row>
                                         <Grid.Column widthSM={Columns.Twelve}>

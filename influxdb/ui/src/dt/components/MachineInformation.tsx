@@ -6,7 +6,7 @@ import {
     Form, ComponentSize, Grid, Columns, Label, InfluxColors,
     DapperScrollbars, List, Gradients, ConfirmationButton,
     IconFont, ComponentColor, Appearance, Button, ButtonType,
-    MultiSelectDropdown, Input, TextArea
+    MultiSelectDropdown, Input, TextArea, ComponentStatus
 } from '@influxdata/clockface'
 import DangerConfirmationOverlay from "src/shared/overlays/DangerConfirmationOverlay";
 
@@ -69,7 +69,6 @@ class MachineInformation extends PureComponent<Props, State> {
 
     private setForm = (): void => {
         const { selectedGraphNode } = this.props;
-        console.log("selectedGraphNode", selectedGraphNode);
 
         this.setState({
             displayName: selectedGraphNode["displayName"],
@@ -263,11 +262,18 @@ class MachineInformation extends PureComponent<Props, State> {
                                     errorMessage={handleValidation(displayName)}
                                     required={true}
                                 >
-                                    <Input
+                                    {/* <Input
                                         name="displayName"
                                         placeholder="Display Name.."
                                         onChange={this.handleChangeInput}
                                         value={displayName}
+                                    /> */}
+                                    <Label
+                                        size={ComponentSize.Small}
+                                        name={displayName}
+                                        description="Display Name"
+                                        color={InfluxColors.Ocean}
+                                        id={displayName}
                                     />
                                 </Form.Element>
                             </Grid.Column>
@@ -282,7 +288,7 @@ class MachineInformation extends PureComponent<Props, State> {
                                         name="description"
                                         value={description}
                                         placeholder="Description.."
-                                        onChange={this.handleChangeInput}
+                                        status={ComponentStatus.Disabled}
                                         rows={4}
                                     />
                                 </Form.Element>
@@ -294,12 +300,42 @@ class MachineInformation extends PureComponent<Props, State> {
                                 widthLG={Columns.Twelve}
                             >
                                 <Form.Element label="Measurements">
-                                    <MultiSelectDropdown
+                                    {/* <MultiSelectDropdown
                                         emptyText={"Select measurement"}
                                         options={measurements}
                                         selectedOptions={selectedMeasurements}
                                         onSelect={this.handleChangeMeasurements}
-                                    />
+                                        buttonStatus={ComponentStatus.Disabled}
+                                    /> */}
+                                    {
+                                        selectedMeasurements.length > 0 ?
+                                            <DapperScrollbars
+                                                autoHide={false}
+                                                autoSizeHeight={true}
+                                                style={{ maxHeight: '100px' }}
+                                                className="data-loading--scroll-content"
+                                            >
+                                                {
+                                                    selectedMeasurements.map((measurement, idx) => {
+                                                        return (
+                                                            <List.Item
+                                                                key={idx}
+                                                                value={measurement}
+                                                                title="Measurements"
+                                                                gradient={Gradients.GundamPilot}
+                                                                wrapText={true}
+                                                            >
+                                                                <List.Indicator type="dot" />
+                                                                <div className="selectors--item-value selectors--item__measurement">
+                                                                    {measurement}
+                                                                </div>
+                                                            </List.Item>
+                                                        )
+                                                    })
+                                                }
+                                            </DapperScrollbars>
+                                            : <h6>No measurement is selected</h6>
+                                    }
                                 </Form.Element>
                             </Grid.Column>
                             <Grid.Column widthXS={Columns.Twelve}>
@@ -336,7 +372,7 @@ class MachineInformation extends PureComponent<Props, State> {
                                 </Form.Element>
                             </Grid.Column>
                         </Grid.Row>
-                        <Grid.Row>
+                        {/* <Grid.Row>
                             <div className="dt-information-buttons">
                                 <Button
                                     text="Summary"
@@ -390,7 +426,7 @@ class MachineInformation extends PureComponent<Props, State> {
                                     />
                                 }
                             </div>
-                        </Grid.Row>
+                        </Grid.Row> */}
                     </Grid>
                 </Form>
             </>

@@ -11,8 +11,9 @@ from core.logger.MongoLogger import MongoLogger
 from application.classes.Validator import Validator
 from application.model.ObjectModel import ObjectModel
 from application.helpers.Helper import cursor_to_json
+import config
 
-UPLOAD_FOLDER =  "/home/machinaide/influxdb/ui/assets/images"
+UPLOAD_FOLDER =  f"{config.PROJECT_URL}/influxdb/ui/assets/images"
 
 dt = Blueprint("dt", __name__)
 
@@ -1093,7 +1094,7 @@ def insertField(token):
     try:
         message, confirm = validator.check_request_params(
             request.json, 
-            ["@id", "name", "parent", "displayName", "type", "minValue", "maxValue"]
+            ["@id", "name", "parent", "displayName", "type", "minValue", "maxValue", "isFillNullActive", "defaultValue", "isOperationActive", "operation", "operationValue"]
         )
 
         if not confirm:
@@ -1135,7 +1136,7 @@ def updateField(token):
     try:
         message, confirm = validator.check_request_params(
             request.json, 
-            ["id", "dataSource", "minValue", "maxValue", "measurement", "displayName"]
+            ["id", "dataSource", "minValue", "maxValue", "measurement", "displayName", "isFillNullActive", "defaultValue", "isOperationActive", "operation", "operationValue"]
         )
 
         if not confirm:

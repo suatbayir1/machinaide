@@ -206,6 +206,7 @@ export const getSessions = async () => {
         //isWithCredentials: true
     })
 
+    console.log(response)
     return response.data
 }
 
@@ -246,6 +247,9 @@ export const getCellCount = async (sessionID) => {
         method: 'GET'
     })
 
+
+    console.log(response)
+    console.log(response.data)
     return response.data
 }
 

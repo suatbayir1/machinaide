@@ -39,7 +39,6 @@ class CreatedReportsListOverlay extends PureComponent<Props, State> {
     }
 
     redirectReportView = (report) => {
-        console.log(report);
         const { selectedReport, history } = this.props;
         history.push(`report-view/${selectedReport?.["_id"]?.["$oid"]}`);
     }

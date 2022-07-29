@@ -147,6 +147,12 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
             return;
         }
 
+        let startTimeDate = this.state.startTime.length ? new Date(this.state.startTime) : null
+        let startTimeUtcString = startTimeDate ? startTimeDate.toISOString() : ""
+
+        let endTimeDate = this.state.endTime.length ? new Date(this.state.endTime) : null
+        let endTimeUtcString = endTimeDate ? endTimeDate.toISOString() : ""
+
         const payload = {
             "sourceName": this.state.selectedPart["text"],
             "sid": this.state.selectedPart["id"],
@@ -154,8 +160,8 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
             "factoryID": this.props.factoryID,
             "cost": this.state.costToFix,
             "description": this.state.description,
-            "startTime": this.state.startTime,
-            "endTime": this.state.endTime,
+            "startTime": startTimeUtcString,
+            "endTime": endTimeUtcString,
         }
 
 
@@ -205,6 +211,17 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
     closeOverlay = () => {
         this.props.handleDismissAddUpdateFailure();
         this.clearForm();
+    }
+
+    getTimeInputFormat = (date) => {
+        if(new Date(date)){
+            let dateForm = new Date(date).toLocaleString()
+            let parts = dateForm.split(" ")
+            let firstPart = parts[0].split(".").reverse().join("-")
+            let secondPart = parts[1]
+            return `${firstPart}T${secondPart}`
+        }
+        return ""        
     }
 
     render() {
@@ -350,7 +367,7 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                                                     <input
                                                         name='startTime'
                                                         type='datetime-local'
-                                                        value={this.state.startTime}
+                                                        value={this.getTimeInputFormat(this.state.startTime)}
                                                         onChange={this.handleChangeFailureTime}
                                                         style={{ background: '#383846', color: '#ffffff' }}
                                                         disabled={
@@ -372,7 +389,7 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
                                                     <input
                                                         name='endTime'
                                                         type='datetime-local'
-                                                        value={this.state.endTime}
+                                                        value={this.getTimeInputFormat(this.state.endTime)}
                                                         onChange={this.handleChangeFailureTime}
                                                         style={{ background: '#383846', color: '#ffffff' }}
                                                         disabled={

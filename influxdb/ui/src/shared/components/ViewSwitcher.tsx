@@ -1,6 +1,6 @@
 // Libraries
-import React, {FunctionComponent} from 'react'
-import {Plot, FromFluxResult} from '@influxdata/giraffe'
+import React, { FunctionComponent } from 'react'
+import { Plot, FromFluxResult } from '@influxdata/giraffe'
 
 // Components
 import GaugeChart from 'src/shared/components/GaugeChart'
@@ -46,13 +46,14 @@ const ViewSwitcher: FunctionComponent<Props> = ({
   properties,
   timeRange,
   files,
-  giraffeResult: {table, fluxGroupKeyUnion},
+  giraffeResult: { table, fluxGroupKeyUnion },
   timeZone,
   statuses,
   checkType = null,
   checkThresholds = [],
   theme,
 }) => {
+  console.log(properties.type);
   switch (properties.type) {
     case 'single-stat':
       return (

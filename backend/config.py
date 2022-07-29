@@ -2,6 +2,8 @@ import os
 
 # from mlserver.flask_app_ml.mlconstants import VAE_HPS_DIR
 
+PROJECT_URL = "/home/machinaide"
+
 mongo = dict(
     MONGO_URI = "mongodb://machinaide:erste2020@localhost:27017/",
     DATABASE = "machinaide"
@@ -18,6 +20,11 @@ INFLUXDB_CLIENT = dict(
     URL = "httpss://vmi515134.contaboserver.net:8080",
     TOKEN = "-Y8yuCS19k6ZD0FLiVvpY-zcEK4VhbBe6HC7WPKR7Z5X2bkm-Ag2iMJUSDSBOugpG6klF2XEddhCMkHRuJPbsQ==",
     ORG = "machinaide"
+)
+
+LDAP = dict(
+    URL = "ldap://localhost:10389",
+    DC = "dc=example,dc=com"
 )
 
 url = dict(
@@ -43,49 +50,33 @@ max_epochs = 5
 max_trials = 10
 executions_per_trial = 1
 
-flaskserver = "vmi515134.contaboserver.net/api/v1.0/metadata" # "flaskserver"
-flask_port = 9632
+flaskserver = "vmi474601.contaboserver.net" # "flaskserver"
+flask_port = "/api/v1.0/metadata"
+health_port = "/api/v1.0/health"
 influx_port = 8086
 bootstrap_server = 'localhost:9094'
 
 
-# METAURL = "https://{}:{}/addModelMeta".format(flaskserver, flask_port)
-# CELLURL = "https://{}:{}/postModelData".format(flaskserver, flask_port)
-# BASICURL = "https://{}:{}/postBasicModel".format(flaskserver, flask_port)
-# PUTBASICURL = "https://{}:{}/updateBasicModel/".format(flaskserver, flask_port)
-# UPDATECELLURL = "https://{}:{}/updateModelData".format(flaskserver, flask_port)
-# AUTOML_POST_TRIAL_URL = "https://{}:{}/postTrial".format(flaskserver, flask_port)
-# AUTOML_POST_EXPERIMENT_URL = "https://{}:{}/postExperiment".format(flaskserver, flask_port)
-# AUTOML_UPDATE_EXPERIMENT_URL = "https://{}:{}/updateExperiment".format(flaskserver, flask_port)
-# AUTOML_CHANGE_STATUS_URL = "https://{}:{}/changeStatus".format(flaskserver, flask_port)
-# UPDATEROWURL ='https://{}:{}/updateBasicRow'.format(flaskserver, flask_port)
-# POSTTRAININGURL = "https://{}:{}/getPostTrainingData/".format(flaskserver, flask_port)
-# POSTTRAININGINSERTURL= "https://{}:{}/insertPostTrainingData".format(flaskserver, flask_port)
-# GETFAILURESURL = "https://{}:{}/returnFailures/".format(flaskserver, flask_port)
-# GETSENSORFROMMAPPING = "https://{}:{}/getSensorFromMapping/".format(flaskserver, flask_port)
-# GETBASICMODEL = 'https://{}:{}/getBasicModel/'.format(flaskserver, flask_port)
-# UPDATEBASICROW = 'https://{}:{}/updateBasicRow'.format(flaskserver, flask_port)
-# ANOMALYURL = 'https://{}:{}/anomaly'.format(flaskserver, flask_port)
-# celldataurl = "https://{}:{}/postCellData".format(flaskserver, flask_port)
-
-METAURL = "https://{}/addModelMeta".format(flaskserver)
-CELLURL = "https://{}/postModelData".format(flaskserver)
-BASICURL = "https://{}/postBasicModel".format(flaskserver)
-PUTBASICURL = "https://{}/updateBasicModel/".format(flaskserver)
-UPDATECELLURL = "https://{}/updateModelData".format(flaskserver)
-AUTOML_POST_TRIAL_URL = "https://{}/postTrial".format(flaskserver)
-AUTOML_POST_EXPERIMENT_URL = "https://{}/postExperiment".format(flaskserver)
-AUTOML_UPDATE_EXPERIMENT_URL = "https://{}/updateExperiment".format(flaskserver)
-AUTOML_CHANGE_STATUS_URL = "https://{}/changeStatus".format(flaskserver)
-UPDATEROWURL ='https://{}/updateBasicRow'.format(flaskserver)
-POSTTRAININGURL = "https://{}/getPostTrainingData/".format(flaskserver)
-POSTTRAININGINSERTURL= "https://{}/insertPostTrainingData".format(flaskserver)
-GETFAILURESURL = "https://{}/returnFailures/".format(flaskserver)
-GETSENSORFROMMAPPING = "https://{}/getSensorFromMapping/".format(flaskserver)
-GETBASICMODEL = 'https://{}/getBasicModel/'.format(flaskserver)
-UPDATEBASICROW = 'https://{}/updateBasicRow'.format(flaskserver)
-ANOMALYURL = 'https://{}/anomaly'.format(flaskserver)
-celldataurl = "https://{}/postCellData".format(flaskserver)
+METAURL = "http://{}:{}/addModelMeta".format(flaskserver, flask_port)
+CELLURL = "https://{}:{}/postModelData".format(flaskserver, flask_port)
+BASICURL = "http://{}:{}/postBasicModel".format(flaskserver, flask_port)
+PUTBASICURL = "http://{}:{}/updateBasicModel/".format(flaskserver, flask_port)
+UPDATECELLURL = "http://{}:{}/updateModelData".format(flaskserver, flask_port)
+AUTOML_POST_TRIAL_URL = "http://{}:{}/postTrial".format(flaskserver, flask_port)
+AUTOML_POST_EXPERIMENT_URL = "http://{}:{}/postExperiment".format(flaskserver, flask_port)
+AUTOML_UPDATE_EXPERIMENT_URL = "http://{}:{}/updateExperiment".format(flaskserver, flask_port)
+TESTINFERENCEURL= "http://{}:{}/testInference".format(flaskserver, flask_port)
+AUTOML_CHANGE_STATUS_URL = "http://{}:{}/changeStatus".format(flaskserver, flask_port)
+UPDATEROWURL ='http://{}:{}/updateBasicRow'.format(flaskserver, flask_port)
+POSTTRAININGURL = "http://{}:{}/getPostTrainingData/".format(flaskserver, flask_port)
+POSTTRAININGINSERTURL= "http://{}:{}/insertPostTrainingData".format(flaskserver, flask_port)
+GETFAILURESURL = "http://{}:{}/returnFailures/".format(flaskserver, flask_port)
+GETSENSORFROMMAPPING = "http://{}:{}/getSensorFromMapping/".format(flaskserver, flask_port)
+POSTREALANOMALYURL= "http://{}:{}/addAnomalyToMachine/".format(flaskserver, health_port)
+GETBASICMODEL = 'http://{}:{}/getBasicModel/'.format(flaskserver, flask_port)
+UPDATEBASICROW = 'http://{}:{}/updateBasicRow'.format(flaskserver, flask_port)
+ANOMALYURL = 'http://{}:{}/anomaly'.format(flaskserver, flask_port)
+celldataurl = "http://{}:{}/postCellData".format(flaskserver, flask_port)
 
 
 models_path = os.getcwd() + "/mlhelpers/Models/"
@@ -102,7 +93,6 @@ ADHPSDIR = os.getcwd() + "/mlhelpers/ADSettings/hps/"
 ADSENSORDIR = os.getcwd() + "/mlhelpers/ADSettings/sensors/"
 REPORTDIR = os.getcwd() + "/alerthelpers/printFiles/"
 MLSESSIONDIR = os.getcwd() + "/mlhelpers/SessionSettings/"
-
 
 TICK_SETTINGS = {
   "LAST": "last value",

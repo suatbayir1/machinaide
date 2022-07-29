@@ -5,7 +5,7 @@ import React, { PureComponent } from "react";
 import {
     Form, ComponentSize, Grid, Columns, Label, InfluxColors,
     DapperScrollbars, List, Gradients, ConfirmationButton,
-    IconFont, ComponentColor, Appearance, TextArea, Input,
+    IconFont, ComponentColor, Appearance, TextArea, Input, ComponentStatus
 } from '@influxdata/clockface'
 import DangerConfirmationOverlay from "src/shared/overlays/DangerConfirmationOverlay";
 
@@ -176,11 +176,18 @@ class ProductionLineInformation extends PureComponent<Props, State> {
                                     errorMessage={handleValidation(displayName)}
                                     required={true}
                                 >
-                                    <Input
+                                    {/* <Input
                                         name="displayName"
                                         placeholder="Display Name.."
                                         onChange={this.handleChangeInput}
                                         value={displayName}
+                                    /> */}
+                                    <Label
+                                        size={ComponentSize.Small}
+                                        name={displayName}
+                                        description="Production Line Name"
+                                        color={InfluxColors.Ocean}
+                                        id={displayName}
                                     />
                                 </Form.Element>
                             </Grid.Column>
@@ -195,7 +202,7 @@ class ProductionLineInformation extends PureComponent<Props, State> {
                                         name="description"
                                         value={description}
                                         placeholder="Description.."
-                                        onChange={this.handleChangeInput}
+                                        status={ComponentStatus.Disabled}
                                         rows={4}
                                     />
                                 </Form.Element>
@@ -236,7 +243,7 @@ class ProductionLineInformation extends PureComponent<Props, State> {
                                 </Form.Element>
                             </Grid.Column>
                         </Grid.Row>
-                        <Grid.Row>
+                        {/* <Grid.Row>
                             <div className="dt-information-buttons">
                                 {
                                     ["admin"].includes(localStorage.getItem("userRole")) &&
@@ -272,7 +279,7 @@ class ProductionLineInformation extends PureComponent<Props, State> {
                                     />
                                 }
                             </div>
-                        </Grid.Row>
+                        </Grid.Row> */}
                     </Grid>
                 </Form>
             </>

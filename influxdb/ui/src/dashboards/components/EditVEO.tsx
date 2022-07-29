@@ -1,36 +1,36 @@
 // Libraries
-import React, {FunctionComponent, useEffect} from 'react'
-import {withRouter, RouteComponentProps} from 'react-router-dom'
-import {connect, ConnectedProps, useDispatch} from 'react-redux'
-import {get} from 'lodash'
+import React, { FunctionComponent, useEffect } from 'react'
+import { withRouter, RouteComponentProps } from 'react-router-dom'
+import { connect, ConnectedProps, useDispatch } from 'react-redux'
+import { get } from 'lodash'
 
 // Components
-import {Overlay, SpinnerContainer, TechnoSpinner} from '@influxdata/clockface'
+import { Overlay, SpinnerContainer, TechnoSpinner } from '@influxdata/clockface'
 import TimeMachine from 'src/timeMachine/components/TimeMachine'
 import VEOHeader from 'src/dashboards/components/VEOHeader'
 
 // Actions
-import {disableUpdatedTimeRangeInVEO} from 'src/shared/actions/app'
-import {setName} from 'src/timeMachine/actions'
-import {saveVEOView} from 'src/dashboards/actions/thunks'
-import {getViewAndResultsForVEO} from 'src/views/actions/thunks'
+import { disableUpdatedTimeRangeInVEO } from 'src/shared/actions/app'
+import { setName } from 'src/timeMachine/actions'
+import { saveVEOView } from 'src/dashboards/actions/thunks'
+import { getViewAndResultsForVEO } from 'src/views/actions/thunks'
 
 // Utils
-import {getActiveTimeMachine} from 'src/timeMachine/selectors'
+import { getActiveTimeMachine } from 'src/timeMachine/selectors'
 
 // Types
-import {AppState, RemoteDataState} from 'src/types'
+import { AppState, RemoteDataState } from 'src/types'
 
 type ReduxProps = ConnectedProps<typeof connector>
 type Props = ReduxProps &
-  RouteComponentProps<{orgID: string; cellID: string; dashboardID: string}>
+  RouteComponentProps<{ orgID: string; cellID: string; dashboardID: string }>
 
 const EditViewVEO: FunctionComponent<Props> = ({
   activeTimeMachineID,
   onSaveView,
   onSetName,
   match: {
-    params: {orgID, cellID, dashboardID},
+    params: { orgID, cellID, dashboardID },
   },
   history,
   view,
@@ -52,7 +52,7 @@ const EditViewVEO: FunctionComponent<Props> = ({
     try {
       onSaveView(dashboardID)
       handleClose()
-    } catch (e) {}
+    } catch (e) { }
   }
 
   const viewMatchesRoute = get(view, 'id', null) === cellID
@@ -86,10 +86,10 @@ const EditViewVEO: FunctionComponent<Props> = ({
 }
 
 const mstp = (state: AppState) => {
-  const {activeTimeMachineID} = state.timeMachines
-  const {view} = getActiveTimeMachine(state)
+  const { activeTimeMachineID } = state.timeMachines
+  const { view } = getActiveTimeMachine(state)
 
-  return {view, activeTimeMachineID}
+  return { view, activeTimeMachineID }
 }
 
 const mdtp = {

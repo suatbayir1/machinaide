@@ -1,3 +1,4 @@
+import subprocess
 import time
 import datetime
 import requests
@@ -34,6 +35,7 @@ from config import (
     PUTBASICURL,
     MLSESSIONDIR,
     MODELDIR,
+    # MLSESSIONDIR,
     POSTTRAININGINSERTURL,
     VAEHPSDIR,
     VAESENSORDIR,
@@ -210,6 +212,7 @@ class MLSession(Process):
                 "Parameters": params,
                 "username": self.creator,
             }
+        print(CELLURL)
         requests.post(url=CELLURL, json=pkg)
         print(CELLURL)
 

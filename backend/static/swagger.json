@@ -923,13 +923,78 @@
                             },
                             "machineId": {
                                 "type": "string",
-                                "example": "Press030",
+                                "example": "Press031",
                                 "description": "ID of the desired machine."
                             },
                             "componentId": {
                                 "type": "string",
                                 "example": "dengeleme",
                                 "description": "ID of the desired component."
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operation successful"
+                    }
+                }
+            }
+        },
+        "/factory/getFields": {
+            "post": {
+                "tags": [
+                    "Factory"
+                ],
+                "summary": "This method returns a list of fields for a sensor and some information about each field.",
+                "description": "This method returns a list of fields for a component and some information about each field.",
+                "operationId": "getFields",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "token",
+                        "description": "Tokens are required to use this method. You can get tokens using the authentication login method.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "description": "",
+                        "required": true,
+                        "properties": {
+                            "factoryId": {
+                                "type": "string",
+                                "example": "Ermetal",
+                                "description": "ID of the desired factory."
+                            },
+                            "plId": {
+                                "type": "string",
+                                "example": "1600T_Press_Line",
+                                "description": "ID of the desired production line"
+                            },
+                            "machineId": {
+                                "type": "string",
+                                "example": "Press031",
+                                "description": "ID of the desired machine."
+                            },
+                            "componentId": {
+                                "type": "string",
+                                "example": "dengeleme",
+                                "description": "ID of the desired component."
+                            },
+                            "sensorId": {
+                                "type": "string",
+                                "example": "presAnaHavaAkis",
+                                "description": "ID of the desired sensor."
                             }
                         }
                     }

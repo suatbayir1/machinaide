@@ -5,6 +5,8 @@ import json
 from application.helpers.Helper import return_response, token_required
 from core.logger.MongoLogger import MongoLogger
 from bson import ObjectId
+from bson.json_util import dumps
+import requests
 
 failure = Blueprint("failure", __name__)
 
@@ -18,6 +20,38 @@ def get_all_failures(token):
     message = "get_all_failures"
     logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
     return return_response(data = result, success = True, message = message), 200
+
+@failure.route("/getFailures", methods = ["POST"])
+@token_required(roles = ["admin", "member", "editor"])
+def get_failures(token):
+    source_name = request.json["sourceName"]
+    result = model.get_failures({"sourceName": source_name})
+    message = "get_failures"
+    logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+    # return dumps({"sourceName": source_name, "token": token})
+    # return dumps(result), 200
+    return return_response(data = result, success = True, message = message), 200
+
+@failure.route("/getTokenTest", methods = ["POST"])
+@token_required(roles = ["admin", "member", "editor"])
+def get_token_test(token):
+    message = "token test"
+    print(request.json)
+    print("token:")
+    print(token)
+    logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+    headers = {
+        'token': request.json["token"],
+        'Content-Type': 'application/json'
+    }
+    res = requests.post(url="https://vmi474601.contaboserver.net/api/v1.0/failure/getFailures", json={"sourceName": "Press031"}, headers=headers)
+    print(res)
+    # return dumps({"sourceName": source_name, "token": token})
+    return dumps({"msg": "token test", "token": token}), 200
+
+@failure.route("/testFailures/<source_name>", methods = ["GET"])
+def test_failures(source_name):
+    return dumps({"sourceName": source_name})
 
 @failure.route("/addFailure", methods = ["POST"])
 @token_required(roles = ["admin", "editor"])

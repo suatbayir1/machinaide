@@ -829,6 +829,8 @@ class FailureTable extends PureComponent<Props, State> {
                                                         {
                                                             this.state.filteredData.map(row => {
                                                                 let recordId = row["_id"]["$oid"];
+                                                                let startTimeDate = new Date(row["startTime"])
+                                                                let endTimeDate = new Date(row["endTime"])
                                                                 return (
                                                                     <tr
                                                                         key={recordId}
@@ -842,8 +844,8 @@ class FailureTable extends PureComponent<Props, State> {
                                                                         </td>
                                                                         <td>{row["sourceName"]}</td>
                                                                         {/* <td>{row["severity"]}</td> */}
-                                                                        <td>{row["startTime"]}</td>
-                                                                        <td>{row["endTime"]}</td>
+                                                                        <td>{(startTimeDate instanceof Date && !isNaN(startTimeDate.valueOf())) ? startTimeDate.toLocaleString() : ""}</td>
+                                                                        <td>{(endTimeDate instanceof Date && !isNaN(endTimeDate.valueOf())) ? endTimeDate.toLocaleString() : ""}</td>
                                                                         <td>
                                                                             <FlexBox margin={ComponentSize.Medium}>
                                                                                 {

@@ -1,5 +1,5 @@
 export const handleValidation = (value: string): string | null => {
-    if (value.trim() === '') {
+    if (value ? value.trim() === '' : true) {
         return 'This field cannot be empty'
     }
 

@@ -1,5 +1,16 @@
 {
     "python.analysis.extraPaths": [
-        "./backend/application/helpers/mlhelpers"
+        "./backend/application/helpers/mlhelpers",
+        "./evalml-server",
+        "./backend/mlhelpers/automl",
+        "./backend/mlhelpers/automl",
+        "./backend/mlhelpers/automl",
+        "./backend/mlhelpers/automl",
+        "./backend/mlhelpers/automl",
+        "./backend/mlhelpers/automl",
+        "./backend/mlhelpers/automl",
+        "./evalml-server",
+        "./evalml-server",
+        "./model-runner"
     ]
 }

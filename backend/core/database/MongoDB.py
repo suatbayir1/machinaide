@@ -32,6 +32,9 @@ class MongoDB():
     
     def update_one(self, collection, data, filter = {}, upsert = True):
         return self.db[collection].update_one(filter, data, upsert)
+    
+    def update_one_feedback(self, collection, data, filter = {}, array_filter={}):
+        return self.db[collection].update_one(filter, data, array_filters=array_filter)
 
     def update_many(self, collection, data, filter = {}, upsert = True):
         return self.db[collection].update_many(filter, data, upsert)

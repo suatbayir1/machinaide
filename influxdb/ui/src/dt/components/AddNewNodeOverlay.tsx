@@ -96,9 +96,6 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
         const { activeTab, objectList } = this.state;
         const { visibleAddNodeOverlay, handleDismissAddNode, generalInfo } = this.props;
 
-        console.log("generalInfo", generalInfo);
-
-
         const tabs: TabbedPageTab[] = [
             {
                 text: 'Factory',

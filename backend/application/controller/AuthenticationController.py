@@ -50,6 +50,7 @@ def loginWithLDAP():
     password = request.json["password"]
 
     try:
+<<<<<<< HEAD
         print("bon")
         con = ldap.initialize('ldap://161.97.67.73:10389', bytes_mode=False)
         print("on")
@@ -58,6 +59,14 @@ def loginWithLDAP():
 
         result = con.search_s(f'dc=example,dc=com', ldap.SCOPE_SUBTREE, f"(uid={username})")   
         print(result)
+=======
+        con = ldap.initialize(config.LDAP["URL"], bytes_mode=False)
+        con.protocol_version = ldap.VERSION3
+        con.set_option(ldap.OPT_REFERRALS, 0)
+
+        result = con.search_s(config.LDAP["DC"], ldap.SCOPE_SUBTREE, f"(uid={username})")   
+
+>>>>>>> 4ac7e6d2d37727ba8da130df8459ad2674d005d2
         if not result:
             raise Exception("User not found")
 

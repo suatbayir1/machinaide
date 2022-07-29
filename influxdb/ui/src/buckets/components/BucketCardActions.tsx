@@ -47,6 +47,7 @@ const BucketCardActions: FC<Props> = ({
   onSetDataLoadersBucket,
   onSetDataLoadersType,
 }) => {
+  console.log("bucket: ",history)
   if (bucketType === 'system') {
     return null
   }

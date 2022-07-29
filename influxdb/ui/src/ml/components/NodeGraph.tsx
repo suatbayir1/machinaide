@@ -6,7 +6,11 @@ import {
     Panel
 } from '@influxdata/clockface'
 
-class NodeGraph extends React.Component {
+interface Props{
+    elements: any[]
+}
+
+class NodeGraph extends React.Component<Props> {
     render() {
         return (
             <Panel style={{ height: 550, color: "black" }}>

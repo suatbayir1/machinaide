@@ -7,7 +7,7 @@ import numpy as np
 import requests
 from scipy import stats
 from tensorflow.keras import backend as K
-from config import celldataurl, ANOMALYURL
+from config import celldataurl, ANOMALYURL, INFLUXDB_CLIENT
 from influxdb_client import InfluxDBClient as idbc
 
 
@@ -494,10 +494,9 @@ class Influx2QueryHelper:
     def influxdb(self):
         if self._influxdb is None:
             org = "machinaide"
-            token = "7YUADsCG_ZIY03eGRhFi1uOEuNCNdLtzQm2OsBCxzGsySPnInlemOL2lF-hhOY_HbylLxpVF0Xif6-6IrzvBZQ=="
-            url = "https://" + self.host + ":" + self.port
-            print(url)
-            self._influxdb = idbc(url=url, token=token, org=org)
+            token = "-Y8yuCS19k6ZD0FLiVvpY-zcEK4VhbBe6HC7WPKR7Z5X2bkm-Ag2iMJUSDSBOugpG6klF2XEddhCMkHRuJPbsQ=="
+            print(INFLUXDB_CLIENT)
+            self._influxdb = idbc(url=INFLUXDB_CLIENT["URL"], token=INFLUXDB_CLIENT["TOKEN"], org=INFLUXDB_CLIENT["ORG"], verify_ssl=False)
 
 
         return self._influxdb.query_api()

@@ -58,6 +58,7 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
 
   async componentDidUpdate(prevProps) {
     if (prevProps.cubeInfo !== this.props.selectedGraphNode) {
+      console.log("update graph node");
       if (scene === undefined) { return; }
 
       if (Object.keys(this.props.selectedGraphNode).length > 0) {
@@ -75,6 +76,8 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
     }
 
     if (prevProps.refreshVisualizePage !== this.props.refreshVisualizePage) {
+      // console.log("update visualize page");
+
       await this.removeAllObjectFromScene();
       const cubeInfo = await DTService.getAllDT();
       const renderedCubeInfo = await this.renderInitialCubeInfo(cubeInfo);
@@ -913,11 +916,13 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
       pl["machines"].forEach((machine) => {
         if (machine["contents"] !== undefined) {
           machine["contents"].forEach((component) => {
-            if (component["visual"] !== undefined && component["visual"] !== "") {
-              component["visual"]["objects"].forEach((visualObject) => {
-                wireframe = visualObject["isRender"] ? false : true;
-                this.handleAddObjectType(visualObject, wireframe);
-              });
+            if (component["@type"] === "Component") {
+              if (component["visual"] !== undefined && component["visual"] !== "") {
+                component["visual"]["objects"].forEach((visualObject) => {
+                  wireframe = visualObject["isRender"] ? false : true;
+                  this.handleAddObjectType(visualObject, wireframe);
+                });
+              }
 
               component["sensors"].forEach((sensor) => {
                 if (sensor["visual"] !== undefined && sensor["visual"] !== "") {

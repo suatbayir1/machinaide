@@ -135,7 +135,7 @@ function defaultGaugeViewProperties() {
   }
 }
 
-function defaultSingleStatViewProperties() {
+export function defaultSingleStatViewProperties() {
   return {
     queries: [defaultViewQuery()],
     colors: DEFAULT_THRESHOLDS_LIST_COLORS as Color[],

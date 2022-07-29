@@ -177,6 +177,8 @@ class FailureAlarmScene extends PureComponent<Props, State> {
         let cubeInfo = JSON.parse(JSON.stringify(payload));
         const { filteredFailures } = this.state;
 
+        console.log({ cubeInfo })
+
         let splittedSource;
 
         await
@@ -352,9 +354,11 @@ class FailureAlarmScene extends PureComponent<Props, State> {
         let CubeInfo = payload;
         let wireframe;
 
-        if (CubeInfo === undefined) {
-            return;
-        }
+        console.log({ CubeInfo })
+
+        // if (CubeInfo === undefined) {
+        //     return;
+        // }
 
         if (payload.productionLines === undefined) {
             CubeInfo = payload[0];

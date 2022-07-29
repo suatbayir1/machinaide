@@ -6,7 +6,7 @@ import {
     Form, ComponentSize, Grid, Columns, Label, InfluxColors,
     DapperScrollbars, List, Gradients, ConfirmationButton,
     IconFont, ComponentColor, Appearance, Button, ButtonType,
-    SelectDropdown, Input, TextArea, FlexBox, FlexDirection,
+    SelectDropdown, Input, TextArea, FlexBox, FlexDirection, ComponentStatus
 } from '@influxdata/clockface'
 import DangerConfirmationOverlay from "src/shared/overlays/DangerConfirmationOverlay";
 
@@ -145,6 +145,7 @@ class SensorInformation extends PureComponent<Props, State> {
         const { units, unit, statusList, status, displayName, description, typeList,
             type, visibleConfirmationOverlay, selectedObject
         } = this.state;
+        const selectedObjectName = objectList.find(x=>selectedObject === x["_id"]["$oid"])
 
         return (
             <>
@@ -205,11 +206,18 @@ class SensorInformation extends PureComponent<Props, State> {
                                     <Form.Element
                                         label="Unit"
                                     >
-                                        <SelectDropdown
+                                        <Label
+                                            size={ComponentSize.Small}
+                                            name={unit}
+                                            description="Unit"
+                                            color={InfluxColors.Ocean}
+                                            id={unit}
+                                        />
+                                        {/* <SelectDropdown
                                             options={units}
                                             selectedOption={unit}
                                             onSelect={(e) => this.setState({ unit: e })}
-                                        />
+                                        /> */}
                                     </Form.Element>
                                 </Grid.Column>
                                 <Grid.Column
@@ -221,11 +229,18 @@ class SensorInformation extends PureComponent<Props, State> {
                                     <Form.Element
                                         label="Status"
                                     >
-                                        <SelectDropdown
+                                        <Label
+                                            size={ComponentSize.Small}
+                                            name={status}
+                                            description="Status"
+                                            color={InfluxColors.Ocean}
+                                            id={status}
+                                        />
+                                        {/* <SelectDropdown
                                             options={statusList}
                                             selectedOption={status}
                                             onSelect={(e) => this.setState({ status: e })}
-                                        />
+                                        /> */}
                                     </Form.Element>
                                 </Grid.Column>
                                 <Grid.Column
@@ -235,11 +250,18 @@ class SensorInformation extends PureComponent<Props, State> {
                                     widthLG={Columns.Twelve}
                                 >
                                     <Form.Element label="Data Type">
-                                        <SelectDropdown
+                                        <Label
+                                            size={ComponentSize.Small}
+                                            name={type}
+                                            description="Data Type"
+                                            color={InfluxColors.Ocean}
+                                            id={type}
+                                        />
+                                        {/* <SelectDropdown
                                             options={typeList}
                                             selectedOption={type}
                                             onSelect={(e) => this.setState({ type: e })}
-                                        />
+                                        /> */}
                                     </Form.Element>
                                 </Grid.Column>
                                 <Grid.Column
@@ -253,12 +275,19 @@ class SensorInformation extends PureComponent<Props, State> {
                                         errorMessage={handleValidation(displayName)}
                                         required={true}
                                     >
-                                        <Input
+                                        <Label
+                                            size={ComponentSize.Small}
+                                            name={displayName}
+                                            description="Display Name"
+                                            color={InfluxColors.Ocean}
+                                            id={displayName}
+                                        />
+                                        {/* <Input
                                             name="displayName"
                                             placeholder="Display Name.."
                                             onChange={this.handleChangeInput}
                                             value={displayName}
-                                        />
+                                        /> */}
                                     </Form.Element>
                                 </Grid.Column>
                                 <Grid.Column
@@ -272,14 +301,21 @@ class SensorInformation extends PureComponent<Props, State> {
                                             name="description"
                                             value={description}
                                             placeholder="Description.."
-                                            onChange={this.handleChangeInput}
+                                            status={ComponentStatus.Disabled}
                                             rows={4}
                                         />
                                     </Form.Element>
                                 </Grid.Column>
                                 <Grid.Column widthSM={Columns.Twelve}>
                                     <Form.Element label="Visual">
-                                        {
+                                        <Label
+                                            size={ComponentSize.Small}
+                                            name={selectedObjectName ? selectedObjectName["name"] : "-"}
+                                            description="Visual"
+                                            color={InfluxColors.Ocean}
+                                            id={selectedObjectName ? selectedObjectName["name"] : "noVisual"}
+                                        />
+                                        {/* {
                                             objectList.length > 0 ?
                                                 < DapperScrollbars
                                                     autoHide={false}
@@ -320,7 +356,7 @@ class SensorInformation extends PureComponent<Props, State> {
                                                     </List>
                                                 </DapperScrollbars>
                                                 : <h6>No visual record found</h6>
-                                        }
+                                        } */}
                                     </Form.Element>
                                 </Grid.Column>
                                 <Grid.Column widthXS={Columns.Twelve}>
@@ -358,7 +394,7 @@ class SensorInformation extends PureComponent<Props, State> {
                                 </Grid.Column>
                             </DapperScrollbars>
                         </Grid.Row>
-                        <Grid.Row>
+                        {/* <Grid.Row>
                             <div className="dt-information-buttons">
                                 <Button
                                     text="Summary"
@@ -408,7 +444,7 @@ class SensorInformation extends PureComponent<Props, State> {
                                     />
                                 }
                             </div>
-                        </Grid.Row>
+                        </Grid.Row> */}
                     </Grid>
                 </Form>
             </>

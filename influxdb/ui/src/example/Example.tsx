@@ -514,6 +514,9 @@ class ExamplePage extends PureComponent<Props, State>{
                       margin={ComponentSize.Medium}
                     >
                       <SparkleSpinner loading={RemoteDataState.Loading} />
+                      <SparkleSpinner loading={RemoteDataState.NotStarted} />
+                      <SparkleSpinner loading={RemoteDataState.Done} />
+                      <SparkleSpinner loading={RemoteDataState.Error} />
                       <TechnoSpinner style={{ width: "50px", height: "50px" }} />
                     </FlexBox>
                     <WaitingText text="Waiting Text" />

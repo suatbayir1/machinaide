@@ -55,6 +55,24 @@ def get_sensors(token):
     logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
     return return_response(data = data, success = True, message = "get_sensors_successfully")
 
+@factory.route("/getFields", methods = ["GET", "POST"])
+@token_required(roles = ["admin", "member", "editor"])
+def get_fields(token):
+    try:
+        data = model.get_fields(request.json)
+        log_type = "INFO"
+        status_code = 200
+        message = "Fields returned successfully"
+        logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+        return return_response(data = data, success = True, message = message)
+    except:
+        message = "An expected error has occurred while fetching fields record"
+        log_type = "ERROR"
+        status_code = 400
+        return return_response(success = False, message = message, code = 400), 400
+    finally:
+        logger.add_log(log_type, request.remote_addr, token["username"], request.method, request.url, "", message,  status_code)
+
 @factory.route("/addMachineAction", methods = ["POST"])
 @token_required(roles = ["admin", "editor"])
 def add_machine_action(token):

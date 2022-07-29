@@ -1,6 +1,7 @@
 # node_modules/
 mongo_backups/
 backend/logs/
+backend/mlhelpers/SessionSettings/
 backend/influxdbmanager/Pres31_DB1.csv
 backend/influxdbmanager/Pres31_DB2.csv
 influxdb/ui/node_modules/

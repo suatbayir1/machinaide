@@ -8,8 +8,9 @@ import time
 import random
 import argparse
 import requests
+import config
 import sys
-sys.path.insert(1, '/home/machinaide/backend')
+sys.path.insert(1, f'{config.PROJECT_URL}/backend')
 from core.nlp.QuestionCorrector import QuestionCorrector
 from core.nlp.MongoManager import MongoManager
 from core.nlp.Helper import Helper
@@ -18,7 +19,6 @@ from core.nlp.NLPHandler import NLPHandler
 from core.nlp.JsonToText import JsonToText
 from application.classes.SentenceSimilarityCalculator import SentenceSimilarityCalculator
 from application.classes.Validator import Validator
-import config
 
 nlpserver = Blueprint("nlp", __name__)
 
@@ -136,24 +136,31 @@ def postTrainData(token):
 @token_required(roles = ["admin", "member", "editor"])
 def similarQuestions(token):
     try: 
+        print("1")
         message, confirm = validator.check_request_params(request.json, ["question"])
+        print("2")
 
         if not confirm:
             return return_response(success = False, message = message, code = 400), 400
 
+        print("3")
+
         questions = model.get_questions({"question": 1, "_id": 0})
+        print("4")
         
         if not questions:
             return return_response(data = [], success = False, message = "There are no questions in the database", code = 403), 403
+        print("5")
 
         questions = [question["question"] for question in questions]
+        print("6")
 
         similarity_table = sentenceSimilarityCalculator.calculate_jaccard_similarity(request.json["question"], questions)
         # similarity_table = sentenceSimilarityCalculator.calculate_cosine_similarity(request.json["question"], questions)
         # similarity_table = sentenceSimilarityCalculator.calculate_similarity_with_spacy(request.json["question"], questions)
         # similarity_table = sentenceSimilarityCalculator.sentence_transformer_semantic_search(request.json["question"], questions)
 
-        print(similarity_table)
+        print("table will here", similarity_table)
         return return_response(data = similarity_table, success = True, message = "Questions were brought to the 5 most similar questions to the question")
     except:
         return return_response(success = False, message = "Unexpected error occurred", code = 403), 403

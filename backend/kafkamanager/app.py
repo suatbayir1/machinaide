@@ -12,4 +12,4 @@ while True:
     message = json.dumps(message).encode("utf-8")
     producer.produce(message)
     print(message)
-    # time.sleep(1)
+    time.sleep(1)

@@ -162,7 +162,8 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                                     >
                                                                         <div>
                                                                             <img
-                                                                                src='https://cdn1.iconfinder.com/data/icons/cars-components-3/24/gears_gear_car_component_part-512.png'
+                                                                                // src='https://cdn1.iconfinder.com/data/icons/cars-components-3/24/gears_gear_car_component_part-512.png'
+                                                                                src='../../../assets/icons/component-card.png'
                                                                                 className="component-image"
                                                                             />
                                                                         </div>
@@ -249,6 +250,14 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                                                                         <div><img src="../../../assets/icons/failure-icon.png" className="li-icon" /></div>
                                                                                                     </div>
                                                                                                     Show Failures
+                                                                                                </Link>
+                                                                                            </li>
+                                                                                            <li className="links">
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/health/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${this.props["match"].params.MID}/${component["id"]}`}>
+                                                                                                    <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+                                                                                                        <div><img src="../../../assets/icons/sidenav-masstrain-icon.png" className="li-icon" /></div>
+                                                                                                    </div>
+                                                                                                    Health Assessment
                                                                                                 </Link>
                                                                                             </li>
                                                                                         </ul>
