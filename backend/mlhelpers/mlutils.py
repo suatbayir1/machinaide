@@ -36,18 +36,16 @@ def inverse_transform_output(output, means, stds):
     for i, out in enumerate(output):
         output[i] = (out * stds[i]) + means[i]
 
-def to_sequences(dataset, input_columns, output_columns, input_dim, output_dim, in_seq_size, out_seq_size, in_means, in_stds, out_means, out_stds):
+def to_sequences(dataset, columns, input_dim, output_dim, in_seq_size, out_seq_size, means, stds):
     x = []
     y = []
 
     for i in range(len(dataset.values)):
         t = i + in_seq_size
-        window = dataset[input_columns]
-        after_window = dataset[output_columns]
-        _transform_sample(window, input_columns, in_means, in_stds)
-        _transform_sample(after_window, output_columns, out_means, out_stds)
-        window = window[i:t]
-        after_window = after_window[t:(t + out_seq_size)]
+        window = dataset[columns][i:t]
+        after_window = dataset[columns][t:(t + out_seq_size)]
+        _transform_sample(window, columns, means, stds)
+        _transform_sample(after_window, columns, means, stds)
         if len(window) != in_seq_size or len(after_window) != out_seq_size:
             break
         # window = [[x] for x in window]
@@ -59,12 +57,15 @@ def to_sequences(dataset, input_columns, output_columns, input_dim, output_dim, 
     print("y", type(y))
     print("in_seq_size", type(in_seq_size))
     print("input_dim", type(input_dim), input_dim)
-    return np.array(x).reshape(
-        len(x), 
-        in_seq_size, 
-        input_dim),np.array(y).reshape(
-            len(y), 
-            output_dim)
+    print(np.asarray(x).shape)
+    print(np.asarray(y).shape)
+    return np.asarray(x), np.asarray(y)
+    # return np.array(x).reshape(
+    #     len(x), 
+    #     in_seq_size, 
+    #     input_dim),np.array(y).reshape(
+    #         len(y), 
+    #         output_dim)
 
 
 def root_mean_squared_error(sequence_length):
@@ -160,7 +161,7 @@ class QueryHelper:
                     endTime
                 )
                 queries += query
-        print(queries)
+        # print(queries)
         return queries
 
 
@@ -201,7 +202,7 @@ class QueryHelper:
 
                     final['values'][sensor_names[k]] = val
 
-        print(final_results)
+        # print(final_results)
         return final_results, sensor_names
 
 
@@ -365,7 +366,7 @@ class Influx2QueryHelper:
         query_list = self._build_influx_weibull_queries(measurement_to_sensor, startTime, endTime, groupWith)
         final_results = list()
         for query in query_list:
-            results = self.influxdb.query(query=query)
+            # results = self.influxdb.query(query=query)
             try:
                 results = self.influxdb.query(query)
             except Exception as e:
@@ -391,10 +392,11 @@ class Influx2QueryHelper:
 
     def query(self, measurement_to_sensor, startTime, endTime):
         query_list = self._build_influx_queries(measurement_to_sensor, startTime, endTime)
-        print(query_list)
+        # print(query_list)
         final_results = list()
         for query in query_list:
-            results = self.influxdb.query(query=query)
+            print("hi")
+            # results = self.influxdb.query(query=query)
             try:
                 results = self.influxdb.query(query)
             except Exception as e:
@@ -421,7 +423,7 @@ class Influx2QueryHelper:
             for sensor in sensors:
                 sensor_names.append(sensor)
 
-        print(final_results)
+        print(final_results[0])
         return final_results, sensor_names
 
     
@@ -492,9 +494,10 @@ class Influx2QueryHelper:
     def influxdb(self):
         if self._influxdb is None:
             org = "machinaide"
-            token = "-Y8yuCS19k6ZD0FLiVvpY-zcEK4VhbBe6HC7WPKR7Z5X2bkm-Ag2iMJUSDSBOugpG6klF2XEddhCMkHRuJPbsQ=="
-
-            self._influxdb = idbc(url="http://localhost:8080", token=token, org=org)
+            token = "7YUADsCG_ZIY03eGRhFi1uOEuNCNdLtzQm2OsBCxzGsySPnInlemOL2lF-hhOY_HbylLxpVF0Xif6-6IrzvBZQ=="
+            url = "https://" + self.host + ":" + self.port
+            print(url)
+            self._influxdb = idbc(url=url, token=token, org=org)
 
 
         return self._influxdb.query_api()

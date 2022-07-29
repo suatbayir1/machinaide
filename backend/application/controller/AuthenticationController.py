@@ -50,12 +50,14 @@ def loginWithLDAP():
     password = request.json["password"]
 
     try:
-        con = ldap.initialize('ldap://localhost:10389', bytes_mode=False)
+        print("bon")
+        con = ldap.initialize('ldap://161.97.67.73:10389', bytes_mode=False)
+        print("on")
         con.protocol_version = ldap.VERSION3
         con.set_option(ldap.OPT_REFERRALS, 0)
 
         result = con.search_s(f'dc=example,dc=com', ldap.SCOPE_SUBTREE, f"(uid={username})")   
-
+        print(result)
         if not result:
             raise Exception("User not found")
 
@@ -88,21 +90,22 @@ def loginWithLDAP():
         }
 
         message = "user_login_successfully"
-        logger.add_log("INFO", request.remote_addr, username, request.method, request.url, request.json, message,  200)
+        # logger.add_log("INFO", request.remote_addr, username, request.method, request.url, request.json, message,  200)
         return return_response(data = [response], success = True, message = message, code = 200), 200
 
     except ldap.INVALID_CREDENTIALS:
         con.unbind()
         message = "password_is_wrong"
-        logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
+        # logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
         return return_response(data = [], success = False, message = message, code = 400), 400
     except ldap.SERVER_DOWN:
         message = "LDAP Server is not running"
-        logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
+        print(message)
+        # logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
         return return_response(data = [], success = False, message = message, code = 400), 400
     except Exception as error:
         message = error.args[0]
-        logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
+        # logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
         return return_response(data = [], success = False, message = message, code = 400), 400
 
 @auth.route("/login", methods = ["POST"])

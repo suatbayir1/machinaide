@@ -144,7 +144,7 @@ export default class MLAdvancedContainer extends PureComponent<Props, State> {
     }
 
     componentDidMount = () => {
-
+        console.log(localStorage.userInfo)
         api.getParams().then(mlinfo => {
             api.getSessions().then(sessions => {
             this.setState({sessions: sessions, mlinfo: mlinfo.data, dataLoaded: true})
@@ -165,9 +165,13 @@ export default class MLAdvancedContainer extends PureComponent<Props, State> {
             mlinfo: mlinfo,
             listMode: false
         })
+
+        api.getCellCount(sessionID).then( obj =>
+            this.setCellCountAndIDs(obj)
+        )
     }   
     onCreateSession = () => {
-        this.setState({listMode: false})
+        this.setState({listMode: false, from: "", to: "", selectedBucket: "", sessionID: "", models:[]})
     }
     setSelectedBucket = (selectedBucket: string) => {
         this.setState({selectedBucket: selectedBucket})
@@ -255,17 +259,33 @@ export default class MLAdvancedContainer extends PureComponent<Props, State> {
     }
 
     onSetTimeRange = (e: any) => {
-        let from = e.lower.replace("T", " ")
-        from = from.replace("Z", "")
-        let to = e.lower.replace("T", " ")
-        to = from.replace("Z", "")
+        if (e.type == "custom") {
+            let from = e.lower.replace("T", " ")
+            from = from.replace("Z", "")
+            let to = e.lower.replace("T", " ")
+            to = from.replace("Z", "")
+    
+            let timeRange = {
+                lower: from,
+                upper: to
+            }
+    
+            this.setState({from: e.lower, to: e.upper, timeRange: timeRange, trainTimeRangeOpen: false})
+        } else {
+            let to = new Date()
+            let from = new Date()
+            from.setSeconds(to.getSeconds() - e.seconds)
 
-        let timeRange = {
-            lower: from,
-            upper: to
+            
+
+            let timeRange = {
+                lower: from.toISOString().replace("T", " ").replace("Z", ""),
+                upper: to.toISOString().replace("T", " ").replace("Z", "")
+            }
+
+            this.setState({from: from.toISOString(), to: to.toISOString(), timeRange: timeRange, trainTimeRangeOpen: false})
         }
-
-        this.setState({from: e.lower, to: e.upper, timeRange: timeRange, trainTimeRangeOpen: false})
+        
     }
 
     onCloseTimeRangePopover = () => {
@@ -281,34 +301,39 @@ export default class MLAdvancedContainer extends PureComponent<Props, State> {
     }
 
     onStartSession = async () => {
+        // console.log(this.props)
+        // console.log(window.location.hostname)
+        // console.log(window.location.port)
         let sessionID = new Date().getTime()
         let newSession = {sessionID: sessionID, from:this.state.from, to: this.state.to,
             database: this.state.selectedBucket, mlinfo: this.state.mlinfo}
         await api.postSession(newSession)
-        let types = ""
-        if (this.state.job === "Anomaly Detection") {
-            types = "AD"
-        } else if (this.state.job === "RUL Estimation") {
-            types = "RUL"
-        } else {
-            types = "FP"
-        }
+        // let types = ""
+        // if (this.state.job === "Anomaly Detection") {
+        //     types = "AD"
+        // } else if (this.state.job === "RUL Estimation") {
+        //     types = "RUL"
+        // } else {
+        //     types = "FP"
+        // }
+        let crt = localStorage.userInfo.uid
+        console.log(crt)
         let pkg = {
-            types: types,
-            creator: "creator",
-            sessionID: sessionID,
+            sessionID: sessionID.toString(),
+            creator: "crt",
             dbSettings: {
-                host: "localhost",
-                port: 8080,
+                host: window.location.hostname,
+                port: window.location.port,
                 db: this.state.selectedBucket,
                 rp: "autogen"
             },
             startTime: this.state.from,
             endTime: this.state.to,
-            sensors: {
-                Input: this.state.measurementToSensors,
-                Output: this.state.measurementToSensors
-            },
+            // sensors: {
+            //     Input: this.state.measurementToSensors,
+            //     Output: this.state.measurementToSensors
+            // },
+            sensors: this.state.measurementToSensors,
             params: this.state.mlinfo["Parameters"]
         }
 
@@ -340,7 +365,7 @@ export default class MLAdvancedContainer extends PureComponent<Props, State> {
         return (
             <React.Fragment>
                 <FlexBox margin={ComponentSize.Small} style={{ marginRight: '10%' }}>
-                    <Popover
+                    {/* <Popover
                         appearance={Appearance.Outline}
                         position={PopoverPosition.Below}
                         triggerRef={this.trainDateTimeRangeRef}
@@ -363,8 +388,25 @@ export default class MLAdvancedContainer extends PureComponent<Props, State> {
                                 // }
                             />
                         )}
+                    /> */}
+                <Panel>
+                  <Panel.Header size={ComponentSize.ExtraSmall}>
+                    <p className="preview-data-margins">Date Picker</p>
+                  </Panel.Header>
+                  <Panel.Body size={ComponentSize.Small}>
+                    <TimeRangeDropdown
+                      onSetTimeRange={this.onSetTimeRange}
+                      timeRange={{
+                        lower: this.state.from,
+                        upper: this.state.to,
+                        type: 'custom'
+                      }}
                     />
-                    <Button
+                    <p style={{ fontSize: '12px', fontWeight: 600 }}>{"From: " + this.state.timeRange.lower}</p>
+                    <p style={{ fontSize: '12px', fontWeight: 600 }}>{"To: " + this.state.timeRange.upper}</p>
+                  </Panel.Body>
+                </Panel>
+                    {/* <Button
                         ref={this.trainDateTimeRangeRef}
                         text="Time Range"
                         onClick={this.onOpenTimeRangePopover}
@@ -378,7 +420,7 @@ export default class MLAdvancedContainer extends PureComponent<Props, State> {
                         color={ComponentColor.Danger}
                         onClick={this.resetTimeRange}
                         style={{marginLeft: "10px"}}
-                    />
+                    /> */}
                 </FlexBox>
             </React.Fragment>
         )
@@ -463,10 +505,10 @@ export default class MLAdvancedContainer extends PureComponent<Props, State> {
                                     >
                                         <Panel>
                                         <Panel.Header>
-                                            Set Job Type and Parameters
+                                            Set Parameters
                                         </Panel.Header>
                                             <Panel.Body>
-                                                <Dropdown
+                                                {/* <Dropdown
                                                     button={(active, onClick) => (
                                                     <Dropdown.Button
                                                         active={active}
@@ -480,7 +522,7 @@ export default class MLAdvancedContainer extends PureComponent<Props, State> {
                                                     <Dropdown.Menu onCollapse={onCollapse}>
                                                         {this.jobDescriptions}
                                                     </Dropdown.Menu>
-                                                )}/>
+                                                )}/> */}
                                                 <br/>
                                                 <TabGroup
                                                     tabinfo={{info: this.state.mlinfo, selectedClass: "AD"}}/>
@@ -499,8 +541,6 @@ export default class MLAdvancedContainer extends PureComponent<Props, State> {
                                         </Panel.Header>
                                             <Panel.Body>
                                                 {this.optionsComponents}
-                                                <p style={{ fontSize: '12px', fontWeight: 600 }}>{"From: " + this.state.from}</p>
-                                                <p style={{ fontSize: '12px', fontWeight: 600 }}>{"To: " + this.state.to}</p>
                                             </Panel.Body>
                                         </Panel>
                                     </Grid.Column>
@@ -549,7 +589,8 @@ export default class MLAdvancedContainer extends PureComponent<Props, State> {
                                                     <ModelSection
                                                         models={this.state.models}
                                                         sessionID={this.state.sessionID}
-                                                        setCellCountAndIDs={this.setCellCountAndIDs}/>
+                                                        setCellCountAndIDs={this.setCellCountAndIDs}
+                                                        cellDataReceived={this.cellDataReceived}/>
                                                 </Panel.Body>
                                             </DapperScrollbars>
                                                 

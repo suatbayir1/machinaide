@@ -15,20 +15,15 @@ authentication = dict(
 )
 
 INFLUXDB_CLIENT = dict(
-    URL = "https://vmi474601.contaboserver.net:8080",
+    URL = "httpss://vmi515134.contaboserver.net:8080",
     TOKEN = "-Y8yuCS19k6ZD0FLiVvpY-zcEK4VhbBe6HC7WPKR7Z5X2bkm-Ag2iMJUSDSBOugpG6klF2XEddhCMkHRuJPbsQ==",
     ORG = "machinaide"
 )
 
 url = dict(
-    BACKEND = "http://127.0.0.1:9632/api/",
-    CHRONOGRAPH = "http://localhost:8080/",
+    BACKEND = "https://127.0.0.1:9632/api/",
+    CHRONOGRAPH = "https://localhost:8080/",
 )
-
-G_ALGS = {
-    "Predictors": ["LSTM"],
-    "Classifiers": []
-}
 
 
 VAE_HPS_DIR = os.getcwd() + "/mlhelpers/VAESettings/hps/"
@@ -36,10 +31,6 @@ TASK_DIRECTORY = os.getcwd() + "/mlhelpers/HPCTasks/"
 VAE_SENSOR_DIR = os.getcwd() +  "/mlhelpers/VAESettings/sensors/"
 AUTO_SETTINGS_DIR = os.getcwd() + "/mlhelpers/AutoSettings/"
 GETSENSORFROMMAPPING = url["BACKEND"] + "/getSensorFromMapping"
-G_ALGS = {
-    "Predictors": ["LSTM"],
-    "Classifiers": []
-}
 host_ip = "localhost"
 AUTOML_BATCH_SIZES = [32, 64, 128]
 AUTOML_EPOCHS = [100, 200]
@@ -52,30 +43,49 @@ max_epochs = 5
 max_trials = 10
 executions_per_trial = 1
 
-flaskserver = "localhost" # "flaskserver"
+flaskserver = "vmi515134.contaboserver.net/api/v1.0/metadata" # "flaskserver"
 flask_port = 9632
 influx_port = 8086
 bootstrap_server = 'localhost:9094'
 
 
-METAURL = "http://{}:{}/addModelMeta".format(flaskserver, flask_port)
-CELLURL = "http://{}:{}/postModelData".format(flaskserver, flask_port)
-BASICURL = "http://{}:{}/postBasicModel".format(flaskserver, flask_port)
-PUTBASICURL = "http://{}:{}/updateBasicModel/".format(flaskserver, flask_port)
-UPDATECELLURL = "http://{}:{}/updateModelData".format(flaskserver, flask_port)
-AUTOML_POST_TRIAL_URL = "http://{}:{}/postTrial".format(flaskserver, flask_port)
-AUTOML_POST_EXPERIMENT_URL = "http://{}:{}/postExperiment".format(flaskserver, flask_port)
-AUTOML_UPDATE_EXPERIMENT_URL = "http://{}:{}/updateExperiment".format(flaskserver, flask_port)
-AUTOML_CHANGE_STATUS_URL = "http://{}:{}/changeStatus".format(flaskserver, flask_port)
-UPDATEROWURL ='http://{}:{}/updateBasicRow'.format(flaskserver, flask_port)
-POSTTRAININGURL = "http://{}:{}/getPostTrainingData/".format(flaskserver, flask_port)
-POSTTRAININGINSERTURL= "http://{}:{}/insertPostTrainingData".format(flaskserver, flask_port)
-GETFAILURESURL = "http://{}:{}/returnFailures/".format(flaskserver, flask_port)
-GETSENSORFROMMAPPING = "http://{}:{}/getSensorFromMapping/".format(flaskserver, flask_port)
-GETBASICMODEL = 'http://{}:{}/getBasicModel/'.format(flaskserver, flask_port)
-UPDATEBASICROW = 'http://{}:{}/updateBasicRow'.format(flaskserver, flask_port)
-ANOMALYURL = 'http://{}:{}/anomaly'.format(flaskserver, flask_port)
-celldataurl = "http://{}:{}/postCellData".format(flaskserver, flask_port)
+# METAURL = "https://{}:{}/addModelMeta".format(flaskserver, flask_port)
+# CELLURL = "https://{}:{}/postModelData".format(flaskserver, flask_port)
+# BASICURL = "https://{}:{}/postBasicModel".format(flaskserver, flask_port)
+# PUTBASICURL = "https://{}:{}/updateBasicModel/".format(flaskserver, flask_port)
+# UPDATECELLURL = "https://{}:{}/updateModelData".format(flaskserver, flask_port)
+# AUTOML_POST_TRIAL_URL = "https://{}:{}/postTrial".format(flaskserver, flask_port)
+# AUTOML_POST_EXPERIMENT_URL = "https://{}:{}/postExperiment".format(flaskserver, flask_port)
+# AUTOML_UPDATE_EXPERIMENT_URL = "https://{}:{}/updateExperiment".format(flaskserver, flask_port)
+# AUTOML_CHANGE_STATUS_URL = "https://{}:{}/changeStatus".format(flaskserver, flask_port)
+# UPDATEROWURL ='https://{}:{}/updateBasicRow'.format(flaskserver, flask_port)
+# POSTTRAININGURL = "https://{}:{}/getPostTrainingData/".format(flaskserver, flask_port)
+# POSTTRAININGINSERTURL= "https://{}:{}/insertPostTrainingData".format(flaskserver, flask_port)
+# GETFAILURESURL = "https://{}:{}/returnFailures/".format(flaskserver, flask_port)
+# GETSENSORFROMMAPPING = "https://{}:{}/getSensorFromMapping/".format(flaskserver, flask_port)
+# GETBASICMODEL = 'https://{}:{}/getBasicModel/'.format(flaskserver, flask_port)
+# UPDATEBASICROW = 'https://{}:{}/updateBasicRow'.format(flaskserver, flask_port)
+# ANOMALYURL = 'https://{}:{}/anomaly'.format(flaskserver, flask_port)
+# celldataurl = "https://{}:{}/postCellData".format(flaskserver, flask_port)
+
+METAURL = "https://{}/addModelMeta".format(flaskserver)
+CELLURL = "https://{}/postModelData".format(flaskserver)
+BASICURL = "https://{}/postBasicModel".format(flaskserver)
+PUTBASICURL = "https://{}/updateBasicModel/".format(flaskserver)
+UPDATECELLURL = "https://{}/updateModelData".format(flaskserver)
+AUTOML_POST_TRIAL_URL = "https://{}/postTrial".format(flaskserver)
+AUTOML_POST_EXPERIMENT_URL = "https://{}/postExperiment".format(flaskserver)
+AUTOML_UPDATE_EXPERIMENT_URL = "https://{}/updateExperiment".format(flaskserver)
+AUTOML_CHANGE_STATUS_URL = "https://{}/changeStatus".format(flaskserver)
+UPDATEROWURL ='https://{}/updateBasicRow'.format(flaskserver)
+POSTTRAININGURL = "https://{}/getPostTrainingData/".format(flaskserver)
+POSTTRAININGINSERTURL= "https://{}/insertPostTrainingData".format(flaskserver)
+GETFAILURESURL = "https://{}/returnFailures/".format(flaskserver)
+GETSENSORFROMMAPPING = "https://{}/getSensorFromMapping/".format(flaskserver)
+GETBASICMODEL = 'https://{}/getBasicModel/'.format(flaskserver)
+UPDATEBASICROW = 'https://{}/updateBasicRow'.format(flaskserver)
+ANOMALYURL = 'https://{}/anomaly'.format(flaskserver)
+celldataurl = "https://{}/postCellData".format(flaskserver)
 
 
 models_path = os.getcwd() + "/mlhelpers/Models/"
@@ -91,6 +101,8 @@ VAESENSORDIR = os.getcwd() +  "/mlhelpers/VAESettings/sensors/"
 ADHPSDIR = os.getcwd() + "/mlhelpers/ADSettings/hps/"
 ADSENSORDIR = os.getcwd() + "/mlhelpers/ADSettings/sensors/"
 REPORTDIR = os.getcwd() + "/alerthelpers/printFiles/"
+MLSESSIONDIR = os.getcwd() + "/mlhelpers/SessionSettings/"
+
 
 TICK_SETTINGS = {
   "LAST": "last value",
@@ -102,8 +114,10 @@ TICK_SETTINGS = {
   "DMIN": "min of last 5 value's differences"
 }
 
+G_ALGS = ["LSTM"]
+
 G_INFO = {
-    "Classes": G_ALGS,
+    "Algorithms": G_ALGS,
     "Parameters": {
         "LSTM": {
             "Epochs": {
@@ -179,7 +193,7 @@ experiments_path_2 = os.getcwd() + "/mlhelpers/experiments/"
 
 #### NLP
 influx = dict(
-    host = 'https://vmi474601.contaboserver.net:8086',
+    host = 'httpss://vmi515134.contaboserver.net:8086',
     orgID = 'd572bde16b31757c',
     dbtoken = "FlviKxQ-RHHWxd1FRkHIc5VwNZuFnP6QTmsJcU6GI7nrd4cuqaTx3cCijZchENMH0zSGuKOew_e4LxW6V09Erw=="
 )

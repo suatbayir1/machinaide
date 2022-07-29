@@ -17,6 +17,7 @@ from tensorflow.keras.layers import Dense, Conv2D, Dropout, Lambda, LSTM, Input,
 from tensorflow.keras import backend as K
 from tensorflow.keras.callbacks import EarlyStopping
 import math
+import subprocess
 
 # from mlutils import Influx2QueryHelper
 tf.compat.v1.enable_eager_execution()
@@ -31,6 +32,7 @@ from config import (
     METAURL,
     BASICURL,
     PUTBASICURL,
+    MLSESSIONDIR,
     MODELDIR,
     POSTTRAININGINSERTURL,
     VAEHPSDIR,
@@ -129,12 +131,14 @@ class MLSession(Process):
         super().__init__()
         self.algs = algs
         self.params = params
-        self.types = settings['types']
+        # self.types = settings['types']
         self.session_id = settings['sessionID']
         self.creator = settings['creator']
         self.db_settings = settings['dbSettings']
-        self.start_time = '%d' % (time.mktime(datetime.datetime.strptime(settings['startTime'], "%Y-%m-%dT%H:%M:%S.%fZ").timetuple()) * 1000000000)
-        self.end_time = '%d' % (time.mktime(datetime.datetime.strptime(settings['endTime'], "%Y-%m-%dT%H:%M:%S.%fZ").timetuple()) * 1000000000)
+        # self.start_time = '%d' % (time.mktime(datetime.datetime.strptime(settings['startTime'], "%Y-%m-%dT%H:%M:%S.%fZ").timetuple()))
+        # self.end_time = '%d' % (time.mktime(datetime.datetime.strptime(settings['endTime'], "%Y-%m-%dT%H:%M:%S.%fZ").timetuple()))
+        self.start_time = settings['startTime']
+        self.end_time = settings['endTime']
         self.measurement_sensor_dict = settings['sensors']
         self.kill_sig_queue = kill_sig_queue
 
@@ -142,33 +146,33 @@ class MLSession(Process):
         self.preprocess_helper = None
         self._train_futures = {}
         self.model_IDs = []
-        self.input_columns = []
-        self.output_columns = []
+        # self.input_columns = []
+        # self.output_columns = []
 
 
     def _query(self):
-        m2s = {}
-        for key in self.measurement_sensor_dict["Input"]:
-            m2s[key] = self.measurement_sensor_dict["Input"][key]
-        for key in self.measurement_sensor_dict["Output"]:
-            if key in list(m2s.keys()):
-                for value in self.measurement_sensor_dict["Output"][key]:
-                    if value not in m2s[key]:
-                        m2s[key].append(value)
-            else:
-                m2s[key] = self.measurement_sensor_dict["Output"][key]
+        # m2s = {}
+        # for key in self.measurement_sensor_dict["Input"]:
+        #     m2s[key] = self.measurement_sensor_dict["Input"][key]
+        # for key in self.measurement_sensor_dict["Output"]:
+        #     if key in list(m2s.keys()):
+        #         for value in self.measurement_sensor_dict["Output"][key]:
+        #             if value not in m2s[key]:
+        #                 m2s[key].append(value)
+        #     else:
+        #         m2s[key] = self.measurement_sensor_dict["Output"][key]
 
-        raw_data, sensor_names = self.influx_client.query(m2s, self.start_time, self.end_time)
+        raw_data, sensor_names = self.influx_client.query(self.measurement_sensor_dict, self.start_time, self.end_time)
         self.sensor_names = sensor_names
         self.raw_data = raw_data
-        for key in self.measurement_sensor_dict["Input"].keys():
-            for col in self.measurement_sensor_dict["Input"][key]: 
-                self.input_columns.append(col)
-        self.input_columns.sort()
-        for key in self.measurement_sensor_dict["Output"].keys():
-            for col in self.measurement_sensor_dict["Output"][key]: 
-                self.output_columns.append(col)
-        self.output_columns.sort()
+        # for key in self.measurement_sensor_dict["Input"].keys():
+        #     for col in self.measurement_sensor_dict["Input"][key]: 
+        #         self.input_columns.append(col)
+        # self.input_columns.sort()
+        # for key in self.measurement_sensor_dict["Output"].keys():
+        #     for col in self.measurement_sensor_dict["Output"][key]: 
+        #         self.output_columns.append(col)
+        # self.output_columns.sort()
 
 
 
@@ -207,44 +211,72 @@ class MLSession(Process):
                 "username": self.creator,
             }
         requests.post(url=CELLURL, json=pkg)
+        print(CELLURL)
 
         meta = {
             "modelID": model_id,
             "creator": creator,
             "createdDate": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "relatedHardware": ["act_force_diff_cyl_1"],
+            # "relatedHardware": ["act_force_diff_cyl_1"],
             "totalfb": 0
         }
-        requests.post(url=METAURL, json=meta)
+        # requests.post(url=METAURL, json=meta)
 
 
     def start_training(self, dataframe):
-        print(self.params)
+        # print(self.params)
+        # for i, alg in enumerate(self.algs):
+        #     if alg == "LSTM":
+        #         lstm_model = MLLSTM(dataframe, dataframe.columns, self.session_id, self.model_IDs[i], self.params[alg], self.db_settings)
+        #         self._train_futures[self.model_IDs[i]] = lstm_model.run()
+        #     self._post_info(alg, self.model_IDs[i], self.params[alg], self.creator)
+
+        # for future in self._train_futures.values():
+        #     try:
+        #         print(future.result())
+        #     except Exception as e:
+        #         print(future.cancelled())
+        #         print(e)
         for i, alg in enumerate(self.algs):
-            if alg == "LSTM":
-                lstm_model = MLLSTM(dataframe, self.input_columns, self.output_columns, self.session_id, self.model_IDs[i], self.params[alg], self.db_settings)
-                self._train_futures[self.model_IDs[i]] = lstm_model.run()
+            # if alg == "SemiSupervisedVAE" and self.semi_available is False:
+            #     continue
+            pkg = {
+                "columns": list(dataframe.columns),
+                "params": self.params[alg],
+                "dbsettings": self.db_settings
+            }
+            t_dir = MLSESSIONDIR + str(self.session_id) + "/" + str(self.model_IDs[i])
+            os.makedirs(t_dir)
+            with open(t_dir + "/sessioninfo.json", 'w') as fp:
+                json.dump(pkg, fp)
+            cmd = " python3 ./mlhelpers/mlsession.py -t train -s " + str(self.session_id) + \
+                " -m " + self.model_IDs[i] + " -a " + alg
+            process = subprocess.Popen(cmd.split(), close_fds=True)
+        #     if alg == "LSTM":
+        #         lstm_model = MLLSTM(dataframe, self.input_columns, self.output_columns, self.session_id, self.model_IDs[i], self.params[alg], self.db_settings)
+        #         self._train_futures[self.model_IDs[i]] = lstm_model.run()
             self._post_info(alg, self.model_IDs[i], self.params[alg], self.creator)
 
-        for future in self._train_futures.values():
-            try:
-                print(future.result())
-            except Exception as e:
-                print(future.cancelled())
-                print(e)
 
 
     def start_session(self):
         for i, alg in enumerate(self.algs):
             mid = uuid.uuid4()
             self.model_IDs.append(mid.hex)
-
+        print("hello")
         self._query()
         df = self.preprocessor.preproc("df", self.sensor_names)
+        print(len(df.values), "vals")
+        if not os.path.isdir(MLSESSIONDIR):
+            os.makedirs(MLSESSIONDIR)
+        os.makedirs(MLSESSIONDIR + str(self.session_id))
+        print(MLSESSIONDIR)
+        df.to_csv(MLSESSIONDIR + str(self.session_id) + "/data.csv")
         self.start_training(df)
         
 
     def run(self):
+        print("@@@@@")
         self._listen_for_kill_signal()
         self.start_session()
 
@@ -2423,5 +2455,54 @@ class AlertModule:
                 print(e)
 
 
+class KafkaHelper:
+    def __init__(self, kafka_version, kafka_servers):
+        self.topics = None
+        self.measurement_sensor_dict = None
+        self.kafka_version = kafka_version
+        self.kafka_servers = kafka_servers
+
+        self.kafka_consumer = None
+        # self.consumers = []
+
+
+    def set_topics(self, measurement_sensor_dict):
+        self.measurement_sensor_dict = measurement_sensor_dict
+        self.topics = list(measurement_sensor_dict.keys())
+
+    
+    def consume(self):
+        message_dict = {}
+        while True:
+            # poll messages each certain ms
+            raw_messages = self.consumer.poll(
+                timeout_ms=1000
+            )
+            # for each messages batch
+            for topic_partition, messages in raw_messages.items():
+                try:
+                    message_dict[topic_partition.topic].append(messages)
+                except:
+                    message_dict[topic_partition.topic] = list()
+                    message_dict[topic_partition.topic].append(messages)
+
+            print(message_dict)
+            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+            message_dict = {}
+
+    @property
+    def consumer(self):
+        if self.kafka_consumer is None:
+            self.kafka_consumer = KafkaConsumer(
+                bootstrap_servers=self.kafka_servers,
+                auto_offset_reset='latest',
+                enable_auto_commit=True,
+                api_version=self.kafka_version,
+                value_deserializer=lambda x: x.decode('utf-8')
+            )
+            self.kafka_consumer.subscribe(self.topics)
+
+        return self.kafka_consumer
+        
     
         

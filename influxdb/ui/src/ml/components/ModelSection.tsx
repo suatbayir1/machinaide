@@ -1,7 +1,7 @@
 import * as api from './api'
 import React, { PureComponent, useState } from 'react'
 import { useInterval } from "./useInterval"
-import { ResourceCard, Grid, Columns, Button, ButtonType, ComponentColor, IconFont, ComponentStatus, TechnoSpinner, Overlay } from "@influxdata/clockface"
+import { ResourceCard, Grid, Columns, Button, ButtonType, ComponentColor, IconFont, ComponentStatus, TechnoSpinner, Overlay, EmptyState, ComponentSize } from "@influxdata/clockface"
 import { Context } from 'src/clockface'
 import TabbedPageTabs from 'src/shared/tabbedPage/TabbedPageTabs'
 import { InfluxColors } from '@influxdata/clockface'
@@ -154,11 +154,11 @@ export default function ModelSection({
     cellDataReceived,
     // sessionPhase
 }) {
-    if (models.length === 0) {
+    if (models.length === 0 && sessionID !== "") {
         useInterval(async () => {
             let obj = await api.getCellCount(sessionID)
             setCellCountAndIDs(obj)
-        }, 10000)
+        }, 3000)
     } else {
         useInterval(null, 0)
     }
@@ -170,13 +170,19 @@ export default function ModelSection({
     // }
     return (
         <Grid>
-            {models.map((model: any) => {
+            {models.length !== 0 ? (models.map((model: any) => {
                 return (
                     <CellSection
                         model={model}
                         cellDataReceived={cellDataReceived}/>
                 )
-            })}
+            })) : (
+                <EmptyState size={ComponentSize.Large} testID="empty-models-list">
+                <EmptyState.Text>
+                    Looks like you don't have any <b>Models</b> yet.
+                </EmptyState.Text>
+                </EmptyState>
+            )}
         </Grid>
     )
 }

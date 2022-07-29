@@ -7,7 +7,7 @@ import InfluxGraph from "./InfluxGraph"
 
 const token =  ERMETAL_TOKEN;
 const bucket = "Ermetal";
-const url = process.env.INFLUX_URL || "https://vmi474601.contaboserver.net:8086"
+const url = process.env.INFLUX_URL || "https://vmi515134.contaboserver.net:8086"
 
 const onSelectAll = (data, setShownData, sensors, setSelectedOptions) => {
   setShownData(data)

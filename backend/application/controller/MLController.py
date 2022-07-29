@@ -99,9 +99,9 @@ def updateAutomlSettings():
 @mlserver.route('/queueTrainingSession/<auto>', methods=['POST'])
 def queueTrainingSession(auto=None):
     settings = request.json
+    print(settings.keys())
     if auto is None:
-        if ('types' not in settings.keys()
-            or 'creator' not in settings.keys()
+        if ( 'creator' not in settings.keys()
             or 'sessionID' not in settings.keys()
             or 'dbSettings' not in settings.keys()
             or 'endTime' not in settings.keys()
@@ -109,21 +109,24 @@ def queueTrainingSession(auto=None):
             or 'sensors' not in settings.keys()
             or 'params' not in settings.keys()):
             return "BAD REQUEST: Missing key.", 400
-        if len(settings.keys()) > 8:
-            return "BAD REQUEST: Unnecessary key.", 400
 
-        algs = []  
-        if settings['types'] == "Predictors":
-            for p_alg in config.G_ALGS["Predictors"]:
-                algs.append(p_alg)
-        elif settings['types'] == "Classifiers":
-            for c_alg in config.G_ALGS["Classifiers"]:
-                algs.append(c_alg)
-        else:
-            for p_alg in config.G_ALGS["Predictors"]:
-                algs.append(p_alg)
-            for c_alg in config.G_ALGS["Classifiers"]:
-                algs.append(c_alg)
+        # algs = []  
+        # if settings['types'] == "Predictors":
+        #     for p_alg in config.G_ALGS["Predictors"]:
+        #         algs.append(p_alg)
+        # elif settings['types'] == "Classifiers":
+        #     for c_alg in config.G_ALGS["Classifiers"]:
+        #         algs.append(c_alg)
+        # else:
+        #     for p_alg in config.G_ALGS["Predictors"]:
+        #         algs.append(p_alg)
+        #     for c_alg in config.G_ALGS["Classifiers"]:
+        #         algs.append(c_alg)
+
+        algs = settings["params"].keys()
+
+        print(settings['startTime'])
+        print(settings['endTime'])
 
         used_params = {}
         for alg in algs:
@@ -140,7 +143,7 @@ def queueTrainingSession(auto=None):
         if not os.path.isdir(config.VAE_SENSOR_DIR):
             os.makedirs(config.VAE_SENSOR_DIR)
         if not os.path.isdir(config.VAE_HPS_DIR):
-            os.makedirs(config.VAE_SENSOR_DIR)
+            os.makedirs(config.VAE_HPS_DIR)
         with open(config.VAE_SENSOR_DIR + model_name + ".json", "w") as f:
             json.dump(settings['sensors'], f)
         # vae_tp.apply_async(callProcessVAE, (cmd, datetime.now(), ))
@@ -181,6 +184,37 @@ def queueTrainingSession(auto=None):
         process = subprocess.Popen(cmd.split(), close_fds=True)
         msg = "experiment " + experiment_name + " started with timeout " + timeout + " from user: " + username
         return {"msg": msg}
+
+
+@mlserver.route('/startInferenceJob/<session_id>/<model_id>', methods=['POST'])
+def startInferenceJob(session_id, model_id):
+    try:
+        url = config.POSTTRAININGURL + str(session_id) + "/" + str(model_id)
+        post_training_info = requests.get(url=url)
+        post_training_info = post_training_info.json()
+        t_dir = config.MLSESSIONDIR + str(session_id) + "/" + str(model_id)
+
+        with open(t_dir + "/posttrain.json", 'w') as fp:
+            json.dump(post_training_info, fp)
+        cmd = " python3 ./mlhelpers/mlsession.py -t run -s " + str(session_id) + \
+            " -m " + str(model_id) + " -a " + post_training_info["Algorithm"]
+        process = subprocess.Popen(cmd.split(), close_fds=True)
+        inference_futures[str(model_id)] = process
+        # runner = ModelRunner(post_training_info.json())
+        # if session_id not in inference_futures.keys():
+        #     inference_futures[session_id] = {}
+        # inference_futures[session_id][model_id] = runner.run()
+        pkg = {
+            "sessionID": str(session_id),
+            "modelID": str(model_id),
+            "status": "running"
+        }
+
+        requests.post(url=config.UPDATECELLURL, json=pkg)
+        return {"msg": "OK"}, 201
+    except Exception as e:
+        print(e)
+        return {"msg": "NOTOK", "exp": str(e)}, 201
 
 
 @mlserver.route('/startPOFModelTraining', methods=['POST'])

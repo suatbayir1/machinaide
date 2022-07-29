@@ -40,8 +40,8 @@ module.exports = merge(common, {
     publicPath: PUBLIC,
     sockPath: `${BASE_PATH}hmr`,
     https: {
-      key: fs.readFileSync('/etc/letsencrypt/live/vmi474601.contaboserver.net/privkey.pem'),
-      cert: fs.readFileSync('/etc/letsencrypt/live/vmi474601.contaboserver.net/fullchain.pem'),
+      key: fs.readFileSync('/etc/letsencrypt/live/vmi515134.contaboserver.net/privkey.pem'),
+      cert: fs.readFileSync('/etc/letsencrypt/live/vmi515134.contaboserver.net/fullchain.pem'),
       // ca: fs.readFileSync('/path/to/ca.pem'),
     }
   },

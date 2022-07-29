@@ -84,7 +84,10 @@ def update_retrain():
 @metadataserver.route('/postModelData', methods=['POST'])
 def post_model_data():
     model_data = request.json
-    model.db.insert_one("model_data", model_data)
+    print(model_data)
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+    res = model.db.insert_one("model_data", model_data)
+    print(res)
     # mongo.db.model_data.insert_one(model_data)
 
     return "CREATED", 201
@@ -93,6 +96,7 @@ def post_model_data():
 @metadataserver.route('/getModelData/<session_id>', methods=['GET'])
 def get_model_data(session_id):
     model_data = model.db.find("model_data", {"sessionID": session_id})
+    print(model_data)
     # model_data = mongo.db.model_data.find({"sessionID": session_id})
 
     return json.dumps(list(model_data), cls=JSONEncoder)

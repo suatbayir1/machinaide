@@ -19,7 +19,7 @@ from application.controller.UserController import user
 from application.controller.GeneralController import general
 from application.controller.BrandController import brand
 from application.controller.MetaDataController import metadataserver
-# from application.controller.MLController import mlserver
+from application.controller.MLController import mlserver
 # from application.controller.NLPController import nlpserver
 from application.controller.NotificationController import notification
 from application.controller.InfluxController import influx
@@ -44,7 +44,7 @@ app.register_blueprint(user, url_prefix = f"{app_prefix}/user")
 app.register_blueprint(general, url_prefix = f"{app_prefix}/general")
 app.register_blueprint(brand, url_prefix = f"{app_prefix}/brand")
 app.register_blueprint(metadataserver, url_prefix = f"{app_prefix}/metadata")
-# app.register_blueprint(mlserver, url_prefix = f"{app_prefix}/ml")
+app.register_blueprint(mlserver, url_prefix = f"{app_prefix}/ml")
 # app.register_blueprint(nlpserver, url_prefix = f"{app_prefix}/nlp")
 app.register_blueprint(notification, url_prefix = f"{app_prefix}/notification")
 app.register_blueprint(influx, url_prefix = f"{app_prefix}/influx")

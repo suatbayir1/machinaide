@@ -28,11 +28,10 @@ manager.start()
 
 
 class MLLSTM:
-    def __init__(self, dataset, input_columns, output_columns, session_id, model_id, parameters, settings):
+    def __init__(self, dataset, columns, session_id, model_id, parameters, settings):
         super().__init__()
         self.dataset = dataset
-        self.input_columns = input_columns
-        self.output_columns = output_columns
+        self.columns = columns
         self.settings = settings
         self.session_id = session_id
         self.model_id = model_id
@@ -41,8 +40,8 @@ class MLLSTM:
         self.epochs = int(parameters['Epochs']['Value'])
         self.s_min = int(parameters['Scaling-Min']['Value'])
         self.s_max = int(parameters['Scaling-Max']['Value'])
-        self.input_dim = len(input_columns)
-        self.output_dim = len(output_columns)
+        self.input_dim = len(columns)
+        self.output_dim = len(columns)
 
     def _post_info(self):
         obj = {
@@ -54,6 +53,7 @@ class MLLSTM:
         }
 
         requests.post(url=UPDATECELLURL, json=obj)
+        print(UPDATECELLURL, "update")
 
 
     def get_error_distribution_stats(self, model, X_train, y_train, out_means, out_stds):
@@ -61,7 +61,7 @@ class MLLSTM:
         relative_error_dict = {}
         error_mean_dict = {}
         error_std_dict = {}
-        for col in self.output_columns:
+        for col in self.columns:
             relative_error_dict[col] = list()
 
         for i, sample in enumerate(X_train):
@@ -70,10 +70,10 @@ class MLLSTM:
 
             for j, pred in enumerate(predictions):
                 relative_error = (y_train[i][j] / pred) - 1
-                relative_error_dict[self.output_columns[j]].append(relative_error.item(0))
+                relative_error_dict[self.columns[j]].append(relative_error.item(0))
 
 
-        for col in self.output_columns:
+        for col in self.columns:
             error_mean = statistics.mean(relative_error_dict[col])
             error_std = statistics.stdev(relative_error_dict[col])
             error_mean_dict[col] = error_mean
@@ -100,32 +100,32 @@ class MLLSTM:
 
 
     def train(self):
-        train_size = int(len(self.dataset) * 0.8)
-        # test_size = len(self.dataset) - train_size
-        train, test = self.dataset.iloc[0:train_size], self.dataset.iloc[train_size:len(self.dataset)]
-        input_means = [self.dataset[col].mean() for col in self.input_columns]
-        input_stds = [self.dataset[col].std() for col in self.input_columns]
-        output_means = [self.dataset[col].mean() for col in self.output_columns]
-        output_stds = [self.dataset[col].std() for col in self.output_columns]
+        # train_size = int(len(self.dataset) * 0.8)
+        # # test_size = len(self.dataset) - train_size
+        # train, test = self.dataset.iloc[0:train_size], self.dataset.iloc[train_size:len(self.dataset)]
+        # input_means = [self.dataset[col].mean() for col in self.input_columns]
+        # input_stds = [self.dataset[col].std() for col in self.input_columns]
+        # output_means = [self.dataset[col].mean() for col in self.output_columns]
+        # output_stds = [self.dataset[col].std() for col in self.output_columns]
+        # print(self.dataset.head())
+        if "time" in self.dataset.columns:
+            self.dataset.set_index("time", inplace=True)
+        means = [self.dataset[col].mean() for col in self.dataset.columns]
+        stds = [self.dataset[col].std() for col in self.dataset.columns]
+        print(self.dataset.describe())
 
-        print(train.head())
-
-        X_train, y_train = to_sequences(train,
-         self.input_columns,
-         self.output_columns,
+        X_train, y_train = to_sequences(self.dataset,
+         self.columns,
          self.input_dim, 
          self.output_dim, 
          self.vector_length,
          1,
-         input_means, 
-         input_stds, 
-         output_means, 
-         output_stds
+         means,
+         stds
         )
 
-        
         model = self._train(X_train, y_train)
-        error_mean_dict, error_std_dict = self.get_error_distribution_stats(model, X_train, y_train, output_means, output_stds)
+        error_mean_dict, error_std_dict = self.get_error_distribution_stats(model, X_train, y_train, means, stds)
 
         if not os.path.isdir(MODELDIR):
             os.mkdir(MODELDIR)
@@ -138,29 +138,26 @@ class MLLSTM:
         obj = {
             "Algorithm": "LSTM",
             "modelID": self.model_id,
-            "sessionID": str(self.session_id),
+            "sessionID": self.session_id,
             "Directory": t_dir,
             "Settings": self.settings,
-            "InputColumns": self.input_columns,
-            "OutputColumns": self.output_columns,
+            "Columns": self.columns,
             "Optional": {
                 "VectorLength": self.vector_length,
                 "ErrorMeans": json.dumps(error_mean_dict),
                 "ErrorStds": json.dumps(error_std_dict),
-                "InputMeans": input_means,
-                "InputStds": input_stds,
-                "OutputMeans": output_means,
-                "OutputStds": output_stds
+                "Means": means,
+                "Stds": stds,
             }
         }
 
-        # requests.post(url=POSTTRAININGINSERTURL, json=obj)
+        requests.post(url=POSTTRAININGINSERTURL, json=obj)
         with open(file_name, 'ab') as train_file:
             pickle.dump(obj, train_file)
 
         self._post_info()
 
-    @concurrent.process
+    # @concurrent.process
     def run(self):
         self.train()
 

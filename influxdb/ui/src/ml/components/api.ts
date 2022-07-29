@@ -2,13 +2,13 @@ import { BACKEND } from 'src/config';
 
 import AJAX from 'src/utils/ajax'
 
-let BASE_URL = "https://vmi474601.contaboserver.net/api/v1.0/ml"
-let BASE_URL2 = "https://vmi474601.contaboserver.net/api/v1.0/ml"
+let BASE_URL = "https://vmi515134.contaboserver.net/api/v1.0/ml"
+let BASE_URL2 = "https://vmi515134.contaboserver.net/api/v1.0/ml"
 
 // let MONGO_URL = "http://localhost:7393"
-let MONGO_URL = "https://vmi474601.contaboserver.net/api/v1.0/metadata"
+let MONGO_URL = "https://vmi515134.contaboserver.net/api/v1.0/metadata"
 let ALERT_URL = "http://localhost:9632"
-let HPC_URL = "https://vmi474601.contaboserver.net/api/v1.0/hpc"
+let HPC_URL = "https://vmi515134.contaboserver.net/api/v1.0/hpc"
 
 export const createTask = async(pkg) => {
     let url = BASE_URL + '/createTask'
@@ -239,6 +239,7 @@ export const acceptModel = async (modelObj) => AJAX({
 
 
 export const getCellCount = async (sessionID) => {
+    console.log(MONGO_URL + '/getModelData/' + sessionID)
     const response = await AJAX({
         url: MONGO_URL + '/getModelData/' + sessionID,
         //excludeBasePath: true,
