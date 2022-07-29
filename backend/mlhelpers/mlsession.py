@@ -3,7 +3,7 @@ import json
 from config import MLSESSIONDIR
 from pandas import read_csv
 from mlhelpers.mllstm import MLLSTM, LSTMRunner
-from mlhelpers.semisupervised import SemiSupervisedVAE
+# from mlhelpers.semisupervised import SemiSupervisedVAE
 
 
 class MLSetup:
@@ -27,14 +27,14 @@ class MLSetup:
     
     def start_training(self):
         if self.algorithm == "LSTM":
-            lstm_model = MLLSTM(self.df, self.settings["input"], self.settings["output"], self.session_id, self.model_id, self.settings["params"], self.settings["dbsettings"])
+            lstm_model = MLLSTM(self.df, self.settings["columns"], self.session_id, self.model_id, self.settings["params"], self.settings["dbsettings"])
             lstm_model.run()
-        elif self.algorithm == "SemiSupervisedVAE":
-            s_dir = MLSESSIONDIR + self.session_id + "/"
-            with open(s_dir + "/semisupervised.json", 'r') as fp:
-                semisupervised_data = json.load(fp)
-            ss_model = SemiSupervisedVAE(self.df, semisupervised_data, self.settings["input"], self.settings["output"], self.session_id, self.model_id, self.settings["params"], self.settings["dbsettings"])
-            ss_model.run()
+        # elif self.algorithm == "SemiSupervisedVAE":
+        #     s_dir = MLSESSIONDIR + self.session_id + "/"
+        #     with open(s_dir + "/semisupervised.json", 'r') as fp:
+        #         semisupervised_data = json.load(fp)
+        #     ss_model = SemiSupervisedVAE(self.df, semisupervised_data, self.settings["input"], self.settings["output"], self.session_id, self.model_id, self.settings["params"], self.settings["dbsettings"])
+        #     ss_model.run()
  
 
     def run(self):

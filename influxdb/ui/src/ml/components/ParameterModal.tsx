@@ -33,17 +33,17 @@ import ButtonGroup from '@material-ui/core/ButtonGroup'
 
 
 export default function TabGroup(tabinfo) {
-  let algs = []
+  let algs = tabinfo.tabinfo.info.Algorithms
   console.log(tabinfo, "hey")
-  if (tabinfo.tabinfo.selectedClass === 'ALL') {
-    Object.keys(tabinfo.tabinfo.info.Classes).forEach(key => {
-      tabinfo.tabinfo.info.Classes[key].forEach(alg => {
-        algs.push(alg)
-      })
-    })
-  } else {
-    algs = tabinfo.tabinfo.info.Classes[tabinfo.tabinfo.selectedClass]
-  }
+  // if (tabinfo.tabinfo.selectedClass === 'ALL') {
+  //   Object.keys(tabinfo.tabinfo.info.Classes).forEach(key => {
+  //     tabinfo.tabinfo.info.Classes[key].forEach(alg => {
+  //       algs.push(alg)
+  //     })
+  //   })
+  // } else {
+  //   algs = tabinfo.tabinfo.info.Classes[tabinfo.tabinfo.selectedClass]
+  // }
 //   const [active, setActive] = React.useState(types[0]);
   const [open, setOpen] = React.useState(false);
 
@@ -76,14 +76,14 @@ export default function TabGroup(tabinfo) {
             <div>
               {/* {active === types[0] ? ( */}
                 <FormDialog forminfo={{info: tabinfo.tabinfo.info, algs: algs}}/>
-                  <div>
+                  {/* <div>
                     <p>{`Selected Algorithm Class: ${tabinfo.tabinfo.selectedClass}`}</p>
-                  </div>
+                  </div> */}
             </div>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} color={ComponentColor.Danger} text="Cancel">
-            </Button>
+            {/* <Button onClick={handleClose} color={ComponentColor.Danger} text="Cancel">
+            </Button> */}
             <Button onClick={handleClose} color={ComponentColor.Primary} text="Set Parameters">
             </Button>
           </DialogActions>

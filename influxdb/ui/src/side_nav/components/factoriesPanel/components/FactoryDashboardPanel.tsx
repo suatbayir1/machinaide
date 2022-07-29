@@ -513,7 +513,7 @@ export default ProductionLineDashboardPanel;
 //                         |> range(start: -1h)
 //                         |> filter(fn: (r) => r["_measurement"] == "system")
 //                         |> filter(fn: (r) => r["_field"] == "load15")
-//                         |> filter(fn: (r) => r["host"] == "vmi474601.contaboserver.net")
+//                         |> filter(fn: (r) => r["host"] == "vmi515134.contaboserver.net")
 //                         |> last()
 //                     `,
 //                     properties: {
@@ -559,7 +559,7 @@ export default ProductionLineDashboardPanel;
 //                         |> range(start: -1m)
 //                         |> filter(fn: (r) => r["_measurement"] == "cpu")
 //                         |> filter(fn: (r) => r["_field"] == "usage_system")
-//                         |> filter(fn: (r) => r["host"] == "vmi474601.contaboserver.net")
+//                         |> filter(fn: (r) => r["host"] == "vmi515134.contaboserver.net")
 //                         |> filter(fn: (r) => r["cpu"] == "cpu-total")
 //                         |> last()
 //                     `,

@@ -2,6 +2,7 @@ import { BACKEND } from 'src/config';
 
 import AJAX from 'src/utils/ajax'
 
+
 let BASE_URL = "http://localhost:9632/api/v1.0/ml"
 let BASE_URL2 = "http://localhost:9632/api/v1.0/ml"
 
@@ -9,6 +10,7 @@ let BASE_URL2 = "http://localhost:9632/api/v1.0/ml"
 let MONGO_URL = "http://localhost:9632/api/v1.0/metadata"
 let ALERT_URL = "http://localhost:9632"
 let HPC_URL = "http://localhost:9632/api/v1.0/hpc"
+
 
 export const createTask = async(pkg) => {
     let url = BASE_URL + '/createTask'

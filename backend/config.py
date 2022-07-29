@@ -17,7 +17,7 @@ authentication = dict(
 )
 
 INFLUXDB_CLIENT = dict(
-    URL = "https://vmi474601.contaboserver.net:8080",
+    URL = "httpss://vmi515134.contaboserver.net:8080",
     TOKEN = "-Y8yuCS19k6ZD0FLiVvpY-zcEK4VhbBe6HC7WPKR7Z5X2bkm-Ag2iMJUSDSBOugpG6klF2XEddhCMkHRuJPbsQ==",
     ORG = "machinaide"
 )
@@ -28,14 +28,9 @@ LDAP = dict(
 )
 
 url = dict(
-    BACKEND = "http://127.0.0.1:9632/api/",
-    CHRONOGRAPH = "http://localhost:8080/",
+    BACKEND = "https://127.0.0.1:9632/api/",
+    CHRONOGRAPH = "https://localhost:8080/",
 )
-
-G_ALGS = {
-    "Predictors": ["LSTM"],
-    "Classifiers": []
-}
 
 
 VAE_HPS_DIR = os.getcwd() + "/mlhelpers/VAESettings/hps/"
@@ -43,10 +38,6 @@ TASK_DIRECTORY = os.getcwd() + "/mlhelpers/HPCTasks/"
 VAE_SENSOR_DIR = os.getcwd() +  "/mlhelpers/VAESettings/sensors/"
 AUTO_SETTINGS_DIR = os.getcwd() + "/mlhelpers/AutoSettings/"
 GETSENSORFROMMAPPING = url["BACKEND"] + "/getSensorFromMapping"
-G_ALGS = {
-    "Predictors": ["LSTM"],
-    "Classifiers": []
-}
 host_ip = "localhost"
 AUTOML_BATCH_SIZES = [32, 64, 128]
 AUTOML_EPOCHS = [100, 200]
@@ -113,8 +104,10 @@ TICK_SETTINGS = {
   "DMIN": "min of last 5 value's differences"
 }
 
+G_ALGS = ["LSTM"]
+
 G_INFO = {
-    "Classes": G_ALGS,
+    "Algorithms": G_ALGS,
     "Parameters": {
         "LSTM": {
             "Epochs": {
@@ -190,7 +183,7 @@ experiments_path_2 = os.getcwd() + "/mlhelpers/experiments/"
 
 #### NLP
 influx = dict(
-    host = 'https://vmi474601.contaboserver.net:8086',
+    host = 'httpss://vmi515134.contaboserver.net:8086',
     orgID = 'd572bde16b31757c',
     dbtoken = "FlviKxQ-RHHWxd1FRkHIc5VwNZuFnP6QTmsJcU6GI7nrd4cuqaTx3cCijZchENMH0zSGuKOew_e4LxW6V09Erw=="
 )
