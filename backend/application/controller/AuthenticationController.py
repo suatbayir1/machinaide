@@ -50,12 +50,11 @@ def loginWithLDAP():
     password = request.json["password"]
 
     try:
-        con = ldap.initialize('ldap://localhost:10389', bytes_mode=False)
+        con = ldap.initialize(config.LDAP["URL"], bytes_mode=False)
         con.protocol_version = ldap.VERSION3
         con.set_option(ldap.OPT_REFERRALS, 0)
 
-        # dc=Ermetal.local
-        result = con.search_s(f'dc=example,dc=com', ldap.SCOPE_SUBTREE, f"(uid={username})")   
+        result = con.search_s(config.LDAP["DC"], ldap.SCOPE_SUBTREE, f"(uid={username})")   
 
         if not result:
             raise Exception("User not found")

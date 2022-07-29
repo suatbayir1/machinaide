@@ -22,6 +22,11 @@ INFLUXDB_CLIENT = dict(
     ORG = "machinaide"
 )
 
+LDAP = dict(
+    URL = "ldap://localhost:10389",
+    DC = "dc=example,dc=com"
+)
+
 url = dict(
     BACKEND = "http://127.0.0.1:9632/api/",
     CHRONOGRAPH = "http://localhost:8080/",

@@ -207,15 +207,21 @@ class MachineHealthPage extends PureComponent<Props, State>{
             modelLogGraphOverlay: false,
             selectedModel: null,
             modelsLastLogs: {},
-            autoRefresh: {status: AutoRefreshStatus.Paused, interval: 10000}
+            autoRefresh: {status: AutoRefreshStatus.Paused, interval: 0}
         }
     }
-    
+    private intervalID: number
     async componentDidMount(){
         console.log(this.props)
         this.getMachineData()
         this.getMachineAnomalies()
         this.getMLModels()
+        if (this.state.autoRefresh.status === AutoRefreshStatus.Active) {
+            this.intervalID = window.setInterval(() => {
+              this.getMLModels()
+            }, this.state.autoRefresh.interval)
+        }
+      
         // this.setState({})
     }
 
@@ -640,13 +646,23 @@ class MachineHealthPage extends PureComponent<Props, State>{
         return false
     }
 
-    onSetAutoRefresh = (selected) => {
-        console.log("set auto refresh", selected)
-        this.setState({autoRefresh: selected})
+    updateAutoRefresh = () => {
+        if(this.state.autoRefresh.status === AutoRefreshStatus.Paused || this.state.autoRefresh.status === AutoRefreshStatus.Disabled){
+            clearInterval(this.intervalID)
+            this.intervalID = null
+        }
+        else if(this.state.autoRefresh.status === AutoRefreshStatus.Active){
+            clearInterval(this.intervalID)
+            this.intervalID = null
+            this.intervalID = window.setInterval(() => {
+                this.getMLModels()
+            }, this.state.autoRefresh.interval)
+        }
     }
 
-    autoRefresh = () => {
-        console.log("auto refresh is working")
+    onSetAutoRefresh = (selected) => {
+        console.log("set auto refresh", selected)
+        this.setState({autoRefresh: selected}, () => this.updateAutoRefresh())
     }
 
     private handleChooseAutoRefresh = (interval: number) => {
@@ -1163,7 +1179,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
                                     <RefreshLogsDropdown
                                         selected={this.state.autoRefresh}
                                         onChoose={this.handleChooseAutoRefresh}
-                                        onManualRefresh={()=>console.log("manual refresh")}
+                                        onManualRefresh={()=>this.getMLModels()}
                                         showManualRefresh={true}
                                     />
                                 </div>                    
