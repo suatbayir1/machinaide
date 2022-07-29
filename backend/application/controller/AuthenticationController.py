@@ -51,11 +51,17 @@ def loginWithLDAP():
     password = request.json["password"]
 
     try:
+        print(config.LDAP["URL"])
         con = ldap.initialize(config.LDAP["URL"], bytes_mode=False)
+        print("con", con)
         con.protocol_version = ldap.VERSION3
+        print("protocol")
         con.set_option(ldap.OPT_REFERRALS, 0)
+        print("set option")
 
+        print("username", username)
         result = con.search_s(config.LDAP["DC"], ldap.SCOPE_SUBTREE, f"(uid={username})")   
+        print("result", result)
 
         if not result:
             raise Exception("User not found")
@@ -97,7 +103,8 @@ def loginWithLDAP():
         message = "password_is_wrong"
         logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
         return return_response(data = [], success = False, message = message, code = 400), 400
-    except ldap.SERVER_DOWN:
+    except ldap.SERVER_DOWN as e:
+        print(e)
         message = "LDAP Server is not running"
         logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
         return return_response(data = [], success = False, message = message, code = 400), 400
