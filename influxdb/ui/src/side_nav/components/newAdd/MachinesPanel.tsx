@@ -231,7 +231,7 @@ class MachinesPanel extends PureComponent<Props, State> {
                                                                                                 </li>
                                                                                             }
                                                                                             <li className="links">
-                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/dt`}>
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/dt?nodeID=${machine["id"]}`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                                                                                                         <div><img src="../../../assets/icons/tree-icon.png" className="li-icon" /></div>
                                                                                                     </div>
@@ -268,14 +268,14 @@ class MachinesPanel extends PureComponent<Props, State> {
                                                                                                     Machine Actions
                                                                                                 </Link>
                                                                                             </li>
-                                                                                            <li className="links">
+                                                                                            {/* <li className="links">
                                                                                                 <Link to={`/orgs/${this.props["match"].params["orgID"]}/predictions/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${machine["id"]}`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                                                                                                         <div><img src="../../../assets/icons/prediction-icon.png" className="li-icon" /></div>
                                                                                                     </div>
                                                                                                     Show Predictions
                                                                                                 </Link>
-                                                                                            </li>
+                                                                                            </li> */}
                                                                                             <li className="links">
                                                                                                 <Link to={`/orgs/${this.props["match"].params["orgID"]}/failures/${this.props["match"].params.FID}/${machine["id"]}`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>

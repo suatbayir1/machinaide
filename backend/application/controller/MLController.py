@@ -14,7 +14,7 @@ from pathlib import Path
 from multiprocessing import Process, Queue
 from multiprocessing.pool import ThreadPool
 from mlhelpers.mlwrappers import MLSession, ModelRunner
-from mlhelpers.automl.ml_config import AUTOML_SETTINGS_DIR, AUTOML_EXPERIMENTS_DIR
+from mlhelpers.automl.ml_config import AUTOML_SETTINGS_DIR, AUTOML_EXPERIMENTS_DIR, MODELS_DIR
 import codecs
 from application.helpers.Helper import return_response, token_required
 # from mlserver.flask_app_ml.mlconstants import VAE_SENSOR_DIR
@@ -528,10 +528,11 @@ def postExperiment():
     optimizer = request.json["optimizer"]
     custom_metric_equation = request.json["customMetricEquation"]
     custom_metric_direction = request.json["customMetricDirection"]
+    start_time = request.json["startTime"]
 
-    experiment_settings = {"experimentName": experiment_name, 'experimentStatus': "RUNNING", "startTime": upload_time ,"creator": creator,
+    experiment_settings = {"experimentName": experiment_name, 'experimentStatus': "RUNNING", "uploadTime": upload_time ,"creator": creator,
         "experimentJob": experiment_job, "timeout": timeout, "settings": settings ,"features": features, "optimizer": optimizer,
-        "customMetricEquation": custom_metric_equation, "customMetricDirection": custom_metric_direction, "trials": []}
+        "customMetricEquation": custom_metric_equation, "customMetricDirection": custom_metric_direction, "startTime": start_time, "trials": []}
     
     if("windowLength" in request.json):
         window_length = request.json["windowLength"]
@@ -586,10 +587,33 @@ def postMLModel():
     mongo_model.post_ml_model(pkg)
     return "OK", 201
 
+@mlserver.route('/deleteMLModel/<modelID>', methods=['DELETE'])
+def deleteMLModel(modelID):
+    query = {"modelID": modelID}
+    mongo_model.delete_ml_model(query)
+    model_dir_path = F"{MODELS_DIR}{modelID}"
+    model_path = F"{MODELS_DIR}{modelID}/model.h5"
+    # remove folder first delete model then check if folder empty then delete
+    if(os.path.exists(model_path)):
+        os.remove(model_path)
+    if(os.path.exists(model_dir_path)):
+        os.rmdir(model_dir_path)       
+    return jsonify(msg="Model is deleted."), 200
+
+@mlserver.route('/deleteMLPipeline/<pipelineID>', methods=['DELETE'])
+def deleteMLPipeline(pipelineID):
+    print("delete pipeline ", pipelineID)
+    query = {"pipelineID": pipelineID}
+    mongo_model.delete_ml_model(query)
+    pipeline_path = F"{os.path.join( os.path.dirname( os.getcwd()), '' )}evalml-server/models/{pipelineID[:-1]}/pipeline{pipelineID[-1]}.cloudpickle" 
+    if(os.path.exists(pipeline_path)):
+        os.remove(pipeline_path)     
+    return jsonify(msg="Pipeline is deleted."), 200
+
 @mlserver.route('/changeStatus', methods=['PUT'])
 def changeStatus():
     experiment_name = request.json['experiment_name']
-    mongo_model.update_experiment({"experimentName": experiment_name}, {'$set': {'experimentStatus': "COMPLETED"}})
+    mongo_model.update_experiment({"experimentName": experiment_name}, {'$set': {'experimentStatus': "COMPLETED", "endTime": time.time()}})
     return {"msg": "Status of experiment " + experiment_name + " is changed to COMPLETED"}
 
 @mlserver.route('/getAutoMLSettings', methods=['GET'])

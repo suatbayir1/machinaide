@@ -154,6 +154,8 @@ class FillNanValues:
     def get_df_with_values(self, df, col_name, operation):
         if(self.is_numeric):
             return self.fill_with_value(df, col_name)
+        elif(operation == "previous"):
+            return df[col_name].fillna(method="ffill")
         elif(operation == "avg"):
             return self.avg_last_five(df, col_name)
         elif(operation == "min"):
@@ -163,7 +165,7 @@ class FillNanValues:
         elif(operation == "davg" or operation == "dmin" or operation == "dmax"):
             return self.last_five_diff(df, col_name, operation)
         else:
-            return df.interpolate()
+            return df[col_name].interpolate()
     
     def fill_with_value(self, df, col_name):
         # if first row is nan, change it to 0
@@ -178,7 +180,7 @@ class FillNanValues:
         new_col = df[col_name].fillna(df[col_name].rolling(5, min_periods=0).mean().shift())
         df[col_name] = new_col
         # just in case if any nan left
-        df = df.fillna(0)
+        df = df.fillna(method="ffill")
         if(check_both_not_none(self.operator, self.operator_value)):
             return self.do_operation(df, col_name)
         return df
@@ -191,7 +193,7 @@ class FillNanValues:
         new_col = df[col_name].fillna(df[col_name].rolling(5, min_periods=0).max().shift())
         df[col_name] = new_col
         # just in case if any nan left
-        df = df.fillna(0)
+        df = df.fillna(method="ffill")
         if(check_both_not_none(self.operator, self.operator_value)):
             return self.do_operation(df, col_name)
         return df
@@ -204,7 +206,7 @@ class FillNanValues:
         new_col = df[col_name].fillna(df[col_name].rolling(5, min_periods=0).min().shift())
         df[col_name] = new_col
         # just in case if any nan left
-        df = df.fillna(0)
+        df = df.fillna(method="ffill")
         if(check_both_not_none(self.operator, self.operator_value)):
             return self.do_operation(df, col_name)
         return df
@@ -264,11 +266,11 @@ def return_default_value(val):
     elif(val == TICK_SETTINGS["MIN"]):
         return (True, False, "min")
     elif(val == TICK_SETTINGS["DAVG"]):
-        return (True, False, "difference_avg")
+        return (True, False, "davg")
     elif(val == TICK_SETTINGS["DMAX"]):
-        return (True, False, "difference_max")
+        return (True, False, "dmax")
     elif(val == TICK_SETTINGS["DMIN"]):
-        return (True, False, "difference_min")
+        return (True, False, "dmin")
     elif(val == "undefined"):
         return (False, True, 0)
     else:
@@ -356,7 +358,16 @@ class RULRegModelRunner:
             # sensor_info = requests.get(url=GETSENSORFROMMAPPING + field).json()
 
             # sensor_info = {"defaultValue": "-666", "operator": "*", "operatorValue": "2"}
-            sensor_info = None
+            sensor_info = {}
+            if("isFillNullActive" in field and field["isFillNullActive"]):
+                if("defaultValue" in field):
+                    sensor_info["defaultValue"] = field["defaultValue"]
+                else:
+                    sensor_info["defaultValue"] = TICK_SETTINGS["LAST"]
+            if("isOperationActive" in field and field["isOperationActive"]):
+                if("operation" and "operationValue" in field):
+                    sensor_info["operation"] = field["operation"]
+                    sensor_info["operationValue"] = field["operationValue"]
             # prepare fillnan configurations
             do_fill_nan = False
             is_numeric = True
@@ -458,7 +469,7 @@ class RULRegModelRunner:
                 verbose=True,
             )
 
-            X = fm.copy().fillna(0)
+            X = fm.copy().fillna(method="ffill")
             predictions = self.model.predict(X)
             print(predictions)
             if(len(predictions) and predictions.iloc[0]):
@@ -793,7 +804,7 @@ class POFModelRunner:
             # df.to_csv("./pof_log_test1.csv")
             # df = df.dropna(axis=0)
             # df.to_csv("./pof_log_test2.csv")
-            df = df.fillna(0)
+            df = df.fillna(method="ffill")
             return df
         else:
             empty_df = pd.DataFrame([])

@@ -35,6 +35,7 @@ AUTOML_POST_TRIAL_URL = f"{api_url}ml/postTrial"
 
 AUTOML_SETTINGS_DIR = os.getcwd() + "/experiment_settings/"
 AUTOML_EXPERIMENTS_DIR = os.getcwd() + "/experiments/"
+MODELS_DIR = os.getcwd() + "/models/"
 
 
 GETFAILURESURL = "http://{}:{}/returnFailures/".format(flaskserver, flask_port)

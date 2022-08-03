@@ -4,11 +4,11 @@ import React, { PureComponent } from "react";
 // Components
 import {
     Form, ComponentSize, Grid, Columns, Label, InfluxColors,
-    SelectDropdown, ComponentStatus, DapperScrollbars, List,
-    Gradients, ConfirmationButton, IconFont, ComponentColor,
-    Appearance, Input, TextArea, TextBlock
+    ComponentStatus, DapperScrollbars, List,
+    Gradients, IconFont, ComponentColor, TextArea, Button, ButtonType,
 } from '@influxdata/clockface'
 import DangerConfirmationOverlay from "src/shared/overlays/DangerConfirmationOverlay";
+import FactorySceneOverlay from "src/dt/components/FactorySceneOverlay";
 
 // Services
 import DTService from "src/shared/services/DTService";
@@ -35,6 +35,7 @@ type State = {
     description: string
     visibleConfirmationOverlay: boolean
     operationType: "delete" | "update"
+    visibleFactory3DOverlay: boolean
 }
 
 class FactoryInformation extends PureComponent<Props, State> {
@@ -48,6 +49,7 @@ class FactoryInformation extends PureComponent<Props, State> {
             description: "",
             visibleConfirmationOverlay: false,
             operationType: "update",
+            visibleFactory3DOverlay: false
         }
     }
 
@@ -70,12 +72,6 @@ class FactoryInformation extends PureComponent<Props, State> {
             bucket: selectedGraphNode["bucket"],
             description: selectedGraphNode["description"],
         })
-    }
-
-    private handleChangeInput = (e): void => {
-        if (Object.keys(this.state).includes(e.target.name)) {
-            this.setState({ [e.target.name]: e.target.value } as Pick<State, keyof State>);
-        }
     }
 
     private deleteFactory = async (): Promise<void> => {
@@ -123,28 +119,21 @@ class FactoryInformation extends PureComponent<Props, State> {
         this.setState({ visibleConfirmationOverlay: false })
     }
 
-    private updateFactory = async (): Promise<void> => {
-        const { selectedGraphNode, handleChangeNotification } = this.props;
-        const { factoryName, location, bucket } = this.state;
-
-        if (factoryName.trim() === "" || location.trim() === "") {
-            handleChangeNotification("error", "Factory name and Location cannot be empty");
-            return;
-        }
-
-        if (bucket != selectedGraphNode["bucket"]) {
-            this.setState({ visibleConfirmationOverlay: true })
-        } else {
-            this.updateFactoryConfirmed();
-        }
-    }
-
     public render(): JSX.Element {
-        const { selectedGraphNode, bucketNames } = this.props;
-        const { factoryName, location, bucket, description, visibleConfirmationOverlay, operationType } = this.state;
+        const { selectedGraphNode, } = this.props;
+        const { factoryName, location, bucket, description, visibleConfirmationOverlay, operationType, visibleFactory3DOverlay } = this.state;
 
         return (
             <>
+                {
+                    visibleFactory3DOverlay &&
+                    <FactorySceneOverlay
+                        visible={visibleFactory3DOverlay}
+                        onClose={() => this.setState({ visibleFactory3DOverlay: false })}
+                    />
+                }
+
+
                 <DangerConfirmationOverlay
                     title={"Are you sure ?"}
                     message={operationType == "update" ? bucketConfirmationText : deleteFactoryConfirmationText}
@@ -160,7 +149,7 @@ class FactoryInformation extends PureComponent<Props, State> {
                                 widthXS={Columns.Six}
                                 widthSM={Columns.Six}
                                 widthMD={Columns.Six}
-                                widthLG={Columns.Twelve}
+                                widthLG={Columns.Six}
                             >
                                 <Form.Element label="Type">
                                     <Label
@@ -176,6 +165,22 @@ class FactoryInformation extends PureComponent<Props, State> {
                                 widthXS={Columns.Six}
                                 widthSM={Columns.Six}
                                 widthMD={Columns.Six}
+                                widthLG={Columns.Six}
+                            >
+                                <Form.Element label="3D View">
+                                    <Button
+                                        text="3D Factory"
+                                        icon={IconFont.Pulse}
+                                        onClick={() => this.setState({ visibleFactory3DOverlay: true })}
+                                        type={ButtonType.Button}
+                                        color={ComponentColor.Secondary}
+                                    />
+                                </Form.Element>
+                            </Grid.Column>
+                            <Grid.Column
+                                widthXS={Columns.Six}
+                                widthSM={Columns.Six}
+                                widthMD={Columns.Six}
                                 widthLG={Columns.Twelve}
                             >
                                 <Form.Element
@@ -183,12 +188,6 @@ class FactoryInformation extends PureComponent<Props, State> {
                                     errorMessage={handleValidation(factoryName)}
                                     required={true}
                                 >
-                                    {/* <Input
-                                        name="factoryName"
-                                        placeholder="Factory Name.."
-                                        onChange={this.handleChangeInput}
-                                        value={factoryName}
-                                    /> */}
                                     <Label
                                         size={ComponentSize.Small}
                                         name={factoryName}
@@ -204,49 +203,7 @@ class FactoryInformation extends PureComponent<Props, State> {
                                 widthMD={Columns.Six}
                                 widthLG={Columns.Twelve}
                             >
-                                <Form.Element
-                                    label="Location"
-                                    errorMessage={handleValidation(location)}
-                                    required={true}
-                                >
-                                    {/* <Input
-                                        name="location"
-                                        placeholder="Location.."
-                                        onChange={this.handleChangeInput}
-                                        value={location}
-                                    /> */}
-                                    {/* <Label
-                                        size={ComponentSize.Small}
-                                        name={location}
-                                        description="Location"
-                                        color={InfluxColors.Ocean}
-                                        id={location}
-                                    /> */}
-                                    <TextArea
-                                        name="location"
-                                        value={location}
-                                        placeholder="Location.."
-                                        rows={2}
-                                        status={ComponentStatus.Disabled}
-                                    />
-                                </Form.Element>
-                            </Grid.Column>
-                            <Grid.Column
-                                widthXS={Columns.Six}
-                                widthSM={Columns.Six}
-                                widthMD={Columns.Six}
-                                widthLG={Columns.Twelve}
-                            >
                                 <Form.Element label="Bucket">
-                                    {/* <SelectDropdown
-                                        buttonStatus={["admin"].includes(localStorage.getItem("userRole"))
-                                            ? ComponentStatus.Valid
-                                            : ComponentStatus.Disabled
-                                        }
-                                        options={bucketNames}
-                                        selectedOption={bucket}
-                                        onSelect={(e) => this.setState({ bucket: e })}
-                                    /> */}
                                     <Label
                                         size={ComponentSize.Small}
                                         name={bucket}
@@ -258,7 +215,27 @@ class FactoryInformation extends PureComponent<Props, State> {
                             </Grid.Column>
                             <Grid.Column
                                 widthXS={Columns.Twelve}
-                                widthSM={Columns.Twelve}
+                                widthSM={Columns.Six}
+                                widthMD={Columns.Twelve}
+                                widthLG={Columns.Twelve}
+                            >
+                                <Form.Element
+                                    label="Location"
+                                    errorMessage={handleValidation(location)}
+                                    required={true}
+                                >
+                                    <TextArea
+                                        name="location"
+                                        value={location}
+                                        placeholder="Location.."
+                                        rows={2}
+                                        status={ComponentStatus.Disabled}
+                                    />
+                                </Form.Element>
+                            </Grid.Column>
+                            <Grid.Column
+                                widthXS={Columns.Twelve}
+                                widthSM={Columns.Six}
                                 widthMD={Columns.Twelve}
                                 widthLG={Columns.Twelve}
                             >
@@ -306,46 +283,6 @@ class FactoryInformation extends PureComponent<Props, State> {
                                 </Form.Element>
                             </Grid.Column>
                         </Grid.Row>
-                        {/* <Grid.Row>
-                            <div className="dt-information-buttons">
-                                {
-                                    ["admin"].includes(localStorage.getItem("userRole")) &&
-                                    <ConfirmationButton
-                                        icon={IconFont.Checkmark}
-                                        onConfirm={() => {
-                                            this.setState({ operationType: "update" },
-                                                () => this.updateFactory())
-                                        }}
-                                        text={"Update"}
-                                        popoverColor={ComponentColor.Success}
-                                        popoverAppearance={Appearance.Outline}
-                                        color={ComponentColor.Success}
-                                        confirmationLabel="Do you want to update ?"
-                                        confirmationButtonColor={ComponentColor.Success}
-                                        confirmationButtonText="Yes"
-                                    />
-                                }
-                                {
-                                    ["admin"].includes(localStorage.getItem("userRole")) &&
-                                    <ConfirmationButton
-                                        icon={IconFont.Remove}
-                                        onConfirm={() => {
-                                            this.setState({
-                                                operationType: "delete",
-                                                visibleConfirmationOverlay: true
-                                            })
-                                        }}
-                                        text={"Delete"}
-                                        popoverColor={ComponentColor.Danger}
-                                        popoverAppearance={Appearance.Outline}
-                                        color={ComponentColor.Danger}
-                                        confirmationLabel="Do you want to delete ?"
-                                        confirmationButtonColor={ComponentColor.Danger}
-                                        confirmationButtonText="Yes"
-                                    />
-                                }
-                            </div>
-                        </Grid.Row> */}
                     </Grid>
                 </Form>
             </>

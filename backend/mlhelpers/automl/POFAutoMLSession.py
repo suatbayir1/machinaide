@@ -24,7 +24,8 @@ from ml_config import (
     AUTOML_CHANGE_STATUS_URL,
     MODEL_DIR,
     AUTOML_UPDATE_EXPERIMENT_URL,
-    UPDATE_MODEL_URL
+    UPDATE_MODEL_URL,
+    TICK_SETTINGS
 )
 from POFModelComponents import (
     POFModelBuilder,
@@ -242,6 +243,7 @@ class POFAutoMLSession:
             "optimizer": "val_loss",
             "customMetricEquation": self.custom_metric_equation,
             "customMetricDirection": self.custom_metric_direction,  
+            "startTime": time.time(),
             "trials": []
         }
 
@@ -338,10 +340,15 @@ class POFAutoMLSession:
             "outputColumns": output_cols,
         }
         requests.put(url=UPDATE_MODEL_URL + self.model_ID, json=updated_pkg)
+
+        json_file_path = F"{os.getcwd()}/experiment_settings/{self.experiment_name}-{self.session_ID}.json"
+        if(os.path.exists(json_file_path)):
+            os.remove(json_file_path)
     
     def prepare_data(self):
         # TODO: get failures 
         failure_res = requests.post(url=GET_FAILURES_URL, json={"sourceName": self.asset_name}, headers={'token': self.token, 'Content-Type': 'application/json'}).json()
+        failure_res = json.loads(failure_res["data"]["data"])
         """ failure_res = [
             {
                 "failureStartTime": '2022-05-30T10:16'
@@ -393,7 +400,17 @@ class POFAutoMLSession:
                     # TODO
                     # sensor_info = requests.get(url=GETSENSORFROMMAPPING + field).json()
 
-                    sensor_info = {"defaultValue": "-666", "operator": "*", "operatorValue": "2"}
+                    # sensor_info = {"defaultValue": "-666", "operator": "*", "operatorValue": "2"}
+                    sensor_info = {}
+                    if("isFillNullActive" in field and field["isFillNullActive"]):
+                        if("defaultValue" in field):
+                            sensor_info["defaultValue"] = field["defaultValue"]
+                        else:
+                            sensor_info["defaultValue"] = TICK_SETTINGS["LAST"]
+                    if("isOperationActive" in field and field["isOperationActive"]):
+                        if("operation" and "operationValue" in field):
+                            sensor_info["operation"] = field["operation"]
+                            sensor_info["operationValue"] = field["operationValue"]
 
                     # prepare fillnan configurations
                     do_fill_nan = False
@@ -405,8 +422,8 @@ class POFAutoMLSession:
                             do_fill_nan, is_numeric, default_value = return_default_value(sensor_info["defaultValue"])
                         else:
                             do_fill_nan, is_numeric, default_value = (False, True, 0)
-                        if("operator" and "operatorValue" in sensor_info):
-                            operator, operator_value = return_operator_info(sensor_info["operator"], sensor_info["operatorValue"])
+                        if("operation" and "operationValue" in sensor_info):
+                            operator, operator_value = return_operator_info(sensor_info["operation"], sensor_info["operationValue"])
                         else:
                             operator, operator_value = (None, None)
                     data = self.get_query_results(field["database"], field["measurement"], field["dataSource"], duration_start_date, duration_end_date)
@@ -489,7 +506,8 @@ class POFAutoMLSession:
             
             if df.empty:
                 print('DataFrame is empty!')
-            
+
+            df = df.fillna(method="ffill")
             try:
                 mindpoints = int(self.min_data_points)
             except ValueError:

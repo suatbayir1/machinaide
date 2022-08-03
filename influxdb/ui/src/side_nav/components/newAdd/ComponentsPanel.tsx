@@ -207,7 +207,7 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                                                                 </Link>
                                                                                             </li>
                                                                                             <li className="links">
-                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/dt`}>
+                                                                                                <Link to={`/orgs/${this.props["match"].params["orgID"]}/dt?nodeID=${component["id"]}`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                                                                                                         <div><img src="../../../assets/icons/tree-icon.png" className="li-icon" /></div>
                                                                                                     </div>
@@ -236,14 +236,14 @@ class ComponentsPanel extends PureComponent<Props, State> {
                                                                                                     </span>
                                                                                                 </Link>
                                                                                             </li>
-                                                                                            <li className="links">
+                                                                                            {/* <li className="links">
                                                                                                 <Link to={`/orgs/${this.props["match"].params["orgID"]}/predictions/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${this.props["match"].params.MID}/${component["id"]}`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                                                                                                         <div><img src="../../../assets/icons/prediction-icon.png" className="li-icon" /></div>
                                                                                                     </div>
                                                                                                     Show Predictions
                                                                                                 </Link>
-                                                                                            </li>
+                                                                                            </li> */}
                                                                                             <li className="links">
                                                                                                 <Link to={`/orgs/${this.props["match"].params["orgID"]}/failures/:FID/:MID/:CID`}>
                                                                                                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>

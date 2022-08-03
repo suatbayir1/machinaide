@@ -66,6 +66,7 @@ export default class Microphone extends PureComponent<Props, State> {
         }
 
         recognition.onerror = function (event) {
+            console.log(event.error);
             if (event.error == 'no-speech') {
                 console.log('Try again.');
             }

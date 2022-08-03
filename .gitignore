@@ -12,6 +12,7 @@ evalml-server/evalmlenv
 backend/mlhelpers/VAESettings/sensors/
 experiments/
 models/
+experiment_settings/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

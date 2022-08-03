@@ -54,6 +54,8 @@ class FillNanValues:
     def get_df_with_values(self, df, col_name, operation):
         if(self.is_numeric):
             return self.fill_with_value(df, col_name)
+        elif(operation == "previous"):
+            return df[col_name].fillna(method="ffill")
         elif(operation == "avg"):
             return self.avg_last_five(df, col_name)
         elif(operation == "min"):
@@ -63,7 +65,7 @@ class FillNanValues:
         elif(operation == "davg" or operation == "dmin" or operation == "dmax"):
             return self.last_five_diff(df, col_name, operation)
         else:
-            return df.interpolate()
+            return df[col_name].interpolate()
     
     def fill_with_value(self, df, col_name):
         # if first row is nan, change it to 0

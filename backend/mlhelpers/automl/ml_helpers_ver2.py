@@ -16,16 +16,19 @@ def return_default_value(val):
     elif(val == TICK_SETTINGS["MIN"]):
         return (True, False, "min")
     elif(val == TICK_SETTINGS["DAVG"]):
-        return (True, False, "difference_avg")
+        return (True, False, "davg")
     elif(val == TICK_SETTINGS["DMAX"]):
-        return (True, False, "difference_max")
+        return (True, False, "dmax")
     elif(val == TICK_SETTINGS["DMIN"]):
-        return (True, False, "difference_min")
+        return (True, False, "dmin")
     elif(val == "undefined"):
         return (False, True, 0)
     else:
         try:
-            n = float(val)
+            if(isinstance(val, str)):
+                n = float(val)
+            else:
+                n = 0
         except ValueError:
             print("value is not numeric")
             n = 0
