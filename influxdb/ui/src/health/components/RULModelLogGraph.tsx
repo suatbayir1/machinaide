@@ -80,9 +80,19 @@ class RULModelLogGraph extends PureComponent<Props, State>{
                             legend: 'time',
                             legendPosition: 'middle',
                             format: (value) => {
-                                // let d = new Date(value)
-                                // return d.toLocaleDateString() + " " + d.toLocaleTimeString().substring(0,5);
-                                return ""
+                              if(value === this.state.modelLogDataPoints[0]["data"][0]["x"]){
+                                let d = new Date(value)
+                                return d.toLocaleDateString() + " " + d.toLocaleTimeString().substring(0,5);
+                              }
+                              else if(value === this.state.modelLogDataPoints[0]["data"][parseInt(this.state.modelLogDataPoints[0]["data"].length/2)]["x"]){
+                                let d = new Date(value)
+                                return d.toLocaleDateString() + " " + d.toLocaleTimeString().substring(0,5);
+                              } 
+                              else if(value === this.state.modelLogDataPoints[0]["data"][this.state.modelLogDataPoints[0]["data"].length-1]["x"]){
+                                let d = new Date(value)
+                                return d.toLocaleDateString() + " " + d.toLocaleTimeString().substring(0,5);
+                              }                                
+                              return ""
                             //return `${d.getUTCDate()}.${d.getUTCMonth()+1}.${d.getUTCFullYear()} ${d.getUTCHours()}:${d.getUTCMinutes()}:${d.getUTCSeconds()}`;
                             }
                         }}

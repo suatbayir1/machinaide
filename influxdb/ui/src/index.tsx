@@ -28,6 +28,13 @@ import { updateReportingContext } from 'src/cloud/utils/reporting'
 // Actions
 import { disablePresentationMode } from 'src/shared/actions/app'
 
+// Translations
+import './i18n';
+import i18next from 'i18next';
+
+const lang = localStorage.getItem('lang') || 'en';
+i18next.changeLanguage(lang);
+
 // Styles
 import 'src/style/chronograf.scss'
 import '@influxdata/clockface/dist/index.css'

@@ -92,8 +92,6 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         scene.children.forEach(async (child) => {
             await transformControl.detach(child);
 
-            console.log("color", object["color"])
-
             if (child["name"] === object["objectName"]) {
                 if (child["type"] == 'ColladaFile') {
                     child.traverse(function (child) {

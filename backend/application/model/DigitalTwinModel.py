@@ -87,6 +87,21 @@ class DigitalTwinModel():
         else:
             return False
 
+    def saveMachineOrders(self, payload):
+        try:
+            update_data = {
+                '$set': payload
+            }
+
+            where = {
+               "plID": payload["plID"]
+            }
+
+            self.db.update_one("machine_orders", update_data, where)
+            return True
+        except:
+            return False 
+
     def add_relationship(self, payload):
         try:
             data = self.db.find(self.collection)
@@ -445,6 +460,7 @@ class DigitalTwinModel():
                     if pl["@id"] == payload["id"]:
                         pl["displayName"] = payload["displayName"]
                         pl["description"] = payload["description"]
+                        pl["section"] = payload["section"]
                         factoryID = factory["id"]
                 
             update_data = {
@@ -679,6 +695,11 @@ class DigitalTwinModel():
         except:
             return 500
 
+    def getMachineOrders(self, where):
+        try:
+            return self.db.find_one("machine_orders", where)
+        except:
+            return 500
 
     def update_dt(self):
         payload = {

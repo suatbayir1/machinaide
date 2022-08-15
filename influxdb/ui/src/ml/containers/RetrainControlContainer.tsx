@@ -12,18 +12,19 @@ import * as api from '../components/api'
 import MLBucketSelector from '../components/MLBucketSelector';
 
 let partitionSpecs = [
-    {"Partition Name": "Local"},
-    {"Partition Name": "partition1",
-     "State": "UP",
-     "Total CPUs": 1818,
-     "Total Nodes": 5,
-     "Minimum Nodes": 1,
-     "Maximum Timeout": "15-01:00:00",
-     "Default Timeout": "15:00:00"
+    { "Partition Name": "Local" },
+    {
+        "Partition Name": "partition1",
+        "State": "UP",
+        "Total CPUs": 1818,
+        "Total Nodes": 5,
+        "Minimum Nodes": 1,
+        "Maximum Timeout": "15-01:00:00",
+        "Default Timeout": "15:00:00"
     }
 ]
 
-interface Props {}
+interface Props { }
 
 interface State {
     models: any[],
@@ -75,7 +76,7 @@ class RetrainControlPage extends PureComponent<Props, State> {
             from: "",
             to: "",
             timeRange: {},
-            selectedModelObject: {modelName: ""},
+            selectedModelObject: { modelName: "" },
             selectedModel: "",
             selectedFramework: "",
             selectedDatabase: "",
@@ -91,7 +92,7 @@ class RetrainControlPage extends PureComponent<Props, State> {
     }
 
     setSelectedBucket = (selectedDatabase) => {
-        this.setState({selectedDatabase: selectedDatabase})
+        this.setState({ selectedDatabase: selectedDatabase })
         this.constructDropdownData(selectedDatabase)
     }
 
@@ -100,45 +101,45 @@ class RetrainControlPage extends PureComponent<Props, State> {
         const measurementQuery = `import "influxdata/influxdb/v1" v1.measurements(bucket: "${selectedBucket}")`
         async function asyncForEach(array, callback) {
             for (let index = 0; index < array.length; index++) {
-              await callback(array[index], index, array);
+                await callback(array[index], index, array);
             }
         }
         let dropdownData = []
-        extractBoxedCol(runQuery(orgID, measurementQuery), '_value').promise.then(async(measurements) => {
-            this.setState({measurements: measurements})
-                asyncForEach(measurements, async(msr) => {
-                    const fieldQuery = `import "influxdata/influxdb/v1" v1.measurementFieldKeys(bucket: "${selectedBucket}", \ 
+        extractBoxedCol(runQuery(orgID, measurementQuery), '_value').promise.then(async (measurements) => {
+            this.setState({ measurements: measurements })
+            asyncForEach(measurements, async (msr) => {
+                const fieldQuery = `import "influxdata/influxdb/v1" v1.measurementFieldKeys(bucket: "${selectedBucket}", \ 
                     measurement: "${msr}")`
-                    let obj = {
-                        label: msr,
-                        value: msr,
-                        selected: msr,
-                        children: []
+                let obj = {
+                    label: msr,
+                    value: msr,
+                    selected: msr,
+                    children: []
+                }
+                let fields = await extractBoxedCol(runQuery(orgID, fieldQuery), '_value').promise
+
+                fields.forEach(field => {
+                    let childrenObj = {
+                        label: field,
+                        value: field,
+                        selected: field,
+                        measurement: msr
                     }
-                    let fields = await extractBoxedCol(runQuery(orgID, fieldQuery), '_value').promise
-
-                    fields.forEach(field => {
-                        let childrenObj = {
-                            label: field,
-                            value: field,
-                            selected: field,
-                            measurement: msr
-                        }
-                        obj.children.push(childrenObj)
-                    })
-                    dropdownData.push(obj)
-
-                }).then(() => {
-                    this.setState({dropdownData: dropdownData})
+                    obj.children.push(childrenObj)
                 })
+                dropdownData.push(obj)
+
+            }).then(() => {
+                this.setState({ dropdownData: dropdownData })
             })
+        })
     }
 
     onDropdownTreeChange = (_, selectedNodes) => {
         let m2s = {}
         // console.log(selectedNodes)
         selectedNodes.forEach(node => {
-            if(node._children) {
+            if (node._children) {
                 m2s[node.value] = []
                 node._children.forEach(field => {
                     m2s[node.value].push(field.value)
@@ -150,12 +151,12 @@ class RetrainControlPage extends PureComponent<Props, State> {
                 m2s[node.measurement].push(node.value)
             }
         })
-        this.setState({measurementToSensors: m2s})
+        this.setState({ measurementToSensors: m2s })
     }
 
     componentDidMount() {
         api.getTasks().then(tasks => {
-            this.setState({mltasks: tasks})
+            this.setState({ mltasks: tasks })
         })
         console.log(this.props);
 
@@ -166,7 +167,7 @@ class RetrainControlPage extends PureComponent<Props, State> {
         // this.getModels();
     }
 
-    handleRadioClick (e) {
+    handleRadioClick(e) {
         console.log(this.state.selectedModelObject)
         let pkg = {
             retrainMethod: e,
@@ -181,93 +182,93 @@ class RetrainControlPage extends PureComponent<Props, State> {
     getModels() {
         api.getBasicModels().then(models => {
             this.setState({ models: models })
-        })    
+        })
     }
 
     onModelChange = (e) => {
         console.log(e)
         let modelObject = this.state.models.find(obj => obj.modelID === e)
-        this.setState({ selectedModel: modelObject.modelName, selectedModelObject: modelObject})
+        this.setState({ selectedModel: modelObject.modelName, selectedModelObject: modelObject })
     }
 
     onFrameworkChange = (e) => {
-        this.setState({ selectedFramework: e})
+        this.setState({ selectedFramework: e })
     }
 
     onSchedulerChange = (e) => {
-        this.setState({ selectedScheduler: e})
+        this.setState({ selectedScheduler: e })
     }
 
     onPartitionChange = (e) => {
-        this.setState({ selectedPartition: e})
+        this.setState({ selectedPartition: e })
         let currentSpec = this.state.partitionSpecs.find(x => x["Partition Name"] === e)
-        this.setState({selectedPartitionSpecs: currentSpec})
+        this.setState({ selectedPartitionSpecs: currentSpec })
     }
 
     isCreateReady = () => {
-        if(this.state.selectedFramework !== "" && this.state.selectedScheduler !== "" &&
-           this.state.selectedPartition !== "" && this.state.nodeCount != 0 &&
-           this.state.cpuCount != 0 && this.state.taskPerNode != 0 && this.state.cpusPerTask != 0 &&
-           this.state.selectedDatabase !== "" && Object.keys(this.state.measurementToSensors).length != 0) {
-               return true
-           }
+        if (this.state.selectedFramework !== "" && this.state.selectedScheduler !== "" &&
+            this.state.selectedPartition !== "" && this.state.nodeCount != 0 &&
+            this.state.cpuCount != 0 && this.state.taskPerNode != 0 && this.state.cpusPerTask != 0 &&
+            this.state.selectedDatabase !== "" && Object.keys(this.state.measurementToSensors).length != 0) {
+            return true
+        }
         else if (this.state.selectedPartition === "Local" && this.state.selectedFramework !== "" &&
-                this.state.selectedDatabase !== "" && Object.keys(this.state.measurementToSensors).length != 0) {
-                    return true
-                }
-        
+            this.state.selectedDatabase !== "" && Object.keys(this.state.measurementToSensors).length != 0) {
+            return true
+        }
+
         return false
     }
 
     private get frameworkItems(): JSX.Element[] {
         return [
-                <Dropdown.Item
-                    testID="dropdown-item-tensorflow"
-                    id="tensorflow"
-                    key="tensorflow"
-                    value="Tensorflow"
-                    onClick={this.onFrameworkChange}>
-                        Tensorflow
-                </Dropdown.Item>,
-                <Dropdown.Item
-                    testID="dropdown-item-pytorch"
-                    id="pytorch"
-                    key="pytorch"
-                    value="PyTORCH"
-                    onClick={this.onFrameworkChange}>
-                        PyTORCH
-                </Dropdown.Item>
-            ]
+            <Dropdown.Item
+                testID="dropdown-item-tensorflow"
+                id="tensorflow"
+                key="tensorflow"
+                value="Tensorflow"
+                onClick={this.onFrameworkChange}>
+                Tensorflow
+            </Dropdown.Item>,
+            <Dropdown.Item
+                testID="dropdown-item-pytorch"
+                id="pytorch"
+                key="pytorch"
+                value="PyTORCH"
+                onClick={this.onFrameworkChange}>
+                PyTORCH
+            </Dropdown.Item>
+        ]
     }
 
     private get schedulerItems(): JSX.Element[] {
         return [
-                <Dropdown.Item
-                    testID="dropdown-item-slurm"
-                    id="slurm"
-                    key="slurm"
-                    value="SLURM"
-                    onClick={this.onSchedulerChange}>
-                        SLURM
-                </Dropdown.Item>,
-                <Dropdown.Item
-                    testID="dropdown-item-pbs"
-                    id="pbs"
-                    key="pbs"
-                    value="PBS"
-                    onClick={this.onSchedulerChange}>
-                        PBS
-                </Dropdown.Item>
-            ]
+            <Dropdown.Item
+                testID="dropdown-item-slurm"
+                id="slurm"
+                key="slurm"
+                value="SLURM"
+                onClick={this.onSchedulerChange}>
+                SLURM
+            </Dropdown.Item>,
+            <Dropdown.Item
+                testID="dropdown-item-pbs"
+                id="pbs"
+                key="pbs"
+                value="PBS"
+                onClick={this.onSchedulerChange}>
+                PBS
+            </Dropdown.Item>
+        ]
     }
 
     private get partitionItems(): JSX.Element[] {
         return this.state.partitionSpecs.map(spec => {
             return <Dropdown.Item
-                    id={spec["Partition Name"]}
-                    key={spec["Partition Name"]}
-                    value={spec["Partition Name"]}
-                    onClick={this.onPartitionChange}>
+                id={spec["Partition Name"]}
+                key={spec["Partition Name"]}
+                value={spec["Partition Name"]}
+                onClick={this.onPartitionChange}>
                 {spec["Partition Name"]}
             </Dropdown.Item>
         })
@@ -276,13 +277,13 @@ class RetrainControlPage extends PureComponent<Props, State> {
     private get modelItems(): JSX.Element[] {
         return this.state.models.map((model) => {
             return <Dropdown.Item
-                    testID="dropdown-item generate-token--read-write"
-                    id={model.modelID}
-                    key={model.modelID}
-                    value={model.modelID}
-                    onClick={this.onModelChange}>
-                        {model.modelName}
-                    </Dropdown.Item>
+                testID="dropdown-item generate-token--read-write"
+                id={model.modelID}
+                key={model.modelID}
+                value={model.modelID}
+                onClick={this.onModelChange}>
+                {model.modelName}
+            </Dropdown.Item>
         })
         // return [
         //     <Dropdown.Item
@@ -326,19 +327,19 @@ class RetrainControlPage extends PureComponent<Props, State> {
             upper: e.upper
         }
 
-        this.setState({from: e.lower, to: e.upper, timeRange: timeRange, trainTimeRangeOpen: false})
+        this.setState({ from: e.lower, to: e.upper, timeRange: timeRange, trainTimeRangeOpen: false })
     }
 
     onCloseTimeRangePopover = () => {
-        this.setState({trainTimeRangeOpen: false})
+        this.setState({ trainTimeRangeOpen: false })
     }
 
     onOpenTimeRangePopover = () => {
-        this.setState({trainTimeRangeOpen: true})
+        this.setState({ trainTimeRangeOpen: true })
     }
 
     resetTimeRange = () => {
-        this.setState({from: new Date().toISOString(), to: new Date().toISOString()})
+        this.setState({ from: new Date().toISOString(), to: new Date().toISOString() })
     }
 
     onCreateTask = () => {
@@ -363,7 +364,7 @@ class RetrainControlPage extends PureComponent<Props, State> {
 
         api.createTask(task).then(() => {
             api.getTasks().then(tasks => {
-                this.setState({mltasks: tasks})
+                this.setState({ mltasks: tasks })
             })
         })
     }
@@ -389,10 +390,10 @@ class RetrainControlPage extends PureComponent<Props, State> {
                                     upper: this.state.to
                                 }}
                                 onSetTimeRange={this.onSetTimeRange}
-                                // onClose={this.onCloseTimeRangePopover}
-                                // position={
-                                //     { position: 'relative' }
-                                // }
+                            // onClose={this.onCloseTimeRangePopover}
+                            // position={
+                            //     { position: 'relative' }
+                            // }
                             />
                         )}
                     />
@@ -409,7 +410,7 @@ class RetrainControlPage extends PureComponent<Props, State> {
                         text="Reset Time Range"
                         color={ComponentColor.Danger}
                         onClick={this.resetTimeRange}
-                        style={{marginLeft: "10px"}}
+                        style={{ marginLeft: "10px" }}
                     />
                 </FlexBox>
             </React.Fragment>
@@ -442,7 +443,7 @@ class RetrainControlPage extends PureComponent<Props, State> {
                                         key="tog-flex"
                                         direction={FlexDirection.Row}
                                         margin={ComponentSize.Small}
-                                        >
+                                    >
                                         <SlideToggle
                                             active={this.state.creatingTask}
                                             size={ComponentSize.ExtraSmall}
@@ -451,7 +452,7 @@ class RetrainControlPage extends PureComponent<Props, State> {
                                         />
                                         <InputLabel>Task Creation</InputLabel>
 
-                                        </FlexBox><br />
+                                    </FlexBox><br />
                                     {this.state.creatingTask ? (
                                         <Button
                                             text="Create"
@@ -460,155 +461,155 @@ class RetrainControlPage extends PureComponent<Props, State> {
                                             onClick={this.onCreateTask}
                                             icon={IconFont.Checkmark}
                                             color={ComponentColor.Secondary}
-                                        />):(null)}
+                                        />) : (null)}
                                 </Panel.Header>
                                 {this.state.creatingTask ? (
                                     <Panel.Body size={ComponentSize.ExtraSmall}>
-                                    <Table
-                                        borders={BorderType.Vertical}
-                                        fontSize={ComponentSize.ExtraSmall}
-                                        cellPadding={ComponentSize.ExtraSmall}
-                                    >
-                                        <Table.Header>
-                                            <Table.Row>
-                                                <Table.HeaderCell>Framework</Table.HeaderCell>
-                                                <Table.HeaderCell>Scheduler</Table.HeaderCell>
-                                            </Table.Row>
-                                        </Table.Header>
-                                        <Table.Body>
-                                            <Table.Row>
-                                                <Table.Cell>
-                                                <Dropdown
-                                                    testID="dropdown--gen-token"
-                                                    style={{width: '160px'}}
-                                                    button={(active, onClick) => (
-                                                        <Dropdown.Button
-                                                            active={active}
-                                                            onClick={onClick}
-                                                            color={ComponentColor.Secondary}
-                                                            testID="dropdown-button--gen-token">
-                                                                {this.state.selectedFramework}
-                                                            </Dropdown.Button>
-                                                    )}
-                                                    menu={onCollapse => (
-                                                        <Dropdown.Menu onCollapse={onCollapse}>
-                                                            {this.frameworkItems}
-                                                        </Dropdown.Menu>
-                                                    )}/>
-                                                </Table.Cell>
-                                                <Table.Cell>
-                                                <Dropdown
-                                                    testID="dropdown--gen-token"
-                                                    style={{width: '160px'}}
-                                                    button={(active, onClick) => (
-                                                        <Dropdown.Button
-                                                            active={active}
-                                                            onClick={onClick}
-                                                            color={ComponentColor.Secondary}
-                                                            status={this.state.selectedPartition === "Local" ? (ComponentStatus.Disabled):(ComponentStatus.Default)}
-                                                            testID="dropdown-button--gen-token">
-                                                                {this.state.selectedScheduler}
-                                                            </Dropdown.Button>
-                                                    )}
-                                                    menu={onCollapse => (
-                                                        <Dropdown.Menu onCollapse={onCollapse}>
-                                                            {this.schedulerItems}
-                                                        </Dropdown.Menu>
-                                                    )}/>
-                                                </Table.Cell>
-                                            </Table.Row>
-                                        </Table.Body>
-                                        <Table.Header>
-                                            <Table.Row>
-                                                <Table.HeaderCell>Partition</Table.HeaderCell>
-                                                <Table.HeaderCell>Node Count</Table.HeaderCell>
-                                            </Table.Row>
-                                        </Table.Header>
-                                        <Table.Body>
-                                            <Table.Row>
-                                                <Table.Cell>
-                                                <Dropdown
-                                                    testID="dropdown--gen-token"
-                                                    style={{width: '160px'}}
-                                                    button={(active, onClick) => (
-                                                        <Dropdown.Button
-                                                            active={active}
-                                                            onClick={onClick}
-                                                            color={ComponentColor.Secondary}
-                                                            testID="dropdown-button--gen-token">
-                                                                {this.state.selectedPartition}
-                                                            </Dropdown.Button>
-                                                    )}
-                                                    menu={onCollapse => (
-                                                        <Dropdown.Menu onCollapse={onCollapse}>
-                                                            {this.partitionItems}
-                                                        </Dropdown.Menu>
-                                                    )}/>
-                                                </Table.Cell>
-                                                <Table.Cell>
-                                                <Input
-                                                    placeholder="placeholder"
-                                                    name="nodecount"
-                                                    autoFocus={true}
-                                                    type={InputType.Number}
-                                                    value={this.state.nodeCount}
-                                                    onChange={(e) => this.setState({nodeCount: Number(e.target.value)})}
-                                                    status={this.state.selectedPartition === "Local" ? (ComponentStatus.Disabled):(ComponentStatus.Default)}
-                                                    testID="bucket-form-nodecount"
-                                                />
-                                                </Table.Cell>
-                                            </Table.Row>
-                                        </Table.Body>
-                                        <Table.Header>
-                                            <Table.Row>
-                                                <Table.HeaderCell>CPU Count</Table.HeaderCell>
-                                                <Table.HeaderCell>Task/Node</Table.HeaderCell>
-                                                <Table.HeaderCell>CPU/Task</Table.HeaderCell>
-                                            </Table.Row>
-                                        </Table.Header>
-                                        <Table.Body>
-                                            <Table.Row>
-                                                <Table.Cell>
-                                                <Input
-                                                    placeholder="placeholder"
-                                                    name="cpucount"
-                                                    autoFocus={true}
-                                                    type={InputType.Number}
-                                                    value={this.state.cpuCount}
-                                                    onChange={(e) => this.setState({cpuCount: Number(e.target.value)})}
-                                                    status={this.state.selectedPartition === "Local" ? (ComponentStatus.Disabled):(ComponentStatus.Default)}
-                                                    testID="bucket-form-cpucount"
-                                                />
-                                                </Table.Cell>
-                                                <Table.Cell>
-                                                <Input
-                                                    placeholder="placeholder"
-                                                    name="nodetask"
-                                                    autoFocus={true}
-                                                    type={InputType.Number}
-                                                    value={this.state.taskPerNode}
-                                                    onChange={(e) => this.setState({taskPerNode: Number(e.target.value)})}
-                                                    status={this.state.selectedPartition === "Local" ? (ComponentStatus.Disabled):(ComponentStatus.Default)}
-                                                    testID="bucket-form-nodetask"
-                                                />
-                                                </Table.Cell>
-                                                <Table.Cell>
-                                                <Input
-                                                    placeholder="placeholder"
-                                                    name="taskcpu"
-                                                    autoFocus={true}
-                                                    type={InputType.Number}
-                                                    value={this.state.cpusPerTask}
-                                                    onChange={(e) => this.setState({cpusPerTask: Number(e.target.value)})}
-                                                    status={this.state.selectedPartition === "Local" ? (ComponentStatus.Disabled):(ComponentStatus.Default)}
-                                                    testID="bucket-form-taskcpu"
-                                                />
-                                                </Table.Cell>
-                                            </Table.Row>
-                                        </Table.Body>
-                                    </Table>
-                                </Panel.Body>
-                                ):(<Panel.Body size={ComponentSize.ExtraSmall}>
+                                        <Table
+                                            borders={BorderType.Vertical}
+                                            fontSize={ComponentSize.ExtraSmall}
+                                            cellPadding={ComponentSize.ExtraSmall}
+                                        >
+                                            <Table.Header>
+                                                <Table.Row>
+                                                    <Table.HeaderCell>Framework</Table.HeaderCell>
+                                                    <Table.HeaderCell>Scheduler</Table.HeaderCell>
+                                                </Table.Row>
+                                            </Table.Header>
+                                            <Table.Body>
+                                                <Table.Row>
+                                                    <Table.Cell>
+                                                        <Dropdown
+                                                            testID="dropdown--gen-token"
+                                                            style={{ width: '160px' }}
+                                                            button={(active, onClick) => (
+                                                                <Dropdown.Button
+                                                                    active={active}
+                                                                    onClick={onClick}
+                                                                    color={ComponentColor.Secondary}
+                                                                    testID="dropdown-button--gen-token">
+                                                                    {this.state.selectedFramework}
+                                                                </Dropdown.Button>
+                                                            )}
+                                                            menu={onCollapse => (
+                                                                <Dropdown.Menu onCollapse={onCollapse}>
+                                                                    {this.frameworkItems}
+                                                                </Dropdown.Menu>
+                                                            )} />
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <Dropdown
+                                                            testID="dropdown--gen-token"
+                                                            style={{ width: '160px' }}
+                                                            button={(active, onClick) => (
+                                                                <Dropdown.Button
+                                                                    active={active}
+                                                                    onClick={onClick}
+                                                                    color={ComponentColor.Secondary}
+                                                                    status={this.state.selectedPartition === "Local" ? (ComponentStatus.Disabled) : (ComponentStatus.Default)}
+                                                                    testID="dropdown-button--gen-token">
+                                                                    {this.state.selectedScheduler}
+                                                                </Dropdown.Button>
+                                                            )}
+                                                            menu={onCollapse => (
+                                                                <Dropdown.Menu onCollapse={onCollapse}>
+                                                                    {this.schedulerItems}
+                                                                </Dropdown.Menu>
+                                                            )} />
+                                                    </Table.Cell>
+                                                </Table.Row>
+                                            </Table.Body>
+                                            <Table.Header>
+                                                <Table.Row>
+                                                    <Table.HeaderCell>Partition</Table.HeaderCell>
+                                                    <Table.HeaderCell>Node Count</Table.HeaderCell>
+                                                </Table.Row>
+                                            </Table.Header>
+                                            <Table.Body>
+                                                <Table.Row>
+                                                    <Table.Cell>
+                                                        <Dropdown
+                                                            testID="dropdown--gen-token"
+                                                            style={{ width: '160px' }}
+                                                            button={(active, onClick) => (
+                                                                <Dropdown.Button
+                                                                    active={active}
+                                                                    onClick={onClick}
+                                                                    color={ComponentColor.Secondary}
+                                                                    testID="dropdown-button--gen-token">
+                                                                    {this.state.selectedPartition}
+                                                                </Dropdown.Button>
+                                                            )}
+                                                            menu={onCollapse => (
+                                                                <Dropdown.Menu onCollapse={onCollapse}>
+                                                                    {this.partitionItems}
+                                                                </Dropdown.Menu>
+                                                            )} />
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <Input
+                                                            placeholder="placeholder"
+                                                            name="nodecount"
+                                                            autoFocus={true}
+                                                            type={InputType.Number}
+                                                            value={this.state.nodeCount}
+                                                            onChange={(e) => this.setState({ nodeCount: Number(e.target.value) })}
+                                                            status={this.state.selectedPartition === "Local" ? (ComponentStatus.Disabled) : (ComponentStatus.Default)}
+                                                            testID="bucket-form-nodecount"
+                                                        />
+                                                    </Table.Cell>
+                                                </Table.Row>
+                                            </Table.Body>
+                                            <Table.Header>
+                                                <Table.Row>
+                                                    <Table.HeaderCell>CPU Count</Table.HeaderCell>
+                                                    <Table.HeaderCell>Task/Node</Table.HeaderCell>
+                                                    <Table.HeaderCell>CPU/Task</Table.HeaderCell>
+                                                </Table.Row>
+                                            </Table.Header>
+                                            <Table.Body>
+                                                <Table.Row>
+                                                    <Table.Cell>
+                                                        <Input
+                                                            placeholder="placeholder"
+                                                            name="cpucount"
+                                                            autoFocus={true}
+                                                            type={InputType.Number}
+                                                            value={this.state.cpuCount}
+                                                            onChange={(e) => this.setState({ cpuCount: Number(e.target.value) })}
+                                                            status={this.state.selectedPartition === "Local" ? (ComponentStatus.Disabled) : (ComponentStatus.Default)}
+                                                            testID="bucket-form-cpucount"
+                                                        />
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <Input
+                                                            placeholder="placeholder"
+                                                            name="nodetask"
+                                                            autoFocus={true}
+                                                            type={InputType.Number}
+                                                            value={this.state.taskPerNode}
+                                                            onChange={(e) => this.setState({ taskPerNode: Number(e.target.value) })}
+                                                            status={this.state.selectedPartition === "Local" ? (ComponentStatus.Disabled) : (ComponentStatus.Default)}
+                                                            testID="bucket-form-nodetask"
+                                                        />
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <Input
+                                                            placeholder="placeholder"
+                                                            name="taskcpu"
+                                                            autoFocus={true}
+                                                            type={InputType.Number}
+                                                            value={this.state.cpusPerTask}
+                                                            onChange={(e) => this.setState({ cpusPerTask: Number(e.target.value) })}
+                                                            status={this.state.selectedPartition === "Local" ? (ComponentStatus.Disabled) : (ComponentStatus.Default)}
+                                                            testID="bucket-form-taskcpu"
+                                                        />
+                                                    </Table.Cell>
+                                                </Table.Row>
+                                            </Table.Body>
+                                        </Table>
+                                    </Panel.Body>
+                                ) : (<Panel.Body size={ComponentSize.ExtraSmall}>
                                     <Table
                                         borders={BorderType.Vertical}
                                         fontSize={ComponentSize.ExtraSmall}
@@ -622,63 +623,63 @@ class RetrainControlPage extends PureComponent<Props, State> {
                                         <Table.Body>
                                             <Table.Row>
                                                 <Table.Cell>
-                                                <Dropdown
-                                                    testID="dropdown--gen-token"
-                                                    style={{width: '160px'}}
-                                                    button={(active, onClick) => (
-                                                        <Dropdown.Button
-                                                            active={active}
-                                                            onClick={onClick}
-                                                            color={ComponentColor.Primary}
-                                                            testID="dropdown-button--gen-token">
+                                                    <Dropdown
+                                                        testID="dropdown--gen-token"
+                                                        style={{ width: '160px' }}
+                                                        button={(active, onClick) => (
+                                                            <Dropdown.Button
+                                                                active={active}
+                                                                onClick={onClick}
+                                                                color={ComponentColor.Primary}
+                                                                testID="dropdown-button--gen-token">
                                                                 {this.state.selectedModel}
                                                             </Dropdown.Button>
-                                                    )}
-                                                    menu={onCollapse => (
-                                                        <Dropdown.Menu onCollapse={onCollapse}>
-                                                            {this.modelItems}
-                                                        </Dropdown.Menu>
-                                                    )}/>
+                                                        )}
+                                                        menu={onCollapse => (
+                                                            <Dropdown.Menu onCollapse={onCollapse}>
+                                                                {this.modelItems}
+                                                            </Dropdown.Menu>
+                                                        )} />
                                                 </Table.Cell>
                                                 <Table.Cell>
-                                                <SelectGroup
-                                                    shape={ButtonShape.StretchToFit}
-                                                    className="retention--radio"
+                                                    <SelectGroup
+                                                        shape={ButtonShape.StretchToFit}
+                                                        className="retention--radio"
                                                     >
-                                                    <SelectGroup.Option
-                                                        name="bucket-retention"
-                                                        id="never"
-                                                        testID="retention-never--button"
-                                                        active={this.state.selectedModelObject.retrainMethod === "nothing"}
-                                                        onClick={this.handleRadioClick.bind(this)}
-                                                        value="nothing"
-                                                        titleText="Never delete data"
-                                                    >
-                                                        Do nothing
-                                                    </SelectGroup.Option>
-                                                    <SelectGroup.Option
-                                                        name="bucket-retention"
-                                                        id="intervals"
-                                                        active={this.state.selectedModelObject.retrainMethod === "retrain"}
-                                                        onClick={this.handleRadioClick.bind(this)}
-                                                        value="retrain"
-                                                        testID="retention-intervals--button"
-                                                        titleText="Delete data older than a duration"
-                                                    >
-                                                        Retrain
-                                                    </SelectGroup.Option>
-                                                    <SelectGroup.Option
-                                                        name="bucket-retention"
-                                                        id="intervals"
-                                                        active={this.state.selectedModelObject.retrainMethod === "retrain-hpc"}
-                                                        onClick={this.handleRadioClick.bind(this)}
-                                                        value="retrain-hpc"
-                                                        testID="retention-intervals--button"
-                                                        titleText="Delete data older than a duration"
-                                                    >
-                                                        HPC
-                                                    </SelectGroup.Option>
-                                                </SelectGroup>
+                                                        <SelectGroup.Option
+                                                            name="bucket-retention"
+                                                            id="never"
+                                                            testID="retention-never--button"
+                                                            active={this.state.selectedModelObject.retrainMethod === "nothing"}
+                                                            onClick={this.handleRadioClick.bind(this)}
+                                                            value="nothing"
+                                                            titleText="Never delete data"
+                                                        >
+                                                            Do nothing
+                                                        </SelectGroup.Option>
+                                                        <SelectGroup.Option
+                                                            name="bucket-retention"
+                                                            id="intervals"
+                                                            active={this.state.selectedModelObject.retrainMethod === "retrain"}
+                                                            onClick={this.handleRadioClick.bind(this)}
+                                                            value="retrain"
+                                                            testID="retention-intervals--button"
+                                                            titleText="Delete data older than a duration"
+                                                        >
+                                                            Retrain
+                                                        </SelectGroup.Option>
+                                                        <SelectGroup.Option
+                                                            name="bucket-retention"
+                                                            id="intervals"
+                                                            active={this.state.selectedModelObject.retrainMethod === "retrain-hpc"}
+                                                            onClick={this.handleRadioClick.bind(this)}
+                                                            value="retrain-hpc"
+                                                            testID="retention-intervals--button"
+                                                            titleText="Delete data older than a duration"
+                                                        >
+                                                            HPC
+                                                        </SelectGroup.Option>
+                                                    </SelectGroup>
                                                 </Table.Cell>
                                             </Table.Row>
                                         </Table.Body>
@@ -697,7 +698,7 @@ class RetrainControlPage extends PureComponent<Props, State> {
                                     </Panel.Body>
                                 </Panel>
 
-                            ):(null)}
+                            ) : (null)}
                             <br></br>
                             <br></br>
                             {this.state.creatingTask ? (
@@ -708,51 +709,51 @@ class RetrainControlPage extends PureComponent<Props, State> {
                                             fontSize={ComponentSize.ExtraSmall}
                                             cellPadding={ComponentSize.ExtraSmall}
                                         >
-                                        <Table.Header>
-                                            <Table.Row>
-                                                <Table.HeaderCell>State</Table.HeaderCell>
-                                                <Table.HeaderCell>Total CPUs</Table.HeaderCell>
-                                                <Table.HeaderCell>Total Nodes</Table.HeaderCell>
-                                            </Table.Row>
-                                        </Table.Header>
-                                        <Table.Body>
-                                            <Table.Row>
-                                                <Table.Cell>
-                                                    {this.state.selectedPartitionSpecs["State"]}
-                                                </Table.Cell>
-                                                <Table.Cell>
-                                                    {this.state.selectedPartitionSpecs["Total CPUs"]}
-                                                </Table.Cell>
-                                                <Table.Cell>
-                                                    {this.state.selectedPartitionSpecs["Total Nodes"]}
-                                                </Table.Cell>
-                                            </Table.Row>
-                                        </Table.Body>
-                                        <Table.Header>
-                                            <Table.Row>
-                                                <Table.HeaderCell>Minimum Nodes</Table.HeaderCell>
-                                                <Table.HeaderCell>Default Timeout</Table.HeaderCell>
-                                                <Table.HeaderCell>Maximum Timeout</Table.HeaderCell>
-                                            </Table.Row>
-                                        </Table.Header>
-                                        <Table.Body>
-                                            <Table.Row>
-                                                <Table.Cell>
-                                                    {this.state.selectedPartitionSpecs["Minimum Nodes"]}
-                                                </Table.Cell>
-                                                <Table.Cell>
-                                                    {this.state.selectedPartitionSpecs["Default Timeout"]}
-                                                </Table.Cell>
-                                                <Table.Cell>
-                                                    {this.state.selectedPartitionSpecs["Maximum Timeout"]}
-                                                </Table.Cell>
-                                            </Table.Row>
-                                        </Table.Body>
+                                            <Table.Header>
+                                                <Table.Row>
+                                                    <Table.HeaderCell>State</Table.HeaderCell>
+                                                    <Table.HeaderCell>Total CPUs</Table.HeaderCell>
+                                                    <Table.HeaderCell>Total Nodes</Table.HeaderCell>
+                                                </Table.Row>
+                                            </Table.Header>
+                                            <Table.Body>
+                                                <Table.Row>
+                                                    <Table.Cell>
+                                                        {this.state.selectedPartitionSpecs["State"]}
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        {this.state.selectedPartitionSpecs["Total CPUs"]}
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        {this.state.selectedPartitionSpecs["Total Nodes"]}
+                                                    </Table.Cell>
+                                                </Table.Row>
+                                            </Table.Body>
+                                            <Table.Header>
+                                                <Table.Row>
+                                                    <Table.HeaderCell>Minimum Nodes</Table.HeaderCell>
+                                                    <Table.HeaderCell>Default Timeout</Table.HeaderCell>
+                                                    <Table.HeaderCell>Maximum Timeout</Table.HeaderCell>
+                                                </Table.Row>
+                                            </Table.Header>
+                                            <Table.Body>
+                                                <Table.Row>
+                                                    <Table.Cell>
+                                                        {this.state.selectedPartitionSpecs["Minimum Nodes"]}
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        {this.state.selectedPartitionSpecs["Default Timeout"]}
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        {this.state.selectedPartitionSpecs["Maximum Timeout"]}
+                                                    </Table.Cell>
+                                                </Table.Row>
+                                            </Table.Body>
                                         </Table>
                                     </Panel.Body>
                                 </Panel>
 
-                            ):(null)}
+                            ) : (null)}
                         </Grid.Column>
                         <Grid.Column
                             widthXS={Columns.Three}
@@ -766,11 +767,11 @@ class RetrainControlPage extends PureComponent<Props, State> {
                                     //     Set Database and Fields
                                     // </Panel.Header>
                                     <DapperScrollbars
-                                            autoHide={true}
-                                            autoSizeHeight={true} style={{ maxHeight: '605px' }}
-                                            className="data-loading--scroll-content"
-                                            >
-                                        <Panel.Body style={{height: '605px'}}>
+                                        autoHide={true}
+                                        autoSizeHeight={true} style={{ maxHeight: '605px' }}
+                                        className="data-loading--scroll-content"
+                                    >
+                                        <Panel.Body style={{ height: '605px' }}>
                                             <Grid>
                                                 <GetResources resources={[ResourceType.Buckets]}>
                                                     <MLBucketSelector
@@ -779,73 +780,73 @@ class RetrainControlPage extends PureComponent<Props, State> {
                                                         databases={this.state.databases}
                                                         selectedDatabase={this.state.selectedDatabase}
                                                         onDropdownTreeChange={this.onDropdownTreeChange}
-                                                        />
+                                                    />
                                                 </GetResources>
                                             </Grid>
                                         </Panel.Body>
                                     </DapperScrollbars>
-                                ):(
-                                <Panel.Body size={ComponentSize.ExtraSmall}>
-                                <Table
-                                    borders={BorderType.Vertical}
-                                    fontSize={ComponentSize.ExtraSmall}
-                                    cellPadding={ComponentSize.ExtraSmall}
-                                >
-                                    <Table.Header>
-                                        <Table.Row>
-                                            <Table.HeaderCell>Models</Table.HeaderCell>
-                                            <Table.HeaderCell>Hardware</Table.HeaderCell>
-                                            <Table.HeaderCell>Task</Table.HeaderCell>
-                                            <Table.HeaderCell>Algorithm</Table.HeaderCell>
-                                            <Table.HeaderCell>Status</Table.HeaderCell>
+                                ) : (
+                                    <Panel.Body size={ComponentSize.ExtraSmall}>
+                                        <Table
+                                            borders={BorderType.Vertical}
+                                            fontSize={ComponentSize.ExtraSmall}
+                                            cellPadding={ComponentSize.ExtraSmall}
+                                        >
+                                            <Table.Header>
+                                                <Table.Row>
+                                                    <Table.HeaderCell>Models</Table.HeaderCell>
+                                                    <Table.HeaderCell>Hardware</Table.HeaderCell>
+                                                    <Table.HeaderCell>Task</Table.HeaderCell>
+                                                    <Table.HeaderCell>Algorithm</Table.HeaderCell>
+                                                    <Table.HeaderCell>Status</Table.HeaderCell>
 
-                                        </Table.Row>
-                                    </Table.Header>
-                                    <Table.Body>
-                                        <Table.Row>
-                                            <Table.Cell>
-                                                {this.state.selectedModelObject.modelName}
-                                            </Table.Cell>
-                                            <Table.Cell>
-                                                {this.state.selectedModelObject.hardware}
-                                            </Table.Cell>
-                                            <Table.Cell>
-                                                {this.state.selectedModelObject.task}
-                                            </Table.Cell>
-                                            <Table.Cell>
-                                                {this.state.selectedModelObject.algorithm}
-                                            </Table.Cell>
-                                            <Table.Cell>
-                                                {this.state.selectedModelObject.status}
-                                            </Table.Cell>
-                                        </Table.Row></Table.Body></Table>
-                                </Panel.Body>
-                                )} 
-                                
+                                                </Table.Row>
+                                            </Table.Header>
+                                            <Table.Body>
+                                                <Table.Row>
+                                                    <Table.Cell>
+                                                        {this.state.selectedModelObject.modelName}
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        {this.state.selectedModelObject.hardware}
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        {this.state.selectedModelObject.task}
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        {this.state.selectedModelObject.algorithm}
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        {this.state.selectedModelObject.status}
+                                                    </Table.Cell>
+                                                </Table.Row></Table.Body></Table>
+                                    </Panel.Body>
+                                )}
+
                             </Panel>
                         </Grid.Column>
-                                <Grid.Column
-                                    widthXS={Columns.Five}
-                                    widthSM={Columns.Five}
-                                    widthMD={Columns.Five}
-                                    widthLG={Columns.Five}
-                                    style={{ marginTop: '20px' }}>
-                                        <Panel>
-                                        <DapperScrollbars
-                                        autoHide={true}
-                                        autoSizeHeight={true} style={{ maxHeight: '480px' }}
-                                        className="data-loading--scroll-content"
-                                        >
-                                            <Panel.Body style={{height: '480px'}}>
-                                                <TaskSection
-                                                tasks={this.state.mltasks}/>
-                                            </Panel.Body>
-                                        </DapperScrollbars>
-                                                
-                                        </Panel>
-                                </Grid.Column>
-                        </>
-                        </Grid></Page.Contents></Page>
+                        <Grid.Column
+                            widthXS={Columns.Five}
+                            widthSM={Columns.Five}
+                            widthMD={Columns.Five}
+                            widthLG={Columns.Five}
+                            style={{ marginTop: '20px' }}>
+                            <Panel>
+                                <DapperScrollbars
+                                    autoHide={true}
+                                    autoSizeHeight={true} style={{ maxHeight: '480px' }}
+                                    className="data-loading--scroll-content"
+                                >
+                                    <Panel.Body style={{ height: '480px' }}>
+                                        <TaskSection
+                                            tasks={this.state.mltasks} />
+                                    </Panel.Body>
+                                </DapperScrollbars>
+
+                            </Panel>
+                        </Grid.Column>
+                    </>
+                </Grid></Page.Contents></Page>
     }
 
 }
@@ -982,7 +983,6 @@ export default RetrainControlPage
 //     }
 
 //     public render(): JSX.Element {
-//         console.log(this.state.selectedModelObject)
 //         return <Page>
 //             <Page.Header fullWidth={true}>
 //                 <Page.Title title={"Retrain Control Panel"} />

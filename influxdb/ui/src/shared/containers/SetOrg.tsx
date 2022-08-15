@@ -34,7 +34,6 @@ import FlowsIndex from 'src/notebooks/components/FlowsIndex'
 
 // My Added Components
 import DigitalTwinPage from 'src/dt/containers/DigitalTwinPage'
-import InteroperableDigitalTwin from 'src/dt/containers/InteroperableDigitalTwin'
 // import FactorySceneOverlay from 'src/dt/components/FactorySceneOverlay'
 import ObjectCreatorPage from 'src/objectCreator/containers/ObjectCreatorPage'
 import ReportsContainer from 'src/reports/containers/ReportsContainer';
@@ -56,6 +55,7 @@ import PredictionPageShowAll from 'src/side_nav/components/newAdd/modules/Predic
 import AlertsPage from 'src/side_nav/components/newAdd/modules/AlertsPage';
 import MaintenancePage from 'src/maintenance/containers/MaintenancePage';
 import MachineActionsPage from 'src/side_nav/components/machineActions/containers/MachineActionsPage';
+import LanguagesContainer from "src/settings/containers/LanguagesContainer";
 
 // ML
 import MLContainer from "src/ml/containers/MLContainer";
@@ -63,7 +63,6 @@ import MLAdvancedContainer from "src/ml/containers/MLAdvancedContainer"
 import RetrainControlContainer from "src/ml/containers/RetrainControlContainer"
 
 // AutoML
-import AutoML from "src/ml/containers/AutoML";
 import AutoMLPage from "src/health/components/AutoMLPage"
 import RULRegAutoMLPage from 'src/health/components/RULRegAutoMLPage'
 
@@ -176,7 +175,6 @@ const SetOrg: FC<Props> = ({
         {/* DT */}
         <PermittedRoute exact path={`${orgPath}/dt`} component={DigitalTwinPage} allowedRoles={["member", "admin", "editor"]} />
         {/* <PermittedRoute exact path={`${orgPath}/dt/factory-scene`} component={FactorySceneOverlay} allowedRoles={["member", "admin", "editor"]} /> */}
-        <PermittedRoute exact path={`${orgPath}/dt/data-flow-settings`} component={InteroperableDigitalTwin} allowedRoles={["member", "admin", "editor"]} />
 
 
         {/* ObjectCreator */}
@@ -321,6 +319,11 @@ const SetOrg: FC<Props> = ({
           exact
           path={`${orgPath}/settings/labels`}
           component={LabelsIndex}
+        />
+        <Route
+          exact
+          path={`${orgPath}/settings/languages`}
+          component={LanguagesContainer}
         />
         <Route exact path={`${orgPath}/settings`} component={VariablesIndex} />
 

@@ -48,7 +48,6 @@ class AutoMLService {
             const res = await response.json();
 
             if (res.data.success !== true) return;
-            console.log(res)
             return res.data;
         }
         catch (err) {
@@ -126,7 +125,7 @@ class AutoMLService {
 
     getExperiment = async (settings) => {
         const url = `${BACKEND.API_URL}ml/getExperiment`;
-        
+
         const request = fetch(url, {
             method: 'POST',
             mode: 'cors',
@@ -147,7 +146,6 @@ class AutoMLService {
             if (response.status !== 200) {
                 throw new Error(res.data.message.text);
             }
-            console.log(res)
             return res;
         } catch (err) {
             alert(err);
@@ -157,7 +155,7 @@ class AutoMLService {
 
     getTrialsFromDB = async (settings) => {
         const url = `${BACKEND.API_URL}ml/getTrialsFromDB`;
-        
+
         const request = fetch(url, {
             method: 'POST',
             mode: 'cors',
@@ -178,7 +176,6 @@ class AutoMLService {
             if (response.status !== 200) {
                 throw new Error(res.data.message.text);
             }
-            console.log(res)
             return res;
         } catch (err) {
             alert(err);
@@ -188,7 +185,7 @@ class AutoMLService {
 
     getTrialsFromDirectory = async (settings) => {
         const url = `${BACKEND.API_URL}ml/getTrialsFromDirectory`;
-        
+
         const request = fetch(url, {
             method: 'POST',
             mode: 'cors',
@@ -209,7 +206,6 @@ class AutoMLService {
             if (response.status !== 200) {
                 throw new Error(res.data.message.text);
             }
-            console.log(res)
             return res;
         } catch (err) {
             alert(err);

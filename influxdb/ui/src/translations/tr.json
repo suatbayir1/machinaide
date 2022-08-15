@@ -1,0 +1,87 @@
+{
+    "headers": {
+        "dt": "Dijital İkiz İzleme Ekranı",
+        "edit_factory": "Fabrika Düzenle"
+    },
+    "dt": {
+        "factory": "Fabrika",
+        "production_line": "Üretim Hattı",
+        "machine": "Makine",
+        "component": "Bileşen",
+        "sensor": "Sensör",
+        "field": "Alan",
+        "machine_count": "Makine Sayısı",
+        "component_count": "Bileşen Sayısı",
+        "sensor_count": "Sensör Sayısı",
+        "show_all_sensor_values": "Sensör Değerlerini Göster",
+        "type": "Tip",
+        "3d_view": "3D Gösterim",
+        "factory_name": "Fabrika İsmi",
+        "location": "Konum",
+        "description": "Açıklama",
+        "production_lines": "Üretim Hatları",
+        "production_line_name": "Üretim Hattı İsmi",
+        "no_production_line_found": "Üretim hattı bulunamadı",
+        "parent": "Ebeveyn",
+        "machine_list": "Makine Listesi",
+        "machine_name": "Makine İsmi",
+        "display_name": "Görüntülenecek İsim",
+        "measurements": "Measurements",
+        "measurement": "Measurement",
+        "component_list": "Bileşen Listesi",
+        "component_name": "Bileşen İsmi",
+        "visual": "Görsel",
+        "sensor_name": "Sensör İsmi",
+        "sensor_list": "Sensör Listesi",
+        "no_sensor_found": "Sensör bulunamadı",
+        "unit": "Birim",
+        "status": "Durum",
+        "data_type": "Veri Tipi",
+        "field_list": "Alan Listesi",
+        "field_name": "Alan İsmi",
+        "data_source": "Data Source",
+        "min_value": "Minimum Değer",
+        "max_value": "Maksimum Değer",
+        "do_operation_on_data": "Veri Üzerinde İşlem Yap",
+        "operation": "İşlem",
+        "value": "Değer",
+        "fill_nan_values": "Nan değerleri doldur",
+        "default_value": "Varsayılan Değer"
+    },
+    "button": {
+        "edit": "Düzenle",
+        "add": "Ekle",
+        "cancel": "İptal",
+        "save": "Kaydet",
+        "show_data_in_chart": "Verileri Grafikte Göster",
+        "update": "Güncelle",
+        "delete": "Sil",
+        "yes": "Evet"
+    },
+    "layout_button": {
+        "top_to_down": "Yukarıdan aşağıya",
+        "bottom_to_up": "Aşağıdan yukarıya",
+        "left_to_right": "Soldan sağa",
+        "right_to_left": "Sağdan sola",
+        "radial_out": "Radyal çıkış",
+        "radial_in": "Radyal iniş"
+    },
+    "add_new_part": "Yeni Parça Ekle",
+    "input": {},
+    "select_language": "Dil Seç",
+    "form": {
+        "unique_id_name": "Tekil ID/İsim"
+    },
+    "warning": {
+        "factory_already_created": "Zaten bir fabrika kuruldu. Sadece 1 fabrika oluşturabilirsiniz",
+        "are_you_sure": "Emin misiniz ?",
+        "no_measurement_selected": "Hiçbir measurement seçilmedi",
+        "no_component_found": "Bileşen bulunamadı",
+        "no_field_found": "Alan bulunamadı",
+        "do_you_want_to_update": "Güncellemek istiyor musunuz ?",
+        "do_you_want_to_delete": "Silmek istiyor musunuz ?"
+    },
+    "tips": {
+        "how_to_add_dt_object": "DT nesnesi nasıl eklenir:"
+    }
+}

@@ -98,8 +98,6 @@ class ObjectService {
     public fileUpload = async (payload) => {
         let url = `${BACKEND.API_URL}dt/fileUpload`;
 
-        console.log("payload", payload)
-
         return await axios
             .post(url, payload, {
                 headers: {

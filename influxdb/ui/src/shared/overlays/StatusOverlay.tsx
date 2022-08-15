@@ -61,8 +61,6 @@ class StatusOverlay extends PureComponent<StatusProps, StatusState> {
     }
 
     setDataForGraphs = () => {
-        console.log("oldParts", this.props.oldParts);
-        //console.log("status page ", this.props)
         let oldParts = this.props.oldParts
         let allPartsTimelineGraphData = []
         let maxLifetime = 0
@@ -345,7 +343,7 @@ class StatusOverlay extends PureComponent<StatusProps, StatusState> {
             maxLifetime: maxLifetime, stepLineGraphData: stepLineGraphData,
             stepLineCategories: this.calculateCats(stepLineGraphData),
             timelineGraphData: timelineGraphData
-        })//, ()=>console.log("step state", this.stat
+        })
     }
 
     calculateCats = (stepLineGraphData) => {

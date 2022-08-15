@@ -1,13 +1,13 @@
 // Constants
-import {FLUX_RESPONSE_BYTES_LIMIT, API_BASE_PATH} from 'src/shared/constants'
+import { FLUX_RESPONSE_BYTES_LIMIT, API_BASE_PATH } from 'src/shared/constants'
 import {
   RATE_LIMIT_ERROR_STATUS,
   RATE_LIMIT_ERROR_TEXT,
 } from 'src/cloud/constants'
 
 // Types
-import {CancelBox} from 'src/types/promises'
-import {File, Query, CancellationError} from 'src/types'
+import { CancelBox } from 'src/types/promises'
+import { File, Query, CancellationError } from 'src/types'
 
 export type RunQueryResult =
   | RunQuerySuccessResult
@@ -39,7 +39,7 @@ export const runQuery = (
   extern?: File,
   abortController?: AbortController
 ): CancelBox<RunQueryResult> => {
-  const url = `${API_BASE_PATH}api/v2/query?${new URLSearchParams({orgID})}`
+  const url = `${API_BASE_PATH}api/v2/query?${new URLSearchParams({ orgID })}`
 
   const headers = {
     'Content-Type': 'application/json',
@@ -49,11 +49,10 @@ export const runQuery = (
   const body: Query = {
     query,
     extern,
-    dialect: {annotations: ['group', 'datatype', 'default']},
+    dialect: { annotations: ['group', 'datatype', 'default'] },
   }
 
   const controller = abortController || new AbortController()
-  // console.log("request", body)
   const request = fetch(url, {
     method: 'POST',
     headers,
@@ -142,9 +141,9 @@ const processErrorResponse = async (
     const message = json.message || json.error
     const code = json.code
 
-    return {type: 'UNKNOWN_ERROR', message, code}
+    return { type: 'UNKNOWN_ERROR', message, code }
   } catch {
-    return {type: 'UNKNOWN_ERROR', message: 'Failed to execute Flux query'}
+    return { type: 'UNKNOWN_ERROR', message: 'Failed to execute Flux query' }
   }
 }
 

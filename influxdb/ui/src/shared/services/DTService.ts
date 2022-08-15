@@ -202,7 +202,6 @@ class DTService {
         return await axios
             .post(url, payload, { headers: { 'token': window.localStorage.getItem("token") } })
             .then(response => {
-                console.log(response);
                 if (response.status === 200) {
                     return JSON.parse(response.data.data.data);
                 }
@@ -475,6 +474,36 @@ class DTService {
             .then(response => {
                 if (response.status === 200) {
                     return response.data.data;
+                }
+            })
+            .catch(err => {
+                return err.response.data.data;
+            })
+    }
+
+    saveMachineOrders = async (payload) => {
+        let url = `${BACKEND.API_URL}dt/saveMachineOrders`;
+
+        return await axios
+            .post(url, payload, { headers: { 'token': window.localStorage.getItem("token") } })
+            .then(response => {
+                if (response.status === 200) {
+                    return response.data.data;
+                }
+            })
+            .catch(err => {
+                return err.response.data.data;
+            })
+    }
+
+    getMachineOrders = async (payload) => {
+        let url = `${BACKEND.API_URL}dt/getMachineOrders`;
+
+        return await axios
+            .post(url, payload, { headers: { 'token': window.localStorage.getItem("token") } })
+            .then(response => {
+                if (response.status === 200) {
+                    return JSON.parse(response.data.data.data);
                 }
             })
             .catch(err => {

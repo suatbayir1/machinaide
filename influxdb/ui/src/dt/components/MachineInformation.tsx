@@ -1,12 +1,11 @@
 // Libraries
 import React, { PureComponent } from "react";
+import i18next from "i18next";
 
 // Components
 import {
     Form, ComponentSize, Grid, Columns, Label, InfluxColors,
-    DapperScrollbars, List, Gradients, ConfirmationButton,
-    IconFont, ComponentColor, Appearance, Button, ButtonType,
-    MultiSelectDropdown, Input, TextArea, ComponentStatus
+    DapperScrollbars, List, Gradients, TextArea, ComponentStatus
 } from '@influxdata/clockface'
 import DangerConfirmationOverlay from "src/shared/overlays/DangerConfirmationOverlay";
 
@@ -75,12 +74,6 @@ class MachineInformation extends PureComponent<Props, State> {
             description: selectedGraphNode["description"],
             selectedMeasurements: selectedGraphNode["measurements"],
         })
-    }
-
-    private handleChangeInput = (e): void => {
-        if (Object.keys(this.state).includes(e.target.name)) {
-            this.setState({ [e.target.name]: e.target.value } as Pick<State, keyof State>);
-        }
     }
 
     public getMeasurements = async (): Promise<void> => {
@@ -164,22 +157,6 @@ class MachineInformation extends PureComponent<Props, State> {
         this.setState({ visibleConfirmationOverlay: false })
     }
 
-    private updateMachine = async (): Promise<void> => {
-        const { selectedGraphNode, handleChangeNotification } = this.props;
-        const { displayName, selectedMeasurements } = this.state;
-
-        if (displayName.trim() == "") {
-            handleChangeNotification("error", "Display name cannot be empty");
-            return;
-        }
-
-        if (selectedGraphNode["measurements"].sort().join(',') !== selectedMeasurements.sort().join(',')) {
-            this.setState({ visibleConfirmationOverlay: true })
-        } else {
-            this.updateMachineConfirmed();
-        }
-    }
-
     private getComponentCount = (content): number => {
         let components = content.filter(c => c?.["@type"] === "Component");
         return components.length;
@@ -200,16 +177,16 @@ class MachineInformation extends PureComponent<Props, State> {
     }
 
     public render() {
-        const { selectedGraphNode, clickPartDetail, clickBrands } = this.props;
+        const { selectedGraphNode } = this.props;
         const {
-            displayName, description, selectedMeasurements, measurements,
+            displayName, description, selectedMeasurements,
             operationType, visibleConfirmationOverlay
         } = this.state;
 
         return (
             <>
                 <DangerConfirmationOverlay
-                    title={"Are you sure ?"}
+                    title={i18next.t('warning.are_you_sure')}
                     message={operationType == "update" ? updateMachineConfirmationText : deleteMachineConfirmationText}
                     visible={visibleConfirmationOverlay}
                     onClose={() => { this.setState({ visibleConfirmationOverlay: false }) }}
@@ -225,11 +202,11 @@ class MachineInformation extends PureComponent<Props, State> {
                                 widthMD={Columns.Six}
                                 widthLG={Columns.Twelve}
                             >
-                                <Form.Element label="Type">
+                                <Form.Element label={i18next.t('dt.type')}>
                                     <Label
                                         size={ComponentSize.Small}
                                         name={selectedGraphNode["type"]}
-                                        description="Node type"
+                                        description={i18next.t('dt.type')}
                                         color={InfluxColors.Ocean}
                                         id={selectedGraphNode["type"]}
                                     />
@@ -241,11 +218,11 @@ class MachineInformation extends PureComponent<Props, State> {
                                 widthMD={Columns.Six}
                                 widthLG={Columns.Twelve}
                             >
-                                <Form.Element label="Parent">
+                                <Form.Element label={i18next.t('dt.parent')}>
                                     <Label
                                         size={ComponentSize.Small}
                                         name={selectedGraphNode["parent"]}
-                                        description="Parent"
+                                        description={i18next.t('dt.parent')}
                                         color={InfluxColors.Ocean}
                                         id={selectedGraphNode["parent"]}
                                     />
@@ -258,20 +235,14 @@ class MachineInformation extends PureComponent<Props, State> {
                                 widthLG={Columns.Twelve}
                             >
                                 <Form.Element
-                                    label="Display Name"
+                                    label={i18next.t('dt.display_name')}
                                     errorMessage={handleValidation(displayName)}
                                     required={true}
                                 >
-                                    {/* <Input
-                                        name="displayName"
-                                        placeholder="Display Name.."
-                                        onChange={this.handleChangeInput}
-                                        value={displayName}
-                                    /> */}
                                     <Label
                                         size={ComponentSize.Small}
                                         name={displayName}
-                                        description="Display Name"
+                                        description={i18next.t('dt.display_name')}
                                         color={InfluxColors.Ocean}
                                         id={displayName}
                                     />
@@ -283,11 +254,11 @@ class MachineInformation extends PureComponent<Props, State> {
                                 widthMD={Columns.Twelve}
                                 widthLG={Columns.Twelve}
                             >
-                                <Form.Element label="Description">
+                                <Form.Element label={i18next.t('dt.description')}>
                                     <TextArea
                                         name="description"
                                         value={description}
-                                        placeholder="Description.."
+                                        placeholder={i18next.t('dt.description')}
                                         status={ComponentStatus.Disabled}
                                         rows={4}
                                     />
@@ -299,14 +270,7 @@ class MachineInformation extends PureComponent<Props, State> {
                                 widthMD={Columns.Twelve}
                                 widthLG={Columns.Twelve}
                             >
-                                <Form.Element label="Measurements">
-                                    {/* <MultiSelectDropdown
-                                        emptyText={"Select measurement"}
-                                        options={measurements}
-                                        selectedOptions={selectedMeasurements}
-                                        onSelect={this.handleChangeMeasurements}
-                                        buttonStatus={ComponentStatus.Disabled}
-                                    /> */}
+                                <Form.Element label={i18next.t('dt.measurements')}>
                                     {
                                         selectedMeasurements.length > 0 ?
                                             <DapperScrollbars
@@ -321,7 +285,7 @@ class MachineInformation extends PureComponent<Props, State> {
                                                             <List.Item
                                                                 key={idx}
                                                                 value={measurement}
-                                                                title="Measurements"
+                                                                title={i18next.t('dt.measurements')}
                                                                 gradient={Gradients.GundamPilot}
                                                                 wrapText={true}
                                                             >
@@ -334,12 +298,12 @@ class MachineInformation extends PureComponent<Props, State> {
                                                     })
                                                 }
                                             </DapperScrollbars>
-                                            : <h6>No measurement is selected</h6>
+                                            : <h6>{i18next.t('warning.no_measurement_selected')}</h6>
                                     }
                                 </Form.Element>
                             </Grid.Column>
                             <Grid.Column widthXS={Columns.Twelve}>
-                                <Form.Element label={`Component List (${this.getComponentCount(selectedGraphNode["contents"])})`}>
+                                <Form.Element label={`${i18next.t('dt.component_list')} (${this.getComponentCount(selectedGraphNode["contents"])})`}>
                                     {
                                         this.getComponentCount(selectedGraphNode["contents"]) > 0 ?
                                             <DapperScrollbars
@@ -354,7 +318,7 @@ class MachineInformation extends PureComponent<Props, State> {
                                                             <List.Item
                                                                 key={idx}
                                                                 value={component.displayName}
-                                                                title="Component Name"
+                                                                title={i18next.t('dt.component_name')}
                                                                 gradient={Gradients.GundamPilot}
                                                                 wrapText={true}
                                                             >
@@ -367,66 +331,11 @@ class MachineInformation extends PureComponent<Props, State> {
                                                     })
                                                 }
                                             </DapperScrollbars>
-                                            : <h6>No component found</h6>
+                                            : <h6>{i18next.t('warning.no_component_found')}</h6>
                                     }
                                 </Form.Element>
                             </Grid.Column>
                         </Grid.Row>
-                        {/* <Grid.Row>
-                            <div className="dt-information-buttons">
-                                <Button
-                                    text="Summary"
-                                    icon={IconFont.CogThick}
-                                    onClick={clickPartDetail}
-                                    type={ButtonType.Button}
-                                    color={ComponentColor.Primary}
-                                />
-
-                                <Button
-                                    text="Brands"
-                                    icon={IconFont.Plus}
-                                    onClick={clickBrands}
-                                    type={ButtonType.Button}
-                                    color={ComponentColor.Secondary}
-                                />
-                                {
-                                    ["admin"].includes(localStorage.getItem("userRole")) &&
-                                    <ConfirmationButton
-                                        icon={IconFont.Checkmark}
-                                        onConfirm={() => {
-                                            this.setState({ operationType: "update" },
-                                                () => this.updateMachine())
-                                        }}
-                                        text={"Update"}
-                                        popoverColor={ComponentColor.Success}
-                                        popoverAppearance={Appearance.Outline}
-                                        color={ComponentColor.Success}
-                                        confirmationLabel="Do you want to update ?"
-                                        confirmationButtonColor={ComponentColor.Success}
-                                        confirmationButtonText="Yes"
-                                    />
-                                }
-                                {
-                                    ["admin"].includes(localStorage.getItem("userRole")) &&
-                                    <ConfirmationButton
-                                        icon={IconFont.Remove}
-                                        onConfirm={() => {
-                                            this.setState({
-                                                operationType: "delete",
-                                                visibleConfirmationOverlay: true
-                                            })
-                                        }}
-                                        text={"Delete"}
-                                        popoverColor={ComponentColor.Danger}
-                                        popoverAppearance={Appearance.Outline}
-                                        color={ComponentColor.Danger}
-                                        confirmationLabel="Do you want to delete ?"
-                                        confirmationButtonColor={ComponentColor.Danger}
-                                        confirmationButtonText="Yes"
-                                    />
-                                }
-                            </div>
-                        </Grid.Row> */}
                     </Grid>
                 </Form>
             </>

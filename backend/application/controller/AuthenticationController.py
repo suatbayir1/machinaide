@@ -14,6 +14,7 @@ from core.logger.MongoLogger import MongoLogger
 import ldap
 import requests
 import base64
+from pprint import pprint
 
 auth = Blueprint("auth", __name__)
 
@@ -54,7 +55,11 @@ def loginWithLDAP():
         con.protocol_version = ldap.VERSION3
         con.set_option(ldap.OPT_REFERRALS, 0)
 
+        print("con", con)
+
         result = con.search_s(config.LDAP["DC"], ldap.SCOPE_SUBTREE, f"(uid={username})")   
+
+        print("result", result)
 
         if not result:
             raise Exception("User not found")
@@ -73,6 +78,7 @@ def loginWithLDAP():
                 if att != 'userPassword':
                     userInfo[att] = item[1][att][0].decode('utf-8')
 
+        print("db", dn)
         con.simple_bind_s(dn, password)
 
         token = jwt.encode({

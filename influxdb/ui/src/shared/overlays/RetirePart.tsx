@@ -80,7 +80,6 @@ class RetirePart extends PureComponent<Props, State> {
         } else {
             notify(generalErrorMessage(result.message.text));
         }
-        console.log("result", result);
     }
 
     render() {

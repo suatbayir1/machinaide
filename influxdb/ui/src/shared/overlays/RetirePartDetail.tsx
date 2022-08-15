@@ -58,7 +58,6 @@ class RetirePartDetail extends PureComponent<Props, State> {
 
     componentDidUpdate(prevProps) {
         if (prevProps.selectedOldPart !== this.props.selectedOldPart) {
-            console.log("update");
             this.getMaintenances();
             this.getFailures();
         }
@@ -74,7 +73,6 @@ class RetirePartDetail extends PureComponent<Props, State> {
         };
 
         const maintenances = await MaintenanceService.getByCondition(payload);
-        console.log(maintenances);
         this.setState({ maintenances })
     }
 
@@ -88,7 +86,6 @@ class RetirePartDetail extends PureComponent<Props, State> {
         };
 
         const failures = await FailureService.getByCondition(payload);
-        console.log(failures);
         this.setState({ failures })
     }
 

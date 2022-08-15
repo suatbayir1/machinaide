@@ -367,3 +367,42 @@ def getMetadataByProcessId(token):
         return return_response(success = False, message = message, code = 400), 400
     finally:
         logger.add_log(log_type, request.remote_addr, token["username"], request.method, request.url, "", message,  status_code)
+
+@factory.route("/getSectionsByFactory", methods = ["POST"])
+@token_required(roles = ["admin", "editor"])
+def getSectionsByFactory(token):
+    try:
+        print("1")
+        message, confirm = validator.check_request_params(
+            request.json, 
+            ["factoryID"]
+        )
+
+        if not confirm:
+            log_type = "ERROR"
+            status_code = 400
+            return return_response(success = False, message = message, code = 400), 400
+
+        print("2")
+
+        result = model.get_sections_by_factory({"factoryID": request.json["factoryID"]})
+
+        print(result)
+
+        if not result:
+            message = "An error occurred while fetching sections by factory"
+            log_type = "ERROR"
+            status_code = 400
+            return return_response(success = False, message = message, code = 400), 400
+
+        message = "Sections successfully fetched"
+        log_type = "INFO"
+        status_code = 200
+        return return_response(success = True, message = message, data = result, code = 200, total_count = len(result)), 200
+    except:
+        message = "An expected error has occurred"
+        log_type = "ERROR"
+        status_code = 400
+        return return_response(success = False, message = message, code = 400), 400
+    finally:
+        logger.add_log(log_type, request.remote_addr, token["username"], request.method, request.url, "", message,  status_code)

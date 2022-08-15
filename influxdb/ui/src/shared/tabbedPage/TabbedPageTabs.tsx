@@ -25,7 +25,6 @@ interface Props {
 
 const activeTabName = (activeTab, tabs) => {
   const tab = tabs.filter(tab => tab.id === activeTab);
-  console.log(tab);
   return tab[0]["text"];
 }
 

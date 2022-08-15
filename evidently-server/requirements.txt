@@ -1,0 +1,10 @@
+evidently==0.1.55.dev0
+pandas==1.4.1
+numpy==1.21.5
+scikit-learn==1.0.2
+requests==2.27.1
+Flask==2.0.3
+Flask-Cors==3.0.10
+pymongo==4.0.2
+Flask-PyMongo==2.3.0
+influxdb-client==1.30.0

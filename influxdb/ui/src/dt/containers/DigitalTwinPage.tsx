@@ -1,6 +1,7 @@
 // Libraries
 import React, { PureComponent } from 'react'
 import { connect, ConnectedProps } from 'react-redux'
+import i18next from "i18next";
 
 // Components
 import DigitalTwinHeader from 'src/dt/components/DigitalTwinHeader'
@@ -66,7 +67,6 @@ class DigitalTwinPage extends PureComponent<Props, State> {
 
     const node = await getDTInfoByID(this.state.dt, nodeID);
 
-    console.log(node);
     this.onClickNode(node);
   }
 
@@ -80,7 +80,7 @@ class DigitalTwinPage extends PureComponent<Props, State> {
     return (
       <Page>
         <DigitalTwinHeader
-          title="Digital Twin Monitor"
+          title={i18next.t("headers.dt")}
         />
 
         <Page.Contents fullWidth={true} scrollable={true}>
@@ -160,7 +160,6 @@ class DigitalTwinPage extends PureComponent<Props, State> {
   }
 
   onClickNode = async (node) => {
-    console.log("node", node);
     this.setState({ selectedGraphNode: node })
   }
 

@@ -103,8 +103,6 @@ class MachineInformationOverlay extends PureComponent<Props, State> {
             })
         })
 
-        console.log({ bucket })
-
         const query = `
         from(bucket: "${bucket}")
             |> range(start: -1h, stop: now())

@@ -48,7 +48,6 @@ class UserManualContainer extends PureComponent<Props, State> {
         }, () => {
             for (let link of this.state.linkList) {
                 if (link["id"] === this.state.activePage) {
-                    console.log(link);
                     this.setState({ activePageName: link["name"], selectedLink: link["name"] })
                 }
             }

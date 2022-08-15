@@ -67,7 +67,6 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
 
     async componentDidUpdate(prevProps) {
         if (this.props.isEdit && prevProps.updateData !== this.props.updateData) {
-            console.log("update");
             this.handleChangeEditRowData(this.props.updateData);
         }
 
@@ -91,7 +90,6 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
     }
 
     handleChangeEditRowData = (editRow) => {
-        console.log("editRow", editRow)
         this.setState({
             costToFix: editRow.costToFix,
             description: editRow.description,
@@ -214,14 +212,14 @@ class AddUpdateFailureOverlay extends PureComponent<Props, State> {
     }
 
     getTimeInputFormat = (date) => {
-        if(new Date(date)){
+        if (new Date(date)) {
             let dateForm = new Date(date).toLocaleString()
             let parts = dateForm.split(" ")
             let firstPart = parts[0].split(".").reverse().join("-")
             let secondPart = parts[1]
             return `${firstPart}T${secondPart}`
         }
-        return ""        
+        return ""
     }
 
     render() {

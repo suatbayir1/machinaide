@@ -21,6 +21,7 @@ import { FACTORY_NAME } from 'src/config';
 import AnomalyGraphTimeRangeDropdown from 'src/health/components/AnomalyGraphTimeRangeDropdown';
 import HealthAssessmentService from 'src/shared/services/HealthAssessmentService'
 import AutoMLService from 'src/shared/services/AutoMLService'
+import DTService from 'src/shared/services/DTService';
 import ModelLogGraphOverlay from 'src/health/components/ModelLogGraphOverlay';
 import TimeMachineRefreshDropdown from 'src/timeMachine/components/RefreshDropdown'
 import RefreshLogsDropdown from 'src/health/components/RefreshLogsDropdown'
@@ -106,6 +107,7 @@ interface State {
     modelsLastLogs: object
     pofDays: number
     pofDaysSent: number
+    dtData: object
     autoRefresh: {  status: AutoRefreshStatus
                     interval: number}
 }
@@ -189,7 +191,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
             selectedFailure: null,
             windowStart: new Date("2021-05-22T12:36").getTime(),
             windowEnd: new Date("2021-05-29T21:22").getTime(),
-            aggregatePeriod: "5s",
+            aggregatePeriod: "1s",
             machineSensorData: [],
             chartID: uuid.v4(),
             sensorNames: [],
@@ -211,14 +213,14 @@ class MachineHealthPage extends PureComponent<Props, State>{
             modelsLastLogs: {},
             pofDays: 30,
             pofDaysSent: 30,
+            dtData: {"productionLines": {}, "machines": {}, "components": {}, "sensors": {}, "fields": {}},
             autoRefresh: {status: AutoRefreshStatus.Paused, interval: 0}
         }
     }
     private intervalID: number
     async componentDidMount(){
         console.log(this.props)
-        this.getMachineData()
-        this.getMachineAnomalies()
+        this.getDTData()
         this.getMLModels()
         if (this.state.autoRefresh.status === AutoRefreshStatus.Active) {
             this.intervalID = window.setInterval(() => {
@@ -227,6 +229,42 @@ class MachineHealthPage extends PureComponent<Props, State>{
         }
       
         // this.setState({})
+    }
+
+    getDTData = async () => {
+        let dt = await DTService.getAllDT();
+        let assets = {"productionLines": {}, "machines": {}, "components": {}, "sensors": {}, "fields": {}}
+        dt = dt[0] ? dt[0] : {}
+        let pls = dt["productionLines"] ? dt["productionLines"] : []
+        console.log(dt, pls)
+        for(let pl of pls){
+            console.log(pl)
+            assets["productionLines"][pl["@id"]] = {"name": pl["name"], "object": pl}
+            let machines = pl["machines"]
+            for(let machine of machines){
+                assets["machines"][machine["@id"]] = {"name": pl["name"] + "." + machine["name"], "object": machine}
+                let contents = machine["contents"]
+                for(let content of contents){
+                    if(content["@type"] === "Component"){
+                        assets["components"][content["@id"]] = {"name": pl["name"] + "." + machine["name"] + "." + content["name"], "object": content}
+                        let sensors = content["sensors"]
+                        for(let sensor of sensors){
+                            assets["sensors"][sensor["@id"]] = {"name": pl["name"] + "." + machine["name"] + "." + content["name"] + "." + sensor["name"], "object": sensor}
+                            let fields = sensor["fields"]
+                            for(let field of fields){
+                            field["database"] = dt["bucket"]
+                            assets["fields"][field["@id"]] = {"name": pl["name"] + "." + machine["name"] + "." + content["name"] + "." + sensor["name"] + "." + field["name"], "object": field}
+                            }
+                        }
+                    }
+                }
+            }        
+        }
+        this.setState({dtData: assets}, ()=>{
+            console.log("dt data", assets)
+            this.getMachineData()
+            this.getMachineAnomalies()
+        })
     }
 
     findProbability = (alpha, beta, days=30) => {
@@ -455,15 +493,15 @@ class MachineHealthPage extends PureComponent<Props, State>{
 
                 rows.push(row)
             }
-            console.log("rows: ", rows)
+            // console.log("rows: ", rows)
             let graphData = {}
             for(let row of rows){
-                if(row["_field"] in graphData){
-                    graphData[row["_field"]]["data"].push([row["_time"], row["_value"].toFixed(2)])
+                if(`${row["_measurement"]}_${row["_field"]}` in graphData){
+                    graphData[`${row["_measurement"]}_${row["_field"]}`]["data"].push([row["_time"], row["_value"].toFixed(2)])
                 }
                 else{
-                    graphData[row["_field"]] = {
-                        name: row["_field"],
+                    graphData[`${row["_measurement"]}_${row["_field"]}`] = {
+                        name: `${row["_measurement"]}_${row["_field"]}`,
                         data: [[row["_time"], row["_value"].toFixed(2)]]
                     }
                 }
@@ -527,6 +565,14 @@ class MachineHealthPage extends PureComponent<Props, State>{
         let start = timeRange.lower
         let stop = timeRange.upper
         let machineID = this.props.match.params.MID
+        let assets = this.state.dtData["machines"]
+        let machineMeasurements = assets[machineID] ? assets[machineID]["object"]["measurements"] : []
+        let measurementStringArray = []
+        console.log("568 ",machineMeasurements, assets, this.state.dtData)
+        for(let m of machineMeasurements){
+            measurementStringArray.push(`r["_measurement"] == "${m}"`)
+        }
+        let measurementString = measurementStringArray.join(" or ")
         this.setState({timeRange: {
                 lower: start,
                 upper: stop,
@@ -534,9 +580,9 @@ class MachineHealthPage extends PureComponent<Props, State>{
         }})
         let query = `from(bucket: "${FACTORY_NAME}")
         |> range(start: ${start}, stop: ${stop})
-        |> filter(fn: (r) => r["_measurement"] == "${machineID}")
-        |> aggregateWindow(every: ${this.state.aggregatePeriod}, fn: mean, createEmpty: false)
-        |> yield(name: "mean")`
+        |> filter(fn: ${measurementString})
+        |> aggregateWindow(every: ${this.state.aggregatePeriod}, fn: last, createEmpty: false)
+        |> yield(name: "last")`
 
         let results = this.processResponse(runQuery(this.props.match.params.orgID, query), start, stop)
     }
@@ -546,6 +592,14 @@ class MachineHealthPage extends PureComponent<Props, State>{
         let start = ""
         let stop = ""
         let machineID = this.props.match.params.MID
+        let assets = this.state.dtData["machines"]
+        let machineMeasurements = assets[machineID] ? assets[machineID]["object"]["measurements"] : [] 
+        let measurementStringArray = []
+        console.log("568 ",machineMeasurements, assets, this.state.dtData)
+        for(let m of machineMeasurements){
+            measurementStringArray.push(`r["_measurement"] == "${m}"`)
+        }
+        let measurementString = measurementStringArray.join(" or ")
         if(timeRange.type === "selectable-duration"){
             stop = new Date().toISOString()
             start = new Date(new Date().getTime() - timeRange.seconds * 1000).toISOString()
@@ -557,10 +611,10 @@ class MachineHealthPage extends PureComponent<Props, State>{
 
         let query = `from(bucket: "${FACTORY_NAME}")
         |> range(start: ${start}, stop: ${stop})
-        |> filter(fn: (r) => r["_measurement"] == "${machineID}")
-        |> aggregateWindow(every: ${this.state.aggregatePeriod}, fn: mean, createEmpty: false)
-        |> yield(name: "mean")`
-        //console.log("--425--",query, this.props.match.params.orgID)
+        |> filter(fn: (r) => ${measurementString})
+        |> aggregateWindow(every: ${this.state.aggregatePeriod}, fn: last, createEmpty: false)
+        |> yield(name: "last")`
+        console.log("--425--",query, this.props.match.params.orgID)
         let results = this.processResponse(runQuery(this.props.match.params.orgID, query))
         console.log("results", results)
 
@@ -1144,8 +1198,46 @@ class MachineHealthPage extends PureComponent<Props, State>{
                         >
                             <Page.Header fullWidth={false}>
                                 <Page.Title title="ML Models" />       
+                                <div className="tabbed-page--header-left" style={{marginLeft: "20px"}}>
+                                    <InputLabel>Number of Days: </InputLabel>
+                                    <Input
+                                        onChange={(e) => this.setState({ pofDays: parseInt(e.target.value) })}
+                                        name="pofDays"
+                                        type={InputType.Number}
+                                        value={this.state.pofDays}
+                                        style={{width: "15%"}}
+                                    />
+                                    <SquareButton
+                                        icon={IconFont.Play}
+                                        onClick={()=>this.setState({pofDaysSent: this.state.pofDays})}
+                                        size={ComponentSize.ExtraSmall}
+                                        titleText={"Get Probability"}
+                                        color={ComponentColor.Primary}
+                                    />
+                                    {/* <FlexBox
+                                        alignItems={AlignItems.Center}
+                                        margin={ComponentSize.Small}
+                                        className="view-options--checkbox"
+                                        key={uuid.v4()}
+                                        style={{margin: "0px", marginLeft: "20px"}}
+                                    >
+                                        <Input
+                                            onChange={(e) => this.setState({ pofDays: parseInt(e.target.value) })}
+                                            name="pofDays"
+                                            type={InputType.Number}
+                                            value={this.state.pofDays}
+                                        />
+                                        <SquareButton
+                                            icon={IconFont.Play}
+                                            onClick={()=>this.setState({pofDaysSent: this.state.pofDays})}
+                                            size={ComponentSize.ExtraSmall}
+                                            titleText={"Get Probability"}
+                                            color={ComponentColor.Primary}
+                                        />
+                                    </FlexBox>  */}                                   
+                                </div>
                                 <div className="tabbed-page--header-right">
-                                <FlexBox
+                                    <FlexBox
                                         alignItems={AlignItems.Center}
                                         margin={ComponentSize.Small}
                                         className="view-options--checkbox"
@@ -1190,6 +1282,9 @@ class MachineHealthPage extends PureComponent<Props, State>{
                             >
                                 <div style={{ height: '100%'}}> {/* , display: 'grid' */} 
                                     <div className="models-card-grid">
+                                        {this.state.displayedModels.length === 0 && (
+                                            <div>There are no models created yet</div>
+                                        )}
                                         {this.state.displayedModels.map((model, i) => (
                                             <ResourceCard
                                                 key={uuid.v4()}
@@ -1310,7 +1405,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
                                                         </div>
                                                         <Grid>
                                                             <Grid.Row>
-                                                                <Grid.Column widthXS={Columns.Four}>
+                                                                <Grid.Column widthXS={Columns.Six}>
                                                                     <div className="tabbed-page--header-left">
                                                                         <Label
                                                                             size={ComponentSize.Small}
@@ -1321,25 +1416,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
                                                                         />
                                                                     </div>
                                                                 </Grid.Column>
-                                                                <Grid.Column widthXS={Columns.Four}>
-                                                                    <div className="tabbed-page--header-right">
-                                                                        <Input
-                                                                            onChange={(e) => this.setState({ pofDays: parseInt(e.target.value) })}
-                                                                            name="modelNamae"
-                                                                            type={InputType.Number}
-                                                                            value={this.state.pofDays}
-                                                                            size={ComponentSize.ExtraSmall}
-                                                                        />
-                                                                        <SquareButton
-                                                                            icon={IconFont.Play}
-                                                                            onClick={()=>this.setState({pofDaysSent: this.state.pofDays})}
-                                                                            size={ComponentSize.ExtraSmall}
-                                                                            titleText={"Get Probability"}
-                                                                            color={ComponentColor.Primary}
-                                                                        />
-                                                                    </div>
-                                                                </Grid.Column>
-                                                                <Grid.Column widthXS={Columns.Four}>
+                                                                <Grid.Column widthXS={Columns.Six}>
                                                                     <div className="tabbed-page--header-right">
                                                                         <Label
                                                                             size={ComponentSize.Small}

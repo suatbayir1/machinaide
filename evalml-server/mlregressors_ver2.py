@@ -448,7 +448,7 @@ class RULRegressionSession:
         )
 
         labels = lm.search(
-            train_df.sort_values('cycle'),
+            train_df.sort_values('time'),
             num_examples_per_instance=20,
             minimum_data=5,
             gap=20,

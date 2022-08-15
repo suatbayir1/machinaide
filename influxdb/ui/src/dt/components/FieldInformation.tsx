@@ -1,16 +1,13 @@
 // Libraries
 import React, { PureComponent } from "react";
+import i18next from "i18next";
 
 // Components
 import {
     Form, ComponentSize, Grid, Columns, Label, InfluxColors,
-    ConfirmationButton, IconFont, ComponentColor, Appearance,
-    SelectDropdown, ComponentStatus, InputType, Input, TextArea,
     SlideToggle, FlexBox, InputLabel
 } from '@influxdata/clockface'
 import DangerConfirmationOverlay from "src/shared/overlays/DangerConfirmationOverlay";
-import Autocomplete from '@material-ui/lab/Autocomplete'
-import TextField from '@material-ui/core/TextField';
 
 // Services
 import DTService from "src/shared/services/DTService";
@@ -18,11 +15,9 @@ import FluxService from "src/shared/services/FluxService";
 
 // Utils
 import { csvToJSON } from 'src/shared/helpers/FileHelper';
-import { handleValidation } from "src/shared/helpers/FormValidator";
 
 // Constants
 import { updateFieldConfirmationText, deleteFieldConfirmationText } from 'src/shared/constants/tips';
-import { DEFAULT_VAL_FUNCTIONS } from 'src/shared/constants/defaultValueFunctions'
 
 type Props = {
     selectedGraphNode: object
@@ -119,12 +114,6 @@ class FieldInformation extends PureComponent<Props, State> {
         this.setState({ bucket, measurements })
     }
 
-    private handleChangeInput = (e): void => {
-        if (Object.keys(this.state).includes(e.target.name)) {
-            this.setState({ [e.target.name]: e.target.value } as Pick<State, keyof State>);
-        }
-    }
-
     private setForm = () => {
         const { selectedGraphNode } = this.props;
 
@@ -195,33 +184,6 @@ class FieldInformation extends PureComponent<Props, State> {
         this.setState({ visibleConfirmationOverlay: false })
     }
 
-    private updateField = async (): Promise<void> => {
-        const { selectedGraphNode, handleChangeNotification } = this.props;
-        const { displayName, dataSource, minValue, maxValue, measurement } = this.state;
-
-        if (
-            displayName.trim() == "" ||
-            measurement.trim() == "" ||
-            dataSource.trim() == "" ||
-            String(minValue) == "" ||
-            String(maxValue) == ""
-        ) {
-            handleChangeNotification("error", "Display name, measurement, data source, min value and max value cannot be empty");
-            return;
-        }
-
-        if (Number(minValue) > Number(maxValue)) {
-            handleChangeNotification("error", "Min value cannot greater than max value.");
-            return;
-        }
-
-        if (dataSource !== selectedGraphNode["dataSource"] || measurement !== selectedGraphNode["measurement"]) {
-            this.setState({ visibleConfirmationOverlay: true })
-        } else {
-            this.updateFieldConfirmed();
-        }
-    }
-
     private handleChangeMeasurement = async (): Promise<void> => {
         const { orgID } = this.props;
         const { bucket, measurement } = this.state;
@@ -256,15 +218,14 @@ class FieldInformation extends PureComponent<Props, State> {
     public render() {
         const { selectedGraphNode } = this.props;
         const {
-            dataSource, minValue, maxValue, measurements, measurement, fields,
-            displayName, description, operationType, visibleConfirmationOverlay,
-            isFillNullActive, defaultValue, isOperationActive, operation, operationValue
+            dataSource, minValue, maxValue, measurement, displayName, description, operationType,
+            visibleConfirmationOverlay, isFillNullActive, defaultValue, isOperationActive, operation, operationValue
         } = this.state;
 
         return (
             <>
                 <DangerConfirmationOverlay
-                    title={"Are you sure ?"}
+                    title={i18next.t('warning.are_you_sure')}
                     message={operationType == "update" ? updateFieldConfirmationText : deleteFieldConfirmationText}
                     visible={visibleConfirmationOverlay}
                     onClose={() => { this.setState({ visibleConfirmationOverlay: false }) }}
@@ -280,11 +241,11 @@ class FieldInformation extends PureComponent<Props, State> {
                                 widthMD={Columns.Six}
                                 widthLG={Columns.Twelve}
                             >
-                                <Form.Element label="Type">
+                                <Form.Element label={i18next.t('dt.type')}>
                                     <Label
                                         size={ComponentSize.Small}
                                         name={selectedGraphNode["type"]}
-                                        description="Node type"
+                                        description={i18next.t('dt.type')}
                                         color={InfluxColors.Ocean}
                                         id={selectedGraphNode["type"]}
                                     />
@@ -296,11 +257,11 @@ class FieldInformation extends PureComponent<Props, State> {
                                 widthMD={Columns.Six}
                                 widthLG={Columns.Twelve}
                             >
-                                <Form.Element label="Parent">
+                                <Form.Element label={i18next.t('dt.parent')}>
                                     <Label
                                         size={ComponentSize.Small}
                                         name={selectedGraphNode["parent"]}
-                                        description="Parent"
+                                        description={i18next.t('dt.parent')}
                                         color={InfluxColors.Ocean}
                                         id={selectedGraphNode["parent"]}
                                     />
@@ -312,17 +273,11 @@ class FieldInformation extends PureComponent<Props, State> {
                                 widthMD={Columns.Twelve}
                                 widthLG={Columns.Twelve}
                             >
-                                <Form.Element label="Display Name">
-                                    {/* <Input
-                                        name="displayName"
-                                        placeholder="Display Name.."
-                                        onChange={this.handleChangeInput}
-                                        value={displayName}
-                                    /> */}
+                                <Form.Element label={i18next.t('dt.display_name')}>
                                     <Label
                                         size={ComponentSize.Small}
                                         name={displayName}
-                                        description="Display Name"
+                                        description={i18next.t('dt.display_name')}
                                         color={InfluxColors.Ocean}
                                         id={displayName}
                                     />
@@ -334,20 +289,11 @@ class FieldInformation extends PureComponent<Props, State> {
                                 widthMD={Columns.Twelve}
                                 widthLG={Columns.Twelve}
                             >
-                                <Form.Element label="Measurement">
-                                    {/* <SelectDropdown
-                                        buttonStatus={["admin"].includes(localStorage.getItem("userRole"))
-                                            ? ComponentStatus.Valid
-                                            : ComponentStatus.Disabled
-                                        }
-                                        options={measurements}
-                                        selectedOption={measurement}
-                                        onSelect={(e) => { this.setState({ measurement: e }, () => this.handleChangeMeasurement()) }}
-                                    /> */}
+                                <Form.Element label={i18next.t('dt.measurement')}>
                                     <Label
                                         size={ComponentSize.Small}
                                         name={measurement}
-                                        description="Measurement"
+                                        description={i18next.t('dt.measurement')}
                                         color={InfluxColors.Ocean}
                                         id={measurement}
                                     />
@@ -359,20 +305,11 @@ class FieldInformation extends PureComponent<Props, State> {
                                 widthMD={Columns.Twelve}
                                 widthLG={Columns.Twelve}
                             >
-                                <Form.Element label="Data Source">
-                                    {/* <SelectDropdown
-                                        buttonStatus={["admin"].includes(localStorage.getItem("userRole"))
-                                            ? ComponentStatus.Valid
-                                            : ComponentStatus.Disabled
-                                        }
-                                        options={fields}
-                                        selectedOption={dataSource}
-                                        onSelect={(e) => this.setState({ dataSource: e })}
-                                    /> */}
+                                <Form.Element label={i18next.t('dt.data_source')}>
                                     <Label
                                         size={ComponentSize.Small}
                                         name={dataSource}
-                                        description="Data Source"
+                                        description={i18next.t('dt.data_source')}
                                         color={InfluxColors.Ocean}
                                         id={dataSource}
                                     />
@@ -384,21 +321,11 @@ class FieldInformation extends PureComponent<Props, State> {
                                 widthMD={Columns.Six}
                                 widthLG={Columns.Six}
                             >
-                                <Form.Element label="Min Value">
-                                    {/* <Input
-                                        name="minValue"
-                                        onChange={this.handleChangeInput}
-                                        value={minValue}
-                                        type={InputType.Number}
-                                        status={["admin"].includes(localStorage.getItem("userRole"))
-                                            ? ComponentStatus.Default
-                                            : ComponentStatus.Disabled
-                                        }
-                                    /> */}
+                                <Form.Element label={i18next.t('dt.min_value')}>
                                     <Label
                                         size={ComponentSize.Small}
                                         name={minValue ? minValue.toString() : "-"}
-                                        description="Min Value"
+                                        description={i18next.t('dt.min_value')}
                                         color={InfluxColors.Ocean}
                                         id={minValue ? minValue.toString() : "noMinValue"}
                                     />
@@ -410,21 +337,11 @@ class FieldInformation extends PureComponent<Props, State> {
                                 widthMD={Columns.Six}
                                 widthLG={Columns.Six}
                             >
-                                <Form.Element label="Max Value">
-                                    {/* <Input
-                                        name="maxValue"
-                                        onChange={this.handleChangeInput}
-                                        value={maxValue}
-                                        type={InputType.Number}
-                                        status={["admin"].includes(localStorage.getItem("userRole"))
-                                            ? ComponentStatus.Default
-                                            : ComponentStatus.Disabled
-                                        }
-                                    /> */}
+                                <Form.Element label={i18next.t('dt.max_value')}>
                                     <Label
                                         size={ComponentSize.Small}
                                         name={maxValue ? maxValue.toString() : "-"}
-                                        description="Max Value"
+                                        description={i18next.t('dt.max_value')}
                                         color={InfluxColors.Ocean}
                                         id={maxValue ? maxValue.toString() : "noMaxValue"}
                                     />
@@ -438,12 +355,11 @@ class FieldInformation extends PureComponent<Props, State> {
                                     widthLG={Columns.Six}
                                 >
                                     <FlexBox margin={ComponentSize.Small}>
-                                        <InputLabel>Do Operation on Data</InputLabel>
+                                        <InputLabel>{i18next.t('dt.do_operation_on_data')}</InputLabel>
                                         <SlideToggle
                                             active={isOperationActive}
                                             size={ComponentSize.ExtraSmall}
                                             onChange={() => this.setState({ isOperationActive: !this.state.isOperationActive })}
-                                            testID="rule-card--slide-toggle"
                                             disabled={true}
                                         />
                                     </FlexBox>
@@ -455,16 +371,11 @@ class FieldInformation extends PureComponent<Props, State> {
                                 widthMD={Columns.Six}
                                 widthLG={Columns.Six}
                             >
-                                <Form.Element label="Operation">
-                                    {/* <SelectDropdown
-                                            options={["+", "-", "/", "*"]}
-                                            selectedOption={operation}
-                                            onSelect={(e) => this.setState({ operation: e })}
-                                        /> */}
+                                <Form.Element label={i18next.t('dt.operation')}>
                                     <Label
                                         size={ComponentSize.Small}
                                         name={operation}
-                                        description="Operation"
+                                        description={i18next.t('dt.operation')}
                                         color={InfluxColors.Ocean}
                                         id={operation}
                                     />
@@ -476,21 +387,11 @@ class FieldInformation extends PureComponent<Props, State> {
                                     widthMD={Columns.Six}
                                     widthLG={Columns.Six}
                                 >
-                                    <Form.Element label="Value">
-                                        {/* <Input
-                                            name="operationValue"
-                                            onChange={this.handleChangeInput}
-                                            value={operationValue}
-                                            type={InputType.Text}
-                                            status={["admin"].includes(localStorage.getItem("userRole"))
-                                                ? ComponentStatus.Default
-                                                : ComponentStatus.Disabled
-                                            }
-                                        /> */}
+                                    <Form.Element label={i18next.t('dt.value')}>
                                         <Label
                                             size={ComponentSize.Small}
                                             name={operationValue}
-                                            description="Operation Value"
+                                            description={i18next.t('dt.value')}
                                             color={InfluxColors.Ocean}
                                             id={operationValue}
                                         />
@@ -505,12 +406,11 @@ class FieldInformation extends PureComponent<Props, State> {
                                     widthLG={Columns.Six}
                                 >
                                     <FlexBox margin={ComponentSize.Small}>
-                                        <InputLabel>Fill Nan Values</InputLabel>
+                                        <InputLabel>{i18next.t('dt.fill_nan_values')}</InputLabel>
                                         <SlideToggle
                                             active={isFillNullActive}
                                             size={ComponentSize.ExtraSmall}
                                             onChange={() => this.setState({ isFillNullActive: !this.state.isFillNullActive })}
-                                            testID="rule-card--slide-toggle"
                                             disabled={true}
                                         />
                                     </FlexBox>
@@ -524,21 +424,15 @@ class FieldInformation extends PureComponent<Props, State> {
                                         widthMD={Columns.Six}
                                         widthLG={Columns.Six}
                                     >
-                                        <Form.Element label="Default Value">
+                                        <Form.Element label={i18next.t('dt.default_value')}>
                                             <Label
                                                 size={ComponentSize.Small}
                                                 name={defaultValue}
-                                                description="Default Value"
+                                                description={i18next.t('dt.default_value')}
                                                 color={InfluxColors.Ocean}
                                                 id={defaultValue}
                                             />
                                         </Form.Element>
-                                        {/* <SelectDropdown
-                                                options={[DEFAULT_VAL_FUNCTIONS.LAST, DEFAULT_VAL_FUNCTIONS.AVG, DEFAULT_VAL_FUNCTIONS.MAX, DEFAULT_VAL_FUNCTIONS.MIN,
-                                                    DEFAULT_VAL_FUNCTIONS.DAVG, DEFAULT_VAL_FUNCTIONS.DMAX, DEFAULT_VAL_FUNCTIONS.DMIN]}
-                                                selectedOption={defaultValue}
-                                                onSelect={(e) => this.setState({ defaultValue: e })}
-                                            /> */}
                                     </Grid.Column>
                                 </Grid.Row>
                             )}
@@ -548,64 +442,17 @@ class FieldInformation extends PureComponent<Props, State> {
                                 widthMD={Columns.Twelve}
                                 widthLG={Columns.Twelve}
                             >
-                                <Form.Element label="Description">
-                                    {/* <TextArea
-                                        name="description"
-                                        value={description}
-                                        placeholder="Description.."
-                                        onChange={this.handleChangeInput}
-                                        rows={4}
-                                    /> */}
+                                <Form.Element label={i18next.t('dt.description')}>
                                     <Label
                                         size={ComponentSize.Small}
                                         name={description}
-                                        description="Description"
+                                        description={i18next.t('dt.description')}
                                         color={InfluxColors.Ocean}
                                         id={description}
                                     />
                                 </Form.Element>
                             </Grid.Column>
                         </Grid.Row>
-                        {/* <Grid.Row>
-                            <div className="dt-information-buttons">
-                                {
-                                    ["admin"].includes(localStorage.getItem("userRole")) &&
-                                    <ConfirmationButton
-                                        icon={IconFont.Checkmark}
-                                        onConfirm={() => {
-                                            this.setState({ operationType: "update" },
-                                                () => this.updateField())
-                                        }}
-                                        text={"Update"}
-                                        popoverColor={ComponentColor.Success}
-                                        popoverAppearance={Appearance.Outline}
-                                        color={ComponentColor.Success}
-                                        confirmationLabel="Do you want to update ?"
-                                        confirmationButtonColor={ComponentColor.Success}
-                                        confirmationButtonText="Yes"
-                                    />
-                                }
-                                {
-                                    ["admin"].includes(localStorage.getItem("userRole")) &&
-                                    <ConfirmationButton
-                                        icon={IconFont.Remove}
-                                        onConfirm={() => {
-                                            this.setState({
-                                                operationType: "delete",
-                                                visibleConfirmationOverlay: true
-                                            })
-                                        }}
-                                        text={"Delete"}
-                                        popoverColor={ComponentColor.Danger}
-                                        popoverAppearance={Appearance.Outline}
-                                        color={ComponentColor.Danger}
-                                        confirmationLabel="Do you want to delete ?"
-                                        confirmationButtonColor={ComponentColor.Danger}
-                                        confirmationButtonText="Yes"
-                                    />
-                                }
-                            </div>
-                        </Grid.Row> */}
                     </Grid>
                 </Form>
             </>

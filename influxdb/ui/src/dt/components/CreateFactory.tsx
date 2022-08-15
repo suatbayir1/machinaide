@@ -1,6 +1,7 @@
 // Libraries
 import React, { PureComponent } from "react";
 import { connect, ConnectedProps } from 'react-redux'
+import i18next from "i18next";
 
 // Components
 import {
@@ -119,13 +120,13 @@ class CreateFactory extends PureComponent<IProps, State> {
                                 <Grid.Row>
                                     <Grid.Column widthSM={Columns.Six}>
                                         <Form.Element
-                                            label="Unique ID/Name"
+                                            label={i18next.t('form.unique_id_name')}
                                             errorMessage={handleValidation(id)}
                                             required={true}
                                         >
                                             <Input
                                                 name="id"
-                                                placeholder="Unique ID.."
+                                                placeholder={i18next.t('form.unique_id_name')}
                                                 onChange={this.handleChangeInput}
                                                 value={id}
                                             />
@@ -133,13 +134,13 @@ class CreateFactory extends PureComponent<IProps, State> {
                                     </Grid.Column>
                                     <Grid.Column widthSM={Columns.Six}>
                                         <Form.Element
-                                            label="Factory Name"
+                                            label={i18next.t('dt.factory_name')}
                                             errorMessage={handleValidation(factoryName)}
                                             required={true}
                                         >
                                             <Input
                                                 name="factoryName"
-                                                placeholder="Factory name.."
+                                                placeholder={i18next.t('dt.factory_name')}
                                                 onChange={this.handleChangeInput}
                                                 value={factoryName}
                                             />
@@ -156,13 +157,13 @@ class CreateFactory extends PureComponent<IProps, State> {
                                     </Grid.Column>
                                     <Grid.Column widthSM={Columns.Six}>
                                         <Form.Element
-                                            label="Location"
+                                            label={i18next.t('dt.location')}
                                             errorMessage={handleValidation(factoryName)}
                                             required={true}
                                         >
                                             <Input
                                                 name="location"
-                                                placeholder="Location.."
+                                                placeholder={i18next.t('dt.location')}
                                                 onChange={this.handleChangeInput}
                                                 value={location}
                                             />
@@ -171,11 +172,11 @@ class CreateFactory extends PureComponent<IProps, State> {
                                 </Grid.Row>
                                 <Grid.Row>
                                     <Grid.Column widthSM={Columns.Twelve}>
-                                        <Form.Element label="Description">
+                                        <Form.Element label={i18next.t('dt.description')}>
                                             <TextArea
                                                 name="description"
                                                 value={description}
-                                                placeholder="Description.."
+                                                placeholder={i18next.t('dt.description')}
                                                 onChange={this.handleChangeInput}
                                                 rows={5}
                                             />
@@ -186,13 +187,13 @@ class CreateFactory extends PureComponent<IProps, State> {
 
                             <Form.Footer>
                                 <Button
-                                    text="Cancel"
+                                    text={i18next.t('button.cancel')}
                                     icon={IconFont.Remove}
                                     onClick={onDismiss}
                                 />
 
                                 <Button
-                                    text="Save"
+                                    text={i18next.t('button.save')}
                                     icon={IconFont.Checkmark}
                                     color={ComponentColor.Success}
                                     type={ButtonType.Submit}
@@ -200,7 +201,7 @@ class CreateFactory extends PureComponent<IProps, State> {
                                 />
                             </Form.Footer>
                         </Form>
-                        : <h2>A factory has already been created. You can create only 1 factory</h2>
+                        : <h2>{i18next.t('warning.factory_already_created')}</h2>
                 }
             </>
         )
