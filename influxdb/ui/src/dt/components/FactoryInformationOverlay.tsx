@@ -1,5 +1,6 @@
 // Libraries
 import React, { PureComponent } from "react";
+import i18next from "i18next";
 
 // Components
 import {
@@ -151,13 +152,12 @@ class FactoryInformationOverlay extends PureComponent<Props, State> {
                 <Overlay visible={isFactoryInformationOverlayVisible}>
                     <Overlay.Container maxWidth={750}>
                         <Overlay.Header
-                            title="Edit Factory"
+                            title={i18next.t('headers.edit_factory')}
                             onDismiss={handleDismissFactoryInformationOverlay}
-                            //children={this.headerChildren}
                         />
                         <Overlay.Body>
                             <DangerConfirmationOverlay
-                                title={"Are you sure ?"}
+                                title={i18next.t('warning.are_you_sure')}
                                 message={operationType == "update" ? bucketConfirmationText : deleteFactoryConfirmationText}
                                 visible={visibleConfirmationOverlay}
                                 onClose={() => { this.setState({ visibleConfirmationOverlay: false }) }}
@@ -168,11 +168,11 @@ class FactoryInformationOverlay extends PureComponent<Props, State> {
                                 <Grid>
                                     <Grid.Row>
                                         <Grid.Column widthXS={Columns.Six}>
-                                            <Form.Element label="Type">
+                                            <Form.Element label={i18next.t('dt.type')}>
                                                 <Label
                                                     size={ComponentSize.Small}
                                                     name={selectedGraphNode["type"]}
-                                                    description="Node type"
+                                                    description={i18next.t('dt.type')}
                                                     color={InfluxColors.Ocean}
                                                     id={selectedGraphNode["type"]}
                                                 />
@@ -180,13 +180,13 @@ class FactoryInformationOverlay extends PureComponent<Props, State> {
                                         </Grid.Column>
                                         <Grid.Column widthXS={Columns.Six}>
                                             <Form.Element
-                                                label="Factory Name"
+                                                label={i18next.t('dt.factory_name')}
                                                 errorMessage={handleValidation(factoryName)}
                                                 required={true}
                                             >
                                                 <Input
                                                     name="factoryName"
-                                                    placeholder="Factory Name.."
+                                                    placeholder={i18next.t('dt.factory_name')}
                                                     onChange={this.handleChangeInput}
                                                     value={factoryName}
                                                 />
@@ -196,13 +196,13 @@ class FactoryInformationOverlay extends PureComponent<Props, State> {
                                     <Grid.Row>
                                         <Grid.Column widthXS={Columns.Six}>
                                             <Form.Element
-                                                label="Location"
+                                                label={i18next.t('dt.location')}
                                                 errorMessage={handleValidation(location)}
                                                 required={true}
                                             >
                                                 <Input
                                                     name="location"
-                                                    placeholder="Location.."
+                                                    placeholder={i18next.t('dt.location')}
                                                     onChange={this.handleChangeInput}
                                                     value={location}
                                                 />
@@ -224,20 +224,20 @@ class FactoryInformationOverlay extends PureComponent<Props, State> {
                                     </Grid.Row>
                                     <Grid.Row>
                                         <Grid.Column widthXS={Columns.Twelve}>
-                                            <Form.Element label="Description">
+                                            <Form.Element label={i18next.t('dt.description')}>
                                                 <TextArea
                                                     name="description"
                                                     value={description}
-                                                    placeholder="Description.."
+                                                    placeholder={i18next.t('dt.description')}
                                                     onChange={this.handleChangeInput}
                                                     rows={4}
                                                 />
                                             </Form.Element>
                                         </Grid.Column>
-                                    </Grid.Row>    
+                                    </Grid.Row>
                                     <Grid.Row>
                                         <Grid.Column widthXS={Columns.Twelve}>
-                                            <Form.Element label={`Production Line List (${selectedGraphNode["productionLines"] ? selectedGraphNode["productionLines"].length : 0})`}>
+                                            <Form.Element label={`${i18next.t('dt.production_lines')} List (${selectedGraphNode["productionLines"] ? selectedGraphNode["productionLines"].length : 0})`}>
                                                 {
                                                     selectedGraphNode["productionLines"] && selectedGraphNode["productionLines"].length > 0 ?
                                                         <DapperScrollbars
@@ -252,7 +252,7 @@ class FactoryInformationOverlay extends PureComponent<Props, State> {
                                                                         <List.Item
                                                                             key={pl["@id"]}
                                                                             value={pl["displayName"]}
-                                                                            title="Production Line Name"
+                                                                            title={i18next.t('dt.production_line_name')}
                                                                             gradient={Gradients.GundamPilot}
                                                                             wrapText={true}
                                                                         >
@@ -265,11 +265,11 @@ class FactoryInformationOverlay extends PureComponent<Props, State> {
                                                                 })
                                                             }
                                                         </DapperScrollbars>
-                                                        : <h6>No production line found</h6>
+                                                        : <h6>{i18next.t('dt.no_production_line_found')}</h6>
                                                 }
                                             </Form.Element>
                                         </Grid.Column>
-                                    </Grid.Row>    
+                                    </Grid.Row>
                                     <Grid.Row>
                                         <div className="dt-information-buttons">
                                             {
@@ -280,13 +280,13 @@ class FactoryInformationOverlay extends PureComponent<Props, State> {
                                                         this.setState({ operationType: "update" },
                                                             () => this.updateFactory())
                                                     }}
-                                                    text={"Update"}
+                                                    text={i18next.t('button.update')}
                                                     popoverColor={ComponentColor.Success}
                                                     popoverAppearance={Appearance.Outline}
                                                     color={ComponentColor.Success}
-                                                    confirmationLabel="Do you want to update ?"
+                                                    confirmationLabel={i18next.t('warning.do_you_want_to_update')}
                                                     confirmationButtonColor={ComponentColor.Success}
-                                                    confirmationButtonText="Yes"
+                                                    confirmationButtonText={i18next.t('button.yes')}
                                                 />
                                             }
                                             {
@@ -299,13 +299,13 @@ class FactoryInformationOverlay extends PureComponent<Props, State> {
                                                             visibleConfirmationOverlay: true
                                                         })
                                                     }}
-                                                    text={"Delete"}
+                                                    text={i18next.t('button.delete')}
                                                     popoverColor={ComponentColor.Danger}
                                                     popoverAppearance={Appearance.Outline}
                                                     color={ComponentColor.Danger}
-                                                    confirmationLabel="Do you want to delete ?"
+                                                    confirmationLabel={i18next.t('warning.do_you_want_to_delete')}
                                                     confirmationButtonColor={ComponentColor.Danger}
-                                                    confirmationButtonText="Yes"
+                                                    confirmationButtonText={i18next.t('button.yes')}
                                                 />
                                             }
                                         </div>

@@ -1,4 +1,5 @@
 import { BACKEND } from 'src/config';
+import axios from "axios";
 
 
 class FactoryService {
@@ -398,6 +399,21 @@ class FactoryService {
         } catch (err) {
             console.error(err);
         }
+    }
+
+    getSectionsByFactory = async (payload) => {
+        let url = `${BACKEND.API_URL}factory/getSectionsByFactory`;
+
+        return await axios
+            .post(url, payload, { headers: { 'token': window.localStorage.getItem("token") } })
+            .then(response => {
+                if (response.status === 200) {
+                    return JSON.parse(response.data.data.data);
+                }
+            })
+            .catch(err => {
+                return err.response.data.data;
+            })
     }
 }
 

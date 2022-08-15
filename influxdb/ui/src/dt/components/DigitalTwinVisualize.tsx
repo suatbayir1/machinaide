@@ -58,7 +58,6 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
 
   async componentDidUpdate(prevProps) {
     if (prevProps.cubeInfo !== this.props.selectedGraphNode) {
-      console.log("update graph node");
       if (scene === undefined) { return; }
 
       if (Object.keys(this.props.selectedGraphNode).length > 0) {
@@ -76,7 +75,6 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
     }
 
     if (prevProps.refreshVisualizePage !== this.props.refreshVisualizePage) {
-      console.log("update visualize page");
       await this.removeAllObjectFromScene();
       const cubeInfo = await DTService.getAllDT();
       const renderedCubeInfo = await this.renderInitialCubeInfo(cubeInfo);
@@ -90,7 +88,6 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
     }
 
     if (prevProps.resultNLPQuery !== this.props.resultNLPQuery) {
-      console.log("result nlp query");
       await this.removeAllObjectFromScene();
       let cubeInfo = await this.handleResultNLPQuery(this.props.resultNLPQuery);
       this.cubeCreator(cubeInfo);
@@ -267,13 +264,11 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
     if (scene !== undefined) {
       let obj;
       for (var i = scene.children.length - 1; i >= 0; i--) {
-        console.log("remove => ", i)
         obj = await scene.children[i];
         obj.material = await undefined;
         obj.geometry = await undefined;
         await scene.remove(obj);
       }
-      console.log("remove finished");
       await renderer.render(scene, camera);
       return true;
     }

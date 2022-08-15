@@ -1,5 +1,6 @@
 // Libraries
 import React, { PureComponent } from "react";
+import i18next from "i18next";
 
 // Components
 import {
@@ -151,11 +152,11 @@ class FactoryInformation extends PureComponent<Props, State> {
                                 widthMD={Columns.Six}
                                 widthLG={Columns.Six}
                             >
-                                <Form.Element label="Type">
+                                <Form.Element label={i18next.t('dt.type')}>
                                     <Label
                                         size={ComponentSize.Small}
                                         name={selectedGraphNode["type"]}
-                                        description="Node type"
+                                        description={i18next.t('dt.type')}
                                         color={InfluxColors.Ocean}
                                         id={selectedGraphNode["type"]}
                                     />
@@ -167,9 +168,9 @@ class FactoryInformation extends PureComponent<Props, State> {
                                 widthMD={Columns.Six}
                                 widthLG={Columns.Six}
                             >
-                                <Form.Element label="3D View">
+                                <Form.Element label={i18next.t('dt.3d_view')}>
                                     <Button
-                                        text="3D Factory"
+                                        text={i18next.t('dt.3d_view')}
                                         icon={IconFont.Pulse}
                                         onClick={() => this.setState({ visibleFactory3DOverlay: true })}
                                         type={ButtonType.Button}
@@ -184,14 +185,14 @@ class FactoryInformation extends PureComponent<Props, State> {
                                 widthLG={Columns.Twelve}
                             >
                                 <Form.Element
-                                    label="Factory Name"
+                                    label={i18next.t('dt.factory_name')}
                                     errorMessage={handleValidation(factoryName)}
                                     required={true}
                                 >
                                     <Label
                                         size={ComponentSize.Small}
                                         name={factoryName}
-                                        description="Factory Name"
+                                        description={i18next.t('dt.factory_name')}
                                         color={InfluxColors.Ocean}
                                         id={factoryName}
                                     />
@@ -220,14 +221,14 @@ class FactoryInformation extends PureComponent<Props, State> {
                                 widthLG={Columns.Twelve}
                             >
                                 <Form.Element
-                                    label="Location"
+                                    label={i18next.t('dt.location')}
                                     errorMessage={handleValidation(location)}
                                     required={true}
                                 >
                                     <TextArea
                                         name="location"
                                         value={location}
-                                        placeholder="Location.."
+                                        placeholder={i18next.t('dt.location')}
                                         rows={2}
                                         status={ComponentStatus.Disabled}
                                     />
@@ -239,18 +240,18 @@ class FactoryInformation extends PureComponent<Props, State> {
                                 widthMD={Columns.Twelve}
                                 widthLG={Columns.Twelve}
                             >
-                                <Form.Element label="Description">
+                                <Form.Element label={i18next.t('dt.description')}>
                                     <TextArea
                                         name="description"
                                         value={description}
-                                        placeholder="Description.."
+                                        placeholder={i18next.t('dt.description')}
                                         rows={4}
                                         status={ComponentStatus.Disabled}
                                     />
                                 </Form.Element>
                             </Grid.Column>
                             <Grid.Column widthXS={Columns.Twelve}>
-                                <Form.Element label={`Production Line List (${selectedGraphNode["productionLines"].length})`}>
+                                <Form.Element label={`${i18next.t('dt.production_lines')} (${selectedGraphNode["productionLines"].length})`}>
                                     {
                                         selectedGraphNode["productionLines"].length > 0 ?
                                             <DapperScrollbars
@@ -265,7 +266,7 @@ class FactoryInformation extends PureComponent<Props, State> {
                                                             <List.Item
                                                                 key={pl["@id"]}
                                                                 value={pl["displayName"]}
-                                                                title="Production Line Name"
+                                                                title={i18next.t('dt.production_line_name')}
                                                                 gradient={Gradients.GundamPilot}
                                                                 wrapText={true}
                                                             >
@@ -278,7 +279,7 @@ class FactoryInformation extends PureComponent<Props, State> {
                                                     })
                                                 }
                                             </DapperScrollbars>
-                                            : <h6>No production line found</h6>
+                                            : <h6>{i18next.t('dt.no_production_line_found')}</h6>
                                     }
                                 </Form.Element>
                             </Grid.Column>

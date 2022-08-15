@@ -49,10 +49,7 @@ class TextureDeleteForm extends PureComponent<IProps, State> {
             return;
         }
 
-        console.log(selectedTexture);
-
         const result = await ObjectService.deleteTexture({ file: selectedTexture["file"] });
-        console.log(result);
         if (result.summary.code !== 200) {
             notify(generalErrorMessage(result.message.text));
             return;

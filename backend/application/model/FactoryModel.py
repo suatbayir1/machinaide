@@ -289,3 +289,10 @@ class FactoryModel():
     def is_dashboard_exists(self, payload):
         collection = "dashboards"
         return cursor_to_json(self.db.find(collection, payload))
+
+    def get_sections_by_factory(self, where):
+        try:
+            collection = "sections"
+            return cursor_to_json(self.db.find(collection, where))
+        except:
+            return False

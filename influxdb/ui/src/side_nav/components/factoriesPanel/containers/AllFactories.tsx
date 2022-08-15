@@ -16,7 +16,6 @@ import ProductionLineCards from 'src/side_nav/components/factoriesPanel/componen
 // Services
 import FactoryService from 'src/shared/services/FactoryService';
 
-
 // Constants
 import { tipStyle, factoryPage } from 'src/shared/constants/tips'
 
@@ -44,7 +43,6 @@ class AllFactories extends PureComponent<Props, State> {
 
     getAllFactories = async () => {
         const factories = await FactoryService.getFactories();
-        console.log("factories", factories);
 
         this.setState({
             factory: factories?.[0],
@@ -55,8 +53,6 @@ class AllFactories extends PureComponent<Props, State> {
 
     render() {
         const { spinnerLoading, isLoading, factory } = this.state;
-
-        console.log("factory", this.state.factory)
 
         return (
             <Page>

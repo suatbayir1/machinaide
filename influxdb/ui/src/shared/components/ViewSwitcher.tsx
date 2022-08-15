@@ -53,7 +53,6 @@ const ViewSwitcher: FunctionComponent<Props> = ({
   checkThresholds = [],
   theme,
 }) => {
-  console.log(properties.type);
   switch (properties.type) {
     case 'single-stat':
       return (

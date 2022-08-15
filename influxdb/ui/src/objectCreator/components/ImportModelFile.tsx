@@ -67,10 +67,7 @@ class UploadModelFile extends PureComponent<IProps, State> {
             return;
         }
 
-        console.log(selectedImportModel);
-
         const result = await ObjectService.deleteModelFile({ file: selectedImportModel["file"] });
-        console.log(result);
         if (result.summary.code !== 200) {
             notify(generalErrorMessage(result.message.text));
             return;

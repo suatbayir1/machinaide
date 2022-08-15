@@ -170,7 +170,7 @@ class HealthAssessmentService {
                 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
                 'token': window.localStorage.getItem("token")
             },
-            body: JSON.stringify({"token": window.localStorage.getItem("token")}),
+            body: JSON.stringify({ "token": window.localStorage.getItem("token") }),
         })
 
         try {
@@ -180,7 +180,6 @@ class HealthAssessmentService {
             if (response.status !== 200) {
                 throw new Error(res.data.message.text);
             }
-            console.log(res)
             return res;
         } catch (err) {
             alert(err);
@@ -211,7 +210,6 @@ class HealthAssessmentService {
             if (response.status !== 200) {
                 throw new Error(res.data.message.text);
             }
-            console.log(res)
             return res;
         } catch (err) {
             alert(err);
@@ -242,7 +240,6 @@ class HealthAssessmentService {
             if (response.status !== 200) {
                 throw new Error(res.data.message.text);
             }
-            console.log(res)
             return res;
         } catch (err) {
             alert(err);
@@ -273,7 +270,6 @@ class HealthAssessmentService {
             if (response.status !== 200) {
                 throw new Error(res.data.message.text);
             }
-            console.log(res)
             return res;
         } catch (err) {
             alert(err);
@@ -283,7 +279,7 @@ class HealthAssessmentService {
 
     getMLModels = async (settings) => {
         const url = `${BACKEND.API_URL}ml/getMLModels`;
-        
+
         const request = fetch(url, {
             method: 'POST',
             mode: 'cors',
@@ -304,7 +300,6 @@ class HealthAssessmentService {
             if (response.status !== 200) {
                 throw new Error(res.data.message.text);
             }
-            console.log(res)
             return res;
         } catch (err) {
             alert(err);
@@ -314,7 +309,7 @@ class HealthAssessmentService {
 
     startStopModel = async (settings) => {
         const url = `${BACKEND.API_URL}ml/startStopModel`;
-        
+
         const request = fetch(url, {
             method: 'POST',
             mode: 'cors',
@@ -335,7 +330,6 @@ class HealthAssessmentService {
             if (response.status !== 200) {
                 throw new Error(res.data.message.text);
             }
-            console.log(res)
             return res;
         } catch (err) {
             alert(err);

@@ -1,11 +1,12 @@
 // Libraries
 import React, { PureComponent } from "react";
 import { connect, ConnectedProps } from 'react-redux'
+import i18next from "i18next";
 
 // Components
 import {
     Form, Button, IconFont, ComponentColor, ButtonType, Grid, Input,
-    Columns, TextArea, ComponentStatus,
+    Columns, TextArea, ComponentStatus, SelectDropdown,
 } from "@influxdata/clockface"
 
 // Utils
@@ -31,12 +32,14 @@ type Props = {
     refreshVisualizePage: () => void
     handleDismissAddNode: () => void
     factoryID: string
+    sections: object[]
 }
 
 type State = {
     id: string
     displayName: string
     description: string
+    section: string
 }
 
 type ReduxProps = ConnectedProps<typeof connector>
@@ -50,6 +53,7 @@ class CreateProductionLine extends PureComponent<IProps, State> {
             id: "",
             displayName: "",
             description: "",
+            section: ""
         }
     }
 
@@ -58,11 +62,12 @@ class CreateProductionLine extends PureComponent<IProps, State> {
             id: "",
             displayName: "",
             description: "",
+            section: ""
         })
     }
 
     private create = async (): Promise<void> => {
-        const { id, displayName, description } = this.state;
+        const { id, displayName, description, section } = this.state;
         const {
             handleDismissAddNode, refreshGraph, notify, factoryID,
             refreshGeneralInfo, refreshVisualizePage
@@ -73,8 +78,8 @@ class CreateProductionLine extends PureComponent<IProps, State> {
             return;
         }
 
-        if (id.trim() === "") {
-            notify(pleaseFillInTheFormCompletely("ID and Factory cannot be empty."));
+        if (id.trim() === "" || section.trim() === "", displayName.trim() === "") {
+            notify(pleaseFillInTheFormCompletely("ID, Display name and section cannot be empty."));
             return;
         }
 
@@ -85,6 +90,7 @@ class CreateProductionLine extends PureComponent<IProps, State> {
             "displayName": displayName,
             "description": description,
             "type": "ProductionLine",
+            "section": section,
             "machines": [],
         }
 
@@ -110,8 +116,8 @@ class CreateProductionLine extends PureComponent<IProps, State> {
     }
 
     public render(): JSX.Element {
-        const { onDismiss, factoryID } = this.props;
-        const { id, displayName, description } = this.state;
+        const { onDismiss, factoryID, sections } = this.props;
+        const { id, displayName, description, section } = this.state;
 
         return (
             <>
@@ -147,7 +153,7 @@ class CreateProductionLine extends PureComponent<IProps, State> {
                                     </Grid.Column>
                                 </Grid.Row>
                                 <Grid.Row>
-                                    <Grid.Column widthSM={Columns.Twelve}>
+                                    <Grid.Column widthSM={Columns.Six}>
                                         <Form.Element
                                             label="Display Name"
                                             errorMessage={handleValidation(displayName)}
@@ -158,6 +164,19 @@ class CreateProductionLine extends PureComponent<IProps, State> {
                                                 placeholder="Display name.."
                                                 onChange={this.handleChangeInput}
                                                 value={displayName}
+                                            />
+                                        </Form.Element>
+                                    </Grid.Column>
+                                    <Grid.Column widthSM={Columns.Six}>
+                                        <Form.Element
+                                            label="Section"
+                                            errorMessage={handleValidation(displayName)}
+                                            required={true}
+                                        >
+                                            <SelectDropdown
+                                                options={sections.map(s => s["name"])}
+                                                selectedOption={section}
+                                                onSelect={(e) => this.setState({ section: e })}
                                             />
                                         </Form.Element>
                                     </Grid.Column>

@@ -3,22 +3,22 @@ import React, { PureComponent } from 'react'
 import ForceGraph2D from "react-force-graph-2d"
 import * as d3 from "d3";
 import { withSize } from "react-sizeme";
+import i18next from "i18next";
 
 // Components
-import AddNewNodeOverlay from "src/dt/components/AddNewNodeOverlay"
-import NLPSearch from 'src/example/NLPSearch'
-
-// Helpers
-import { history } from 'src/store/history'
+import AddNewNodeOverlay from "src/dt/components/AddNewNodeOverlay";
+import NLPSearch from 'src/example/NLPSearch';
+import VisualizeSensorDataOverlay from "src/dt/overlays/VisualizeSensorDataOverlay";
 
 // Utilities
-import { BACKEND } from "src/config";
+import { csvToJSON } from 'src/shared/helpers/FileHelper';
 
 // Css
 import 'src/style/custom.css'
 
 // Services
 import DTService from 'src/shared/services/DTService';
+import FluxService from "src/shared/services/FluxService";
 
 import {
     Panel, ComponentSize, Form, Button, Grid, Columns, ButtonType, ComponentColor, TechnoSpinner,
@@ -51,14 +51,18 @@ interface State {
     notificationVisible: boolean
     notificationType: string
     notificationMessage: string
-    currentSensorValue: object[]
+    fieldsLastData: object[]
     graphWidth: number
+    fields: object[]
+    openVisualizeSensorDataOverlay: boolean
+    valuesByField: object
 }
 
 const withSizeHOC = withSize({ monitorWidth: true, monitorHeight: false, noPlaceholder: true })
 
 class DigitalTwinGraph extends PureComponent<Props, State> {
     private graphRef: React.RefObject<HTMLInputElement>;
+    private intervalID: NodeJS.Timer
 
     constructor(props) {
         super(props);
@@ -85,27 +89,30 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
             queryParameter: "",
             spinnerLoading: RemoteDataState.Loading,
             constantJsonData: [],
-            selectedGraphType: { text: 'Top to down', value: 'td' },
+            selectedGraphType: { text: i18next.t('layout_button.top_to_down'), value: 'td' },
             graphTypeList: [
-                { text: 'Top to down', value: 'td' },
-                { text: 'Bottom to up', value: 'bu' },
-                { text: 'Left to right', value: 'lr' },
-                { text: 'Right to left', value: 'rl' },
-                { text: 'Radial out', value: 'radialout' },
-                { text: 'Radial in', value: 'radialin' },
+                { text: i18next.t('layout_button.top_to_down'), value: 'td' },
+                { text: i18next.t('layout_button.bottom_to_up'), value: 'bu' },
+                { text: i18next.t('layout_button.left_to_right'), value: 'lr' },
+                { text: i18next.t('layout_button.right_to_left'), value: 'rl' },
+                { text: i18next.t('layout_button.radial_out'), value: 'radialout' },
+                { text: i18next.t('layout_button.radial_in'), value: 'radialin' },
             ],
             visibleAddNodeOverlay: false,
             notificationVisible: false,
             notificationType: '',
             notificationMessage: '',
-            currentSensorValue: [],
+            fieldsLastData: [],
             graphWidth: 860,
+            openVisualizeSensorDataOverlay: false,
+            fields: [],
+            valuesByField: {},
         };
     }
 
     async componentDidMount(): Promise<void> {
         await this.createGraph();
-        this.getRealTimeSensorData();
+        // this.getRealTimeSensorData();
         this.responsiveConfiguration();
     }
 
@@ -115,6 +122,8 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                 graphWidth: document.querySelector("#graphDiv").clientWidth - 30
             })
         });
+
+        clearInterval(this.intervalID);
     }
 
     responsiveConfiguration = () => {
@@ -143,42 +152,45 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
             }
         }
 
-        if (prevProps.showAllSensorValues !== this.props.showAllSensorValues) {
+        if (prevProps.showAllSensorValues !== this.props.showAllSensorValues && this.props.showAllSensorValues) {
+            await clearInterval(this.intervalID);
             this.getRealTimeSensorData();
+            this.intervalID = setInterval(() => {
+                this.getRealTimeSensorData();
+            }, 5000)
+
         }
     }
 
     getRealTimeSensorData = async () => {
-        let eventSource = new EventSource(`${BACKEND.API_URL}topic/sensors_data`);
+        const { fields } = this.state;
+        let valuesByField = {};
 
-        if (!this.props.showAllSensorValues) {
-            eventSource.close();
-            return;
-        }
+        const query = `
+            from(bucket: "Ermetal")
+            |> range(start: -5)
+            |> last()
+        `
 
-        eventSource.onmessage = e => {
-            let currentData = JSON.parse(e.data);
+        const csvResult = await FluxService.fluxQuery(this.props.orgID, query);
+        const jsonResult = await csvToJSON(csvResult);
 
-            let tempCurrentSensorValue = this.state.currentSensorValue;
-
-            let found = false;
-            tempCurrentSensorValue.forEach(item => {
-                if (item["name"] === currentData["name"]) {
-                    item["current_value"] = currentData["current_value"];
-                    found = true;
+        console.log({ jsonResult });
+        console.log({ fields });
+        for (const field of fields) {
+            for (const data of jsonResult) {
+                if (data["_measurement"] === field["measurement"] && data["_field"] === field["dataSource"]) {
+                    valuesByField[field["name"]] = Number(data["_value"]).toFixed(2)
                 }
-            })
-
-            if (!found) {
-                tempCurrentSensorValue.push(currentData);
             }
-
-            this.setState({ currentSensorValue: tempCurrentSensorValue });
         }
+
+        this.setState({ valuesByField });
     }
 
     createGraph = async () => {
         const graphInfo = await DTService.getAllDT();
+        const fields = [];
 
         this.setState({
             constantJsonData: graphInfo
@@ -257,6 +269,8 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                             })
 
                             sensor["fields"].map(field => {
+                                fields.push(field);
+
                                 nodes.push(Object.assign({
                                     id: field?.["name"],
                                     color: "orange",
@@ -301,143 +315,13 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
             prunedTree: returnData,
             constantData: returnData,
             nodesById: nodesById,
-            spinnerLoading: RemoteDataState.Done
+            spinnerLoading: RemoteDataState.Done,
+            fields,
         })
 
         this.graphRef.zoom(2, 1000);
         this.graphRef.d3Force('collide', d3.forceCollide(5));
     }
-
-    // createGraph = async () => {
-    //     const graphInfo = await DTService.getAllDT();
-
-    //     this.setState({
-    //         constantJsonData: graphInfo
-    //     });
-
-    //     const nodes = [];
-    //     const links = [];
-
-    //     graphInfo.map(factory => {
-    //         nodes.push(Object.assign({
-    //             id: factory?.factoryName,
-    //             color: "blue",
-    //             size: 500,
-    //             src: "../../assets/images/graph/ermetal.png",
-    //             symbolType: "star",
-    //         }, factory));
-
-    //         factory["productionLines"].map(pl => {
-    //             nodes.push(Object.assign({
-    //                 id: pl?.name,
-    //                 color: "red",
-    //                 size: 400,
-    //                 symbolType: "circle",
-    //                 src: "../../assets/images/graph/pl.jpg",
-    //             }, pl));
-
-    //             links.push({
-    //                 source: pl?.parent,
-    //                 target: pl?.name
-    //             });
-
-    //             pl["machines"].map(machine => {
-    //                 nodes.push(Object.assign({
-    //                     id: machine?.name,
-    //                     color: "red",
-    //                     size: 400,
-    //                     symbolType: "circle",
-    //                     src: "../../assets/images/graph/machine.jpg",
-    //                 }, machine));
-
-    //                 links.push({
-    //                     source: machine?.parent,
-    //                     target: machine?.name
-    //                 });
-
-    //                 machine["contents"].map(component => {
-    //                     if (component["@type"] !== "Component") {
-    //                         return;
-    //                     }
-
-    //                     nodes.push(Object.assign({
-    //                         id: component?.name,
-    //                         color: "green",
-    //                         size: 300,
-    //                         symbolType: "square",
-    //                         src: "../../assets/images/graph/component.png",
-    //                     }, component))
-
-    //                     links.push({
-    //                         source: component?.parent,
-    //                         target: component?.name
-    //                     })
-
-    //                     component["sensors"].map(sensor => {
-    //                         nodes.push(Object.assign({
-    //                             id: sensor?.name,
-    //                             color: "orange",
-    //                             size: 300,
-    //                             symbolType: "triangle",
-    //                             src: "../../assets/images/graph/sensor.jpg",
-    //                         }, sensor))
-
-    //                         links.push({
-    //                             source: sensor?.parent,
-    //                             target: sensor?.name
-    //                         })
-
-    //                         sensor["fields"].map(field => {
-    //                             nodes.push(Object.assign({
-    //                                 id: field?.["name"],
-    //                                 color: "orange",
-    //                                 size: 300,
-    //                                 symbolType: "triangle",
-    //                                 src: "../../assets/images/graph/measurement.jpg",
-    //                             }, field))
-
-    //                             links.push({
-    //                                 source: field?.parent,
-    //                                 target: field?.name
-    //                             })
-    //                         })
-    //                     })
-    //                 })
-    //             })
-    //         })
-    //     })
-
-    //     const returnData = {
-    //         nodes,
-    //         links
-    //     }
-
-    //     // Set NodesById for collapse / expand
-    //     const rootId = "Ermetal"
-    //     const nodesById = Object.fromEntries(
-    //         returnData["nodes"].map((node) => [node.id, node])
-    //     );
-
-    //     returnData["nodes"].forEach((node) => {
-    //         node["collapsed"] = node.id !== rootId;
-    //         node["childLinks"] = [];
-    //     });
-
-    //     returnData["links"].forEach((link) => {
-    //         nodesById[link.source]["childLinks"].push(link)
-    //     });
-
-    //     this.setState({
-    //         data: returnData,
-    //         prunedTree: returnData,
-    //         constantData: returnData,
-    //         nodesById: nodesById,
-    //         spinnerLoading: RemoteDataState.Done
-    //     })
-
-    //     this.graphRef.zoom(2, 1000);
-    //     this.graphRef.d3Force('collide', d3.forceCollide(4));
-    // }
 
     onChangeInput = (e) => {
         this.setState({ queryParameter: e.target.value })
@@ -664,7 +548,7 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                                             {
                                                 ["admin"].includes(localStorage.getItem("userRole")) &&
                                                 <Button
-                                                    text="Add"
+                                                    text={i18next.t('button.add')}
                                                     icon={IconFont.Plus}
                                                     onClick={this.openAddNodeOverlay}
                                                     type={ButtonType.Button}
@@ -672,35 +556,15 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                                                     className="show-only-pc"
                                                 />
                                             }
-                                            {/* 
-                                            <Button
-                                                className="show-only-pc"
-                                                text="View Factory"
-                                                icon={IconFont.Pulse}
-                                                onClick={() => history.push(`/orgs/${this.props.orgID}/dt/factory-scene`)}
-                                                type={ButtonType.Button}
-                                                color={ComponentColor.Primary}
-                                            /> */}
-
-                                            <Button
-                                                className="show-only-pc"
-                                                text="Data Flow"
-                                                icon={IconFont.Shuffle}
-                                                onClick={() => history.push(`/orgs/${this.props.orgID}/dt/data-flow-settings`)}
-                                                type={ButtonType.Button}
-                                                color={ComponentColor.Primary}
-                                            />
 
                                             <Dropdown
                                                 testID="dropdown--gen-token"
-                                                style={{ width: '125px' }}
+                                                style={{ width: '150px' }}
                                                 button={(active, onClick) => (
                                                     <Dropdown.Button
                                                         active={active}
                                                         onClick={onClick}
                                                         color={ComponentColor.Primary}
-                                                        // style={{ width: '125px' }}
-                                                        testID="dropdown-button--gen-token"
                                                     >
                                                         {selectedGraphType['text']}
                                                     </Dropdown.Button>
@@ -713,6 +577,17 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                                                     </Dropdown.Menu>
                                                 )}
                                             />
+
+                                            {this.props.selectedGraphNode["type"] === "Field" ?
+                                                <Button
+                                                    text={i18next.t('button.show_data_in_chart')}
+                                                    icon={IconFont.BarChart}
+                                                    type={ButtonType.Button}
+                                                    color={ComponentColor.Secondary}
+                                                    onClick={() => this.setState({ openVisualizeSensorDataOverlay: true })}
+                                                />
+                                                : null
+                                            }
                                         </div>
                                     </Grid.Column>
                                 </Grid.Row>
@@ -746,52 +621,29 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                                 img.style.margin = "50px"
 
                                 // show all sensor values
-                                this.props.showAllSensorValues && this.state.currentSensorValue.forEach(item => {
-                                    if (item["name"] === node["name"]) {
-
-                                        if (item["current_value"] < node["minValue"]) {
-                                            ctx.fillStyle = "yellow"
-                                        } else if (item["current_value"] > node["maxValue"]) {
-                                            ctx.fillStyle = "red"
-                                        } else {
-                                            ctx.fillStyle = "white"
-                                        }
-
-                                        ctx.font = "4px Arial";
-                                        ctx.fillText(String(item["current_value"]), node.x - 2, node.y + 8);
-
+                                if (this.props.showAllSensorValues && node["type"] === "Field") {
+                                    if (this.state.valuesByField[node["name"]] < node["minValue"]) {
+                                        ctx.fillStyle = "yellow"
+                                    } else if (this.state.valuesByField[node["name"]] > node["maxValue"]) {
+                                        ctx.fillStyle = "red"
+                                    } else {
+                                        ctx.fillStyle = "white"
                                     }
-                                })
 
+                                    ctx.font = "4px Arial";
+                                    ctx.fillText(String(this.state.valuesByField[node["name"]]), node.x - 4, node.y + 8);
+                                }
 
                                 if (this.props.selectedGraphNode["name"] === node["name"]) {
                                     ctx.drawImage(img, node.x - 4, node.y - 4, 8, 8);
                                     ctx.strokeStyle = '#f00';
                                     ctx.lineWidth = 1;
                                     ctx.strokeRect(node.x - 4, node.y - 4, 8, 8);
-
-                                    // show only selected sensor value
-                                    this.state.currentSensorValue.forEach(item => {
-                                        if (item["name"] === node["name"]) {
-
-                                            if (item["current_value"] < node["minValue"]) {
-                                                ctx.fillStyle = "yellow"
-                                            } else if (item["current_value"] > node["maxValue"]) {
-                                                ctx.fillStyle = "red"
-                                            } else {
-                                                ctx.fillStyle = "white"
-                                            }
-
-                                            ctx.font = "4px Arial";
-                                            ctx.fillText(String(item["current_value"]), node.x - 2, node.y + 8);
-                                        }
-                                    })
                                 } else {
                                     ctx.drawImage(img, node.x - 4, node.y - 4, 8, 8);
                                 }
                             }}
                         />
-
 
                         <Notification
                             key={"id"}
@@ -826,6 +678,13 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                             generalInfo={this.props.generalInfo}
                         />
 
+                        <VisualizeSensorDataOverlay
+                            visible={this.state.openVisualizeSensorDataOverlay}
+                            onClose={() => this.setState({ openVisualizeSensorDataOverlay: false })}
+                            field={this.props.selectedGraphNode}
+                            dt={this.state.constantJsonData}
+                            orgID={this.props.orgID}
+                        />
                     </Panel.Body>
                 </Panel>
             </>

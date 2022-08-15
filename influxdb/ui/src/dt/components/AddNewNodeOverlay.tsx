@@ -1,6 +1,7 @@
 // Libraries
 import React, { PureComponent } from 'react'
 import uuid from "uuid";
+import i18next from "i18next";
 
 // Components
 import { ComponentColor, Overlay, InfluxColors, QuestionMarkTooltip } from '@influxdata/clockface'
@@ -15,6 +16,7 @@ import CreateField from 'src/dt/components/CreateField';
 
 // Services
 import DTService from 'src/shared/services/DTService';
+import FactoryService from 'src/shared/services/FactoryService';
 
 // Constants
 import { tipStyle, addNewNodeHeader } from 'src/shared/constants/tips';
@@ -33,6 +35,7 @@ interface Props {
 interface State {
     activeTab: string
     objectList: object[]
+    sections: any[]
 }
 
 class AddNewNodeOverlay extends PureComponent<Props, State> {
@@ -42,6 +45,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
         this.state = {
             activeTab: "factory",
             objectList: [],
+            sections: [],
         };
     }
 
@@ -49,11 +53,22 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
         this.getObjectList();
     }
 
+    componentDidUpdate(prevProps: Readonly<Props>): void {
+        if (prevProps.generalInfo !== this.props.generalInfo) {
+            this.getSections();
+        }
+    }
+
     getObjectList = async () => {
         const result = await DTService.getObjectList();
         this.setState({
             objectList: result
         })
+    }
+
+    getSections = async () => {
+        const sections = await FactoryService.getSectionsByFactory({ "factoryID": this.props.generalInfo["factoryID"] });
+        this.setState({ sections })
     }
 
     clearForm = () => {
@@ -83,7 +98,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                 tooltipStyle={{ width: '400px' }}
                 color={ComponentColor.Secondary}
                 tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
-                    <div style={{ color: InfluxColors.Star }}>{"How to add DT object:"}
+                    <div style={{ color: InfluxColors.Star }}>{i18next.t('tips.how_to_add_dt_object')}
                         <hr style={tipStyle} />
                     </div>
                     {addNewNodeHeader}
@@ -98,27 +113,27 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
 
         const tabs: TabbedPageTab[] = [
             {
-                text: 'Factory',
+                text: i18next.t('dt.factory'),
                 id: 'factory',
             },
             {
-                text: 'Production Line',
+                text: i18next.t('dt.production_line'),
                 id: 'pl',
             },
             {
-                text: 'Machine',
+                text: i18next.t('dt.machine'),
                 id: 'machine',
             },
             {
-                text: 'Component',
+                text: i18next.t('dt.component'),
                 id: 'component',
             },
             {
-                text: 'Sensor',
+                text: i18next.t('dt.sensor'),
                 id: 'sensor',
             },
             {
-                text: 'Field',
+                text: i18next.t('dt.field'),
                 id: 'field',
             }
         ]
@@ -128,7 +143,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                 <Overlay visible={visibleAddNodeOverlay}>
                     <Overlay.Container maxWidth={750}>
                         <Overlay.Header
-                            title="Add New Node"
+                            title={i18next.t('add_new_part')}
                             onDismiss={handleDismissAddNode}
                             children={this.headerChildren}
                         />
@@ -163,6 +178,7 @@ class AddNewNodeOverlay extends PureComponent<Props, State> {
                                     refreshVisualizePage={this.props.refreshVisualizePage}
                                     handleDismissAddNode={this.props.handleDismissAddNode}
                                     factoryID={generalInfo["factoryID"]}
+                                    sections={this.state.sections}
                                 />
                             }
 

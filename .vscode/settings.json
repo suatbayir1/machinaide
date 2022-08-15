@@ -11,6 +11,7 @@
         "./backend/mlhelpers/automl",
         "./evalml-server",
         "./evalml-server",
-        "./model-runner"
+        "./model-runner",
+        "./evidently-server"
     ]
 }

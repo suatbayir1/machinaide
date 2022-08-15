@@ -1095,12 +1095,12 @@ export const reportUpdatedSuccessfully = (): Notification => ({
 // Data Flow
 export const addDataFlowSettingSuccessfully = (): Notification => ({
   ...defaultSuccessNotification,
-  message: `Data flow setting created successfully`,
+  message: `Machine orders setting created successfully`,
 })
 
 export const addDataFlowSettingFailure = (): Notification => ({
   ...defaultErrorNotification,
-  message: `This dataflow setting already exists`,
+  message: `This machine orders setting already exists`,
 })
 
 export const deleteDataFlowSettingSuccessfully = (): Notification => ({

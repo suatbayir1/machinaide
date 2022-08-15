@@ -1,12 +1,11 @@
 // Libraries
 import React, { PureComponent } from "react";
+import i18next from "i18next";
 
 // Components
 import {
     Form, ComponentSize, Grid, Columns, Label, InfluxColors,
-    DapperScrollbars, List, Gradients, ConfirmationButton,
-    IconFont, ComponentColor, Appearance, Button, ButtonType,
-    Input, TextArea, FlexBox, FlexDirection, ComponentStatus
+    DapperScrollbars, List, Gradients, TextArea, ComponentStatus
 } from '@influxdata/clockface'
 import DangerConfirmationOverlay from "src/shared/overlays/DangerConfirmationOverlay";
 
@@ -69,40 +68,6 @@ class ComponentInformation extends PureComponent<Props, State> {
         })
     }
 
-    private handleChangeInput = (e): void => {
-        if (Object.keys(this.state).includes(e.target.name)) {
-            this.setState({ [e.target.name]: e.target.value } as Pick<State, keyof State>);
-        }
-    }
-
-    private updateComponent = async (): Promise<void> => {
-        const { selectedGraphNode, handleChangeNotification, refreshGraph, refreshGeneralInfo, refreshVisualizePage } = this.props;
-        const { displayName, description, selectedObject } = this.state;
-
-        if (displayName.trim() == "") {
-            handleChangeNotification("error", "Display name cannot be empty");
-            return;
-        }
-
-        const payload = {
-            "id": selectedGraphNode["@id"],
-            "visual": selectedObject,
-            displayName,
-            description,
-        }
-
-        const updatedResult = await DTService.updateComponent(payload);
-
-        if (updatedResult.summary.code === 200) {
-            handleChangeNotification("success", updatedResult.message.text);
-            refreshGraph();
-            refreshVisualizePage();
-            refreshGeneralInfo();
-        } else {
-            handleChangeNotification("error", updatedResult.message.text);
-        }
-    }
-
     private deleteComponent = async (): Promise<void> => {
         const { selectedGraphNode, handleChangeNotification, refreshGraph, refreshVisualizePage, refreshGeneralInfo } = this.props;
 
@@ -123,14 +88,14 @@ class ComponentInformation extends PureComponent<Props, State> {
     }
 
     public render() {
-        const { selectedGraphNode, clickPartDetail, clickBrands, objectList } = this.props;
+        const { selectedGraphNode, objectList } = this.props;
         const { displayName, description, visibleConfirmationOverlay, selectedObject } = this.state;
-        const selectedObjectName = objectList.find(x=>selectedObject === x["_id"]["$oid"])
+        const selectedObjectName = objectList.find(x => selectedObject === x["_id"]["$oid"])
 
         return (
             <>
                 <DangerConfirmationOverlay
-                    title={"Are you sure ?"}
+                    title={i18next.t('warning.are_you_sure')}
                     message={deleteComponentConfirmationText}
                     visible={visibleConfirmationOverlay}
                     onClose={() => { this.setState({ visibleConfirmationOverlay: false }) }}
@@ -152,11 +117,11 @@ class ComponentInformation extends PureComponent<Props, State> {
                                     widthMD={Columns.Six}
                                     widthLG={Columns.Twelve}
                                 >
-                                    <Form.Element label="Type">
+                                    <Form.Element label={i18next.t('dt.type')}>
                                         <Label
                                             size={ComponentSize.Small}
                                             name={selectedGraphNode["type"]}
-                                            description="Node type"
+                                            description={i18next.t('dt.type')}
                                             color={InfluxColors.Ocean}
                                             id={selectedGraphNode["type"]}
                                         />
@@ -168,11 +133,11 @@ class ComponentInformation extends PureComponent<Props, State> {
                                     widthMD={Columns.Six}
                                     widthLG={Columns.Twelve}
                                 >
-                                    <Form.Element label="Parent">
+                                    <Form.Element label={i18next.t('dt.parent')}>
                                         <Label
                                             size={ComponentSize.Small}
                                             name={selectedGraphNode["parent"]}
-                                            description="Parent"
+                                            description={i18next.t('dt.parent')}
                                             color={InfluxColors.Ocean}
                                             id={selectedGraphNode["parent"]}
                                         />
@@ -185,20 +150,14 @@ class ComponentInformation extends PureComponent<Props, State> {
                                     widthLG={Columns.Twelve}
                                 >
                                     <Form.Element
-                                        label="Display Name"
+                                        label={i18next.t('dt.display_name')}
                                         errorMessage={handleValidation(displayName)}
                                         required={true}
                                     >
-                                        {/* <Input
-                                            name="displayName"
-                                            placeholder="Display Name.."
-                                            onChange={this.handleChangeInput}
-                                            value={displayName}
-                                        /> */}
                                         <Label
                                             size={ComponentSize.Small}
                                             name={displayName}
-                                            description="Display Name"
+                                            description={i18next.t('dt.display_name')}
                                             color={InfluxColors.Ocean}
                                             id={displayName}
                                         />
@@ -210,71 +169,29 @@ class ComponentInformation extends PureComponent<Props, State> {
                                     widthMD={Columns.Twelve}
                                     widthLG={Columns.Twelve}
                                 >
-                                    <Form.Element label="Description">
+                                    <Form.Element label={i18next.t('dt.description')}>
                                         <TextArea
                                             name="description"
                                             value={description}
-                                            placeholder="Description.."
+                                            placeholder={i18next.t('dt.description')}
                                             status={ComponentStatus.Disabled}
                                             rows={4}
                                         />
                                     </Form.Element>
                                 </Grid.Column>
                                 <Grid.Column widthSM={Columns.Twelve}>
-                                    <Form.Element label="Visual">
+                                    <Form.Element label={i18next.t('dt.visual')}>
                                         <Label
                                             size={ComponentSize.Small}
                                             name={selectedObjectName ? selectedObjectName["name"] : "-"}
-                                            description="Visual"
+                                            description={i18next.t('dt.visual')}
                                             color={InfluxColors.Ocean}
                                             id={selectedObjectName ? selectedObjectName["name"] : "noVisual"}
                                         />
-                                        {/* {
-                                            objectList.length > 0 ?
-                                                < DapperScrollbars
-                                                    autoHide={false}
-                                                    autoSizeHeight={true} style={{ maxHeight: '100px' }}
-                                                    className="data-loading--scroll-content"
-                                                >
-                                                    <List>
-                                                        {
-                                                            objectList.map((object) => {
-                                                                return (
-                                                                    <List.Item
-                                                                        key={object["name"]}
-                                                                        value={object["name"]}
-                                                                        onClick={() => {
-                                                                            this.setState({
-                                                                                selectedObject: object["_id"]["$oid"]
-                                                                            })
-                                                                        }}
-                                                                        title={object["name"]}
-                                                                        gradient={Gradients.GundamPilot}
-                                                                        wrapText={true}
-                                                                        selected={selectedObject === object["_id"]["$oid"] ? true : false}
-                                                                    >
-                                                                        <FlexBox
-                                                                            direction={FlexDirection.Row}
-                                                                            margin={ComponentSize.Small}
-                                                                        >
-                                                                            <List.Indicator type="dot" />
-                                                                            <List.Indicator type="checkbox" />
-                                                                            <div className="selectors--item-value selectors--item__measurement">
-                                                                                {object["name"]}
-                                                                            </div>
-                                                                        </FlexBox>
-                                                                    </List.Item>
-                                                                )
-                                                            })
-                                                        }
-                                                    </List>
-                                                </DapperScrollbars>
-                                                : <h6>No visual record found</h6>
-                                        } */}
                                     </Form.Element>
                                 </Grid.Column>
                                 <Grid.Column widthXS={Columns.Twelve}>
-                                    <Form.Element label={`Sensor List (${selectedGraphNode["sensors"].length})`}>
+                                    <Form.Element label={`${i18next.t('dt.sensor_list')} (${selectedGraphNode["sensors"].length})`}>
                                         {
                                             selectedGraphNode["sensors"].length > 0 ?
                                                 <DapperScrollbars
@@ -289,7 +206,7 @@ class ComponentInformation extends PureComponent<Props, State> {
                                                                 <List.Item
                                                                     key={idx}
                                                                     value={sensor.displayName}
-                                                                    title="Sensor Name"
+                                                                    title={i18next.t('dt.sensor_name')}
                                                                     gradient={Gradients.GundamPilot}
                                                                     wrapText={true}
                                                                 >
@@ -302,63 +219,12 @@ class ComponentInformation extends PureComponent<Props, State> {
                                                         })
                                                     }
                                                 </DapperScrollbars>
-                                                : <h6>No sensor found</h6>
+                                                : <h6>{i18next.t('dt.no_sensor_found')}</h6>
                                         }
                                     </Form.Element>
                                 </Grid.Column>
                             </DapperScrollbars>
                         </Grid.Row>
-                        {/* <Grid.Row>
-                            <div className="dt-information-buttons">
-                                <Button
-                                    text="Summary"
-                                    icon={IconFont.CogThick}
-                                    onClick={clickPartDetail}
-                                    type={ButtonType.Button}
-                                    color={ComponentColor.Primary}
-                                />
-
-                                <Button
-                                    text="Brands"
-                                    icon={IconFont.Plus}
-                                    onClick={clickBrands}
-                                    type={ButtonType.Button}
-                                    color={ComponentColor.Secondary}
-                                />
-                                {
-                                    ["admin"].includes(localStorage.getItem("userRole")) &&
-                                    <ConfirmationButton
-                                        icon={IconFont.Checkmark}
-                                        onConfirm={this.updateComponent}
-                                        text={"Update"}
-                                        popoverColor={ComponentColor.Success}
-                                        popoverAppearance={Appearance.Outline}
-                                        color={ComponentColor.Success}
-                                        confirmationLabel="Do you want to update ?"
-                                        confirmationButtonColor={ComponentColor.Success}
-                                        confirmationButtonText="Yes"
-                                    />
-                                }
-                                {
-                                    ["admin"].includes(localStorage.getItem("userRole")) &&
-                                    <ConfirmationButton
-                                        icon={IconFont.Remove}
-                                        onConfirm={() => {
-                                            this.setState({
-                                                visibleConfirmationOverlay: true
-                                            })
-                                        }}
-                                        text={"Delete"}
-                                        popoverColor={ComponentColor.Danger}
-                                        popoverAppearance={Appearance.Outline}
-                                        color={ComponentColor.Danger}
-                                        confirmationLabel="Do you want to delete ?"
-                                        confirmationButtonColor={ComponentColor.Danger}
-                                        confirmationButtonText="Yes"
-                                    />
-                                }
-                            </div>
-                        </Grid.Row> */}
                     </Grid>
                 </Form>
             </>

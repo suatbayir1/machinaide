@@ -7,9 +7,6 @@ import { withSize } from "react-sizeme";
 // Styles
 import 'src/style/custom.css'
 
-// Services
-import DTService from 'src/shared/services/DTService';
-
 // Components
 import {
     Panel, ComponentSize, TechnoSpinner, RemoteDataState, SpinnerContainer,
@@ -17,6 +14,7 @@ import {
 
 interface Props {
     productionLine: object
+    machineOrders: any[]
 }
 
 interface State {
@@ -50,8 +48,16 @@ class ProductionLineGraph extends PureComponent<Props, State> {
     }
 
     async componentDidMount(): Promise<void> {
-        await this.createGraph();
+        if (this.props.machineOrders.length > 0) {
+            await this.createGraph(this.props.machineOrders);
+        }
         this.responsiveConfiguration();
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>): void {
+        if (prevProps.machineOrders !== this.props.machineOrders) {
+            this.createGraph(this.props.machineOrders);
+        }
     }
 
     componentWillUnmount() {
@@ -71,35 +77,28 @@ class ProductionLineGraph extends PureComponent<Props, State> {
         });
     }
 
-    createGraph = async () => {
-        const graphInfo = await DTService.getAllDT();
+    createGraph = async (machineOrders) => {
         const nodes = [];
         const links = [];
 
-        graphInfo.map(factory => {
-            factory["productionLines"].map(pl => {
-                if (pl["@id"] === this.props?.productionLine?.["id"]) {
-                    pl["machines"].map(machine => {
-                        nodes.push(Object.assign({
-                            id: machine?.displayName,
-                            color: "red",
-                            size: 400,
-                            symbolType: "circle",
-                            src: "../../assets/images/graph/machine.jpg",
-                        }, machine));
+        machineOrders.map((machine, index) => {
+            nodes.push(Object.assign({
+                id: machine["@id"],
+                color: "red",
+                size: 400,
+                symbolType: "circle",
+                src: String(machine["@id"]).toLowerCase().includes("robot")
+                    ? "../../assets/icons/machine-card-icon.png"
+                    : "../../assets/images/graph/machine.jpg",
+            }, machine));
 
 
-                        machine["contents"].map(component => {
-                            if (component["@type"] === "Relationship") {
-                                links.push({
-                                    source: component?.source,
-                                    target: component?.target
-                                });
-                            }
-                        })
-                    })
-                }
-            })
+            if ((index + 1) !== machineOrders.length) {
+                links.push({
+                    source: machine["@id"],
+                    target: machineOrders[index + 1]["@id"]
+                });
+            }
         })
 
         const returnData = {
@@ -130,6 +129,7 @@ class ProductionLineGraph extends PureComponent<Props, State> {
             spinnerLoading,
             selectedGraphType,
         } = this.state;
+
 
         return (
             <>

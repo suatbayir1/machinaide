@@ -3,7 +3,7 @@ import React, { PureComponent } from "react";
 
 // Components
 import {
-    Form, ComponentSize, Grid, Columns, Label, InfluxColors,
+    Form, ComponentSize, Grid, Columns, Label, InfluxColors, SelectDropdown,
     DapperScrollbars, List, Gradients, ConfirmationButton,
     IconFont, ComponentColor, Appearance, TextArea, Input, Overlay
 } from '@influxdata/clockface'
@@ -11,6 +11,7 @@ import DangerConfirmationOverlay from "src/shared/overlays/DangerConfirmationOve
 
 // Services
 import DTService from "src/shared/services/DTService";
+import FactoryService from 'src/shared/services/FactoryService';
 
 // Utils
 import { handleValidation } from "src/shared/helpers/FormValidator";
@@ -26,6 +27,7 @@ type Props = {
     refreshGeneralInfo: () => void
     isProductionLineInformationOverlayVisible: boolean
     handleDismissProductionLineInformationOverlay: () => void
+    generalInfo: string[],
 }
 
 type State = {
@@ -33,6 +35,8 @@ type State = {
     operationType: "delete" | "update"
     description: string
     visibleConfirmationOverlay: boolean
+    sections: object[]
+    section: string
 }
 
 class ProductionLineInformationOverlay extends PureComponent<Props, State> {
@@ -44,6 +48,8 @@ class ProductionLineInformationOverlay extends PureComponent<Props, State> {
             description: "",
             operationType: "update",
             visibleConfirmationOverlay: false,
+            sections: [],
+            section: "",
         }
     }
 
@@ -54,7 +60,13 @@ class ProductionLineInformationOverlay extends PureComponent<Props, State> {
     public async componentDidUpdate(prevProps: Readonly<Props>): Promise<void> {
         if (prevProps.selectedGraphNode !== this.props.selectedGraphNode) {
             this.setForm();
+            this.getSections();
         }
+    }
+
+    public getSections = async () => {
+        const sections = await FactoryService.getSectionsByFactory({ "factoryID": this.props.generalInfo["factoryID"] });
+        this.setState({ sections })
     }
 
     private setForm = (): void => {
@@ -63,6 +75,7 @@ class ProductionLineInformationOverlay extends PureComponent<Props, State> {
         this.setState({
             displayName: selectedGraphNode["displayName"],
             description: selectedGraphNode["description"],
+            section: selectedGraphNode["section"] || ""
         })
     }
 
@@ -93,19 +106,19 @@ class ProductionLineInformationOverlay extends PureComponent<Props, State> {
 
     private updateProductionLine = async (): Promise<void> => {
         const { selectedGraphNode, handleChangeNotification, refreshGraph, refreshVisualizePage, refreshGeneralInfo } = this.props;
-        const { displayName, description } = this.state;
+        const { displayName, description, section } = this.state;
 
-        if (displayName.trim() === "" || description.trim() === "") {
-            handleChangeNotification("error", "Production line name and Description cannot be empty");
+        if (displayName.trim() === "" || description.trim() === "", section.trim() === "") {
+            handleChangeNotification("error", "Production line name, section and description cannot be empty");
             return;
         }
 
         const payload = {
             "id": selectedGraphNode["@id"],
             displayName,
-            description
+            description,
+            section
         }
-
         const updatedResult = await DTService.updateProductionLine(payload);
 
         if (updatedResult.summary.code === 200) {
@@ -121,7 +134,7 @@ class ProductionLineInformationOverlay extends PureComponent<Props, State> {
 
     public render() {
         const { selectedGraphNode, isProductionLineInformationOverlayVisible, handleDismissProductionLineInformationOverlay } = this.props;
-        const { description, displayName, visibleConfirmationOverlay } = this.state;
+        const { description, displayName, visibleConfirmationOverlay, sections, section } = this.state;
 
         return (
             <>
@@ -130,7 +143,7 @@ class ProductionLineInformationOverlay extends PureComponent<Props, State> {
                         <Overlay.Header
                             title="Edit Production Line"
                             onDismiss={handleDismissProductionLineInformationOverlay}
-                            //children={this.headerChildren}
+                        //children={this.headerChildren}
                         />
                         <Overlay.Body>
                             <DangerConfirmationOverlay
@@ -168,7 +181,7 @@ class ProductionLineInformationOverlay extends PureComponent<Props, State> {
                                         </Grid.Column>
                                     </Grid.Row>
                                     <Grid.Row>
-                                        <Grid.Column widthXS={Columns.Twelve}>
+                                        <Grid.Column widthXS={Columns.Six}>
                                             <Form.Element
                                                 label="Production Line Name"
                                                 errorMessage={handleValidation(displayName)}
@@ -179,6 +192,19 @@ class ProductionLineInformationOverlay extends PureComponent<Props, State> {
                                                     placeholder="Display Name.."
                                                     onChange={this.handleChangeInput}
                                                     value={displayName}
+                                                />
+                                            </Form.Element>
+                                        </Grid.Column>
+                                        <Grid.Column widthSM={Columns.Six}>
+                                            <Form.Element
+                                                label="Section"
+                                                errorMessage={handleValidation(displayName)}
+                                                required={true}
+                                            >
+                                                <SelectDropdown
+                                                    options={sections.map(s => s["name"])}
+                                                    selectedOption={section}
+                                                    onSelect={(e) => this.setState({ section: e })}
                                                 />
                                             </Form.Element>
                                         </Grid.Column>
@@ -195,7 +221,7 @@ class ProductionLineInformationOverlay extends PureComponent<Props, State> {
                                                 />
                                             </Form.Element>
                                         </Grid.Column>
-                                    </Grid.Row>    
+                                    </Grid.Row>
                                     <Grid.Row>
                                         <Grid.Column widthXS={Columns.Twelve}>
                                             <Form.Element label={`Machine List (${selectedGraphNode["machines"] ? selectedGraphNode["machines"].length : 0})`}>

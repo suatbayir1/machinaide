@@ -54,6 +54,7 @@ interface State {
     filterFeedback: string
     filterTimeRange: TimeRange
     showFilters: boolean
+    searchSensorQuery: string
 }
 
 //const lineChartRef = useRef(null)
@@ -71,6 +72,7 @@ class AnomalyBrushGraph extends Component<Props, State> {
               upper: stop,
               type: 'custom'
             },
+            searchSensorQuery: "",
             filterType: [],
             filterCode: [],
             filterUserFeedback: "",
@@ -114,7 +116,7 @@ class AnomalyBrushGraph extends Component<Props, State> {
                       // console.log(config.config.series[config.seriesIndex])
                       // console.log(config.config.series[config.seriesIndex].name)
                       // console.log(config.config.series[config.seriesIndex].data[config.dataPointIndex])
-                      console.log("onclick", event.target.tagName)
+                      // console.log("onclick", event.target.tagName)
                       if(config.config.series[config.seriesIndex]){
                         let anno = {
                           x: config.config.series[config.seriesIndex].data[config.dataPointIndex][0],
@@ -209,6 +211,30 @@ class AnomalyBrushGraph extends Component<Props, State> {
                     format: 'dd MMM yy HH:mm:ss',
                     formatter: undefined,
                   },
+                  shared: true,
+                  /* custom: ({ series, seriesIndex, dataPointIndex, w }) => {
+                    const hoverXaxis = w.globals.seriesX[seriesIndex][dataPointIndex];
+                    const hoverIndexes = w.globals.seriesX.map(seriesX => {
+                      return seriesX.findIndex(xData => xData === hoverXaxis);
+                    });
+              
+                    let hoverList = '';
+                    hoverIndexes.forEach((hoverIndex, seriesEachIndex) => {
+                      if (hoverIndex >= 0) {
+                        hoverList += `<span>${w.globals.seriesNames[seriesEachIndex]}: ${series[seriesEachIndex][hoverIndex]}</span><br />`;
+                      }
+                    });
+                    
+                    const formatHoverX = new Date(hoverXaxis).toISOString().replace(/T/, ' ').replace(/\..+/, '')
+              
+                    return `<div class="card">
+                      <div class="card-header p-1">${formatHoverX}</div>
+                      <div class="card-body p-1">
+                        ${hoverList}
+                      </div>
+                    </div>`;
+                  }, */
+                  //intersect: true
                 },
                 xaxis: {
                   type: "datetime",
@@ -830,7 +856,7 @@ class AnomalyBrushGraph extends Component<Props, State> {
                       // console.log(config.config.series[config.seriesIndex])
                       // console.log(config.config.series[config.seriesIndex].name)
                       // console.log(config.config.series[config.seriesIndex].data[config.dataPointIndex])
-                      console.log("onclick", event.target.tagName)
+                      // console.log("onclick", event.target.tagName)
                       if(config.config.series[config.seriesIndex]){
                         let anno = {
                           x: config.config.series[config.seriesIndex].data[config.dataPointIndex][0],
@@ -920,10 +946,32 @@ class AnomalyBrushGraph extends Component<Props, State> {
                 },
                 tooltip: {
                   theme: "dark",
-                  x: {
+                  /* x: {
                     show: true,
                     format: 'dd MMM yy HH:mm:ss',
                     formatter: undefined,
+                  }, */
+                  shared: true,
+                  custom: ({ series, seriesIndex, dataPointIndex, w }) => {
+                    const hoverXaxis = w.globals.seriesX[seriesIndex][dataPointIndex];
+                    const hoverIndexes = w.globals.seriesX.map(seriesX => {
+                      return seriesX.findIndex(xData => xData === hoverXaxis);
+                    });
+              
+                    let hoverList = '';
+                    hoverIndexes.forEach((hoverIndex, seriesEachIndex) => {
+                      if (hoverIndex >= 0) {
+                        hoverList += `<span>Hello- ${w.globals.seriesNames[seriesEachIndex]}: ${series[seriesEachIndex][hoverIndex]}</span><br />`;
+                      }
+                    });
+                    const formatHoverX = hoverXaxis;
+              
+                    return `<div class="card">
+                      <div class="card-header p-1">${formatHoverX}</div>
+                      <div class="card-body p-1">
+                        ${hoverList}
+                      </div>
+                    </div>`;
                   },
                 },
                 xaxis: {
@@ -1110,6 +1158,7 @@ class AnomalyBrushGraph extends Component<Props, State> {
         })
       }
       else{
+        // console.log("sensor data:", this.props.graphData[sensor])
         if(this.state.series.length === 0){
           this.getMachineAnomalies()
         }
@@ -1127,6 +1176,16 @@ class AnomalyBrushGraph extends Component<Props, State> {
       }
       //ApexCharts.exec("anomalyChart", 'toggleSeries', sensor)
       //ApexCharts.exec("brushChart", 'toggleSeries', sensor)
+    }
+
+    filterSensorNames = () => {
+      let sensorNames = this.props.sensorNames
+      let query = this.state.searchSensorQuery
+      if(query.length){
+        let filtered = sensorNames.filter(sn => sn.includes(query))
+        return filtered
+      }
+      return sensorNames
     }
 
     render(){
@@ -1154,7 +1213,7 @@ class AnomalyBrushGraph extends Component<Props, State> {
                             series={this.state.series}
                             type="area"
                             width="900"
-                            height="430"
+                            height="450"
                             // ref={lineChartRef}
                           />}
                           {this.state.optionsLine && <Chart
@@ -1170,8 +1229,21 @@ class AnomalyBrushGraph extends Component<Props, State> {
                       
                       <Grid.Column 
                         widthXS={Columns.Three}
-                        style={{position: "absolute", left: "85%", top: "50%", transform: "translate(-50%, -50%)"}}
+                        style={{position: "absolute", left: "85%", top: "53%", transform: "translate(-50%, -50%)"}}
                       >
+                        
+                        <div className="tabbed-page--header-right">
+                          <Input
+                              onChange={(e) => this.setState({ searchSensorQuery: e.target.value })}
+                              name="searchSensorQuery"
+                              type={InputType.Text}
+                              value={this.state.searchSensorQuery}
+                              icon={IconFont.Search}
+                              placeholder={"Filter sensor names"}
+                              // style={{width: "15%"}}
+                          />
+                        </div>
+                        <br/>
                         <div style={{display: "flex"}}>
                           <div className="tabbed-page--header-left">
                             <Label
@@ -1206,7 +1278,7 @@ class AnomalyBrushGraph extends Component<Props, State> {
                             style={{ height: "200px", background: InfluxColors.Castle}}
                             className="data-loading--scroll-content"
                         >
-                          {this.props.sensorNames.map(sensor => {
+                          {this.filterSensorNames().map(sensor => {
                             return(                              
                               <FlexBox
                                 alignItems={AlignItems.Center}

@@ -76,10 +76,7 @@ class ImportComponentOverlay extends PureComponent<Props, State> {
             return;
         }
 
-        console.log(selectedImportObject["_id"]["$oid"]);
-
         const result = await ObjectService.deleteComponentModel({ id: selectedImportObject["_id"]["$oid"] });
-        console.log(result);
         if (result.summary.code !== 200) {
             notify(generalErrorMessage(result.message.text));
             return;

@@ -6,8 +6,7 @@ export const tipStyle = {
     margin: '3px'
 }
 
-export const addNewNodeHeader = `This window was created to add a new digital twin object to the system. 
-You need to fill in the form completely by clicking the 
+export const addNewNodeHeader = `This window was created to add a new digital twin object to the system. You need to fill in the form completely by clicking the 
  - factory button to add a factory,
  - production line button to add a production line,
  - machine button to add a machine, 

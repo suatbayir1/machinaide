@@ -1,5 +1,6 @@
 // Libraries
 import React, { PureComponent } from "react";
+import i18next from "i18next";
 
 // Components
 import {
@@ -33,11 +34,11 @@ class GeneralInformation extends PureComponent<Props, State> {
                         widthMD={Columns.Six}
                         widthLG={Columns.Twelve}
                     >
-                        <Form.Element label="Factory">
+                        <Form.Element label={i18next.t('dt.factory')}>
                             <Label
                                 size={ComponentSize.Small}
                                 name={info["factory"]}
-                                description="Factory Name"
+                                description={i18next.t('dt.factory')}
                                 color={InfluxColors.Viridian}
                                 id={info["factoryName"]}
                             />
@@ -49,11 +50,11 @@ class GeneralInformation extends PureComponent<Props, State> {
                         widthMD={Columns.Six}
                         widthLG={Columns.Four}
                     >
-                        <Form.Element label="Machine Count">
+                        <Form.Element label={i18next.t('dt.machine_count')}>
                             <Label
                                 size={ComponentSize.Small}
                                 name={info["machineCount"]}
-                                description="Machine Count"
+                                description={i18next.t('dt.machine_count')}
                                 color={InfluxColors.Viridian}
                                 id={info["machineCount"]}
                             />
@@ -65,11 +66,11 @@ class GeneralInformation extends PureComponent<Props, State> {
                         widthMD={Columns.Six}
                         widthLG={Columns.Four}
                     >
-                        <Form.Element label="Component Count">
+                        <Form.Element label={i18next.t('dt.component_count')}>
                             <Label
                                 size={ComponentSize.Small}
                                 name={info["componentCount"]}
-                                description="Component Count"
+                                description={i18next.t('dt.component_count')}
                                 color={InfluxColors.Viridian}
                                 id={info["componentCount"]}
                             />
@@ -81,11 +82,11 @@ class GeneralInformation extends PureComponent<Props, State> {
                         widthMD={Columns.Six}
                         widthLG={Columns.Four}
                     >
-                        <Form.Element label="Sensor Count">
+                        <Form.Element label={i18next.t('dt.sensor_count')}>
                             <Label
                                 size={ComponentSize.Small}
                                 name={info["sensorCount"]}
-                                description="Sensor Count"
+                                description={i18next.t('dt.sensor_count')}
                                 color={InfluxColors.Viridian}
                                 id={info["sensorCount"]}
                             />
@@ -105,7 +106,7 @@ class GeneralInformation extends PureComponent<Props, State> {
                         <FlexBox
                             margin={ComponentSize.Large}
                         >
-                            <h5>Show All Sensor Values</h5>
+                            <h5>{i18next.t('dt.show_all_sensor_values')}</h5>
                             <SlideToggle
                                 active={this.props.showAllSensorValues}
                                 size={ComponentSize.Small}

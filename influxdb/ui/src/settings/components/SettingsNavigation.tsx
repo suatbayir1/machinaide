@@ -1,28 +1,28 @@
 // Libraries
-import React, {PureComponent} from 'react'
+import React, { PureComponent } from 'react'
 import _ from 'lodash'
-import {withRouter, RouteComponentProps} from 'react-router-dom'
+import { withRouter, RouteComponentProps } from 'react-router-dom'
 
 // Components
 import TabbedPageTabs from 'src/shared/tabbedPage/TabbedPageTabs'
 
 // Types
-import {TabbedPageTab} from 'src/shared/tabbedPage/TabbedPageTabs'
+import { TabbedPageTab } from 'src/shared/tabbedPage/TabbedPageTabs'
 
 // Decorators
-import {ErrorHandling} from 'src/shared/decorators/errors'
+import { ErrorHandling } from 'src/shared/decorators/errors'
 
 interface OwnProps {
   activeTab: string
   orgID: string
 }
 
-type Props = OwnProps & RouteComponentProps<{orgID: string}>
+type Props = OwnProps & RouteComponentProps<{ orgID: string }>
 
 @ErrorHandling
 class SettingsNavigation extends PureComponent<Props> {
   public render() {
-    const {activeTab, orgID, history} = this.props
+    const { activeTab, orgID, history } = this.props
 
     const handleTabClick = (id: string): void => {
       history.push(`/orgs/${orgID}/settings/${id}`)
@@ -40,6 +40,10 @@ class SettingsNavigation extends PureComponent<Props> {
       {
         text: 'Labels',
         id: 'labels',
+      },
+      {
+        text: 'Languages',
+        id: 'languages',
       },
     ]
 

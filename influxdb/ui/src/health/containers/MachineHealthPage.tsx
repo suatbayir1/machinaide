@@ -191,7 +191,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
             selectedFailure: null,
             windowStart: new Date("2021-05-22T12:36").getTime(),
             windowEnd: new Date("2021-05-29T21:22").getTime(),
-            aggregatePeriod: "5s",
+            aggregatePeriod: "1s",
             machineSensorData: [],
             chartID: uuid.v4(),
             sensorNames: [],
@@ -493,15 +493,15 @@ class MachineHealthPage extends PureComponent<Props, State>{
 
                 rows.push(row)
             }
-            console.log("rows: ", rows)
+            // console.log("rows: ", rows)
             let graphData = {}
             for(let row of rows){
-                if(row["_field"] in graphData){
-                    graphData[row["_field"]]["data"].push([row["_time"], row["_value"].toFixed(2)])
+                if(`${row["_measurement"]}_${row["_field"]}` in graphData){
+                    graphData[`${row["_measurement"]}_${row["_field"]}`]["data"].push([row["_time"], row["_value"].toFixed(2)])
                 }
                 else{
-                    graphData[row["_field"]] = {
-                        name: row["_field"],
+                    graphData[`${row["_measurement"]}_${row["_field"]}`] = {
+                        name: `${row["_measurement"]}_${row["_field"]}`,
                         data: [[row["_time"], row["_value"].toFixed(2)]]
                     }
                 }
@@ -581,8 +581,13 @@ class MachineHealthPage extends PureComponent<Props, State>{
         let query = `from(bucket: "${FACTORY_NAME}")
         |> range(start: ${start}, stop: ${stop})
         |> filter(fn: ${measurementString})
+<<<<<<< HEAD
         |> aggregateWindow(every: ${this.state.aggregatePeriod}, fn: mean, createEmpty: false)
         |> yield(name: "mean")`
+=======
+        |> aggregateWindow(every: ${this.state.aggregatePeriod}, fn: last, createEmpty: false)
+        |> yield(name: "last")`
+>>>>>>> 0adc3dfce73125da828187469c225f7e79cbcfe1
 
         let results = this.processResponse(runQuery(this.props.match.params.orgID, query), start, stop)
     }
@@ -612,8 +617,8 @@ class MachineHealthPage extends PureComponent<Props, State>{
         let query = `from(bucket: "${FACTORY_NAME}")
         |> range(start: ${start}, stop: ${stop})
         |> filter(fn: (r) => ${measurementString})
-        |> aggregateWindow(every: ${this.state.aggregatePeriod}, fn: mean, createEmpty: false)
-        |> yield(name: "mean")`
+        |> aggregateWindow(every: ${this.state.aggregatePeriod}, fn: last, createEmpty: false)
+        |> yield(name: "last")`
         console.log("--425--",query, this.props.match.params.orgID)
         let results = this.processResponse(runQuery(this.props.match.params.orgID, query))
         console.log("results", results)

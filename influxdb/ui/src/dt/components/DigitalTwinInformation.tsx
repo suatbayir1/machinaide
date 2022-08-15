@@ -1,6 +1,7 @@
 // Libraries
 import React, { PureComponent } from 'react'
 import { connect, ConnectedProps } from 'react-redux'
+import i18next from "i18next";
 
 // Components
 import {
@@ -259,7 +260,7 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                                     refreshGeneralInfo={this.props.refreshGeneralInfo}
                                 />
                                 <Button
-                                    text="Edit"
+                                    text={i18next.t('button.edit')}
                                     icon={IconFont.Pencil}
                                     onClick={() => { this.setState({ factoryInformationOverlay: !this.state.factoryInformationOverlay }) }}
                                     type={ButtonType.Button}
@@ -280,7 +281,7 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                                     refreshGeneralInfo={this.props.refreshGeneralInfo}
                                 />
                                 <Button
-                                    text="Edit"
+                                    text={i18next.t('button.edit')}
                                     icon={IconFont.Pencil}
                                     onClick={() => { this.setState({ productionLineInformationOverlay: !this.state.productionLineInformationOverlay }) }}
                                     type={ButtonType.Button}
@@ -304,7 +305,7 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                                     refreshGeneralInfo={this.props.refreshGeneralInfo}
                                 />
                                 <Button
-                                    text="Edit"
+                                    text={i18next.t('button.edit')}
                                     icon={IconFont.Pencil}
                                     onClick={() => { this.setState({ machineInformationOverlay: !this.state.machineInformationOverlay }) }}
                                     type={ButtonType.Button}
@@ -328,7 +329,7 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                                     objectList={objectList}
                                 />
                                 <Button
-                                    text="Edit"
+                                    text={i18next.t('button.edit')}
                                     icon={IconFont.Pencil}
                                     onClick={() => { this.setState({ componentInformationOverlay: !this.state.componentInformationOverlay }) }}
                                     type={ButtonType.Button}
@@ -352,7 +353,7 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                                     objectList={objectList}
                                 />
                                 <Button
-                                    text="Edit"
+                                    text={i18next.t('button.edit')}
                                     icon={IconFont.Pencil}
                                     onClick={() => { this.setState({ sensorInformationOverlay: !this.state.sensorInformationOverlay }) }}
                                     type={ButtonType.Button}
@@ -374,7 +375,7 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                                     refreshGeneralInfo={this.props.refreshGeneralInfo}
                                 />
                                 <Button
-                                    text="Edit"
+                                    text={i18next.t('button.edit')}
                                     icon={IconFont.Pencil}
                                     onClick={() => { this.setState({ fieldInformationOverlay: !this.state.fieldInformationOverlay }) }}
                                     type={ButtonType.Button}
@@ -401,6 +402,7 @@ class DigitalTwinInformation extends PureComponent<IProps, State> {
                             refreshGraph={this.props.refreshGraph}
                             refreshVisualizePage={this.props.refreshVisualizePage}
                             refreshGeneralInfo={this.props.refreshGeneralInfo}
+                            generalInfo={generalInfo}
                         />
                         <MachineInformationOverlay
                             isMachineInformationOverlayVisible={this.state.machineInformationOverlay}

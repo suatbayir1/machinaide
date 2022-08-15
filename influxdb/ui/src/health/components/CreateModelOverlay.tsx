@@ -603,7 +603,7 @@ class CreateModelOverlay extends PureComponent<Props, State>{
                           <div className="tabbed-page--header-left">
                             <Input
                               onChange={(e) => this.setState({ modelName: e.target.value })}
-                              name="modelNamae"
+                              name="modelName"
                               type={InputType.Text}
                               value={this.state.modelName}
                             />

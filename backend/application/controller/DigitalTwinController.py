@@ -662,7 +662,7 @@ def insertProductionLine(token):
     try:
         message, confirm = validator.check_request_params(
             request.json, 
-            ["@id", "name", "parent", "displayName", "type", "machines"]
+            ["@id", "name", "parent", "displayName", "type", "machines", "section"]
         )
 
         if not confirm:
@@ -704,13 +704,15 @@ def updateProductionLine(token):
     try:
         message, confirm = validator.check_request_params(
             request.json, 
-            ["id", "displayName"]
+            ["id", "displayName", "section"]
         )
 
         if not confirm:
             log_type = "ERROR"
             status_code = 400
             return return_response(success = False, message = message, code = 400), 400
+
+        print(request.json)
 
         update_result = model.update_production_line(request.json)
 
@@ -1203,6 +1205,84 @@ def deleteField(token):
         log_type = "ERROR"
         status_code = 400
         return return_response(success = False, message = message, code = 400), 400
+    finally:
+        logger.add_log(log_type, request.remote_addr, token["username"], request.method, request.url, "", message,  status_code)
+
+@dt.route("/saveMachineOrders", methods = ["POST"])
+@token_required(roles = ["admin", "editor"])
+def saveMachineOrders(token):
+    try:
+        message, confirm = validator.check_request_params(
+            request.json, 
+            ["plID", "machines"]
+        )
+
+        print("tes2t")
+
+        if not confirm:
+            log_type = "ERROR"
+            status_code = 400
+            return return_response(success = False, message = message, code = 400), 400
+
+        insert_result = model.saveMachineOrders(request.json)
+        print("test3")
+        print(insert_result)
+
+        if not insert_result:
+            message = "An error occurred while saving a machine orders"
+            log_type = "ERROR"
+            status_code = 500
+            return return_response(success = False, message = message, code = 500), 500
+
+        message = "Machine orders saved succesfully"
+        log_type = "INFO"
+        status_code = 200
+        return return_response(success = True, message = message, code = 200), 200
+    except:
+        message = "An expected error has occurred"
+        log_type = "ERROR"
+        status_code = 400
+        return return_response(success = False, message = message, code = 400), 400
+    finally:
+        logger.add_log(log_type, request.remote_addr, token["username"], request.method, request.url, "", message,  status_code)
+
+@dt.route("/getMachineOrders", methods = ["POST"])
+@token_required(roles = ["admin", "editor"])
+def getMachineOrders(token):
+    try:
+        missed_keys, confirm = request_validation(request.json, ["plID"])
+
+        if not confirm:
+            message = f"{missed_keys} field(s) cannot be empty or undefined"
+            log_type = "ERROR"
+            status_code = 200
+            return return_response(success = False, message = message), 400
+
+        where = {
+            "plID": request.json["plID"]
+        }
+
+        result = model.getMachineOrders(where)
+
+        print(result)
+        if result == None:
+            result = []
+
+        if result == 500:
+            message = "An error occurred while fetching a machine orders"
+            log_type = "ERROR"
+            status_code = 500
+            return return_response(success = False, message = message), 500
+
+        message = "Machine records has been fetched successfully"
+        log_type = "INFO"
+        status_code = 200
+        return return_response(data = result, success = True, message = message), 200
+    except:
+        message = "An expected error has occurred"
+        log_type = "ERROR"
+        status_code = 400
+        return return_response(success = False, message = message), 400
     finally:
         logger.add_log(log_type, request.remote_addr, token["username"], request.method, request.url, "", message,  status_code)
 

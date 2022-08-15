@@ -126,27 +126,15 @@ class BMFInformation extends PureComponent<Props, State> {
     setDataForStatusGraphs = () => {
         const { oldParts, maintenances, failures, brands } = this.props;
 
-        console.log("changed");
-        console.log("oldParts", this.props.oldParts);
-        console.log("maintenances", this.props.maintenances);
-        console.log("failures", this.props.failures);
-        console.log("brands", this.props.brands);
-
-
         let oldPartsBMs = []
         for (let oldPart of oldParts) {
             for (let brandModel of brands) {
-                console.log("oldPart", oldPart);
-                console.log("brandModel", brandModel);
-
                 if (brandModel["brandName"] === oldPart["brand"]["brandName"] && brandModel["modelName"] === oldPart["brand"]["modelName"]) {
                     let name = `${brandModel["brandName"]}/${brandModel["modelName"]}`;
                     let deploymentDateStr = oldPart["deploymentTime"] ? oldPart["deploymentTime"].substr(0, 10) : "unknown deployment date";
                     oldPartsBMs.push({ ...oldPart, brandModelText: name, brandModel: brandModel["_id"]["$oid"] })
                     if (oldPart["failureIDs"] && oldPart["failureIDs"].length) {
-                        console.log("===>", oldPart);
                         FailureService.getByCondition({ "inArray": { "_id": oldPart["failureIDs"] } }).then(res => {
-                            console.log("res", res);
                             let failures = res;
                             failures = failures.sort((a, b) => new Date(a["startTime"]) - new Date(b["startTime"]))
                             this.setState({
@@ -177,7 +165,6 @@ class BMFInformation extends PureComponent<Props, State> {
                 }
             }
         }
-        console.log("oldPartsBMs", oldPartsBMs);
         this.setState({ oldParts: oldPartsBMs })
     }
 
@@ -305,7 +292,6 @@ class BMFInformation extends PureComponent<Props, State> {
     }
 
     handeDetailOldPart = (row) => {
-        console.log(row);
         this.setState({ selectedOldPart: row, visibleRetirePartDetail: true });
     }
 
@@ -322,8 +308,6 @@ class BMFInformation extends PureComponent<Props, State> {
         };
 
         const maintenances = await MaintenanceService.getByCondition(payload);
-
-        console.log("maintenances", maintenances);
 
         this.setState({
             visibleRelatedMaintenanceFailure: true,
@@ -345,8 +329,6 @@ class BMFInformation extends PureComponent<Props, State> {
         };
 
         const failures = await FailureService.getByCondition(payload);
-
-        console.log("failures", failures)
 
         this.setState({
             visibleRelatedMaintenanceFailure: true,

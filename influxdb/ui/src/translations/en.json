@@ -1,0 +1,87 @@
+{
+    "headers": {
+        "dt": "Digital Twin Monitor Screen",
+        "edit_factory": "Edit Factory"
+    },
+    "dt": {
+        "factory": "Factory",
+        "production_line": "Production Line",
+        "machine": "Machine",
+        "component": "Component",
+        "sensor": "Sensor",
+        "field": "Field",
+        "machine_count": "Machine Count",
+        "component_count": "Component Count",
+        "sensor_count": "Sensor Count",
+        "show_all_sensor_values": "Show All Sensor Values",
+        "type": "Type",
+        "3d_view": "3D View",
+        "factory_name": "Factory Name",
+        "location": "Location",
+        "description": "Description",
+        "production_lines": "Production Lines",
+        "production_line_name": "Production Line Name",
+        "no_production_line_found": "No production line found",
+        "parent": "Parent",
+        "machine_list": "Machine List",
+        "machine_name": "Machine Name",
+        "display_name": "Display Name",
+        "measurements": "Measurements",
+        "measurement": "Measurement",
+        "component_list": "Component List",
+        "component_name": "Component Name",
+        "visual": "Visual",
+        "sensor_name": "Sensor Name",
+        "sensor_list": "Sensor List",
+        "no_sensor_found": "No sensor found",
+        "unit": "Unit",
+        "status": "Status",
+        "data_type": "Data Type",
+        "field_list": "Field List",
+        "field_name": "Field Name",
+        "data_source": "Data Source",
+        "min_value": "Min Value",
+        "max_value": "Max Value",
+        "do_operation_on_data": "Do Operation on Data",
+        "operation": "Operation",
+        "value": "Value",
+        "fill_nan_values": "Fill Nan Values",
+        "default_value": "Default Value"
+    },
+    "layout_button": {
+        "top_to_down": "Top to down",
+        "bottom_to_up": "Bottom to up",
+        "left_to_right": "Left to right",
+        "right_to_left": "Right to left",
+        "radial_out": "Radial out",
+        "radial_in": "Radial in"
+    },
+    "button": {
+        "edit": "Edit",
+        "add": "Add",
+        "cancel": "Cancel",
+        "save": "Save",
+        "show_data_in_chart": "Show Data in Chart",
+        "update": "Update",
+        "delete": "Delete",
+        "yes": "Yes"
+    },
+    "add_new_part": "Add New Part",
+    "input": {},
+    "select_language": "Select Language",
+    "form": {
+        "unique_id_name": "Unique ID/Name"
+    },
+    "warning": {
+        "factory_already_created": "A factory has already been created. You can create only 1 factory",
+        "are_you_sure": "Are you sure ?",
+        "no_measurement_selected": "No measurement is selected",
+        "no_component_found": "No component found",
+        "no_field_found": "No field found",
+        "do_you_want_to_update": "Do you want to update ?",
+        "do_you_want_to_delete": "Do you want to delete ?"
+    },
+    "tips": {
+        "how_to_add_dt_object": "How to add DT object:"
+    }
+}

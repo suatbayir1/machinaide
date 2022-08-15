@@ -18,6 +18,9 @@ import "src/side_nav/components/constants/factoryDashboard.css";
 // Constants
 import { tipStyle, productionLineDataFlow } from 'src/shared/constants/tips'
 
+// Services
+import DTService from 'src/shared/services/DTService';
+
 interface Props {
     productionLine: object
     orgID: string
@@ -26,6 +29,7 @@ interface Props {
 interface State {
     visibleMachineOrderOverlay: boolean
     shortcutCards: object[]
+    machineOrders: any[]
 }
 
 class FactoryCard extends PureComponent<Props, State> {
@@ -39,13 +43,26 @@ class FactoryCard extends PureComponent<Props, State> {
                 { link: `/orgs/${this.props.orgID}/machines/${this.props["factoryID"]}/${this.props.productionLine["id"]}`, icon: '../../../assets/icons/machine-list-icon.png', name: `Show Machines (${this.props.productionLine["machineCount"]})`, width: '60px', height: '60px', marginTop: '20px' },
                 { link: `/orgs/${this.props.orgID}/alerting`, icon: '../../../assets/icons/alerts-icon.png', name: 'Show Alerts', width: '60px', height: '60px', marginTop: '20px' },
                 { link: `/orgs/${this.props.orgID}/failures/${this.props.factoryID}/${this.props.productionLine["id"]}`, icon: '../../../assets/icons/failure-icon.png', name: 'Show Failures', width: '60px', height: '60px', marginTop: '20px' },
-            ]
+            ],
+            machineOrders: []
         };
     }
 
-    render() {
+    componentDidMount(): void {
+        this.getMachineOrders();
+    }
+
+    getMachineOrders = async () => {
         const { productionLine } = this.props;
-        const { visibleMachineOrderOverlay } = this.state;
+
+        const machineOrders = await DTService.getMachineOrders({ "plID": productionLine["id"] });
+
+        this.setState({ machineOrders: machineOrders["machines"] || [] })
+    }
+
+    render() {
+        const { productionLine, } = this.props;
+        const { visibleMachineOrderOverlay, machineOrders } = this.state;
 
         return (
             <>
@@ -53,6 +70,7 @@ class FactoryCard extends PureComponent<Props, State> {
                     visible={visibleMachineOrderOverlay}
                     onClose={() => this.setState({ visibleMachineOrderOverlay: false })}
                     productionLine={productionLine}
+                    getMachineOrders={this.getMachineOrders}
                 />
 
                 <ResourceCard
@@ -86,6 +104,7 @@ class FactoryCard extends PureComponent<Props, State> {
 
                         <ProductionLineGraph
                             productionLine={productionLine}
+                            machineOrders={machineOrders}
                         />
                     </Grid.Row>
 
@@ -122,7 +141,7 @@ class FactoryCard extends PureComponent<Props, State> {
                                 onClick={() => this.setState({ visibleMachineOrderOverlay: true })}
                                 style={{ background: 'rgba(255, 255, 255, 0.1)', cursor: 'pointer', textAlign: 'center', height: '150px', marginBottom: '20px' }}
                             >
-                                <img src={"../../../assets/icons/failure-icon.png"} width={60} height={60} style={{ marginTop: "20px" }} />
+                                <img src={"../../../assets/icons/machine-action-icon.png"} width={60} height={60} style={{ marginTop: "20px" }} />
                                 <h4 style={{ paddingBottom: '20px', color: 'white' }}>Machine Orders</h4>
                             </div>
                         </Grid.Column>

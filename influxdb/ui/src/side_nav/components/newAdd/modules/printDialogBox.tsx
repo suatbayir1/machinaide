@@ -47,8 +47,6 @@ const FormDialog = (props) => {
             email: email,
             reportData: data,
         }
-
-        console.log(params);
     }
 
     return (
