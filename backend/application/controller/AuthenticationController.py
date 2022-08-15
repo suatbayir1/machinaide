@@ -51,46 +51,58 @@ def loginWithLDAP():
     password = request.json["password"]
 
     try:
-        con = ldap.initialize(config.LDAP["URL"], bytes_mode=False)
+        con = ldap.initialize(config.LDAP["ERMETAL_URL"], bytes_mode=False)
         print("con", con)
         con.protocol_version = ldap.VERSION3
         print("protocol")
         con.set_option(ldap.OPT_REFERRALS, 0)
         print("set option")
 
+        print(username, password)
+        con.simple_bind_s(username, password)
+
         print("username", username)
-        result = con.search_s(config.LDAP["DC"], ldap.SCOPE_SUBTREE, f"(uid={username})")   
-        print("result", result)
+        # result = con.search_s(config.LDAP["DC"], ldap.SCOPE_SUBTREE, f"(uid={username})")   
+        # print("result", result)
 
-        if not result:
-            raise Exception("User not found")
+        #"CN=machinaide ldp,OU=BT,OU=BIM,OU=Ermetal,DC=ermetal,DC=local"
 
-        userInfo = {}
+        res =con.search_s(config.LDAP["ERMETAL_DC"], ldap.SCOPE_SUBTREE,f"(userPrincipalName={username})")
+        for dn, entry in res:
+            print(entry['givenName'])
+            print(entry['cn'])
+            print(entry['sn'])
+            print(username)
 
-        for item in result:
-            dn = item[0]
+        # if not result:
+        #     raise Exception("User not found")
 
-            for att in item[0].split(","):
-                splitted_att = att.split("=")
-                if splitted_att[0] == "ou":
-                    role = splitted_att[1]
+        # userInfo = {}
 
-            for att in item[1]:
-                if att != 'userPassword':
-                    userInfo[att] = item[1][att][0].decode('utf-8')
+        # for item in result:
+        #     dn = item[0]
 
-        con.simple_bind_s(dn, password)
+        #     for att in item[0].split(","):
+        #         splitted_att = att.split("=")
+        #         if splitted_att[0] == "ou":
+        #             role = splitted_att[1]
+
+        #     for att in item[1]:
+        #         if att != 'userPassword':
+        #             userInfo[att] = item[1][att][0].decode('utf-8')
+
+
 
         token = jwt.encode({
             "username": username,
-            "role": role,
+            "role": "admin",
             "expiry_time": time.mktime((datetime.datetime.now() + datetime.timedelta(days=7)).timetuple())
         }, config.authentication["SECRET_KEY"])
 
         response = {
             'token': token.decode("UTF-8"), 
-            'role': role,
-            'userInfo': userInfo,
+            'role': "admin",
+            # 'userInfo': userInfo,
         }
 
         message = "user_login_successfully"

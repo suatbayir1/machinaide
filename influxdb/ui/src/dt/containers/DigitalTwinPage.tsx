@@ -14,7 +14,6 @@ import {
   clearTask,
 } from 'src/tasks/actions/creators'
 import { loadBuckets } from 'src/timeMachine/actions/queryBuilder'
-
 import { saveNewScript, cancel } from 'src/tasks/actions/thunks'
 
 // Types
@@ -22,6 +21,9 @@ import { AppState } from 'src/types'
 
 // Services
 import DTService from 'src/shared/services/DTService';
+
+// Helpers
+import { getDTInfoByID } from 'src/shared/helpers/DTHelper';
 
 type ReduxProps = ConnectedProps<typeof connector>
 type Props = ReduxProps
@@ -34,6 +36,7 @@ interface State {
   resultNLPQuery: object
   showAllSensorValues: boolean
   refreshGraph: boolean
+  dt: object[]
 }
 
 class DigitalTwinPage extends PureComponent<Props, State> {
@@ -48,7 +51,23 @@ class DigitalTwinPage extends PureComponent<Props, State> {
       resultNLPQuery: {},
       showAllSensorValues: false,
       refreshGraph: false,
+      dt: []
     }
+  }
+
+  public parseQueryParams = async () => {
+    if (this.props["location"].search === "") {
+      return;
+    }
+
+    const query = new URLSearchParams(this.props["location"].search);
+
+    const nodeID = query.get('nodeID');
+
+    const node = await getDTInfoByID(this.state.dt, nodeID);
+
+    console.log(node);
+    this.onClickNode(node);
   }
 
   public componentWillUnmount() {
@@ -141,6 +160,7 @@ class DigitalTwinPage extends PureComponent<Props, State> {
   }
 
   onClickNode = async (node) => {
+    console.log("node", node);
     this.setState({ selectedGraphNode: node })
   }
 
@@ -148,6 +168,9 @@ class DigitalTwinPage extends PureComponent<Props, State> {
   async componentDidMount(): Promise<void> {
     this.props.onLoadBuckets()
     await this.refreshGeneralInfo();
+    const dt = await DTService.getAllDT();
+    this.setState({ dt })
+    this.parseQueryParams();
   }
 
   refreshGeneralInfo = async () => {

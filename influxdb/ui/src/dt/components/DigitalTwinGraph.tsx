@@ -672,7 +672,7 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                                                     className="show-only-pc"
                                                 />
                                             }
-
+                                            {/* 
                                             <Button
                                                 className="show-only-pc"
                                                 text="View Factory"
@@ -680,7 +680,7 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                                                 onClick={() => history.push(`/orgs/${this.props.orgID}/dt/factory-scene`)}
                                                 type={ButtonType.Button}
                                                 color={ComponentColor.Primary}
-                                            />
+                                            /> */}
 
                                             <Button
                                                 className="show-only-pc"

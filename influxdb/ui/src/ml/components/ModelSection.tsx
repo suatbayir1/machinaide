@@ -158,21 +158,12 @@ export default function ModelSection({
     cellDataReceived,
     // sessionPhase
 }) {
-<<<<<<< HEAD
     if (models.length === 0 && sessionID !== "") {
-=======
-    console.log(sessionID)
-    if (models.length === 0) {
->>>>>>> 4ac7e6d2d37727ba8da130df8459ad2674d005d2
         useInterval(async () => {
             let obj = await api.getCellCount(sessionID)
             console.log(obj)
             setCellCountAndIDs(obj)
-<<<<<<< HEAD
         }, 3000)
-=======
-        }, 3000) //10000
->>>>>>> 4ac7e6d2d37727ba8da130df8459ad2674d005d2
     } else {
         useInterval(null, 0)
     }
@@ -190,7 +181,6 @@ export default function ModelSection({
                         model={model}
                         cellDataReceived={cellDataReceived}/>
                 )
-<<<<<<< HEAD
             })) : (
                 <EmptyState size={ComponentSize.Large} testID="empty-models-list">
                 <EmptyState.Text>
@@ -198,15 +188,6 @@ export default function ModelSection({
                 </EmptyState.Text>
                 </EmptyState>
             )}
-=======
-                
-            })) : (<TechnoSpinner style={{
-                position: 'absolute', left: '50%', top: '50%',
-                transform: 'translate(-50%, -50%)',
-                height: "100px",
-                width: "100px"
-            }}/>)}
->>>>>>> 4ac7e6d2d37727ba8da130df8459ad2674d005d2
         </Grid>
     )
 }

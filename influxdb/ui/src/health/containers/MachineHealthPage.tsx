@@ -21,6 +21,7 @@ import { FACTORY_NAME } from 'src/config';
 import AnomalyGraphTimeRangeDropdown from 'src/health/components/AnomalyGraphTimeRangeDropdown';
 import HealthAssessmentService from 'src/shared/services/HealthAssessmentService'
 import AutoMLService from 'src/shared/services/AutoMLService'
+import DTService from 'src/shared/services/DTService';
 import ModelLogGraphOverlay from 'src/health/components/ModelLogGraphOverlay';
 import TimeMachineRefreshDropdown from 'src/timeMachine/components/RefreshDropdown'
 import RefreshLogsDropdown from 'src/health/components/RefreshLogsDropdown'
@@ -103,7 +104,10 @@ interface State {
     showEnabledModels: boolean
     modelLogGraphOverlay: boolean
     selectedModel: object
-    modelsLastLogs: object,
+    modelsLastLogs: object
+    pofDays: number
+    pofDaysSent: number
+    dtData: object
     autoRefresh: {  status: AutoRefreshStatus
                     interval: number}
 }
@@ -207,14 +211,16 @@ class MachineHealthPage extends PureComponent<Props, State>{
             modelLogGraphOverlay: false,
             selectedModel: null,
             modelsLastLogs: {},
+            pofDays: 30,
+            pofDaysSent: 30,
+            dtData: {"productionLines": {}, "machines": {}, "components": {}, "sensors": {}, "fields": {}},
             autoRefresh: {status: AutoRefreshStatus.Paused, interval: 0}
         }
     }
     private intervalID: number
     async componentDidMount(){
         console.log(this.props)
-        this.getMachineData()
-        this.getMachineAnomalies()
+        this.getDTData()
         this.getMLModels()
         if (this.state.autoRefresh.status === AutoRefreshStatus.Active) {
             this.intervalID = window.setInterval(() => {
@@ -223,6 +229,42 @@ class MachineHealthPage extends PureComponent<Props, State>{
         }
       
         // this.setState({})
+    }
+
+    getDTData = async () => {
+        let dt = await DTService.getAllDT();
+        let assets = {"productionLines": {}, "machines": {}, "components": {}, "sensors": {}, "fields": {}}
+        dt = dt[0] ? dt[0] : {}
+        let pls = dt["productionLines"] ? dt["productionLines"] : []
+        console.log(dt, pls)
+        for(let pl of pls){
+            console.log(pl)
+            assets["productionLines"][pl["@id"]] = {"name": pl["name"], "object": pl}
+            let machines = pl["machines"]
+            for(let machine of machines){
+                assets["machines"][machine["@id"]] = {"name": pl["name"] + "." + machine["name"], "object": machine}
+                let contents = machine["contents"]
+                for(let content of contents){
+                    if(content["@type"] === "Component"){
+                        assets["components"][content["@id"]] = {"name": pl["name"] + "." + machine["name"] + "." + content["name"], "object": content}
+                        let sensors = content["sensors"]
+                        for(let sensor of sensors){
+                            assets["sensors"][sensor["@id"]] = {"name": pl["name"] + "." + machine["name"] + "." + content["name"] + "." + sensor["name"], "object": sensor}
+                            let fields = sensor["fields"]
+                            for(let field of fields){
+                            field["database"] = dt["bucket"]
+                            assets["fields"][field["@id"]] = {"name": pl["name"] + "." + machine["name"] + "." + content["name"] + "." + sensor["name"] + "." + field["name"], "object": field}
+                            }
+                        }
+                    }
+                }
+            }        
+        }
+        this.setState({dtData: assets}, ()=>{
+            console.log("dt data", assets)
+            this.getMachineData()
+            this.getMachineAnomalies()
+        })
     }
 
     findProbability = (alpha, beta, days=30) => {
@@ -523,6 +565,14 @@ class MachineHealthPage extends PureComponent<Props, State>{
         let start = timeRange.lower
         let stop = timeRange.upper
         let machineID = this.props.match.params.MID
+        let assets = this.state.dtData["machines"]
+        let machineMeasurements = assets[machineID] ? assets[machineID]["object"]["measurements"] : []
+        let measurementStringArray = []
+        console.log("568 ",machineMeasurements, assets, this.state.dtData)
+        for(let m of machineMeasurements){
+            measurementStringArray.push(`r["_measurement"] == "${m}"`)
+        }
+        let measurementString = measurementStringArray.join(" or ")
         this.setState({timeRange: {
                 lower: start,
                 upper: stop,
@@ -530,7 +580,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
         }})
         let query = `from(bucket: "${FACTORY_NAME}")
         |> range(start: ${start}, stop: ${stop})
-        |> filter(fn: (r) => r["_measurement"] == "${machineID}")
+        |> filter(fn: ${measurementString})
         |> aggregateWindow(every: ${this.state.aggregatePeriod}, fn: mean, createEmpty: false)
         |> yield(name: "mean")`
 
@@ -542,6 +592,14 @@ class MachineHealthPage extends PureComponent<Props, State>{
         let start = ""
         let stop = ""
         let machineID = this.props.match.params.MID
+        let assets = this.state.dtData["machines"]
+        let machineMeasurements = assets[machineID] ? assets[machineID]["object"]["measurements"] : [] 
+        let measurementStringArray = []
+        console.log("568 ",machineMeasurements, assets, this.state.dtData)
+        for(let m of machineMeasurements){
+            measurementStringArray.push(`r["_measurement"] == "${m}"`)
+        }
+        let measurementString = measurementStringArray.join(" or ")
         if(timeRange.type === "selectable-duration"){
             stop = new Date().toISOString()
             start = new Date(new Date().getTime() - timeRange.seconds * 1000).toISOString()
@@ -553,10 +611,10 @@ class MachineHealthPage extends PureComponent<Props, State>{
 
         let query = `from(bucket: "${FACTORY_NAME}")
         |> range(start: ${start}, stop: ${stop})
-        |> filter(fn: (r) => r["_measurement"] == "${machineID}")
+        |> filter(fn: (r) => ${measurementString})
         |> aggregateWindow(every: ${this.state.aggregatePeriod}, fn: mean, createEmpty: false)
         |> yield(name: "mean")`
-        //console.log("--425--",query, this.props.match.params.orgID)
+        console.log("--425--",query, this.props.match.params.orgID)
         let results = this.processResponse(runQuery(this.props.match.params.orgID, query))
         console.log("results", results)
 
@@ -689,60 +747,83 @@ class MachineHealthPage extends PureComponent<Props, State>{
       } */
     }
 
+    deleteModel = async (model) => {
+        if("modelName" in model){
+            let result = confirm(`Are you sure you want to delete ${model["modelName"]}`)
+            if(result){
+                if("pipelineID" in model){
+                    await AutoMLService.deleteMLPipeline(model["pipelineID"])
+                    this.getMLModels()
+                }
+                else{
+                    if("modelID" in model){
+                        await AutoMLService.deleteMLModel(model["modelID"])
+                        this.getMLModels()
+                    }
+                }
+            }
+        }        
+    }
+
     contextMenu = (modelName, enabled, modelTask, model) =>{
-        return (
-          <Context>
-            <Context.Menu
-              icon={enabled ? IconFont.Stop : IconFont.Play}
-              color={ComponentColor.Warning}
-            >
-              {enabled ? <Context.Item
-                label="Stop Model"
-                action={() => {
-                    HealthAssessmentService.startStopModel({"modelName": modelName, "enabled": false})
-                    this.getMLModels()
-                }}
-              /> : <Context.Item
-                label="Start Model"
-                action={() =>{
-                    HealthAssessmentService.startStopModel({"modelName": modelName, "enabled": true})
-                    this.getMLModels()
-                }}
-                />}
-            </Context.Menu>
-            <Context.Menu icon={IconFont.GraphLine}>
-              <Context.Item
-                label="View Log Chart"
-                action={() => this.setState({modelLogGraphOverlay: true, selectedModel: model})}
-              />
-            </Context.Menu>
-            <Context.Menu
-              icon={IconFont.BarChart}
-              color={ComponentColor.Secondary}
-            >
-              <Context.Item
-                label="View AutoML results"
-                action={() => {
-                    if(modelTask === "rulreg"){
-                        this.props["history"].push(`/orgs/${this.props["match"]["params"]["orgID"]}/rulreg-automl/${model["pipelineID"]}/duration`)
-                    }
-                    else{
-                        this.props["history"].push(`/orgs/${this.props["match"]["params"]["orgID"]}/automl/${modelName}/duration`)
-                    }
-                }}
-              />
-            </Context.Menu>
-            <Context.Menu
-              icon={IconFont.Trash}
-              color={ComponentColor.Danger}
-            >
-              <Context.Item
-                label="Delete Model"
-                action={() => console.log("delete click")}
-              />
-            </Context.Menu>
-          </Context>
-        )
+        if(("trainingDone" in model) && model["trainingDone"]){
+            return (
+                <Context>
+                  <Context.Menu
+                    icon={enabled ? IconFont.Stop : IconFont.Play}
+                    color={ComponentColor.Warning}
+                  >
+                    {enabled ? <Context.Item
+                      label="Stop Model"
+                      action={() => {
+                          HealthAssessmentService.startStopModel({"modelName": modelName, "enabled": false})
+                          this.getMLModels()
+                      }}
+                    /> : <Context.Item
+                      label="Start Model"
+                      action={() =>{
+                          HealthAssessmentService.startStopModel({"modelName": modelName, "enabled": true})
+                          this.getMLModels()
+                      }}
+                      />}
+                  </Context.Menu>
+                  <Context.Menu icon={IconFont.GraphLine}>
+                    <Context.Item
+                      label="View Log Chart"
+                      action={() => this.setState({modelLogGraphOverlay: true, selectedModel: model}, ()=>this.onSetAutoRefresh({status: 'paused', interval: 0}))}
+                    />
+                  </Context.Menu>
+                  <Context.Menu
+                    icon={IconFont.BarChart}
+                    color={ComponentColor.Secondary}
+                  >
+                    <Context.Item
+                      label="View AutoML results"
+                      action={() => {
+                          if(modelTask === "rulreg"){
+                              this.props["history"].push(`/orgs/${this.props["match"]["params"]["orgID"]}/rulreg-automl/${model["pipelineID"]}/duration`)
+                          }
+                          else{
+                              this.props["history"].push(`/orgs/${this.props["match"]["params"]["orgID"]}/automl/${modelName}/duration`)
+                          }
+                      }}
+                    />
+                  </Context.Menu>
+                  <Context.Menu
+                    icon={IconFont.Trash}
+                    color={ComponentColor.Danger}
+                  >
+                    <Context.Item
+                      label="Delete Model"
+                      action={() => this.deleteModel(model)}
+                    />
+                  </Context.Menu>
+                </Context>
+              )
+        }
+        else{
+            return(<></>)
+        }
       }
 
     public render(){
@@ -1116,47 +1197,52 @@ class MachineHealthPage extends PureComponent<Props, State>{
                             style={{height: "500px", marginTop: "20px", border: 'solid 2px #999dab', borderRadius: '4px'}}
                         >
                             <Page.Header fullWidth={false}>
-                                <Page.Title title="ML Models" />
-                                <div className="tabbed-page--header-left">
-                                    {/* <Input
-                                        onChange={() => this.setState({ showEnabledModels: !this.state.showEnabledModels})}
-                                        name="showEnabledModels"
-                                        type={InputType.Checkbox}
-                                        checked={this.state.showEnabledModels}
+                                <Page.Title title="ML Models" />       
+                                <div className="tabbed-page--header-left" style={{marginLeft: "20px"}}>
+                                    <InputLabel>Number of Days: </InputLabel>
+                                    <Input
+                                        onChange={(e) => this.setState({ pofDays: parseInt(e.target.value) })}
+                                        name="pofDays"
+                                        type={InputType.Number}
+                                        value={this.state.pofDays}
+                                        style={{width: "15%"}}
                                     />
-                                    <InputLabel>Show only enabled models</InputLabel> */}
-                                    {/* <TimeMachineRefreshDropdown /> */}
+                                    <SquareButton
+                                        icon={IconFont.Play}
+                                        onClick={()=>this.setState({pofDaysSent: this.state.pofDays})}
+                                        size={ComponentSize.ExtraSmall}
+                                        titleText={"Get Probability"}
+                                        color={ComponentColor.Primary}
+                                    />
+                                    {/* <FlexBox
+                                        alignItems={AlignItems.Center}
+                                        margin={ComponentSize.Small}
+                                        className="view-options--checkbox"
+                                        key={uuid.v4()}
+                                        style={{margin: "0px", marginLeft: "20px"}}
+                                    >
+                                        <Input
+                                            onChange={(e) => this.setState({ pofDays: parseInt(e.target.value) })}
+                                            name="pofDays"
+                                            type={InputType.Number}
+                                            value={this.state.pofDays}
+                                        />
+                                        <SquareButton
+                                            icon={IconFont.Play}
+                                            onClick={()=>this.setState({pofDaysSent: this.state.pofDays})}
+                                            size={ComponentSize.ExtraSmall}
+                                            titleText={"Get Probability"}
+                                            color={ComponentColor.Primary}
+                                        />
+                                    </FlexBox>  */}                                   
+                                </div>
+                                <div className="tabbed-page--header-right">
                                     <FlexBox
                                         alignItems={AlignItems.Center}
                                         margin={ComponentSize.Small}
                                         className="view-options--checkbox"
                                         key={uuid.v4()}
-                                    >
-                                        <Toggle
-                                            id="prefixoptional"
-                                            checked={this.state.showEnabledModels}
-                                            name={"showEnabledModels"}
-                                            type={InputToggleType.Checkbox}
-                                            onChange={() => {
-                                                if(this.state.showEnabledModels){
-                                                    this.setState({displayedModels: this.state.models, showEnabledModels: false})
-                                                }
-                                                else{
-                                                    let enabledModels = this.state.models.filter(m=>m["enabled"])
-                                                    this.setState({displayedModels: enabledModels, showEnabledModels: true})
-                                                }
-                                            }}
-                                            size={ComponentSize.ExtraSmall}
-                                        />
-                                        <InputLabel>Show only enabled models</InputLabel>
-                                    </FlexBox>
-                                </div>        
-                                <div className="tabbed-page--header-right">
-                                <FlexBox
-                                        alignItems={AlignItems.Center}
-                                        margin={ComponentSize.Small}
-                                        className="view-options--checkbox"
-                                        key={uuid.v4()}
+                                        style={{margin: "0px", marginRight: "25px"}}
                                     >
                                         <Toggle
                                             id="prefixoptional"
@@ -1196,6 +1282,9 @@ class MachineHealthPage extends PureComponent<Props, State>{
                             >
                                 <div style={{ height: '100%'}}> {/* , display: 'grid' */} 
                                     <div className="models-card-grid">
+                                        {this.state.displayedModels.length === 0 && (
+                                            <div>There are no models created yet</div>
+                                        )}
                                         {this.state.displayedModels.map((model, i) => (
                                             <ResourceCard
                                                 key={uuid.v4()}
@@ -1294,7 +1383,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
                                                         <div style={{ width: 'auto', height: '150px' }}>
                                                             <GaugeChart
                                                                 key={uuid.v4()}
-                                                                value={modelsLastLogs[model["modelID"]] ? this.findProbability(modelsLastLogs[model["modelID"]]["prediction"][0], modelsLastLogs[model["modelID"]]["prediction"][1]) : ""}
+                                                                value={modelsLastLogs[model["modelID"]] ? this.findProbability(modelsLastLogs[model["modelID"]]["prediction"][0], modelsLastLogs[model["modelID"]]["prediction"][1], this.state.pofDaysSent) : ""}
                                                                 properties={this.state.gaugeProperties}
                                                                 theme={'dark'}
                                                                 style={{height: "150px", width: "auto"}}
@@ -1339,6 +1428,16 @@ class MachineHealthPage extends PureComponent<Props, State>{
                                                                     </div>
                                                                 </Grid.Column>
                                                             </Grid.Row> 
+                                                            {/* <Grid.Row>
+                                                                <Grid.Column widthXS={Columns.Six}>
+                                                                    <Input
+                                                                        onChange={(e) => this.setState({ pofDays: parseInt(e.target.value) })}
+                                                                        name="modelNamae"
+                                                                        type={InputType.Number}
+                                                                        value={this.state.pofDays}
+                                                                    />
+                                                                </Grid.Column>
+                                                            </Grid.Row> */}
                                                         </Grid>
                                                     </>
                                                 }                                                   
@@ -1377,13 +1476,14 @@ class MachineHealthPage extends PureComponent<Props, State>{
                         </Page>
                         <Grid.Row style={{marginTop: "20px"}}>
                             <Grid.Column widthXS={Columns.Two}>
-                                {/* <Button
-                                    color={ComponentColor.Secondary}
-                                    titleText="Test token"
-                                    text="Submit"
-                                    type={ButtonType.Button}
-                                    onClick={() => this.testToken()}
-                                /> */}
+                                <div className="tabbed-page--header-left">
+                                    <CTAButton
+                                        icon={IconFont.TextBlock}
+                                        color={ComponentColor.Secondary}
+                                        text={"Generate Report"}
+                                        onClick={()=>console.log("generate report")}
+                                    />
+                                </div>
                             </Grid.Column>
                             <Grid.Column widthXS={Columns.Eight}/>
                             <Grid.Column widthXS={Columns.Two}>

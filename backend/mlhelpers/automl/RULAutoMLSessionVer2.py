@@ -28,7 +28,8 @@ from ml_config import (
     AUTOML_CHANGE_STATUS_URL,
     AUTOML_UPDATE_EXPERIMENT_URL,
     UPDATE_MODEL_URL,
-    POST_MODEL_URL
+    POST_MODEL_URL,
+    TICK_SETTINGS
 )
 from sklearn.metrics import confusion_matrix, recall_score, precision_score
 from query_templates import get_measurements_query, get_fields_query, get_sensor_data_query
@@ -153,10 +154,11 @@ class RULAutoMLSession:
             "optimizer": self.optimizer_name,
             "customMetricEquation": self.custom_metric_equation,
             "customMetricDirection": self.custom_metric_direction,
+            "startTime": time.time(),
             "trials": [],
         }
         print(experiment)
-        # TODO: post experiment
+        # TODO: post experiment -108-
         requests.post(url=AUTOML_POST_EXPERIMENT_URL , json=experiment)
 
         model_builder = RULModelBuilder(sequence_length=seq_len, seq_array=seq_array, label_array=label_array, optimizers=self.optimizer_settings["compile"])
@@ -208,7 +210,7 @@ class RULAutoMLSession:
 
         tuner.search(seq_array, label_array, epochs=self.number_of_epochs, validation_split=0.2, callbacks=[stop_early, int_callback])
 
-        # TODO: change experiment status from "running" to "completed"
+        # TODO: change experiment status from "running" to "completed" -108-
         requests.put(url=AUTOML_CHANGE_STATUS_URL , json={'experiment_name': self.experiment_name})
 
         best_hps=tuner.get_best_hyperparameters(num_trials=1)[0]
@@ -254,7 +256,7 @@ class RULAutoMLSession:
         pkg =  {"experiment_name": self.experiment_name, "metric_name": hypermodel.metrics_names, "metric_value": eval_result, "end_time": time.time(),
             "accuracy": eval_result[1], "precision": precision, "recall": recall, "windowLength": self.window_length}
         
-        # TODO: update experiment results
+        # TODO: update experiment results -108-
         requests.put(url=AUTOML_UPDATE_EXPERIMENT_URL, json=json.dumps(pkg, default=numpy_converter))
 
         obj = {
@@ -266,10 +268,13 @@ class RULAutoMLSession:
 
         print(pkg, obj)
 
-        # TODO update trained model info
+        # TODO update trained model info -108-
         requests.put(url=UPDATE_MODEL_URL + self.model_ID, json=obj)
 
-        # TODO
+        # TODO delete json settings
+        json_file_path = F"{os.getcwd()}/experiment_settings/{self.experiment_name}-{self.session_ID}.json"
+        if(os.path.exists(json_file_path)):
+            os.remove(json_file_path)
         """ if os.path.exists(log_file):
             time.sleep(5)
             os.remove(log_file) """
@@ -376,6 +381,7 @@ class RULAutoMLSession:
     def prepare_data(self):
         # TODO: get failures 
         failure_res = requests.post(url=GET_FAILURES_URL, json={"sourceName": self.asset_name}, headers={'token': self.token, 'Content-Type': 'application/json'}).json()
+        failure_res = json.loads(failure_res["data"]["data"])
         """ failure_res = [
             {
                 "failureStartTime": '2022-05-30T10:16'
@@ -383,6 +389,7 @@ class RULAutoMLSession:
             {
                 "failureStartTime": '2022-06-02T11:30'
             },] """
+        print("failure res", failure_res)
         failures = []
         for failure in failure_res:
             failure["startTime"] = parser.parse(failure["startTime"][0:16])
@@ -426,8 +433,18 @@ class RULAutoMLSession:
                 for field in fields:
                     # TODO
                     # sensor_info = requests.get(url=GETSENSORFROMMAPPING + field).json()
+                    sensor_info = {}
+                    if("isFillNullActive" in field and field["isFillNullActive"]):
+                        if("defaultValue" in field):
+                            sensor_info["defaultValue"] = field["defaultValue"]
+                        else:
+                            sensor_info["defaultValue"] = TICK_SETTINGS["LAST"]
+                    if("isOperationActive" in field and field["isOperationActive"]):
+                        if("operation" and "operationValue" in field):
+                            sensor_info["operation"] = field["operation"]
+                            sensor_info["operationValue"] = field["operationValue"]
 
-                    sensor_info = {"defaultValue": "-666", "operator": "*", "operatorValue": "2"}
+                    # sensor_info = {"defaultValue": "-666", "operation": "*", "operationValue": "2"}
 
                     # prepare fillnan configurations
                     do_fill_nan = False
@@ -439,8 +456,8 @@ class RULAutoMLSession:
                             do_fill_nan, is_numeric, default_value = return_default_value(sensor_info["defaultValue"])
                         else:
                             do_fill_nan, is_numeric, default_value = (False, True, 0)
-                        if("operator" and "operatorValue" in sensor_info):
-                            operator, operator_value = return_operator_info(sensor_info["operator"], sensor_info["operatorValue"])
+                        if("operation" and "operationValue" in sensor_info):
+                            operator, operator_value = return_operator_info(sensor_info["operation"], sensor_info["operationValue"])
                         else:
                             operator, operator_value = (None, None)
                     data = self.get_query_results("sensor", field["database"], field["measurement"], field["dataSource"], duration_start_date, duration_end_date)
@@ -545,7 +562,9 @@ class RULAutoMLSession:
                 result = pd.DataFrame()
             
             print(result)
-            # result.to_csv("./flux_df_out_sensor-fill.csv")  
+            # TODO: 29.07.2022
+            result = result.fillna(method="ffill")
+            # result.to_csv("./18-2_flux_df_out_sensor-fill.csv")  
 
             if result.empty:
                 print('DataFrame is empty!')
@@ -610,7 +629,7 @@ class RULAutoMLSession:
                     }
                     print(obj)
 
-                    # TODO: post model info
+                    # TODO: post model info -108-
                     requests.post(url=POST_MODEL_URL, json=obj)
 
                     self.start_tuning(seq_array=seq_array, label_array=label_array, seq_len=seq_len, features=sensor_cols, train_df=result)

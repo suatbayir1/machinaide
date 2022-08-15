@@ -268,6 +268,54 @@ class AutoMLService {
             console.log("Error while getting automl settings with msg: ", err);
         }
     };
+
+    deleteMLModel = async (machineID) => {
+        const url = `${BACKEND.API_URL}ml/deleteMLModel/${machineID}`;
+
+        const request = fetch(url, {
+            method: 'DELETE',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
+            }
+        })
+
+        try {
+            const response = await request;
+            const res = await response.json();
+            return res;
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    deleteMLPipeline = async (machineID) => {
+        const url = `${BACKEND.API_URL}ml/deleteMLPipeline/${machineID}`;
+
+        const request = fetch(url, {
+            method: 'DELETE',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
+            }
+        })
+
+        try {
+            const response = await request;
+            const res = await response.json();
+            return res;
+        } catch (err) {
+            console.error(err);
+        }
+    }
 }
 
 export default new AutoMLService();

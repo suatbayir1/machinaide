@@ -13,6 +13,23 @@ import uuid from 'uuid'
 import DTService from 'src/shared/services/DTService';
 import FailureService from 'src/shared/services/FailureService'
 import HealthAssessmentService from 'src/shared/services/HealthAssessmentService'
+import AutoMLService from 'src/shared/services/AutoMLService'
+
+const optimizers = {
+  'Accuracy': 'accuracy',
+  'Validation Accuracy': 'val_accuracy',
+  'Loss': 'loss',
+  'Validation Loss': 'val_loss',
+  'Mean Squared Error': 'mse',
+  'AUC (Area Under The Curve)': 'auc',
+  'True Positives': 'tp',
+  'True Negatives': 'tn',
+  'False Positives': 'fp',
+  'False Negatives': 'fn',
+  'Precision': 'precision',
+  'Recall': 'recall',
+  'Custom': 'custom',
+}
 
 interface Props {
     handleChangeNotification: (type: string, message: string) => void
@@ -43,6 +60,7 @@ interface State {
     assetName: string
     assetChildren: object[]
     assets: object
+    windowSize: string
     // 20.06.22
     allProductionLines: object[]
     allProductionLinesMenu: string[]
@@ -71,6 +89,7 @@ interface State {
     modelName: string
 
     autoMLSettingsOverlay: boolean
+    autoMLSettings: object
 }
 
 class CreateModelOverlay extends PureComponent<Props, State>{
@@ -78,13 +97,13 @@ class CreateModelOverlay extends PureComponent<Props, State>{
         task: "",
         tasks: [ANOMALY_DETECTION_TASK, RUL_TASK, RULREG_TASK, POF_TASK],
         database: "",
-        databases: ["Press030", "Press031", "Press032", "Press033", "Press034", "Robot"],
+        databases: [],
         measurement: "",
-        measurements: ["measurement1", "measurement2", "measurement3", "measurement4", "measurement5"],
+        measurements: [],
         field: "",
-        fields: ["field1", "field2", "field3", "field4", "field5"],
+        fields: [],
         product: "None",
-        products: ["None", "product1", "product2", "product3", "product4", "product5"],
+        products: ["None"],
         numberOfDaysThreshold: "30",
         assetTypes: ["Production Line", "Machine", "Component"],
         assetType: "",
@@ -94,6 +113,7 @@ class CreateModelOverlay extends PureComponent<Props, State>{
         assetNames: [],
         assetName: "",
         assetChildren: [],
+        windowSize: "30",
         //20.06.22
         allProductionLines: [],
         allProductionLinesMenu: [],
@@ -119,12 +139,15 @@ class CreateModelOverlay extends PureComponent<Props, State>{
 
         modelName: "",
 
-        autoMLSettingsOverlay: false
+        autoMLSettingsOverlay: false,
+        autoMLSettings: {}
     }
 
     async componentDidMount() {
       console.log("parent params", this.props)
       let dt = await DTService.getAllDT();
+      let autoMLSettings = await AutoMLService.getAutoMLSettings()
+      this.setState({autoMLSettings: autoMLSettings}, ()=>console.log("automl settings, ", autoMLSettings))
       
       let assets = {"productionLines": {}, "machines": {}, "components": {}, "sensors": {}, "fields": {}}
       dt = dt[0] ? dt[0] : {}
@@ -427,6 +450,15 @@ class CreateModelOverlay extends PureComponent<Props, State>{
       this.setState({selectedFields: filteredOptions})
     }
 
+    formatKerasOptimizerName = (optimizer) => {
+      if(optimizer in optimizers){
+        return optimizers[optimizer]
+      }
+      else{
+        return "val_accuracy"
+      }
+    }
+
     trainModel = async () => {
       let fields = []
       let allFields = this.state.assets["fields"]
@@ -442,31 +474,48 @@ class CreateModelOverlay extends PureComponent<Props, State>{
       
       console.log("fields: ", fields)
       if(this.state.task === RUL_TASK){
+        let kerasTunerMinDataPoints = this.state.autoMLSettings["kerasTunerMinDataPoints"] ? this.state.autoMLSettings["kerasTunerMinDataPoints"] : "200"
+        let kerasTunerCustomMetricEquation = this.state.autoMLSettings["kerasTunerCustomMetricEquation"] ? this.state.autoMLSettings["kerasTunerCustomMetricEquation"] : "-"
+        let kerasTunerCustomMetricDirection = this.state.autoMLSettings["kerasTunerCustomMetricDirection"] ? this.state.autoMLSettings["kerasTunerCustomMetricDirection"] : "-"
+        let kerasTunerType = this.state.autoMLSettings["kerasTunerType"] ? this.state.autoMLSettings["kerasTunerType"] : "Hyperband"
+        let kerasTunerOptimizer = this.state.autoMLSettings["kerasTunerOptimizer"] ? this.formatKerasOptimizerName(this.state.autoMLSettings["kerasTunerOptimizer"]) : "val_accuracy"
+        let kerasTunerNumberOfEpochs = this.state.autoMLSettings["kerasTunerNumberOfEpochs"] ? this.state.autoMLSettings["kerasTunerNumberOfEpochs"] : "50"
+
         let settings = {
           "assetName": this.state.selectedAsset, "fields": fields,
-          "minDataPoints": "200", "customMetricEquation": "-", "customMetricDirection": "-",
-          "timeout": "2h", "numberOfEpochs": "50", "sessionID": Date.now(), "experimentName": this.state.modelName, "creator": this.props.username,
-          "tunerType": "hyperband", "optimizer": "val_accuracy", "windowLength": "30", "productID": "-1", "token": window.localStorage.getItem("token")
+          "minDataPoints": kerasTunerMinDataPoints, "customMetricEquation": kerasTunerCustomMetricEquation, "customMetricDirection": kerasTunerCustomMetricDirection,
+          "timeout": "2h", "numberOfEpochs": kerasTunerNumberOfEpochs, "sessionID": Date.now(), "experimentName": this.state.modelName, "creator": this.props.username,
+          "tunerType": kerasTunerType, "optimizer": kerasTunerOptimizer, "windowLength": this.state.windowSize, "productID": "-1", "token": window.localStorage.getItem("token")
         }
         const test = await HealthAssessmentService.startRULAutoMLSession(settings)
         console.log("test token res:", test)
       }
       else if(this.state.task === POF_TASK){
+        let kerasTunerMinDataPoints = this.state.autoMLSettings["kerasTunerMinDataPoints"] ? this.state.autoMLSettings["kerasTunerMinDataPoints"] : "200"
+        let kerasTunerCustomMetricEquation = this.state.autoMLSettings["kerasTunerCustomMetricEquation"] ? this.state.autoMLSettings["kerasTunerCustomMetricEquation"] : "-"
+        let kerasTunerCustomMetricDirection = this.state.autoMLSettings["kerasTunerCustomMetricDirection"] ? this.state.autoMLSettings["kerasTunerCustomMetricDirection"] : "-"
+        let kerasTunerNumberOfEpochs = this.state.autoMLSettings["kerasTunerNumberOfEpochs"] ? this.state.autoMLSettings["kerasTunerNumberOfEpochs"] : "50"
+        let kerasTunerType = this.state.autoMLSettings["kerasTunerType"] ? this.state.autoMLSettings["kerasTunerType"] : "Hyperband"
         let settings = {
           "assetName": this.state.selectedAsset, "fields": fields,
-          "minDataPoints": "200", "customMetricEquation": "-", "customMetricDirection": "-",
-          "timeout": "2h", "numberOfEpochs": "50", "sessionID": Date.now(), "experimentName": this.state.modelName, "creator": this.props.username,
-          "tunerType": "hyperband", "optimizer": "val_accuracy", "productID": "-1", "token": window.localStorage.getItem("token")
+          "minDataPoints": kerasTunerMinDataPoints, "customMetricEquation": kerasTunerCustomMetricEquation, "customMetricDirection": kerasTunerCustomMetricDirection,
+          "timeout": "4h", "numberOfEpochs": kerasTunerNumberOfEpochs, "sessionID": Date.now(), "experimentName": this.state.modelName, "creator": this.props.username,
+          "tunerType": kerasTunerType, "optimizer": "val_loss", "productID": "-1", "token": window.localStorage.getItem("token")
         }
         const test = await HealthAssessmentService.startPOFAutoMLSession(settings)
         console.log("test token res:", test)
       }
       else if(this.state.task === RULREG_TASK){
+        let evalMLMinDataPoints = this.state.autoMLSettings["evalMLMinDataPoints"] ? this.state.autoMLSettings["evalMLMinDataPoints"] : "200"
+        let evalMLCustomLateGuessPunishment = this.state.autoMLSettings["evalMLCustomLateGuessPunishment"] ? this.state.autoMLSettings["evalMLCustomLateGuessPunishment"] : "-"
+        let evalMLCustomEarlyGuessPunishment = this.state.autoMLSettings["evalMLCustomEarlyGuessPunishment"] ? this.state.autoMLSettings["evalMLCustomEarlyGuessPunishment"] : "-"
+        let evalMLMaxIterations = this.state.autoMLSettings["evalMLMaxIterations"] ? this.state.autoMLSettings["evalMLMaxIterations"] : "10"
+        let evalMLObjective = this.state.autoMLSettings["evalMLObjective"] ? this.state.autoMLSettings["evalMLObjective"] : "MSE"
         let settings = {
           "assetName": this.state.selectedAsset, "fields": fields,
-          "minDataPoints": "200", "lateGuessPunishment": "-", "earlyGuessPunishment": "-",
-          "timeout": "2", "sessionID": Date.now(), "experimentName": this.state.modelName, "creator": this.props.username,
-          "maxIterations": "10", "objective": "MSE", "productID": "-1", "token": window.localStorage.getItem("token")
+          "minDataPoints": evalMLMinDataPoints, "lateGuessPunishment": evalMLCustomLateGuessPunishment, "earlyGuessPunishment": evalMLCustomEarlyGuessPunishment,
+          "timeout": "4", "sessionID": Date.now(), "experimentName": this.state.modelName, "creator": this.props.username,
+          "maxIterations": evalMLMaxIterations, "objective": evalMLObjective, "productID": "-1", "token": window.localStorage.getItem("token")
         }
         const test = await HealthAssessmentService.startRULRegAutoMLSession(settings)
         console.log("test token res:", test)
@@ -513,6 +562,31 @@ class CreateModelOverlay extends PureComponent<Props, State>{
                           </div>
                         </Grid.Column>
                       </Grid.Row>
+                      {this.state.task === RUL_TASK && (
+                        <Grid.Row> {/* style={{marginBottom: "10px"}} */}
+                          <Grid.Column widthXS={Columns.Three} /* style={{ margin: "7px" }} */>
+                            <div className="tabbed-page--header-left">
+                              <Label
+                                  size={ComponentSize.Small}
+                                  name={"Days Prior To Failure"}
+                                  description={"ML task"}
+                                  color={InfluxColors.Castle}
+                                  id={"icon-label"} 
+                              />
+                            </div>
+                          </Grid.Column>
+                          <Grid.Column widthXS={Columns.Nine} /* style={{ margin: "7px" }} */>
+                            <div className="tabbed-page--header-left">
+                              <SelectDropdown
+                                  // style={{width: "10%"}}
+                                  options={["15", "20", "30", "45", "60"]}
+                                  selectedOption={this.state.windowSize}
+                                  onSelect={(e) => {this.setState({windowSize: e})}}
+                              />
+                            </div>
+                          </Grid.Column>
+                        </Grid.Row>
+                      )}
                       <Grid.Row>
                         <Grid.Column widthXS={Columns.Two} /* style={{ margin: "7px" }} */>
                           <div className="tabbed-page--header-left">

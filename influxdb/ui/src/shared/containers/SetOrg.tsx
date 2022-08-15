@@ -35,7 +35,7 @@ import FlowsIndex from 'src/notebooks/components/FlowsIndex'
 // My Added Components
 import DigitalTwinPage from 'src/dt/containers/DigitalTwinPage'
 import InteroperableDigitalTwin from 'src/dt/containers/InteroperableDigitalTwin'
-import FactorySceneOverlay from 'src/dt/components/FactorySceneOverlay'
+// import FactorySceneOverlay from 'src/dt/components/FactorySceneOverlay'
 import ObjectCreatorPage from 'src/objectCreator/containers/ObjectCreatorPage'
 import ReportsContainer from 'src/reports/containers/ReportsContainer';
 import ReportViewContainer from 'src/reports/containers/ReportViewContainer';
@@ -175,7 +175,7 @@ const SetOrg: FC<Props> = ({
 
         {/* DT */}
         <PermittedRoute exact path={`${orgPath}/dt`} component={DigitalTwinPage} allowedRoles={["member", "admin", "editor"]} />
-        <PermittedRoute exact path={`${orgPath}/dt/factory-scene`} component={FactorySceneOverlay} allowedRoles={["member", "admin", "editor"]} />
+        {/* <PermittedRoute exact path={`${orgPath}/dt/factory-scene`} component={FactorySceneOverlay} allowedRoles={["member", "admin", "editor"]} /> */}
         <PermittedRoute exact path={`${orgPath}/dt/data-flow-settings`} component={InteroperableDigitalTwin} allowedRoles={["member", "admin", "editor"]} />
 
 
@@ -234,7 +234,7 @@ const SetOrg: FC<Props> = ({
 
         {/* HEALTH ASSESSMENT */}
         <Route path={`${orgPath}/health/:FID/:PLID/:MID/:CID`} component={MachineHealthPage} />
-        <Route path={`${orgPath}/health/:FID/:PLID/:MID`} component={MachineHealthPage} />               
+        <Route path={`${orgPath}/health/:FID/:PLID/:MID`} component={MachineHealthPage} />
 
         {/* Data Explorer */}
         <Route path={`${orgPath}/data-explorer`} component={DataExplorerPage} />

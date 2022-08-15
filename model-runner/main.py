@@ -14,7 +14,7 @@ from tensorflow import keras
 from pymongo import MongoClient
 from flask import Flask, jsonify
 from tensorflow.keras import backend as k
-from model_runner import POFModelRunner, RULModelRunner, RULRegModelRunner 
+from model_runner import POFModelRunner, RULModelRunner, RULRegModelRunner, CustomMetric
 from apscheduler.schedulers.background import BackgroundScheduler
 
 # from model_runner import RULModelRunner, POFModelRunner, RULRegModelRunner, CustomMetric
@@ -99,9 +99,12 @@ def load_models():
                 if("dataInfo" in model):
                     settings["asset"] = model["dataInfo"]["asset"]
                     settings["fields"] = model["dataInfo"]["fields"]
-                settings["loadedModel"] = keras.models.load_model(MODELS_DIR + model["modelID"] + "/model.h5",
+                
+                model_path = MODELS_DIR + model["modelID"] + "/model.h5"
+                if(os.path.exists(model_path)):
+                    settings["loadedModel"] = keras.models.load_model(model_path,
                                         custom_objects = {"weibull_loglik_discrete": weibull_loglik_discrete, "activate": activate})
-                models[model_id] = settings
+                    models[model_id] = settings
             elif(model["task"] == "rul"):
                 settings = {}
                 settings["modelID"] = model_id
@@ -121,14 +124,24 @@ def load_models():
                         if(model["dataInfo"]["optimizer"] == "custom"):
                             settings["optimizer"] = "custom"
                             settings["customEquation"] = model["dataInfo"]["customEquation"]
-                            settings["loadedModel"] = keras.models.load_model(MODELS_DIR + model["modelID"] + "/model.h5", custom_objects={"CustomMetric": CustomMetric})
+                            model_path = MODELS_DIR + model["modelID"] + "/model.h5"
+                            if(os.path.exists(model_path)):
+                                settings["loadedModel"] = keras.models.load_model(model_path, custom_objects={"CustomMetric": CustomMetric})
                         else:
-                            settings["loadedModel"] = keras.models.load_model(MODELS_DIR + model["modelID"] + "/model.h5")
+                            model_path = MODELS_DIR + model["modelID"] + "/model.h5"
+                            if(os.path.exists(model_path)):
+                                settings["loadedModel"] = keras.models.load_model(model_path)
                     else:
-                        settings["loadedModel"] = keras.models.load_model(MODELS_DIR + model["modelID"] + "/model.h5")
+                        model_path = MODELS_DIR + model["modelID"] + "/model.h5"
+                        if(os.path.exists(model_path)):
+                            settings["loadedModel"] = keras.models.load_model(model_path)
                 else:
-                    settings["loadedModel"] = keras.models.load_model(MODELS_DIR + model["modelID"] + "/model.h5")
-                models[model_id] = settings
+                    model_path = MODELS_DIR + model["modelID"] + "/model.h5"
+                    if(os.path.exists(model_path)):
+                        settings["loadedModel"] = keras.models.load_model(model_path)
+                model_path = MODELS_DIR + model["modelID"] + "/model.h5"
+                if(os.path.exists(model_path)):        
+                    models[model_id] = settings
             elif(model["task"] == "rulreg"):
                 settings = {}
                 pipeline_id = model["pipelineID"]
@@ -145,8 +158,10 @@ def load_models():
                     settings["lastDataPoint"] = None
                 
                 pipeline_no = pipeline_id[-1]
-                settings["loadedModel"] = evalml.pipelines.PipelineBase.load(EVALML_MODELS_DIR + model["modelID"] + "/pipeline" + pipeline_no + ".cloudpickle")
-                models[pipeline_id] = settings
+                model_path = EVALML_MODELS_DIR + model["modelID"] + "/pipeline" + pipeline_no + ".cloudpickle"
+                if(os.path.exists(model_path)):  
+                    settings["loadedModel"] = evalml.pipelines.PipelineBase.load(model_path)
+                    models[pipeline_id] = settings
     print(models)
     # free stopped models
     for mid in modelIDs:

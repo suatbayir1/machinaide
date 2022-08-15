@@ -23,8 +23,10 @@ INFLUXDB_CLIENT = dict(
 )
 
 LDAP = dict(
-    URL = "ldap://10.16.0.10:389",
-    DC = "dc=dcerm,dc=ermetal,dc=local"
+    # URL = "ldap://161.97.67.73:10389",
+    # DC = "dc=example,dc=com",
+    ERMETAL_URL = "ldap://10.16.0.10:389",
+    ERMETAL_DC = "OU=BT,OU=BIM,OU=Ermetal,DC=ermetal,DC=local"
 )
 
 url = dict(

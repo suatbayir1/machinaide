@@ -42,6 +42,7 @@ from ml_config import (
     MODELS_DIR,
     POST_MODEL_URL,
     AUTOML_POST_REG_EXPERIMENT_URL,
+    TICK_SETTINGS,
 )
 
 evalMLObjectives = ["ExpVariance", "MAE", "MaxError", "Mean Squared Log Error", 
@@ -197,6 +198,7 @@ class RULRegressionSession:
     def prepare_data(self):
         # TODO: get failures 
         failure_res = requests.post(url=GET_FAILURES_URL, json={"sourceName": self.asset_name}, headers={'token': self.token, 'Content-Type': 'application/json'}).json()
+        failure_res = json.loads(failure_res["data"]["data"])
         """ failure_res = [
             {
                 "failureStartTime": '2022-05-30T10:16'
@@ -248,7 +250,18 @@ class RULRegressionSession:
                     # TODO
                     # sensor_info = requests.get(url=GETSENSORFROMMAPPING + field).json()
 
-                    sensor_info = {"defaultValue": "-666", "operator": "*", "operatorValue": "2"}
+                    # sensor_info = {"defaultValue": "-666", "operator": "*", "operatorValue": "2"}
+
+                    sensor_info = {}
+                    if("isFillNullActive" in field and field["isFillNullActive"]):
+                        if("defaultValue" in field):
+                            sensor_info["defaultValue"] = field["defaultValue"]
+                        else:
+                            sensor_info["defaultValue"] = TICK_SETTINGS["LAST"]
+                    if("isOperationActive" in field and field["isOperationActive"]):
+                        if("operation" and "operationValue" in field):
+                            sensor_info["operation"] = field["operation"]
+                            sensor_info["operationValue"] = field["operationValue"]
 
                     # prepare fillnan configurations
                     do_fill_nan = False
@@ -260,8 +273,8 @@ class RULRegressionSession:
                             do_fill_nan, is_numeric, default_value = return_default_value(sensor_info["defaultValue"])
                         else:
                             do_fill_nan, is_numeric, default_value = (False, True, 0)
-                        if("operator" and "operatorValue" in sensor_info):
-                            operator, operator_value = return_operator_info(sensor_info["operator"], sensor_info["operatorValue"])
+                        if("operation" and "operationValue" in sensor_info):
+                            operator, operator_value = return_operator_info(sensor_info["operation"], sensor_info["operationValue"])
                         else:
                             operator, operator_value = (None, None)
                     data = self.get_query_results(field["database"], field["measurement"], field["dataSource"], duration_start_date, duration_end_date)
@@ -346,6 +359,7 @@ class RULRegressionSession:
                 print('DataFrame is empty!')
             
             else:
+                result = result.fillna(method="ffill")
                 # print("-----------------------------")
                 # print(result.shape[0], self.min_data_points, type(self.min_data_points))
                 try:
@@ -425,7 +439,7 @@ class RULRegressionSession:
     
     
     def start_tuning(self, train_df):
-        start_time = datetime.datetime.now().timestamp()
+        start_time = time.time() # datetime.datetime.now().timestamp()
 
         lm = cp.LabelMaker(
             target_dataframe_name="id",
@@ -434,7 +448,7 @@ class RULRegressionSession:
         )
 
         labels = lm.search(
-            train_df.sort_values('cycle'),
+            train_df.sort_values('time'),
             num_examples_per_instance=20,
             minimum_data=5,
             gap=20,
@@ -605,7 +619,7 @@ class RULRegressionSession:
             "experimentJob": "rulreg",
             "trainingDone": True,
             "startTime": start_time,
-            "endTime": datetime.datetime.now().timestamp(),
+            "endTime": time.time(), # datetime.datetime.now().timestamp(),
             "durations": self.calculate_durations(self.duration_start, self.duration_end),
             "allParameters": all_parameters,
             "rankingResults": ranking_results,
@@ -620,6 +634,10 @@ class RULRegressionSession:
         print("-exp_results-", exp_results)
         # TODO: TEST
         requests.post(url=AUTOML_POST_REG_EXPERIMENT_URL, json=json.dumps(exp_results, default=numpy_converter))
+
+        json_file_path = F"{os.getcwd()}/experiment_settings/{self.experiment_name}-{self.session_ID}.json"
+        if(os.path.exists(json_file_path)):
+            os.remove(json_file_path)
     
     def run(self):
         self.prepare_data()

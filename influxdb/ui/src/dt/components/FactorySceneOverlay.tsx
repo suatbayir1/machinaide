@@ -12,12 +12,16 @@ var initializeDomEvents = require('threex-domevents')
 var THREEx = {}
 initializeDomEvents(THREE, THREEx)
 var camera, controls, scene, renderer;
+
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader"
 
-interface Props { }
-interface State {
+interface Props {
+    visible: boolean
+    onClose: () => void
 }
+
+interface State { }
 
 class FactorySceneOverlay extends PureComponent<Props, State> {
     constructor(props) {
@@ -43,7 +47,6 @@ class FactorySceneOverlay extends PureComponent<Props, State> {
         });
     }
 
-
     renderGLTFModel = async () => {
         const loader = new GLTFLoader();
         const dracoLoader = new DRACOLoader();
@@ -52,7 +55,7 @@ class FactorySceneOverlay extends PureComponent<Props, State> {
         loader.setDRACOLoader(dracoLoader);
 
         await loader.load(
-            '../../assets/images/model/ermetal.glb',
+            '../../assets/images/model/factory-glb.glb',
 
             async function (gltf) {
                 gltf.scene.scale.set(0.01, 0.01, 0.01);
@@ -81,17 +84,17 @@ class FactorySceneOverlay extends PureComponent<Props, State> {
         );
 
         camera.position.set(454.94, 105.60, 225.82);
-        camera.quaternion.set(0.83, -0.8, 0.52, -0.05);
-        camera.rotation.set(-0.43, 1.06, 0.39);
+        // camera.quaternion.set(0.83, -0.8, 0.52, -0.05);
+        // camera.rotation.set(-0.43, 1.06, 0.39);
 
         // Renderer
         renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.outputEncoding = THREE.sRGBEncoding;
         renderer.setClearColor(0x000000);
-        renderer.setSize(window.innerWidth * 0.90, window.innerHeight * 0.80);
+        renderer.setSize(document.querySelector("#visualizeGraph").clientWidth - 40 * 0.90, window.innerHeight * 0.80);
 
-        const element = await document.getElementById("sceneArea");
+        const element = await document.getElementById("factoryArea");
         element.appendChild(renderer.domElement);
 
         // Light
@@ -110,34 +113,31 @@ class FactorySceneOverlay extends PureComponent<Props, State> {
         controls.addEventListener("change", () => {
             renderer.render(scene, camera);
         });
-
     }
 
     responsiveConfiguration = () => {
-        renderer.setSize(document.querySelector("#visualizeGraph").clientWidth - 40, 700);
+        renderer.setSize(document.querySelector("#factoryGraph").clientWidth - 40, 700);
         renderer.render(scene, camera);
 
         window.addEventListener('resize', () => {
-            if (document.querySelector("#visualizeGraph") !== null) {
-                renderer.setSize(document.querySelector("#visualizeGraph").clientWidth - 40, 700);
+            if (document.querySelector("#factoryGraph") !== null) {
+                renderer.setSize(document.querySelector("#factoryGraph").clientWidth - 40, 700);
             }
         });
     }
 
-    private closeModal = () => {
-        this.props["history"].goBack()
-    }
-
     public render(): JSX.Element {
+        const { visible, onClose } = this.props;
+
         return (
-            <Overlay visible={true} className="show-only-pc">
-                <Overlay.Container maxWidth={1500}>
+            <Overlay visible={visible} className="show-only-pc">
+                <Overlay.Container maxWidth={1500} id="overlay">
                     <Overlay.Header
-                        title="Factory Scene"
-                        onDismiss={this.closeModal}
+                        title="3D Overlay"
+                        onDismiss={onClose}
                     />
-                    <Overlay.Body id={"visualizeGraph"}>
-                        <div id="sceneArea"></div>
+                    <Overlay.Body id={"factoryGraph"}>
+                        <div id="factoryArea"></div>
                     </Overlay.Body>
 
                 </Overlay.Container>
