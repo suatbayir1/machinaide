@@ -1,7 +1,9 @@
 {
     "headers": {
         "dt": "Digital Twin Monitor Screen",
-        "edit_factory": "Edit Factory"
+        "edit_factory": "Edit Factory",
+        "add_user": "Add User",
+        "user_management_page": "User Management Page"
     },
     "dt": {
         "factory": "Factory",
@@ -64,13 +66,19 @@
         "show_data_in_chart": "Show Data in Chart",
         "update": "Update",
         "delete": "Delete",
-        "yes": "Yes"
+        "yes": "Yes",
+        "add_user": "Add User",
+        "export": "Export"
     },
     "add_new_part": "Add New Part",
     "input": {},
     "select_language": "Select Language",
     "form": {
-        "unique_id_name": "Unique ID/Name"
+        "unique_id_name": "Unique ID/Name",
+        "username": "Username",
+        "role": "Role",
+        "select_rol": "Select Role",
+        "select_status": "Select Status"
     },
     "warning": {
         "factory_already_created": "A factory has already been created. You can create only 1 factory",
@@ -83,5 +91,22 @@
     },
     "tips": {
         "how_to_add_dt_object": "How to add DT object:"
+    },
+    "message": {
+        "user_create_success": "User created successfully",
+        "user_create_fail": "An error occurred while creating user",
+        "user_delete_success": "User deleted successfully",
+        "user_delete_fail": "An error occurred while deleting user",
+        "user_status_change_success": "The user status was changed",
+        "user_status_change_fail": "An error occurred while status changing",
+        "user_role_change_success": "The user role was changed",
+        "user_role_change_fail": "An error occurred while user role changing",
+        "user_add_to_org_success": "User successfully added to the organization",
+        "user_add_to_org_fail": "An error occurred while user adding to the organization",
+        "user_delete_from_org_success": "User successfully deleted from organization",
+        "user_delete_from_org_fail": "An error occurred while user deleting from organization"
+    },
+    "pages": {
+        "users": "Users"
     }
 }

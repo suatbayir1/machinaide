@@ -25,7 +25,7 @@ import OrgProfilePage from 'src/organizations/containers/OrgProfilePage'
 import AlertingIndex from 'src/alerting/components/AlertingIndex'
 import AlertHistoryIndex from 'src/alerting/components/AlertHistoryIndex'
 import CheckHistory from 'src/checks/components/CheckHistory'
-import MembersIndex from 'src/members/containers/MembersIndex'
+// import MembersIndex from 'src/members/containers/MembersIndex'
 import UsersIndex from 'src/users/containers/UsersIndex'
 import RouteToDashboardList from 'src/dashboards/components/RouteToDashboardList'
 import ClientLibrariesPage from 'src/writeData/containers/ClientLibrariesPage'
@@ -328,9 +328,9 @@ const SetOrg: FC<Props> = ({
         <Route exact path={`${orgPath}/settings`} component={VariablesIndex} />
 
         {/* Members */}
-        {!CLOUD && (
+        {/* {!CLOUD && (
           <Route path={`${orgPath}/members`} component={MembersIndex} />
-        )}
+        )} */}
 
         {/* Users */}
         {!CLOUD && (

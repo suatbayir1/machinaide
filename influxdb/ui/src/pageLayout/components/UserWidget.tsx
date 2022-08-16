@@ -100,7 +100,7 @@ const UserWidget: FC<Props> = ({
             )}
           />
         }
-        <TreeNav.UserItem
+        {/* <TreeNav.UserItem
           id="members"
           label="Members"
           testID="user-nav-item-members"
@@ -108,7 +108,7 @@ const UserWidget: FC<Props> = ({
           linkElement={className => (
             <Link className={className} to={`${orgPrefix}/members`} id="user-menu-members-link" />
           )}
-        />
+        /> */}
         {
           ["admin"].includes(localStorage.getItem("userRole")) &&
           <TreeNav.UserItem
