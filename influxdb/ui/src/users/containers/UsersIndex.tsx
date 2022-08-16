@@ -1,12 +1,12 @@
 // Libraries
-import React, { Component, createRef } from 'react'
+import React, { Component } from 'react'
 import { withRouter, RouteComponentProps } from 'react-router-dom'
 import { connect, ConnectedProps } from 'react-redux'
 import { Link } from "react-router-dom"
+import i18next from "i18next"
 
 // Services
 import UserService from 'src/users/services/UserService';
-import MemberService from 'src/members/services/MemberService';
 import OrganizationService from 'src/organizations/services/OrganizationService';
 
 // Helpers
@@ -14,16 +14,18 @@ import { getAll } from 'src/resources/selectors'
 import { dataToCSV, dataToXLSX } from 'src/shared/parsing/dataToCsv';
 import download from 'src/external/download.js';
 
+// Actions
+import { notify as notifyAction } from 'src/shared/actions/notifications'
+
 // Components
 import AddUserOverlay from 'src/users/components/AddUserOverlay';
-import ImportUserFile from 'src/users/components/ImportUserFile';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
 import HomeIcon from '@material-ui/icons/Home';
 import {
     Page, Grid, IconFont, ComponentColor, ComponentSize, Button, ButtonType,
-    Table, DapperScrollbars, BorderType, Popover, Appearance, PopoverPosition,
-    PopoverInteraction, Columns, FlexBox, Notification, Gradients, ConfirmationButton,
+    Table, DapperScrollbars, BorderType, Appearance,
+    Columns, FlexBox, ConfirmationButton,
     Input, MultiSelectDropdown, Dropdown, SlideToggle, SpinnerContainer, TechnoSpinner,
     RemoteDataState, SelectDropdown, Form,
 } from '@influxdata/clockface'
@@ -35,6 +37,13 @@ import { getByID } from 'src/resources/selectors'
 // Types
 import { AppState, Organization, ResourceType } from 'src/types'
 
+// Constants
+import {
+    generalSuccessMessage,
+    generalErrorMessage,
+} from 'src/shared/copy/notifications'
+import { roles } from "src/shared/constants/lists";
+
 type ReduxProps = ConnectedProps<typeof connector>
 type RouterProps = RouteComponentProps<{ orgID: string }>
 type Props = RouterProps & ReduxProps
@@ -42,37 +51,25 @@ type Props = RouterProps & ReduxProps
 interface State {
     userList: object[]
     visibleAddUserOverlay: boolean
-    notificationVisible: boolean
-    notificationType: string
-    notificationMessage: string
     filterUsername: string
     filterRole: string[]
     filterStatus: string[]
     filteredUserList: object[]
-    visibleImportFileOverlay: boolean
-    roleList: string[]
     spinnerLoading: RemoteDataState
     isLoading: boolean
 }
 
 class UsersIndex extends Component<Props, State> {
-    private importButtonRef = createRef<HTMLButtonElement>();
-
     constructor(props) {
         super(props)
 
         this.state = {
             userList: [],
             visibleAddUserOverlay: false,
-            notificationVisible: false,
-            notificationType: '',
-            notificationMessage: '',
             filterUsername: '',
             filterRole: ["member", "editor", "admin"],
             filterStatus: ["active", "inactive"],
             filteredUserList: [],
-            visibleImportFileOverlay: false,
-            roleList: ["member", "editor", "admin"],
             spinnerLoading: RemoteDataState.Loading,
             isLoading: false,
         }
@@ -86,7 +83,7 @@ class UsersIndex extends Component<Props, State> {
         });
     }
 
-    getUsers = async () => {
+    public getUsers = async () => {
         const userList = await UserService.getUsersFromMongo();
 
         this.setState({
@@ -95,8 +92,8 @@ class UsersIndex extends Component<Props, State> {
         })
     }
 
-    deleteUser = async (row) => {
-        const deleteResult = await UserService.deleteUser(row["userID"]);
+    private deleteUser = async (row) => {
+        const { notify } = this.props;
 
         const payload = {
             "userID": row["_id"]["$oid"]
@@ -104,28 +101,16 @@ class UsersIndex extends Component<Props, State> {
 
         const deleteFromMongoResult = await UserService.deleteUserFromMongo(payload);
 
-        if (deleteResult.status === 204 && deleteFromMongoResult.data.summary.code === 200) {
-            this.handleChangeNotification("success", "User deleted successfully");
+        if (deleteFromMongoResult.data.summary.code === 200) {
+            notify(generalSuccessMessage(i18next.t('message.user_delete_success')));
+            this.getUsers();
+        } else {
+            notify(generalErrorMessage(i18next.t('message.user_delete_fail')));
         }
-        this.getUsers();
     }
 
     handleDismissAddUserOverlay = () => {
         this.setState({ visibleAddUserOverlay: false })
-    }
-
-    handleChangeNotification = (notificationType, notificationMessage) => {
-        this.setState({
-            notificationVisible: true,
-            notificationType,
-            notificationMessage,
-        })
-    }
-
-    handleChangeInput = (e): void => {
-        if (Object.keys(this.state).includes(e.target.name)) {
-            this.setState({ [e.target.name]: e.target.value } as Pick<State, keyof State>);
-        }
     }
 
     handleChangeDropdownRole = (option: string) => {
@@ -195,11 +180,6 @@ class UsersIndex extends Component<Props, State> {
         try {
             download(csv, `users-${now}.csv`, 'text/plain')
         } catch (error) {
-            this.setState({
-                notificationVisible: true,
-                notificationType: "error",
-                notificationMessage: error,
-            });
         }
     }
 
@@ -217,37 +197,30 @@ class UsersIndex extends Component<Props, State> {
         try {
             download(xlsx, `users-${now}.xlsx`, 'text/plain')
         } catch (error) {
-            this.setState({
-                notificationVisible: true,
-                notificationType: "error",
-                notificationMessage: error,
-            });
         }
     }
 
-    handleCloseImportDataForm = () => {
-        this.setState({ visibleImportFileOverlay: false });
-    }
+    public changeUserStatus = async (user) => {
+        const { notify } = this.props;
 
-    changeUserStatus = async (user) => {
         const payload = {
             "oid": user["_id"]["$oid"],
             "status": user.status === "active" ? "inactive" : "active"
         }
 
-        await UserService.updateUser(payload, user["userID"]);
-
         const mongoResult = await UserService.updateUserFromMongo(payload);
 
         if (mongoResult.data.summary.code === 200) {
-            this.handleChangeNotification("success", `The ${user["username"]} status was changed`);
+            notify(generalSuccessMessage(i18next.t('message.user_status_change_success')));
             this.getUsers();
         } else {
-            this.handleChangeNotification("error", `An error occurred while status changing`);
+            notify(generalErrorMessage(i18next.t('message.user_status_change_fail')));
         }
     }
 
-    changeUserRole = async (user, e) => {
+    public changeUserRole = async (user, e) => {
+        const { notify } = this.props;
+
         const payload = {
             "oid": user["_id"]["$oid"],
             "role": e
@@ -256,14 +229,16 @@ class UsersIndex extends Component<Props, State> {
         const mongoResult = await UserService.updateUserFromMongo(payload);
 
         if (mongoResult.data.summary.code === 200) {
-            this.handleChangeNotification("success", `The ${user["username"]} role was changed`);
+            notify(generalSuccessMessage(i18next.t('message.user_role_change_success')));
             this.getUsers();
         } else {
-            this.handleChangeNotification("error", `An error occurred while role changing`);
+            notify(generalErrorMessage(i18next.t('message.user_role_change_fail')));
         }
     }
 
-    addUserToOrganization = async (user, org) => {
+    public addUserToOrganization = async (user, org) => {
+        const { notify } = this.props;
+
         const payload = {
             "oid": user["_id"]["$oid"],
             "organizations": user["organizations"] === undefined ? [org] : [...user["organizations"], org]
@@ -272,21 +247,16 @@ class UsersIndex extends Component<Props, State> {
         const mongoResult = await UserService.updateUserFromMongo(payload);
 
         if (mongoResult.data.summary.code === 200) {
-            const memberToOrgPayload = {
-                "id": user["userID"] === undefined ? "" : user["userID"],
-                "name": user["username"]
-            }
-
-            await MemberService.addMemberToOrganization(memberToOrgPayload, org["id"]);
-
-            this.handleChangeNotification("success", "User successfully added to the organization");
+            notify(generalSuccessMessage(i18next.t('message.user_add_to_org_success')));
             this.getUsers();
         } else {
-            this.handleChangeNotification("error", mongoResult.data.summary.text)
+            notify(generalErrorMessage(i18next.t('message.user_add_to_org_fail')));
         }
     }
 
-    deleteUserFromOrganization = async (user, org) => {
+    public deleteUserFromOrganization = async (user, org) => {
+        const { notify } = this.props;
+
         const owners = await OrganizationService.getAllOwnersFromOrganization(org["id"]);
         const isOwner = owners.users.find(u => u.name == user.username);
 
@@ -302,12 +272,10 @@ class UsersIndex extends Component<Props, State> {
         const mongoResult = await UserService.updateUserFromMongo(payload);
 
         if (mongoResult.data.summary.code === 200) {
-            await MemberService.removeMemberFromOrganization(org["id"], user["userID"])
-
-            this.handleChangeNotification("success", "User successfully deleted from organization");
+            notify(generalSuccessMessage(i18next.t('message.user_delete_from_org_success')));
             this.getUsers();
         } else {
-            this.handleChangeNotification("error", mongoResult.data.summary.text)
+            notify(generalErrorMessage(i18next.t('message.user_delete_from_org_fail')));
         }
     }
 
@@ -316,28 +284,6 @@ class UsersIndex extends Component<Props, State> {
 
         return (
             <>
-                <Notification
-                    key={"id"}
-                    id={"id"}
-                    icon={
-                        this.state.notificationType === 'success'
-                            ? IconFont.Checkmark
-                            : IconFont.Alerts
-                    }
-                    duration={5000}
-                    size={ComponentSize.Small}
-                    visible={this.state.notificationVisible}
-                    gradient={
-                        this.state.notificationType === 'success'
-                            ? Gradients.HotelBreakfast
-                            : Gradients.DangerDark
-                    }
-                    onTimeout={() => this.setState({ notificationVisible: false })}
-                    onDismiss={() => this.setState({ notificationVisible: false })}
-                >
-                    <span className="notification--message">{this.state.notificationMessage}</span>
-                </Notification>
-
                 {
                     <SpinnerContainer
                         loading={this.state.spinnerLoading}
@@ -348,9 +294,9 @@ class UsersIndex extends Component<Props, State> {
 
                 {
                     this.state.isLoading &&
-                    <Page titleTag={pageTitleSuffixer(['Members', 'Organization'])} className="users-page-display">
-                        <Page.Header fullWidth={true} testID="member-page--header">
-                            <Page.Title title="User Management Page" />
+                    <Page titleTag={pageTitleSuffixer(['Users', 'Organization'])} className="users-page-display">
+                        <Page.Header fullWidth={true}>
+                            <Page.Title title={i18next.t('headers.user_management_page')} />
                         </Page.Header>
 
                         <Breadcrumbs
@@ -361,7 +307,7 @@ class UsersIndex extends Component<Props, State> {
                             <Link color="inherit" to="/">
                                 <HomeIcon style={{ marginTop: '4px' }} />
                             </Link>
-                            <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Users</Typography>
+                            <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>{i18next.t('pages.users')}</Typography>
                         </Breadcrumbs>
 
                         <Page.Contents fullWidth={false} scrollable={true}>
@@ -373,7 +319,7 @@ class UsersIndex extends Component<Props, State> {
                                         widthMD={Columns.Three}
                                         widthLG={Columns.Two}
                                     >
-                                        <Form.Element label="Filter by username">
+                                        <Form.Element label={i18next.t('form.username')}>
                                             <Input
                                                 icon={IconFont.Search}
                                                 name="filterUsername"
@@ -388,10 +334,10 @@ class UsersIndex extends Component<Props, State> {
                                         widthMD={Columns.Three}
                                         widthLG={Columns.Two}
                                     >
-                                        <Form.Element label="Filter by role">
+                                        <Form.Element label={i18next.t('form.role')}>
                                             <MultiSelectDropdown
-                                                emptyText={"Select role"}
-                                                options={this.state.roleList}
+                                                emptyText={i18next.t('form.select_role')}
+                                                options={roles}
                                                 selectedOptions={this.state.filterRole}
                                                 onSelect={this.handleChangeDropdownRole}
                                             />
@@ -403,9 +349,9 @@ class UsersIndex extends Component<Props, State> {
                                         widthMD={Columns.Three}
                                         widthLG={Columns.Two}
                                     >
-                                        <Form.Element label="Filter by status">
+                                        <Form.Element label={i18next.t('dt.status')}>
                                             <MultiSelectDropdown
-                                                emptyText={"Select status"}
+                                                emptyText={i18next.t('form.select_status')}
                                                 options={["active", "inactive"]}
                                                 selectedOptions={this.state.filterStatus}
                                                 onSelect={this.handleChangeDropdownStatus}
@@ -429,10 +375,10 @@ class UsersIndex extends Component<Props, State> {
                                         >
                                             <Table.Header>
                                                 <Table.Row>
-                                                    <Table.HeaderCell style={{ width: "200px" }}>Username</Table.HeaderCell>
-                                                    <Table.HeaderCell style={{ width: "200px" }}>Production Lines</Table.HeaderCell>
-                                                    <Table.HeaderCell style={{ width: "250px" }}>Role</Table.HeaderCell>
-                                                    <Table.HeaderCell style={{ width: "200px" }}>Active</Table.HeaderCell>
+                                                    <Table.HeaderCell style={{ width: "200px" }}>{i18next.t('form.username')}</Table.HeaderCell>
+                                                    <Table.HeaderCell style={{ width: "200px" }}>{i18next.t('dt.production_lines')}</Table.HeaderCell>
+                                                    <Table.HeaderCell style={{ width: "250px" }}>{i18next.t('form.role')}</Table.HeaderCell>
+                                                    <Table.HeaderCell style={{ width: "200px" }}>{i18next.t('dt.status')}</Table.HeaderCell>
                                                     <Table.HeaderCell style={{ width: "50px" }}></Table.HeaderCell>
                                                 </Table.Row>
                                             </Table.Header>
@@ -461,9 +407,9 @@ class UsersIndex extends Component<Props, State> {
                                                                                         popoverColor={ComponentColor.Danger}
                                                                                         popoverAppearance={Appearance.Outline}
                                                                                         color={ComponentColor.Primary}
-                                                                                        confirmationLabel="Do you want to delete ?"
+                                                                                        confirmationLabel={i18next.t('warning.do_you_want_to_delete')}
                                                                                         confirmationButtonColor={ComponentColor.Danger}
-                                                                                        confirmationButtonText="Yes"
+                                                                                        confirmationButtonText={i18next.t('button.yes')}
                                                                                         style={{ margin: '0px 5px 5px 0px' }}
                                                                                     />
                                                                                 )
@@ -483,7 +429,6 @@ class UsersIndex extends Component<Props, State> {
                                                                                         size={ComponentSize.ExtraSmall}
                                                                                         style={{ width: '40px' }}
                                                                                     >
-                                                                                        {/* {""} */}
                                                                                     </Dropdown.Button>
                                                                                 )}
                                                                                 menu={onCollapse => (
@@ -504,7 +449,6 @@ class UsersIndex extends Component<Props, State> {
                                                                                                 if (!exist) {
                                                                                                     return (
                                                                                                         <Dropdown.Item
-                                                                                                            testID="dropdown-item generate-token--read-write"
                                                                                                             id={item['id']}
                                                                                                             key={item['id']}
                                                                                                             value={item}
@@ -525,7 +469,7 @@ class UsersIndex extends Component<Props, State> {
                                                                 <Table.Cell>
                                                                     <SelectDropdown
                                                                         style={{ width: '200px' }}
-                                                                        options={this.state.roleList}
+                                                                        options={roles}
                                                                         selectedOption={row["role"]}
                                                                         onSelect={(e) => this.changeUserRole(row, e)}
                                                                     />
@@ -544,14 +488,14 @@ class UsersIndex extends Component<Props, State> {
                                                                         <ConfirmationButton
                                                                             icon={IconFont.Remove}
                                                                             onConfirm={() => { this.deleteUser(row) }}
-                                                                            text={"Delete"}
+                                                                            text={i18next.t('button.delete')}
                                                                             size={ComponentSize.ExtraSmall}
                                                                             popoverColor={ComponentColor.Danger}
                                                                             popoverAppearance={Appearance.Outline}
                                                                             color={ComponentColor.Danger}
-                                                                            confirmationLabel="Do you want to delete ?"
+                                                                            confirmationLabel={i18next.t('warning.do_you_want_to_delete')}
                                                                             confirmationButtonColor={ComponentColor.Danger}
-                                                                            confirmationButtonText="Yes"
+                                                                            confirmationButtonText={i18next.t('button.yes')}
                                                                         />
                                                                     </FlexBox>
                                                                 </Table.Cell>
@@ -568,22 +512,20 @@ class UsersIndex extends Component<Props, State> {
                                     <div className="users-table-bottom-buttons-container">
                                         <FlexBox margin={ComponentSize.Small} className="users-table-bottom-buttons">
                                             <Dropdown
-                                                style={{ width: '110px' }}
+                                                style={{ width: '130px' }}
                                                 button={(active, onClick) => (
                                                     <Dropdown.Button
                                                         active={active}
                                                         onClick={onClick}
                                                         color={ComponentColor.Danger}
                                                         icon={IconFont.Export}
-                                                        testID="dropdown-button--gen-token"
                                                     >
-                                                        {'Export'}
+                                                        {i18next.t('button.export')}
                                                     </Dropdown.Button>
                                                 )}
                                                 menu={onCollapse => (
                                                     <Dropdown.Menu onCollapse={onCollapse}>
                                                         <Dropdown.Item
-                                                            testID="dropdown-item generate-token--read-write"
                                                             id={'csv'}
                                                             key={'csv'}
                                                             value={'csv'}
@@ -592,7 +534,6 @@ class UsersIndex extends Component<Props, State> {
                                                             {'csv'}
                                                         </Dropdown.Item>
                                                         <Dropdown.Item
-                                                            testID="dropdown-item generate-token--read-write"
                                                             id={'xlsx'}
                                                             key={'xlsx'}
                                                             value={'xlsx'}
@@ -603,33 +544,12 @@ class UsersIndex extends Component<Props, State> {
                                                     </Dropdown.Menu>
                                                 )}
                                             />
-                                            <Popover
-                                                triggerRef={this.importButtonRef}
-                                                appearance={Appearance.Outline}
-                                                position={PopoverPosition.Below}
-                                                showEvent={PopoverInteraction.Hover}
-                                                hideEvent={PopoverInteraction.Hover}
-                                                distanceFromTrigger={8}
-                                                enableDefaultStyles={false}
-                                                contents={() => (
-                                                    <p>Import in this order: username, password</p>
-                                                )}
-                                            />
                                             <Button
-                                                ref={this.importButtonRef}
-                                                text="Import"
-                                                type={ButtonType.Button}
-                                                icon={IconFont.Import}
-                                                color={ComponentColor.Success}
-                                                onClick={() => this.setState({ visibleImportFileOverlay: true })}
-                                                style={{ width: '110px' }}
-                                            />
-                                            <Button
-                                                text="Add User"
+                                                text={i18next.t('button.add_user')}
                                                 type={ButtonType.Button}
                                                 icon={IconFont.Plus}
                                                 color={ComponentColor.Primary}
-                                                style={{ width: '110px' }}
+                                                style={{ width: '130px' }}
                                                 onClick={() => { this.setState({ visibleAddUserOverlay: true }) }}
                                             />
                                         </FlexBox>
@@ -645,17 +565,7 @@ class UsersIndex extends Component<Props, State> {
                 <AddUserOverlay
                     visibleAddUserOverlay={this.state.visibleAddUserOverlay}
                     handleDismissAddUserOverlay={this.handleDismissAddUserOverlay}
-                    handleChangeNotification={this.handleChangeNotification}
                     getUsers={this.getUsers}
-                />
-
-                <ImportUserFile
-                    overlay={this.state.visibleImportFileOverlay}
-                    onClose={this.handleCloseImportDataForm}
-                    getUsers={this.getUsers}
-                    setNotificationData={this.handleChangeNotification}
-                    fileTypesToAccept=".csv, .xlsx"
-                    orgID={this.props["match"].params["orgID"]}
                 />
             </>
         )
@@ -676,6 +586,10 @@ const mstp = (state: AppState, props: RouterProps) => {
     }
 }
 
-const connector = connect(mstp)
+const mdtp = {
+    notify: notifyAction,
+}
+
+const connector = connect(mstp, mdtp)
 
 export default connector(withRouter(UsersIndex))

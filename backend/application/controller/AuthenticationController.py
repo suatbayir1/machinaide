@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, make_response
 from flask_cors import CORS, cross_origin
 from application.model.AuthenticationModel import AuthenticationModel
+from application.model.UserModel import UserModel
 import json
 from werkzeug.utils import secure_filename
 import os
@@ -19,6 +20,7 @@ from pprint import pprint
 auth = Blueprint("auth", __name__)
 
 model = AuthenticationModel()
+user_model = UserModel()
 logger = MongoLogger()
 
 @auth.route("/loginWithInflux", methods = ["POST"])
@@ -55,30 +57,28 @@ def loginWithLDAP():
         con.protocol_version = ldap.VERSION3
         con.set_option(ldap.OPT_REFERRALS, 0)
 
-        print("con", con)
-
         result = con.search_s(config.LDAP["DC"], ldap.SCOPE_SUBTREE, f"(uid={username})")   
-
-        print("result", result)
 
         if not result:
             raise Exception("User not found")
 
-        userInfo = {}
+        for dn, entry in result:
+            userInfo = {
+                "givenName": entry["givenName"][0].decode('utf-8'),
+                "cn": entry["cn"][0].decode('utf-8'),
+                "sn": entry["sn"][0].decode('utf-8'),
+                "uid": username
+            }
 
-        for item in result:
-            dn = item[0]
+        # Get user role from mongodb
+        user = user_model.get_user_by_username(username)
+        role = user["role"]
 
-            for att in item[0].split(","):
-                splitted_att = att.split("=")
-                if splitted_att[0] == "ou":
-                    role = splitted_att[1]
+        if user["status"] == "inactive":
+            message = "This user banned"
+            logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
+            return return_response(data = [], success = False, message = message, code = 400), 400
 
-            for att in item[1]:
-                if att != 'userPassword':
-                    userInfo[att] = item[1][att][0].decode('utf-8')
-
-        print("db", dn)
         con.simple_bind_s(dn, password)
 
         token = jwt.encode({
@@ -104,6 +104,77 @@ def loginWithLDAP():
         return return_response(data = [], success = False, message = message, code = 400), 400
     except ldap.SERVER_DOWN:
         message = "LDAP Server is not running"
+        logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
+        return return_response(data = [], success = False, message = message, code = 400), 400
+    except Exception as error:
+        message = error.args[0]
+        logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
+        return return_response(data = [], success = False, message = message, code = 400), 400
+
+@auth.route("/loginWithLDAPErmetal", methods = ["POST"])
+def loginWithLDAPErmetal():
+    if not request.json:
+        message = "username_password_cannot_be_empty"
+        logger.add_log("ERROR", request.remote_addr, '', request.method, request.url, "", message,  400)
+        return return_response(data = [], success = False, message = message, code = 400), 400
+
+    if not request.json["username"] or not request.json["password"]:
+        message = "username_password_cannot_be_empty"
+        logger.add_log("ERROR", request.remote_addr, '', request.method, request.url, request.json, message,  400)
+        return return_response(data = [], success = False, message = message, code = 400), 400
+
+    username = request.json["username"]
+    password = request.json["password"]
+
+    try:
+        con = ldap.initialize(config.LDAP["ERMETAL_URL"], bytes_mode=False)
+        con.protocol_version = ldap.VERSION3
+        con.set_option(ldap.OPT_REFERRALS, 0)
+        con.simple_bind_s(username, password)
+
+        res = con.search_s(config.LDAP["ERMETAL_DC"], ldap.SCOPE_SUBTREE, f"(userPrincipalName={username})")
+        for dn, entry in res:
+            userInfo = {
+                "givenName": entry["givenName"][0].decode('utf-8'),
+                "cn": entry["cn"][0].decode('utf-8'),
+                "sn": entry["sn"][0].decode('utf-8'),
+                "uid": username
+            }
+
+        # Get user role from mongodb
+        user = user_model.get_user_by_username(username)
+        role = user["role"]
+
+        if user["status"] == "inactive":
+            message = "This user banned"
+            logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
+            return return_response(data = [], success = False, message = message, code = 400), 400
+
+        token = jwt.encode({
+            "username": username,
+            "role": role,
+            "expiry_time": time.mktime((datetime.datetime.now() + datetime.timedelta(days=7)).timetuple())
+        }, config.authentication["SECRET_KEY"])
+
+        response = {
+            'token': token.decode("UTF-8"), 
+            'role': role,
+            'userInfo': userInfo,
+        }
+
+        message = "user_login_successfully"
+        logger.add_log("INFO", request.remote_addr, username, request.method, request.url, request.json, message,  200)
+        return return_response(data = [response], success = True, message = message, code = 200), 200
+
+    except ldap.INVALID_CREDENTIALS:
+        con.unbind()
+        message = "password_is_wrong"
+        logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
+        return return_response(data = [], success = False, message = message, code = 400), 400
+    except ldap.SERVER_DOWN as e:
+        print(e)
+        message = "LDAP Server is not running"
+        print(message)
         logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
         return return_response(data = [], success = False, message = message, code = 400), 400
     except Exception as error:
@@ -154,30 +225,25 @@ def login():
 @auth.route("/signup", methods = ["POST"])
 @token_required(roles = ["admin"])
 def signup(token):
-    if not request.json["username"] or not request.json["password"] or not request.json["role"]:
-        message = "Username, password and role cannot be empty"
+    print("signup")
+    if not request.json["username"] or not request.json["role"]:
+        message = "Username, and role cannot be empty"
         logger.add_log("ERROR", request.remote_addr, '', request.method, request.url, request.json, message,  400)
         return return_response(data=[], success=False, message = message), 400
 
     request_data = {
         "username": request.json["username"],
-        "password": request.json["password"],
-        "role": request.json["role"]
+        "role": request.json["role"],
+        "status": "active"
     }
-
-    optinal_keys = ["userID", "status", "organizations"]
-
-    for key in optinal_keys:
-        if key in request.json:
-            request_data[key] = request.json[key]
 
     result = model.add_user(request_data)
 
     if result:
-        message = "new_user_created_successfully"
+        message = "New user created successfully"
         logger.add_log("INFO", request.remote_addr, '', request.method, request.url, request.json, message,  200)
         return return_response(data = [], success = True, message = message, code = 200), 200
 
-    message = "username_already_exists"
+    message = "Username already exists"
     logger.add_log("DUPLICATED", request.remote_addr, '', request.method, request.url, request.json, message,  409)
     return return_response(data = [], success = False, message = message, code = 409), 409

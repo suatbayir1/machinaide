@@ -1,7 +1,9 @@
 {
     "headers": {
         "dt": "Dijital İkiz İzleme Ekranı",
-        "edit_factory": "Fabrika Düzenle"
+        "edit_factory": "Fabrika Düzenle",
+        "add_user": "Kullanıcı Ekle",
+        "user_management_page": "Kullanıcı Yönetim Sayfası"
     },
     "dt": {
         "factory": "Fabrika",
@@ -56,7 +58,9 @@
         "show_data_in_chart": "Verileri Grafikte Göster",
         "update": "Güncelle",
         "delete": "Sil",
-        "yes": "Evet"
+        "yes": "Evet",
+        "add_user": "Kullanıcı Ekle",
+        "export": "Dışarı Aktar"
     },
     "layout_button": {
         "top_to_down": "Yukarıdan aşağıya",
@@ -70,7 +74,11 @@
     "input": {},
     "select_language": "Dil Seç",
     "form": {
-        "unique_id_name": "Tekil ID/İsim"
+        "unique_id_name": "Tekil ID/İsim",
+        "username": "Kullanıcı Adı",
+        "role": "Rol",
+        "select_rol": "Rol Seç",
+        "select_status": "Durum Seç"
     },
     "warning": {
         "factory_already_created": "Zaten bir fabrika kuruldu. Sadece 1 fabrika oluşturabilirsiniz",
@@ -83,5 +91,22 @@
     },
     "tips": {
         "how_to_add_dt_object": "DT nesnesi nasıl eklenir:"
+    },
+    "message": {
+        "user_create_success": "Kullanıcı başarıyla oluşturuldu",
+        "user_create_fail": "Kullanıcı oluşturulurken bir hata oluştu",
+        "user_delete_success": "Kullanıcı başarıyla silindi",
+        "user_delete_fail": "Kullanıcı silinirken bir hata oluştu",
+        "user_status_change_success": "Kullanıcı durumu değiştirildi",
+        "user_status_change_fail": "Kullanıcı durumu değiştirilirken hata oluştu",
+        "user_role_change_success": "Kullanıcı rolü değiştirildi",
+        "user_role_change_fail": "Kullanıcı rolü değiştirilirken bir hata oluştu",
+        "user_add_to_org_success": "Kullanıcı organizasyona başarıyla eklendi",
+        "user_add_to_org_fail": "Kullanıcı organizasyona eklenirken bir hata oluştu",
+        "user_delete_from_org_success": "Kullanıcı organizasyondan başarıyla silindi",
+        "user_delete_from_org_fail": "Kullanıcı organizasyondan silinirken bir hata oluştu"
+    },
+    "pages": {
+        "users": "Kullanıcılar"
     }
 }

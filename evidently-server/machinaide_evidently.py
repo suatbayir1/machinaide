@@ -4,7 +4,7 @@ from datetime import datetime
 from evidently.model_profile import Profile
 from sklearn import datasets, ensemble, model_selection
 from evidently.pipeline.column_mapping import ColumnMapping
-from evidently.model_profile.sections import ClassificationPerformanceProfileSection
+from evidently.model_profile.sections import ClassificationPerformanceProfileSection, CatTargetDriftProfileSection
 
 from evidently.dashboard import Dashboard
 from evidently.dashboard.tabs import ClassificationPerformanceTab
@@ -60,14 +60,14 @@ ermetal_column_mapping.numerical_features = numerical_features
 ermetal_model_performance_dashboard = Dashboard(tabs=[ClassificationPerformanceTab(verbose_level=1)])
 ermetal_model_performance_dashboard.calculate(df, None, column_mapping=ermetal_column_mapping)
 
-ermetal_model_performance_dashboard.save('./ermetal_model_performance.html')
+ermetal_model_performance_dashboard.save('./ermetal_model_performance_2.html')
 
-ermetal_classification_performance_profile = Profile(sections=[ClassificationPerformanceProfileSection()])
+ermetal_classification_performance_profile = Profile(sections=[ClassificationPerformanceProfileSection(), CatTargetDriftProfileSection()])
 ermetal_classification_performance_profile.calculate(df, None, column_mapping=ermetal_column_mapping)
 
 result = ermetal_classification_performance_profile.json() 
 
-with open("ermetal_results.json", "w") as outfile:
+with open("ermetal_results_2.json", "w") as outfile:
     outfile.write(result)
 
 

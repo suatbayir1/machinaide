@@ -13,7 +13,6 @@ class AuthenticationModel():
         is_user_exists = self.is_user_exists(payload["username"])
 
         if not is_user_exists:
-            payload["password"] = generate_password_hash(payload["password"])
             self.db.insert_one(self.collection, payload)
             return True
         return False

@@ -27,6 +27,18 @@ class UserModel():
         except:
             return False
 
+    def get_user_by_username(self, username):
+        try:
+            collection = "user"
+
+            where = {
+                "username": username
+            }
+
+            return self.db.find_one(collection, where)
+        except:
+            return False
+
     def is_user_already_exist(self, payload):
         return cursor_to_json(self.db.find(self.collection, payload))
 
