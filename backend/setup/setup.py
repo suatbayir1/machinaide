@@ -151,9 +151,18 @@ class Setup:
         for factory in self.dt:
             self.db.digital_twin.insert_one(factory)
     
+    def add_root(self):
+        root = {
+            "username": "machinaide.ldp@ermetal.local",
+            "role": "admin",
+            "status": "active"
+        }
 
+        print(root)
+        self.db.user.insert_one(root)
 
 if __name__ == '__main__':
     setup = Setup()
-    setup.iterate_sheets()
-    setup.insert_dt()
+    # setup.iterate_sheets()
+    # setup.insert_dt()
+    setup.add_root()

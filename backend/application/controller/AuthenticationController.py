@@ -76,6 +76,12 @@ def loginWithLDAP():
 
         # Get user role from mongodb
         user = user_model.get_user_by_username(username)
+        
+        if user == None:
+            message = "This user not registered to system"
+            logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
+            return return_response(data = [], success = False, message = message, code = 400), 400
+            
         role = user["role"]
 
         if user["status"] == "inactive":
