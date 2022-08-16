@@ -2,7 +2,7 @@ import os
 
 # from mlserver.flask_app_ml.mlconstants import VAE_HPS_DIR
 
-PROJECT_URL = "/home/machinaide/project/machinaide"
+PROJECT_URL = "/home/machinaide"
 
 mongo = dict(
     MONGO_URI = "mongodb://machinaide:erste2020@localhost:27017/",
@@ -23,15 +23,15 @@ INFLUXDB_CLIENT = dict(
 )
 
 LDAP = dict(
-    # URL = "ldap://161.97.67.73:10389",
-    # DC = "dc=example,dc=com",
-    ERMETAL_URL = "ldap://10.16.0.10:389",
-    ERMETAL_DC = "OU=BT,OU=BIM,OU=Ermetal,DC=ermetal,DC=local"
+    URL = "ldap://161.97.67.73:10389",
+    DC = "dc=example,dc=com",
+    # ERMETAL_URL = "ldap://10.16.0.10:389",
+    # ERMETAL_DC = "OU=BT,OU=BIM,OU=Ermetal,DC=ermetal,DC=local"
 )
 
 url = dict(
-    BACKEND = "https://127.0.0.1:9632/api/",
-    CHRONOGRAPH = "https://localhost:8080/",
+    BACKEND = "http://127.0.0.1:9632/api/",
+    CHRONOGRAPH = "http://localhost:8080/",
 )
 
 

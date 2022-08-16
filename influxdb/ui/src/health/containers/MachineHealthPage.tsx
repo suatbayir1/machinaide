@@ -581,13 +581,8 @@ class MachineHealthPage extends PureComponent<Props, State>{
         let query = `from(bucket: "${FACTORY_NAME}")
         |> range(start: ${start}, stop: ${stop})
         |> filter(fn: ${measurementString})
-<<<<<<< HEAD
-        |> aggregateWindow(every: ${this.state.aggregatePeriod}, fn: mean, createEmpty: false)
-        |> yield(name: "mean")`
-=======
         |> aggregateWindow(every: ${this.state.aggregatePeriod}, fn: last, createEmpty: false)
         |> yield(name: "last")`
->>>>>>> 0adc3dfce73125da828187469c225f7e79cbcfe1
 
         let results = this.processResponse(runQuery(this.props.match.params.orgID, query), start, stop)
     }

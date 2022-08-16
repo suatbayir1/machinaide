@@ -54,7 +54,7 @@ def loginWithLDAP():
     password = request.json["password"]
 
     try:
-        con = ldap.initialize(config.LDAP["ERMETAL_URL"], bytes_mode=False)
+        con = ldap.initialize(config.LDAP["URL"], bytes_mode=False)
         print("con", con)
         con.protocol_version = ldap.VERSION3
         print("protocol")

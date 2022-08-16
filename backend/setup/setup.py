@@ -161,8 +161,25 @@ class Setup:
         print(root)
         self.db.user.insert_one(root)
 
+    def add_sections(self):
+        sections = [
+            {
+                "factoryID" : "Ermetal",
+                "name" : "Section 1",
+                "icon" : "ermetal_logo.png"
+            },
+            {
+                "factoryID" : "Ermetal",
+                "name" : "Section 2",
+                "icon" : "erkalip_logo.jpg"
+            }
+        ]
+
+        self.db.sections.insert_many(sections)
+
 if __name__ == '__main__':
     setup = Setup()
     # setup.iterate_sheets()
     # setup.insert_dt()
-    setup.add_root()
+    # setup.add_root()
+    setup.add_sections()
