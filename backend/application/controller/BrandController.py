@@ -11,7 +11,7 @@ model = BrandModel()
 logger = MongoLogger()
 
 @brand.route("/add", methods = ["POST"])
-@token_required(roles = ["admin", "editor"])
+@token_required(roles = ["admin", "editor", "member"])
 def add(token):
     try:
         missed_keys, confirm = request_validation(request.json, ["brandName", "modelName", "price", "country", "type"])

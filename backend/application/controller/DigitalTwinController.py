@@ -496,7 +496,7 @@ def retire(token):
         logger.add_log(log_type, request.remote_addr, token["username"], request.method, request.url, "", message,  status_code)
 
 @dt.route("/getRetired", methods = ["POST"])
-@token_required(roles = ["admin", "editor"])
+@token_required(roles = ["admin", "editor", "member"])
 def get_retired(token):
     try:
         missed_keys, confirm = request_validation(request.json, ["name"])
@@ -1247,7 +1247,7 @@ def saveMachineOrders(token):
         logger.add_log(log_type, request.remote_addr, token["username"], request.method, request.url, "", message,  status_code)
 
 @dt.route("/getMachineOrders", methods = ["POST"])
-@token_required(roles = ["admin", "editor"])
+@token_required(roles = ["admin", "editor", "member"])
 def getMachineOrders(token):
     try:
         missed_keys, confirm = request_validation(request.json, ["plID"])

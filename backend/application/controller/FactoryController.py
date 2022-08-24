@@ -138,7 +138,7 @@ def delete_machine_action(token):
         return return_response(success = True, message = message, code = 200), 200
 
 @factory.route("/isMachineActionExists", methods = ["POST"])
-@token_required(roles = ["admin", "editor"])
+@token_required(roles = ["admin", "editor", "member"])
 def is_machine_action_exists(token):
     if not request.data:
         message = "Request data cannot be empty"
@@ -226,7 +226,7 @@ def update_material(token):
         return return_response(success = True, message = message, code = 200), 200
 
 @factory.route("/isMaterialExists", methods = ["POST"])
-@token_required(roles = ["admin", "editor"])
+@token_required(roles = ["admin", "editor", "member"])
 def is_material_exists(token):
     if not request.data:
         message = "Request data cannot be empty"
@@ -245,7 +245,7 @@ def is_material_exists(token):
         return return_response(success = True, message = message, code = 409)
 
 @factory.route("/createDashboard", methods = ["POST"])
-@token_required(roles = ["admin", "editor"])
+@token_required(roles = ["admin", "editor", "member"])
 def create_dashboard(token):
     try:
         if not request.data:
@@ -268,7 +268,7 @@ def create_dashboard(token):
 
 
 @factory.route("/deleteDashboard", methods = ["POST", "DELETE"])
-@token_required(roles = ["admin", "editor"])
+@token_required(roles = ["admin", "editor", "member"])
 def delete_dashboard(token):
     if not request.data:
         message = "Request data cannot be empty"
@@ -295,7 +295,7 @@ def get_dashboards(token):
     return return_response(data = data, success = True, message = message), 200
 
 @factory.route("/isDashboardExists", methods = ["POST"])
-@token_required(roles = ["admin", "editor"])
+@token_required(roles = ["admin", "editor", "member"])
 def is_dashboard_exists(token):
     if not request.data:
         message = "Request data cannot be empty"
@@ -315,7 +315,7 @@ def is_dashboard_exists(token):
 
 
 @factory.route("/getMetadataByProcessId", methods = ["POST"])
-@token_required(roles = ["admin", "editor"])
+@token_required(roles = ["admin", "editor", "member"])
 def getMetadataByProcessId(token):
     try:
         message, confirm = validator.check_request_params(
@@ -369,7 +369,7 @@ def getMetadataByProcessId(token):
         logger.add_log(log_type, request.remote_addr, token["username"], request.method, request.url, "", message,  status_code)
 
 @factory.route("/getSectionsByFactory", methods = ["POST"])
-@token_required(roles = ["admin", "editor"])
+@token_required(roles = ["admin", "editor", "member"])
 def getSectionsByFactory(token):
     try:
         print("1")

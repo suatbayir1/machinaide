@@ -1,6 +1,6 @@
 from mlhelpers.mlwrappers import KafkaHelper
 
-helper = KafkaHelper((10,0), ["vmi515134.contaboserver.net:9092"])
+helper = KafkaHelper((10,0), ["vmi474601.contaboserver.net:9092"])
 
 measurement_sensor_dict = {
     "msr1": ["snsr1", "snsr2"],

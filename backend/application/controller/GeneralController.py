@@ -73,7 +73,7 @@ def delete_report(token):
         return return_response(success = True, message = message, code = 200), 200
 
 @general.route("/updateReport", methods = ["POST", "PUT"])
-@token_required(roles = ["admin", "editor"])
+@token_required(roles = ["admin", "editor", "member"])
 def update_report(token):
     result = model.update_report(request.json)
 

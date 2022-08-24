@@ -63,7 +63,7 @@ ermetal_model_performance_dashboard.calculate(df, None, column_mapping=ermetal_c
 ermetal_model_performance_dashboard.save('./ermetal_model_performance_2.html')
 
 ermetal_classification_performance_profile = Profile(sections=[ClassificationPerformanceProfileSection(), CatTargetDriftProfileSection()])
-ermetal_classification_performance_profile.calculate(df, None, column_mapping=ermetal_column_mapping)
+ermetal_classification_performance_profile.calculate(df, df, column_mapping=ermetal_column_mapping)
 
 result = ermetal_classification_performance_profile.json() 
 

@@ -336,6 +336,64 @@ class HealthAssessmentService {
             console.error(err);
         }
     }
+    
+    getEvidentlyReport = async (modelID) => {
+        const url = `${BACKEND.API_URL}health/getEvidentlyReport/${modelID}`;
+
+        const request = fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
+            }
+        })
+
+        try {
+            const response = await request;
+            const res = await response.json();
+
+            if (res.data.success !== true) return;
+            const result = JSON.parse(res.data.data)
+            return result;
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    getMLModel = async (settings) => {
+        const url = `${BACKEND.API_URL}ml/getMLModel`;
+        console.log(settings)
+        const request = fetch(url, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
+            },
+            body: JSON.stringify(settings),
+        })
+
+        try {
+            const response = await request;
+            console.log(response)
+            const res = await response.json();
+            console.log("-", res)
+            if (response.status !== 200) {
+                throw new Error(res.data.message.text);
+            }
+            return res;
+        } catch (err) {
+            alert(err);
+            console.error(err);
+        }
+    }
 
 }
 

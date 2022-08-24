@@ -11,7 +11,7 @@ org = "machinaide"
 bucket = "Ermetal"
 
 # http://localhost:8080
-client = InfluxDBClient(url="https://vmi515134.contaboserver.net:8080", token=token)
+client = InfluxDBClient(url="https://vmi474601.contaboserver.net:8080", token=token)
 
 write_api = client.write_api(write_options=SYNCHRONOUS)
 

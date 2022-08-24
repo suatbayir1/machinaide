@@ -17,7 +17,7 @@ authentication = dict(
 )
 
 INFLUXDB_CLIENT = dict(
-    URL = "httpss://vmi515134.contaboserver.net:8080",
+    URL = "https://vmi474601.contaboserver.net:8080",
     TOKEN = "-Y8yuCS19k6ZD0FLiVvpY-zcEK4VhbBe6HC7WPKR7Z5X2bkm-Ag2iMJUSDSBOugpG6klF2XEddhCMkHRuJPbsQ==",
     ORG = "machinaide"
 )
@@ -185,7 +185,7 @@ experiments_path_2 = os.getcwd() + "/mlhelpers/experiments/"
 
 #### NLP
 influx = dict(
-    host = 'httpss://vmi515134.contaboserver.net:8086',
+    host = 'https://vmi474601.contaboserver.net:8086',
     orgID = 'd572bde16b31757c',
     dbtoken = "FlviKxQ-RHHWxd1FRkHIc5VwNZuFnP6QTmsJcU6GI7nrd4cuqaTx3cCijZchENMH0zSGuKOew_e4LxW6V09Erw=="
 )

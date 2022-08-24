@@ -38,6 +38,9 @@ class MLModel():
     def get_ml_models(self, filter={}):
         return self.db.find("basic_models", filter)
     
+    def get_ml_model(self, filter={}):
+        return self.db.find_one("basic_models", filter)
+    
     def delete_ml_model(self, where):
         try:
             return self.db.delete_one("basic_models", where)

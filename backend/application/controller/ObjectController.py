@@ -15,7 +15,7 @@ logger = MongoLogger()
 validator = Validator()
 
 @obj.route("/getObjectPool", methods = ["GET"])
-@token_required(roles = ["admin"])
+@token_required(roles = ["admin", "editor", "member"])
 def get_object_pool(token):
     data = model.get_object_pool()
     message = "Get_Object_Pool_Successfully"
@@ -23,7 +23,7 @@ def get_object_pool(token):
     return return_response(data = data, success = True, message = message), 200
 
 @obj.route("/saveComponentObject", methods = ["PUT"])
-@token_required(roles = ["admin"])
+@token_required(roles = ["admin", "editor", "member"])
 def save_component_object(token):
     try:
         message, confirm = validator.check_request_params(
@@ -52,7 +52,7 @@ def save_component_object(token):
 
 
 @obj.route("/saveAsComponentObject", methods = ["POST"])
-@token_required(roles = ["admin"])
+@token_required(roles = ["admin", "editor", "member"])
 def save_as_component_object(token):
     try:
         message, confirm = validator.check_request_params(
@@ -86,7 +86,7 @@ def save_as_component_object(token):
         logger.add_log(log_type, request.remote_addr, token["username"], request.method, request.url, "", message,  status_code)
 
 @obj.route("/removeObject", methods = ["POST", "DELETE"])
-@token_required(roles = ["admin"])
+@token_required(roles = ["admin", "editor", "member"])
 def remove_object(token):
     result = model.remove_object(request.json)
     if result:
@@ -100,7 +100,7 @@ def remove_object(token):
 
 
 @obj.route("/deleteComponentModel", methods = ["DELETE"])
-@token_required(roles = ["admin", "editor"])
+@token_required(roles = ["admin", "editor", "member"])
 def deleteComponentModel(token):
     try:
         print("test")

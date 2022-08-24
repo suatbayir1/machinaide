@@ -54,7 +54,7 @@ def test_failures(source_name):
     return dumps({"sourceName": source_name})
 
 @failure.route("/addFailure", methods = ["POST"])
-@token_required(roles = ["admin", "editor"])
+@token_required(roles = ["admin", "editor", "member"])
 def add_failure(token):
     result = model.add_failure(request.json)
     message = "added_failure"
@@ -62,7 +62,7 @@ def add_failure(token):
     return return_response(success = True, message = message), 200
 
 @failure.route("/isFailureExist", methods = ["POST"])
-@token_required(roles = ["admin", "editor"])
+@token_required(roles = ["admin", "editor", "member"])
 def is_failure_exist(token):
     result = model.is_failure_exist(request.json)
     if not result:
@@ -75,7 +75,7 @@ def is_failure_exist(token):
         return return_response(success = True, message = "failure_already_exists"), 409
 
 @failure.route("/updateFailure", methods = ["POST", "PUT"])
-@token_required(roles = ["admin", "editor"])
+@token_required(roles = ["admin", "editor", "member"])
 def update_failure(token):
     result = model.update_failure(request.json)
 
@@ -89,7 +89,7 @@ def update_failure(token):
         return return_response(success = True, message = message), 200
 
 @failure.route("/removeFailure", methods = ["POST", "DELETE"])
-@token_required(roles = ["admin", "editor"])
+@token_required(roles = ["admin", "editor", "member"])
 def remove_failure(token):
     result = model.remove_failure(request.json)
 

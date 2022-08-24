@@ -23,3 +23,6 @@ class HealthAssessmentModel():
     
     def update_anomaly_feedback(self, payload, where, array_filters):
         return self.db.update_one_feedback(self.collection, payload, where, array_filters)
+
+    def get_evidently_report(self, where):
+        return self.db.find_one("evidently_reports", where)

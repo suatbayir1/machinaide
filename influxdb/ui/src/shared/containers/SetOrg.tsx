@@ -88,6 +88,8 @@ import RULMonitorPage from 'src/example/rulMonitor/RULMonitorPage'
 
 // Health Assessment
 import MachineHealthPage from 'src/health/containers/MachineHealthPage'
+import EvidentlyReportPage from 'src/health/components/EvidentlyReportPage'
+import RegEvidentlyReportPage from 'src/health/components/RegEvidentlyReportPage'
 
 // Types
 import { AppState, Organization, ResourceType } from 'src/types'
@@ -231,6 +233,8 @@ const SetOrg: FC<Props> = ({
         <Route path={`${orgPath}/rul-monitor`} component={RULMonitorPage} />
 
         {/* HEALTH ASSESSMENT */}
+        <Route path={`${orgPath}/health/report/:MID`} component={EvidentlyReportPage} /> {/* MID == model id */}
+        <Route path={`${orgPath}/health/reg-report/:MID`} component={RegEvidentlyReportPage} />
         <Route path={`${orgPath}/health/:FID/:PLID/:MID/:CID`} component={MachineHealthPage} />
         <Route path={`${orgPath}/health/:FID/:PLID/:MID`} component={MachineHealthPage} />
 

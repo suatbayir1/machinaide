@@ -28,6 +28,8 @@ def query(token):
             return return_response(success = False, message = message, code = 400), 400
             
         query = InfluxManager.create_flux_query(request.json)
+        print("query", query)
+
 
         data = influxManager.get_data_from_influxdb(query)
 

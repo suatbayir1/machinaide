@@ -36,7 +36,10 @@ class InfluxManager:
         return query
 
     def get_data_from_influxdb(self, query):
+        print("data from influxdb")
         values = self.client.query_api().query(org = self.org, query = query)
+
+        print("values", values)
 
         data = []
         for table in values:

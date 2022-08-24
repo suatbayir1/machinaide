@@ -93,13 +93,13 @@ def loginWithLDAP():
 
         token = jwt.encode({
             "username": username,
-            "role": "admin",
+            "role": role,
             "expiry_time": time.mktime((datetime.datetime.now() + datetime.timedelta(days=7)).timetuple())
         }, config.authentication["SECRET_KEY"])
 
         response = {
             'token': token.decode("UTF-8"), 
-            'role': "admin",
+            'role': role,
             'userInfo': userInfo,
         }
 

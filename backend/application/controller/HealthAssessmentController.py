@@ -77,3 +77,8 @@ def change_feedback(machine_id, model_id):
     where = {"machineID": machine_id}
     model.update_anomaly_feedback(payload, where, array_filters)
     return return_response(success = True), 200
+
+@health_assessment.route("/getEvidentlyReport/<model_id>", methods = ["GET"])
+def get_evidently_report(model_id):
+    result = model.get_evidently_report({"modelID": model_id})
+    return return_response(data = result, success = True), 200

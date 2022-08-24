@@ -820,6 +820,17 @@ def getModelLastLog(model_id):
     if(model_logs.count() == 0):
         return dumps(None), 200
     return dumps(model_logs[0]["logs"][-1]), 200
+
+@mlserver.route('/getMLModel', methods=['POST'])
+def getMLModel():
+    settings = request.json
+    model_id = settings["modelID"]
+    task = settings["task"]
+    if(task == "rulreg"):
+        model = mongo_model.get_ml_model({"pipelineID": model_id})
+        return json.dumps(model, cls=JSONEncoder)
+    model = mongo_model.get_ml_model({"modelID": model_id})
+    return json.dumps(model, cls=JSONEncoder)
 # @mlserver.route('/experiments', methods=['GET'])
 # def get_experiments():
 #     exps = mongo_model.get_experiments()
