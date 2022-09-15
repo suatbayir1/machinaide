@@ -1,8 +1,8 @@
 // Libraries
-import {produce} from 'immer'
+import { produce } from 'immer'
 
 // Types
-import {ActionTypes, Actions} from 'src/overlays/actions/overlays'
+import { ActionTypes, Actions } from 'src/overlays/actions/overlays'
 
 export type OverlayID =
   | 'add-note'
@@ -30,7 +30,7 @@ const nullParams = {}
 const defaultState: OverlayState = {
   id: null,
   params: nullParams,
-  onClose: () => {},
+  onClose: () => { },
 }
 
 export const overlaysReducer = (
@@ -40,7 +40,8 @@ export const overlaysReducer = (
   produce(state, draftState => {
     switch (action.type) {
       case ActionTypes.ShowOverlay: {
-        const {overlayID, overlayParams, onClose} = action.payload
+        console.log(action.payload);
+        const { overlayID, overlayParams, onClose } = action.payload
         draftState.id = overlayID
         draftState.params = overlayParams
         draftState.onClose = onClose
@@ -49,7 +50,7 @@ export const overlaysReducer = (
       case ActionTypes.DismissOverlay: {
         draftState.id = null
         draftState.params = nullParams
-        draftState.onClose = () => {}
+        draftState.onClose = () => { }
         return
       }
     }

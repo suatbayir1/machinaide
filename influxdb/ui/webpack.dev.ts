@@ -9,7 +9,7 @@ const {
 } = require('./src/utils/env')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const webpack = require('webpack')
-// const fs = require('fs');
+const fs = require('fs');
 
 
 module.exports = merge(common, {
@@ -29,9 +29,9 @@ module.exports = merge(common, {
     },
     compress: true,
     proxy: {
-      '/api/v2': 'http://localhost:8086',
-      '/debug/flush': 'http://localhost:8086',
-      '/oauth': 'http://localhost:8086',
+      '/api/v2': 'https://localhost:8086',
+      '/debug/flush': 'https://localhost:8086',
+      '/oauth': 'https://localhost:8086',
     },
     disableHostCheck: true,
     host: '0.0.0.0',
@@ -39,11 +39,11 @@ module.exports = merge(common, {
     public: PUBLIC,
     publicPath: PUBLIC,
     sockPath: `${BASE_PATH}hmr`,
-    // https: {
-    //   key: fs.readFileSync('/etc/letsencrypt/live/vmi474601.contaboserver.net/privkey.pem'),
-    //   cert: fs.readFileSync('/etc/letsencrypt/live/vmi474601.contaboserver.net/fullchain.pem'),
-    //   // ca: fs.readFileSync('/path/to/ca.pem'),
-    // }
+    https: {
+      key: fs.readFileSync('/etc/letsencrypt/live/vmi474601.contaboserver.net/privkey.pem'),
+      cert: fs.readFileSync('/etc/letsencrypt/live/vmi474601.contaboserver.net/fullchain.pem'),
+      // ca: fs.readFileSync('/path/to/ca.pem'),
+    }
   },
   plugins: [
     new webpack.DllReferencePlugin({

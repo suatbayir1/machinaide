@@ -123,7 +123,7 @@ class UploadModelFile extends PureComponent<IProps, State> {
                                             name="file"
                                             type="file"
                                             id="inputFile"
-                                            accept=".dae"
+                                            accept=".dae, .glb"
                                         />
                                     </Form.Element>
                                 </Grid.Column>

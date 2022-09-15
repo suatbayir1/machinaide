@@ -62,6 +62,8 @@ class ImportComponentOverlay extends PureComponent<Props, State> {
             return;
         }
 
+        console.log(selectedImportObject);
+
         await handleSaveImportComponent(selectedImportObject);
 
         notify(generalSuccessMessage("Component successfully added to the scene"));

@@ -1,5 +1,6 @@
 import pymongo
 import pandas as pd
+import math
 
 class Setup:
     def __init__(self):
@@ -16,7 +17,7 @@ class Setup:
                 "Factory": self.add_factory,
                 "ProductionLine": self.add_production_line,
                 "Machine": self.add_machine,
-                "Component": self.add_component,
+                "Inter": self.add_component,
                 "Sensor": self.add_sensor,
                 "Field": self.add_field
             }
@@ -36,9 +37,9 @@ class Setup:
                 "location": row["location"],
                 "type": "Factory",
                 "productionLines": [],
-                "bucket": ""
+                "bucket": row["bucket"]
             }
-            
+
             self.dt.append(factory)
 
     def add_production_line(self, params):
@@ -53,7 +54,8 @@ class Setup:
                         "description": row["description"],
                         "name": row["name"],
                         "photoUrl": row["photo_url"],
-                        "machines": []
+                        "machines": [],
+                        "section": row["section"]
                     }
 
                     factory["productionLines"].append(pl)
@@ -73,7 +75,7 @@ class Setup:
                             "description": row["description"],
                             "photoUrl": row["photo_url"],
                             "contents": [],
-                            "measurements": []
+                            "measurements": row["measurements"].split(',')
                         }
 
                         pl["machines"].append(machine)
@@ -85,9 +87,9 @@ class Setup:
                     for machine in pl["machines"]:
                         if machine["name"] == row["parent_id"]:
                             component = {
-                                "@id": row["name"],
+                                "@id": row["name"].strip().replace(" ", "_").replace(".", "_"),
                                 "@type": "Component",
-                                "name": row["name"],
+                                "name": row["name"].strip().replace(" ", "_").replace(".", "_"),
                                 "displayName": row["displayName"],
                                 "description": row["description"],
                                 "type": "Component",
@@ -104,14 +106,14 @@ class Setup:
                 for pl in factory["productionLines"]:
                     for machine in pl["machines"]:
                         for component in machine["contents"]:
-                            if component["name"] == row["parent_id"]:
+                            if component["name"] == row["parent_id"].strip().replace(" ", "_").replace(".", "_"):
                                 sensor = {
                                     "@type": ["Telemetry", row["type"]],
-                                    "@id": row["name"],
-                                    "name": row["name"],
+                                    "@id": f'S_{row["name"].strip().replace(" ", "_").replace(".", "_")}',
+                                    "name": f'S_{row["name"].strip().replace(" ", "_").replace(".", "_")}',
                                     "schema": row["unit"],
                                     "type": "Sensor",
-                                    "parent": row["parent_id"],
+                                    "parent": row["parent_id"].strip().replace(" ", "_").replace(".", "_"),
                                     "unit": row["unit"],
                                     "displayName": row["displayName"],
                                     "description": row["description"],
@@ -129,16 +131,18 @@ class Setup:
                     for machine in pl["machines"]:
                         for component in machine["contents"]:
                             for sensor in component["sensors"]:
-                                if sensor["name"] == row["parent_id"]:
+                                if sensor["name"] == f'S_{row["parent_id"].strip().replace(" ", "_").replace(".", "_")}':
                                     field = {
-                                        "@id": row["name"],
-                                        "name": row["name"],
-                                        "minValue": row["minValue"],
-                                        "maxValue": row["maxValue"],
+                                        "@id": f'F_{row["name"].strip().replace(" ", "_").replace(".", "_")}',
+                                        "name": f'F_{row["name"].strip().replace(" ", "_").replace(".", "_")}',
+                                        "minValue": round(row["minValue"], 2),
+                                        "maxValue": round(row["maxValue"], 2),
                                         "type": "Field",
-                                        "parent": row["parent_id"],
+                                        "parent": f'S_{row["parent_id"].strip().replace(" ", "_").replace(".", "_")}',
                                         "displayName": row["displayName"],
                                         "description": row["description"],
+                                        "measurement": row["measurement"],
+                                        "dataSource": row["dataSource"]
                                     }
 
                                     sensor["fields"].append(field)
@@ -158,7 +162,6 @@ class Setup:
             "status": "active"
         }
 
-        print(root)
         self.db.user.insert_one(root)
 
     def add_sections(self):
@@ -177,9 +180,13 @@ class Setup:
 
         self.db.sections.insert_many(sections)
 
+    def delete(self):
+        self.db.digital_twin.delete_many({})
+
 if __name__ == '__main__':
     setup = Setup()
-    # setup.iterate_sheets()
-    # setup.insert_dt()
+    setup.delete()
+    setup.iterate_sheets()
+    setup.insert_dt()
     # setup.add_root()
     # setup.add_sections()

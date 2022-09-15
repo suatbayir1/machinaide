@@ -1,66 +1,118 @@
-import pandas as pd
-from datetime import datetime
-from evidently.model_profile import Profile
-from sklearn import datasets, ensemble, model_selection
-from evidently.pipeline.column_mapping import ColumnMapping
-from evidently.model_profile.sections import ClassificationPerformanceProfileSection
+# run with PYTHONPATH=. python3 main.py
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from flask_pymongo import PyMongo
+from bson.json_util import dumps
+from datetime import datetime, timedelta
+from RULEvidentlyReport import RULEvidentlyReport
+from RULRegEvidentlyReport import RULRegEvidentlyReport
+from threading import Thread
+import os
 
-from evidently.dashboard import Dashboard
-from evidently.dashboard.tabs import ClassificationPerformanceTab
+from evidently_config import (
+    MONGO, INFLUX
+)
 
-bcancer = datasets.load_breast_cancer()
-bcancer_frame = pd.DataFrame(bcancer.data, columns=bcancer.feature_names)
+from pymongo import MongoClient
+from influxdb_client import InfluxDBClient
 
-# TODO: biz buraya kullanıcının verdiği feedbackleri gireceğiz
-bcancer_frame["feedback"] = bcancer.target
+influxdb_client = InfluxDBClient(url=INFLUX["host"], token=INFLUX["dbtoken"], org=INFLUX["orgID"], verify_ssl = False) 
+query_api = influxdb_client.query_api()
 
-print("bcancer_frame")
-print(bcancer_frame.head())
+app = Flask(__name__)
+CORS(app, supports_credentials=True)
 
-target = "feedback"
-prediction = "prediction"
+client = MongoClient(MONGO["MONGO_URI"])
+db = client[MONGO["DATABASE"]]
 
-numerical_features = bcancer.feature_names
-categorical_features = []
+@app.route('/testEvidentlyServer', methods=['GET'])
+def testServer():
+    return {"msg": "Evidently server is working like a miracle"}, 200
 
-features = numerical_features.tolist() + categorical_features
+@app.route('/addReport', methods=['POST'])
+def addReport():
+    model_id = request.json["modelID"]
+    created_report = request.json["report"]
+    report = db["evidently_reports"].find_one({"modelID": model_id})
+    if(report):
+        x = db["evidently_reports"].update_one({"modelID": model_id}, {"$set": created_report})
+    else:
+        print(created_report)
+        x = db["evidently_reports"].insert_one(created_report)
+    
+    return {"msg": "Report is created"}, 200
 
-# model performance dashboard
-# train_data, test_data = model_selection.train_test_split(bcancer_frame, random_state=0)
-train_data = bcancer_frame
-model = ensemble.RandomForestClassifier(random_state=0)
+@app.route('/createRULEvidentlyReport/<model_id>', methods=['POST'])
+def createRULEvidentlyReport(model_id):
+    print("lol", model_id)
+    logs = db["model_logs"].find_one({"modelID": model_id})
+    if("logs" in logs):
+        logs_in_range = []
+        for log in reversed(logs["logs"]):
+            date_obj = datetime.strptime(log["time"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            now = datetime.now()
+            thirty_days = now - timedelta(3)
+            if(date_obj>=thirty_days):
+                logs_in_range.insert(0, log)
+            else:
+                break
+        print("len is: ", len(logs["logs"]), "-", len(logs_in_range))
+        settings = {
+            "modelID": model_id,
+            "fields": request.json["fields"], 
+            "daterange": request.json["daterange"], 
+            "logsInRange": logs_in_range}
 
-model.fit(train_data[features], train_data[target])
+        rul_evidently = RULEvidentlyReport(settings)
+        Thread(target=rul_evidently.create_report).start()
 
-train_predictions = model.predict(train_data[features])
-# test_predictions = model.predict(test_data[features])
+        return {"msg": "Report creation on progress."}, 200
+    return {"msg": "No log has found to create report."}, 200
 
-train_data[prediction] = train_predictions
-# test_data[prediction] = test_predictions
+@app.route('/createRULRegEvidentlyReport/<model_id>', methods=['POST'])
+def createRULRegEvidentlyReport(model_id):
+    print("lol", model_id)
+    logs = db["model_logs"].find_one({"modelID": model_id})
+    if("logs" in logs):
+        logs_in_range = []
+        for log in reversed(logs["logs"]):
+            date_obj = datetime.strptime(log["time"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            now = datetime.now()
+            thirty_days = now - timedelta(3)
+            if(date_obj>=thirty_days):
+                logs_in_range.insert(0, log)
+            else:
+                break
+        print("len is: ", len(logs["logs"]), "-", len(logs_in_range))
+        settings = {
+            "modelID": model_id,
+            "fields": request.json["fields"], 
+            "daterange": request.json["daterange"], 
+            "logsInRange": logs_in_range}
 
-print("train data")
-print(train_data.head())
+        rulreg_evidently = RULRegEvidentlyReport(settings)
+        Thread(target=rulreg_evidently.create_report).start()
 
-# print("test data")
-# print(test_data.head())
+        return {"msg": "Report creation on progress."}, 200
+    return {"msg": "No log has found to create report."}, 200
 
-# do column mapping to let evidently understand the data
-bcancer_column_mapping = ColumnMapping()
-bcancer_column_mapping.target = target
-bcancer_column_mapping.prediction = prediction
-bcancer_column_mapping.numerical_features = numerical_features
+@app.route('/returnEvidentlyReport/<model_id>', methods=['GET'])
+def returnEvidentlyReport(model_id):
+    report = db["evidently_reports"].find_one({"modelID": model_id})
+    return dumps(report), 200
 
-bcancer_model_performance_dashboard = Dashboard(tabs=[ClassificationPerformanceTab(verbose_level=1)])
-bcancer_model_performance_dashboard.calculate(train_data, None, column_mapping=bcancer_column_mapping)
+@app.route('/getLog', methods=['POST'])
+def getLog():
+    feedback = request.json["feedback"]
+    timestamp = request.json["timestamp"]
+    modelID = request.json["modelID"]
+    query = {"modelID": modelID, "logs.time": timestamp}
+    update_set = {"logs.$.feedback": feedback}
+    data = {"$set": update_set}
+    logs = db["model_logs"].update_one(query, data)
+    print(logs)
+    return jsonify(msg="Model log feedback is updated"), 200
 
-bcancer_model_performance_dashboard.save('./bcancer_model_performance.html')
-
-bcancer_classification_performance_profile = Profile(sections=[ClassificationPerformanceProfileSection()])
-bcancer_classification_performance_profile.calculate(train_data, None, column_mapping=bcancer_column_mapping)
-
-result = bcancer_classification_performance_profile.json() 
-
-with open("bcancer_results.json", "w") as outfile:
-    outfile.write(result)
-
-
+if __name__ == "__main__":
+    port = int(os.environ.get('PORT', 6161))
+    app.run(debug=True, host='0.0.0.0', port=port)

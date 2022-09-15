@@ -131,6 +131,47 @@ class SaveComponentOverlay extends PureComponent<Props, State> {
                     "opacity": opacity
                 }
                 objects.push(object);
+            } else if (child["type"] === 'GlbFile') {
+                let color;
+                let opacity;
+
+                child["traverse"](function (child) {
+                    if (child.isMesh) {
+                        color = `#${child.material.color.getHexString()}`;
+                        opacity = child.material.opacity;
+                    }
+                })
+
+
+                let object = {
+                    "isRender": false,
+                    "name": child["name"],
+                    "geometryType": child["type"],
+                    "fileName": child["fileName"],
+                    "boxMeasure": {
+                        "x": child["scale"]["x"],
+                        "y": child["scale"]["y"],
+                        "z": child["scale"]["z"],
+                    },
+                    "scale": {
+                        "x": child["scale"]["x"],
+                        "y": child["scale"]["y"],
+                        "z": child["scale"]["z"],
+                    },
+                    "position": {
+                        "x": child["position"]["x"],
+                        "y": child["position"]["y"],
+                        "z": child["position"]["z"],
+                    },
+                    "rotate": {
+                        "x": child["rotation"]["x"],
+                        "y": child["rotation"]["y"],
+                        "z": child["rotation"]["z"],
+                    },
+                    "color": color,
+                    "opacity": opacity
+                }
+                objects.push(object);
             }
         })
 
@@ -190,6 +231,9 @@ class SaveComponentOverlay extends PureComponent<Props, State> {
             "name": saveAsComponentName,
             "children": objects
         }
+
+        console.log(objects);
+        console.log(payload);
 
         const insertResult = await ObjectService.saveAsComponentObject(payload);
 

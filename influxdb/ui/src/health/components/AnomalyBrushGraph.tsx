@@ -668,7 +668,7 @@ class AnomalyBrushGraph extends Component<Props, State> {
             }
           },
           annotationTimestamps: anomalyTimestamps
-        })  
+        }, () => console.log("-annotations-", this.state.options, this.state.optionsLine))  
       }    
     }
 
@@ -830,7 +830,7 @@ class AnomalyBrushGraph extends Component<Props, State> {
                   show: false
                 },
                 noData: {
-                  text: "There is no data. Try selecting a sensor from the list.",
+                  text: "There is no data. Try selecting a sensor or an anomaly timestamp from the list.",
                   align: 'center',
                   verticalAlign: 'middle',
                   offsetX: 0,
@@ -849,6 +849,9 @@ class AnomalyBrushGraph extends Component<Props, State> {
                   toolbar: {
                     autoSelected: "pan",
                     show: false
+                  },
+                  animations: {
+                    enabled: false
                   },
                   events: {
                     click: (event, chartContext, config) => {
@@ -914,21 +917,7 @@ class AnomalyBrushGraph extends Component<Props, State> {
                   enabled: false
                 },
                 annotations: {
-                  xaxis: [{
-                    x: new Date('2021-05-13').getTime(),
-                    borderColor: '#DC4E58',
-                    opacity: 1,
-                    borderWidth: 4,
-                    strokeDashArray: 0,
-                    label: {
-                      style: {
-                        color: 'white',
-                        background: '#DC4E58',
-                        fontWeight: 500,
-                      },
-                      text: 'anomaly'
-                    }
-                  }]
+                  xaxis: []
                 },
                 fill: {
                   gradient: {
@@ -946,33 +935,12 @@ class AnomalyBrushGraph extends Component<Props, State> {
                 },
                 tooltip: {
                   theme: "dark",
-                  /* x: {
+                  x: {
                     show: true,
                     format: 'dd MMM yy HH:mm:ss',
                     formatter: undefined,
-                  }, */
-                  shared: true,
-                  custom: ({ series, seriesIndex, dataPointIndex, w }) => {
-                    const hoverXaxis = w.globals.seriesX[seriesIndex][dataPointIndex];
-                    const hoverIndexes = w.globals.seriesX.map(seriesX => {
-                      return seriesX.findIndex(xData => xData === hoverXaxis);
-                    });
-              
-                    let hoverList = '';
-                    hoverIndexes.forEach((hoverIndex, seriesEachIndex) => {
-                      if (hoverIndex >= 0) {
-                        hoverList += `<span>Hello- ${w.globals.seriesNames[seriesEachIndex]}: ${series[seriesEachIndex][hoverIndex]}</span><br />`;
-                      }
-                    });
-                    const formatHoverX = hoverXaxis;
-              
-                    return `<div class="card">
-                      <div class="card-header p-1">${formatHoverX}</div>
-                      <div class="card-body p-1">
-                        ${hoverList}
-                      </div>
-                    </div>`;
                   },
+                  shared: true,
                 },
                 xaxis: {
                   type: "datetime",
@@ -1010,6 +978,9 @@ class AnomalyBrushGraph extends Component<Props, State> {
                     target: "anomalyChart",
                     enabled: true,
                     autoScaleYaxis: true
+                  },
+                  animations: {
+                    enabled: false
                   },
                   events: {
                     brushScrolled: (hartContext, { xaxis, yaxis }) => {

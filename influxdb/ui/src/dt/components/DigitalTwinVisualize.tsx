@@ -13,6 +13,8 @@ import {
   SpinnerContainer
 } from '@influxdata/clockface'
 import { ColladaLoader } from "three/examples/jsm/loaders/ColladaLoader";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader"
 
 // Helpers
 var THREE = require("three");
@@ -21,7 +23,7 @@ var TransformControls = require("three-transform-controls")(THREE);
 var initializeDomEvents = require('threex-domevents')
 var THREEx = {}
 initializeDomEvents(THREE, THREEx)
-var camera, controls, scene, renderer, domEvents, transformControl;
+var camera, controls, scene, renderer, transformControl;
 var dae, kinematics, kinematicsTween;
 const tweenParameters = {};
 const TWEEN = require("@tweenjs/tween.js");
@@ -52,12 +54,17 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
   }
 
   async componentDidMount(): Promise<void> {
+    console.log("visualize mount");
     await this.renderVisualizeData();
     await this.responsiveConfiguration();
   }
 
   async componentDidUpdate(prevProps) {
+    console.log("visualize update");
+
+
     if (prevProps.cubeInfo !== this.props.selectedGraphNode) {
+      console.log("1");
       if (scene === undefined) { return; }
 
       if (Object.keys(this.props.selectedGraphNode).length > 0) {
@@ -75,6 +82,8 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
     }
 
     if (prevProps.refreshVisualizePage !== this.props.refreshVisualizePage) {
+      console.log("2");
+
       await this.removeAllObjectFromScene();
       const cubeInfo = await DTService.getAllDT();
       const renderedCubeInfo = await this.renderInitialCubeInfo(cubeInfo);
@@ -88,6 +97,8 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
     }
 
     if (prevProps.resultNLPQuery !== this.props.resultNLPQuery) {
+      console.log("3");
+
       await this.removeAllObjectFromScene();
       let cubeInfo = await this.handleResultNLPQuery(this.props.resultNLPQuery);
       this.cubeCreator(cubeInfo);
@@ -295,8 +306,6 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(555, 750);
     document.getElementById("visualizeArea").appendChild(renderer.domElement);
-
-    domEvents = new THREEx.DomEvents(camera, renderer.domElement)
 
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableZomm = true;
@@ -699,9 +708,7 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
       dae.position.x = object["position"]["x"];
       dae.position.y = object["position"]["y"];
       dae.position.z = object["position"]["z"];
-
       dae.updateMatrix();
-      // kinematics = collada.kinematics;
 
       Object.keys(collada.library.materials).forEach(material => {
         collada.library.materials[material].build.wireframe = wireframe;
@@ -711,20 +718,56 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
 
       scene.add(dae);
       renderer.render(scene, camera);
-      // vm.setupTween();
-      // vm.animate();
     });
+    await renderer.render(scene, camera);
+  }
+
+  addGlbFile = async (item, wireframe) => {
+    const loader = new GLTFLoader();
+    const dracoLoader = new DRACOLoader();
+
+    dracoLoader.setDecoderPath("../../node_modules/three/examples/js/libs/draco/");
+    loader.setDRACOLoader(dracoLoader);
+    await loader.load(
+      `../../assets/images/model/${item['fileName']}`,
+
+      async function (gltf) {
+        gltf.scene.traverse((o) => {
+          if (o.isMesh) {
+            console.log("wire", o.material);
+            // o.material.emissive = new THREE.Color(object.color);
+
+          }
+        });
+
+        gltf.scene.scale.set(
+          item.scaleX || 0.01,
+          item.scaleY || 0.01,
+          item.scaleZ || 0.01
+        );
+
+        gltf.scene.position.set(
+          item.positionX || 0,
+          item.positionY || 0,
+          item.positionZ || 0
+        )
+
+        await scene.add(gltf.scene);
+        await renderer.render(scene, camera);
+      },
+
+      function (_) {
+      },
+
+      function (_) {
+      }
+    );
     await renderer.render(scene, camera);
   }
 
   addObjectToScene = (object) => {
     scene.add(object);
 
-    // domEvents.addEventListener(object, 'click', function () {
-    //   transformControl.attach(object);
-    //   scene.add(transformControl);
-    //   renderer.render(scene, camera);
-    // })
     renderer.render(scene, camera);
   }
 
@@ -874,7 +917,7 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
   }
 
   handleAddObjectType = (object, wireframe) => {
-    console.log({ object });
+    console.log(object);
     switch (object["geometryType"]) {
       case "BoxGeometry":
         this.addCube(object, wireframe);
@@ -891,16 +934,15 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
       case "ColladaFile":
         this.addColladaFile(object, wireframe);
         break;
+      case "GlbFile":
+        this.addGlbFile(object, wireframe);
+        break;
     }
   }
 
   cubeCreator(payload) {
-    console.log("cubeINFO *****");
-
     let CubeInfo = payload;
     let wireframe;
-
-    console.log(CubeInfo);
 
     if (CubeInfo == undefined) {
       return;
@@ -945,6 +987,8 @@ class DigitalTwinVisualize extends PureComponent<Props, State> {
 
   public render() {
     const { spinnerLoading } = this.state
+
+    console.log("visualize 1");
 
     return (
       <>

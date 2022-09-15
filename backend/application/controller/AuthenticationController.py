@@ -39,7 +39,6 @@ def loginWithInflux():
 
 @auth.route("/loginWithLDAP", methods = ["POST"])
 def loginWithLDAP():
-    print("test")
     if not request.json:
         message = "username_password_cannot_be_empty"
         logger.add_log("ERROR", request.remote_addr, '', request.method, request.url, "", message,  400)
@@ -55,11 +54,8 @@ def loginWithLDAP():
 
     try:
         con = ldap.initialize(config.LDAP["URL"], bytes_mode=False)
-        print("con", con)
         con.protocol_version = ldap.VERSION3
-        print("protocol")
         con.set_option(ldap.OPT_REFERRALS, 0)
-        print("set option")
 
         result = con.search_s(config.LDAP["DC"], ldap.SCOPE_SUBTREE, f"(uid={username})")   
 
@@ -113,9 +109,7 @@ def loginWithLDAP():
         logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
         return return_response(data = [], success = False, message = message, code = 400), 400
     except ldap.SERVER_DOWN as e:
-        print(e)
         message = "LDAP Server is not running"
-        print(message)
         logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
         return return_response(data = [], success = False, message = message, code = 400), 400
     except Exception as error:
@@ -184,9 +178,7 @@ def loginWithLDAPErmetal():
         logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
         return return_response(data = [], success = False, message = message, code = 400), 400
     except ldap.SERVER_DOWN as e:
-        print(e)
         message = "LDAP Server is not running"
-        print(message)
         logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
         return return_response(data = [], success = False, message = message, code = 400), 400
     except Exception as error:
@@ -237,7 +229,6 @@ def login():
 @auth.route("/signup", methods = ["POST"])
 @token_required(roles = ["admin"])
 def signup(token):
-    print("signup")
     if not request.json["username"] or not request.json["role"]:
         message = "Username, and role cannot be empty"
         logger.add_log("ERROR", request.remote_addr, '', request.method, request.url, request.json, message,  400)

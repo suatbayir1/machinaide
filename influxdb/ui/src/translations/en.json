@@ -68,7 +68,8 @@
         "delete": "Delete",
         "yes": "Yes",
         "add_user": "Add User",
-        "export": "Export"
+        "export": "Export",
+        "data_sources": "Data Sources"
     },
     "add_new_part": "Add New Part",
     "input": {},

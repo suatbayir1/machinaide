@@ -1,3 +1,4 @@
+import json
 import numpy as np
 import pandas as pd
 from datetime import datetime
@@ -60,14 +61,23 @@ ermetal_column_mapping.numerical_features = numerical_features
 ermetal_model_performance_dashboard = Dashboard(tabs=[ClassificationPerformanceTab(verbose_level=1)])
 ermetal_model_performance_dashboard.calculate(df, None, column_mapping=ermetal_column_mapping)
 
-ermetal_model_performance_dashboard.save('./ermetal_model_performance_2.html')
+ermetal_model_performance_dashboard.save('./classification_model_ermetal_results_3.html')
 
-ermetal_classification_performance_profile = Profile(sections=[ClassificationPerformanceProfileSection(), CatTargetDriftProfileSection()])
-ermetal_classification_performance_profile.calculate(df, df, column_mapping=ermetal_column_mapping)
+ermetal_classification_performance_profile = Profile(sections=[ClassificationPerformanceProfileSection()])
+ermetal_classification_performance_profile.calculate(df, None, column_mapping=ermetal_column_mapping)
 
 result = ermetal_classification_performance_profile.json() 
+result_json = json.loads(result)
+print(type(result_json))
+result_json["feedback"] = df["feedback"].to_json(orient='values')
+result_json["prediction"] = df["prediction"].to_json(orient='values')
+result_json["features"] = {}
 
-with open("ermetal_results_2.json", "w") as outfile:
-    outfile.write(result)
+for col in numerical_features:
+    result_json["features"][col] = df[col].to_json(orient='values')
+    
+result_str = json.dumps(result_json)
 
+with open("classification_model_ermetal_results_3.json", "w") as outfile:
+    outfile.write(result_str)
 

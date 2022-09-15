@@ -2,6 +2,8 @@
 import React, { PureComponent } from 'react'
 import { connect, ConnectedProps } from 'react-redux'
 import { ColladaLoader } from "three/examples/jsm/loaders/ColladaLoader";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader"
 
 // Components
 import {
@@ -813,6 +815,52 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
         await renderer.render(scene, camera);
     }
 
+
+    addGlbFile = async (type, item, render = true) => {
+        const loader = new GLTFLoader();
+        const dracoLoader = new DRACOLoader();
+
+        dracoLoader.setDecoderPath("../../node_modules/three/examples/js/libs/draco/");
+        loader.setDRACOLoader(dracoLoader);
+        let vm = this;
+        await loader.load(
+            `../../assets/images/model/${item['fileName']}`,
+
+            async function (gltf) {
+                gltf.scene.scale.set(
+                    item.scaleX || 0.01,
+                    item.scaleY || 0.01,
+                    item.scaleZ || 0.01
+                );
+
+                gltf.scene.position.set(
+                    item.positionX || 0,
+                    item.positionY || 0,
+                    item.positionZ || 0
+                )
+
+                gltf.scene.name = type === 'loaded' ? gltf.scene["name"] : vm.randomTextGenerator(10);
+                gltf.scene.type = 'GlbFile';
+                gltf.scene.fileName = item["fileName"];
+
+                if (render) {
+                    await scene.add(gltf.scene);
+                    await renderer.render(scene, camera);
+                } else {
+                    vm.addToSceneAndClickEvent(gltf.scene, "new");
+                }
+            },
+
+            function (_) {
+            },
+
+            function (_) {
+            }
+        );
+        await renderer.render(scene, camera);
+    }
+
+
     public removeNewObjectsFromScene = async (): Promise<void> => {
         const newObjectsId = [];
         this.state.newObjects.forEach(newItem => {
@@ -841,6 +889,7 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
 
     public handleSaveImportComponent = async (component: object): Promise<void> => {
         component["children"].forEach(item => {
+            console.log(item);
             this.setState({
                 newObjects: [...this.state.newObjects, item]
             })
@@ -854,6 +903,8 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
                 this.addTorus('loaded', item, true);
             } else if (item["geometryType"] === 'ColladaFile') {
                 this.addColladaFile('loaded', item, false);
+            } else if (item["geometryType"] === 'GlbFile') {
+                this.addGlbFile('loaded', item, false);
             }
         })
 
@@ -881,8 +932,19 @@ class ObjectCreatorPage extends PureComponent<Props, State> {
     }
 
     public handleSaveImportModel = async (model: object): Promise<void> => {
-        const item = { "fileName": model["file"] }
-        this.addColladaFile('', item, false);
+        const fileType = model["file"].split('.').pop();
+
+        switch (fileType) {
+            case "dae":
+                this.addColladaFile('', { "fileName": model["file"] }, false);
+                break;
+            case "glb":
+                this.addGlbFile('', { "fileName": model["file"] }, false);
+                break;
+            default:
+                break;
+        }
+
     }
 
     public render(): JSX.Element {

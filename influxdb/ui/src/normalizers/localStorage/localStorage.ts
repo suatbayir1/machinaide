@@ -1,12 +1,12 @@
 // Libraries
-import {get} from 'lodash'
+import { get } from 'lodash'
 
 // Types
-import {LocalStorage} from 'src/types'
-import {FlagState} from 'src/shared/reducers/flags'
+import { LocalStorage } from 'src/types'
+import { FlagState } from 'src/shared/reducers/flags'
 
 // Constants
-import {VERSION} from 'src/shared/constants'
+import { VERSION } from 'src/shared/constants'
 
 // Utils
 import {
@@ -14,13 +14,13 @@ import {
   setLocalStateRanges,
   normalizeApp,
 } from 'src/normalizers/localStorage'
-import {normalizeResources} from './resources'
+import { normalizeResources } from './resources'
 
 export const normalizeGetLocalStorage = (state: LocalStorage): LocalStorage => {
   let newState = state
 
   if (state.ranges) {
-    newState = {...newState, ranges: getLocalStateRanges(state.ranges)}
+    newState = { ...newState, ranges: getLocalStateRanges(state.ranges) }
   }
 
   const appPersisted = get(newState, 'app.persisted', false)
@@ -35,14 +35,15 @@ export const normalizeGetLocalStorage = (state: LocalStorage): LocalStorage => {
 }
 
 export const normalizeSetLocalStorage = (state: LocalStorage): LocalStorage => {
-  const {app, flags, ranges, autoRefresh, userSettings} = state
+  const { app, flags, ranges, autoRefresh, userSettings, dtReducer } = state
   return {
     VERSION,
     autoRefresh,
     userSettings,
-    flags: {override: flags.override} as FlagState,
+    flags: { override: flags.override } as FlagState,
     app: normalizeApp(app),
     ranges: setLocalStateRanges(ranges),
     resources: normalizeResources(state),
+    dtReducer,
   }
 }

@@ -12,6 +12,8 @@
         "./evalml-server",
         "./evalml-server",
         "./model-runner",
+        "./evidently-server",
+        "./evidently-server",
         "./evidently-server"
     ]
 }

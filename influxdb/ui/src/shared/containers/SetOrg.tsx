@@ -85,11 +85,14 @@ import ExamplePage from 'src/example/Example'
 import AnomalyMonitorPage from 'src/example/anomalyMonitor/AnomalyMonitorPage'
 import POFMonitorPage from 'src/example/pofMonitor/POFMonitorPage'
 import RULMonitorPage from 'src/example/rulMonitor/RULMonitorPage'
+import RULFeedbackPage from 'src/health/components/feedback-pages/RULFeedbackPage'
+import POFFeedbackPage from 'src/health/components/feedback-pages/POFFeedbackPage'
+import RULRegFeedbackPage from 'src/health/components/feedback-pages/RULRegFeedbackPage'
 
 // Health Assessment
 import MachineHealthPage from 'src/health/containers/MachineHealthPage'
-import EvidentlyReportPage from 'src/health/components/EvidentlyReportPage'
-import RegEvidentlyReportPage from 'src/health/components/RegEvidentlyReportPage'
+import ClassificationEvidentlyReportPage from 'src/health/components/ClassificationEvidentlyReportPage'
+import RegressionEvidentlyReportPage from 'src/health/components/RegressionEvidentlyReportPage'
 
 // Types
 import { AppState, Organization, ResourceType } from 'src/types'
@@ -231,10 +234,16 @@ const SetOrg: FC<Props> = ({
         <Route path={`${orgPath}/anomaly-monitor`} component={AnomalyMonitorPage} />
         <Route path={`${orgPath}/pof-monitor`} component={POFMonitorPage} />
         <Route path={`${orgPath}/rul-monitor`} component={RULMonitorPage} />
+        <Route path={`${orgPath}/health/rul-feedback/:FID/:PLID/:MID/:CID/:MODELID`} component={RULFeedbackPage} /> 
+        <Route path={`${orgPath}/health/rul-feedback/:FID/:PLID/:MID/:MODELID`} component={RULFeedbackPage} /> 
+        <Route path={`${orgPath}/health/pof-feedback/:FID/:PLID/:MID/:CID/:MODELID`} component={POFFeedbackPage} /> 
+        <Route path={`${orgPath}/health/pof-feedback/:FID/:PLID/:MID/:MODELID`} component={POFFeedbackPage} /> 
+        <Route path={`${orgPath}/health/rulreg-feedback/:FID/:PLID/:MID/:CID/:MODELID`} component={RULRegFeedbackPage} /> 
+        <Route path={`${orgPath}/health/rulreg-feedback/:FID/:PLID/:MID/:MODELID`} component={RULRegFeedbackPage} /> 
 
         {/* HEALTH ASSESSMENT */}
-        <Route path={`${orgPath}/health/report/:MID`} component={EvidentlyReportPage} /> {/* MID == model id */}
-        <Route path={`${orgPath}/health/reg-report/:MID`} component={RegEvidentlyReportPage} />
+        <Route path={`${orgPath}/health/classification-report/:MID`} component={ClassificationEvidentlyReportPage} /> {/* MID == model id */}
+        <Route path={`${orgPath}/health/regression-report/:MID`} component={RegressionEvidentlyReportPage} /> {/* MID == model id */}
         <Route path={`${orgPath}/health/:FID/:PLID/:MID/:CID`} component={MachineHealthPage} />
         <Route path={`${orgPath}/health/:FID/:PLID/:MID`} component={MachineHealthPage} />
 

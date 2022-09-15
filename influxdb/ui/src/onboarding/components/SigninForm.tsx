@@ -12,6 +12,7 @@ import { postSignin } from 'src/client'
 
 // Actions
 import { notify as notifyAction } from 'src/shared/actions/notifications'
+import { getDTThunk } from 'src/dt/actions/dtActions';
 
 // Services
 import LoginService from 'src/onboarding/services/LoginService';
@@ -125,6 +126,7 @@ class SigninForm extends PureComponent<Props, State> {
         throw new Error(resp.data.message)
       }
 
+      this.props.getDTThunk();
       this.handleRedirect();
     } catch (error) {
       const message = get(error, 'response.data.msg', '')
@@ -166,6 +168,7 @@ const mstp = ({ links }: AppState) => ({
 
 const mdtp = {
   notify: notifyAction,
+  getDTThunk: getDTThunk,
 }
 
 const connector = connect(mstp, mdtp)

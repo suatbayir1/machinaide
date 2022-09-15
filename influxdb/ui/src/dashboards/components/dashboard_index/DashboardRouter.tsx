@@ -237,7 +237,7 @@ class DashboardRouter extends Component<Props, State> {
                                             // Iterate fields
                                             let fields = "";
                                             sensor.fields.map((field, idx) => {
-                                                fields += `r[\"_field\"] == \"${field["name"]}\"`;
+                                                fields += `r[\"_field\"] == \"${field["dataSource"]}\"`;
                                                 if (idx !== sensor.fields.length - 1) {
                                                     fields += " or ";
                                                 }
@@ -261,7 +261,7 @@ class DashboardRouter extends Component<Props, State> {
                                                 dashboardID,
                                                 cellName,
                                                 "measurements": machine.measurements,
-                                                "fields": sensor.fields.map(f => f["name"]),
+                                                "fields": sensor.fields.map(f => f["dataSource"]),
                                                 "xAxis": xAxisCounter % 2 === 0 ? 0 : 6,
                                                 "bucket": structure[0].bucket,
                                                 "query": query,
@@ -316,7 +316,7 @@ class DashboardRouter extends Component<Props, State> {
                                                 query = `from(bucket: \"${structure[0].bucket}\")\n  
                                                     |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  
                                                     ${measurements}
-                                                    |> filter(fn: (r) => r[\"_field\"] == \"${field["name"]}\")\n
+                                                    |> filter(fn: (r) => r[\"_field\"] == \"${field["dataSource"]}\")\n
                                                     |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  
                                                     |> yield(name: \"mean\")
                                                 `
@@ -328,7 +328,7 @@ class DashboardRouter extends Component<Props, State> {
                                                 dashboardID,
                                                 cellName,
                                                 "measurements": machine.measurements,
-                                                "fields": [field["name"]],
+                                                "fields": [field["dataSource"]],
                                                 "xAxis": xAxisCounter % 2 === 0 ? 0 : 6,
                                                 "bucket": structure[0].bucket,
                                                 "query": query,
@@ -372,7 +372,7 @@ class DashboardRouter extends Component<Props, State> {
                                                     query = `from(bucket: \"${structure[0].bucket}\")\n  
                                                             |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  
                                                             ${measurements}
-                                                            |> filter(fn: (r) => r[\"_field\"] == \"${field["name"]}\")\n
+                                                            |> filter(fn: (r) => r[\"_field\"] == \"${field["dataSource"]}\")\n
                                                             |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  
                                                             |> yield(name: \"mean\")
                                                         `
@@ -384,7 +384,7 @@ class DashboardRouter extends Component<Props, State> {
                                                     dashboardID,
                                                     cellName,
                                                     "measurements": machine.measurements,
-                                                    "fields": [field["name"]],
+                                                    "fields": [field["dataSource"]],
                                                     "xAxis": xAxisCounter % 2 === 0 ? 0 : 6,
                                                     "bucket": structure[0].bucket,
                                                     "query": query,

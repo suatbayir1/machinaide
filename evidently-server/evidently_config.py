@@ -8,3 +8,5 @@ INFLUX = dict(
     orgID = 'd572bde16b31757c',
     dbtoken = "FlviKxQ-RHHWxd1FRkHIc5VwNZuFnP6QTmsJcU6GI7nrd4cuqaTx3cCijZchENMH0zSGuKOew_e4LxW6V09Erw=="
 )
+
+ADD_REPORT_URL = f"http://localhost:6161/addReport"

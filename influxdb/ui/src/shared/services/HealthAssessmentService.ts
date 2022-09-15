@@ -307,6 +307,36 @@ class HealthAssessmentService {
         }
     }
 
+    getMLModelsWithID = async (settings) => {
+        const url = `${BACKEND.API_URL}ml/getMLModelsWithID`;
+
+        const request = fetch(url, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
+            },
+            body: JSON.stringify(settings),
+        })
+
+        try {
+            const response = await request;
+            const res = await response.json();
+
+            if (response.status !== 200) {
+                throw new Error(res.data.message.text);
+            }
+            return res;
+        } catch (err) {
+            alert(err);
+            console.error(err);
+        }
+    }
+
     startStopModel = async (settings) => {
         const url = `${BACKEND.API_URL}ml/startStopModel`;
 
@@ -364,11 +394,102 @@ class HealthAssessmentService {
         }
     }
 
+    createRULEvidentlyReport = async (modelID, settings) => {
+        const url = `${BACKEND.EVIDENTLY_URL}/createRULEvidentlyReport/${modelID}`;
+
+        const request = fetch(url, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
+            },
+            body: JSON.stringify(settings),
+        })
+
+        try {
+            const response = await request;
+            const res = await response.json();
+
+            if (response.status !== 200) {
+                throw new Error(res.data.message.text);
+            }
+            return res;
+        } catch (err) {
+            alert(err);
+            console.error(err);
+        }
+    }
+
+    createRULRegEvidentlyReport = async (modelID, settings) => {
+        const url = `${BACKEND.EVIDENTLY_URL}/createRULRegEvidentlyReport/${modelID}`;
+
+        const request = fetch(url, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
+            },
+            body: JSON.stringify(settings),
+        })
+
+        try {
+            const response = await request;
+            const res = await response.json();
+
+            if (response.status !== 200) {
+                throw new Error(res.data.message.text);
+            }
+            return res;
+        } catch (err) {
+            alert(err);
+            console.error(err);
+        }
+    }
+
     getMLModel = async (settings) => {
         const url = `${BACKEND.API_URL}ml/getMLModel`;
         console.log(settings)
         const request = fetch(url, {
             method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
+            },
+            body: JSON.stringify(settings),
+        })
+
+        try {
+            const response = await request;
+            console.log(response)
+            const res = await response.json();
+            console.log("-", res)
+            if (response.status !== 200) {
+                throw new Error(res.data.message.text);
+            }
+            return res;
+        } catch (err) {
+            alert(err);
+            console.error(err);
+        }
+    }
+
+    updateModelLogFeedback = async (settings) => {
+        const url = `${BACKEND.API_URL}ml/updateModelLogFeedback`;
+        console.log(settings)
+        const request = fetch(url, {
+            method: 'PUT',
             mode: 'cors',
             headers: {
                 'Content-Type': 'application/json',

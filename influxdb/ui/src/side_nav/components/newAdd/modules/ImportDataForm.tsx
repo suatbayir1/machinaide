@@ -598,19 +598,6 @@ class ImportDataForm extends PureComponent<Props, State> {
                                         ) : null
                                     }
 
-                                    {/* {
-                                        this.state.uploadContent === "" &&
-                                        <Button
-                                            color={ComponentColor.Primary}
-                                            text="User Manual"
-                                            size={ComponentSize.Small}
-                                            type={ButtonType.Button}
-                                            icon={IconFont.Download}
-                                            style={{ 'float': 'right', marginTop: '20px' }}
-                                            onClick={() => { this.downloadExample() }}
-                                        />
-                                    } */}
-
                                     {
                                         this.state.uploadContent === "" &&
                                         <Link color="inherit" to={`/orgs/${this.props.orgID}/user-manual/failurePage`}>

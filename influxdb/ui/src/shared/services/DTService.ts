@@ -20,8 +20,8 @@ class DTService {
         try {
             const response = await request;
             const res = await response.json();
-
             if (res.data.success !== true) return;
+
             const result = JSON.parse(res.data.data)
             return result;
         } catch (err) {

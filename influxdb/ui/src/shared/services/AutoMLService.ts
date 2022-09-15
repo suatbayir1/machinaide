@@ -239,6 +239,33 @@ class AutoMLService {
         }
     };
 
+    async getModelLogsOnContion(modelID, task): Promise<any> {
+        let url = `${BACKEND.API_URL}ml/getModelLogsOnCondition/${modelID}`;
+
+        const fetchPromise = fetch(url, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
+            },
+            credentials: 'include',
+            body: JSON.stringify({"task": task}),
+        })
+
+        try {
+            const response = await fetchPromise;
+            const res = await response.json();
+            return res
+        }
+        catch (err) {
+            console.log("Error while getting automl settings with msg: ", err);
+        }
+    };
+
     async getModelLastLog(modelID): Promise<any> {
         let url = `${BACKEND.API_URL}ml/getModelLastLog/${modelID}`;
 

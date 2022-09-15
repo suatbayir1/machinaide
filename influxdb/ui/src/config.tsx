@@ -2,6 +2,7 @@ export const BACKEND = {
     // "API_URL": "http://127.0.0.1:9632/api/v1.0/",
     "API_URL": "https://vmi474601.contaboserver.net/api/v1.0/",
     "EVALML_URL": "http://127.0.0.1:6363",
+    "EVIDENTLY_URL": "http://127.0.0.1:6161",
     "SOCKET_URL": "http://127.0.0.1:5000",
     "NLP_URL": "http://127.0.0.1:7777",
     "NLP_MODULE_URL": "http://127.0.0.1:8787"

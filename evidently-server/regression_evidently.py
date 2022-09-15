@@ -66,20 +66,24 @@ ermetal_column_mapping.numerical_features = numerical_features
 ermetal_model_performance_dashboard = Dashboard(tabs=[RegressionPerformanceTab(verbose_level=1)])
 ermetal_model_performance_dashboard.calculate(df, None, column_mapping=ermetal_column_mapping)
 
-ermetal_model_performance_dashboard.save('./reg_model_performance_3.html')
+ermetal_model_performance_dashboard.save('./reg_model_performance_4.html')
 
-ermetal_classification_performance_profile = Profile(sections=[RegressionPerformanceProfileSection()])
-ermetal_classification_performance_profile.calculate(df, None, column_mapping=ermetal_column_mapping)
+ermetal_regression_performance_profile = Profile(sections=[RegressionPerformanceProfileSection()])
+ermetal_regression_performance_profile.calculate(df, None, column_mapping=ermetal_column_mapping)
 
-result = ermetal_classification_performance_profile.json() 
+result = ermetal_regression_performance_profile.json() 
 result_json = json.loads(result)
 print(type(result_json))
 result_json["feedback"] = df["feedback"].to_json(orient='values')
 result_json["prediction"] = df["prediction"].to_json(orient='values')
-result_json["features"] = df.to_json(orient='values')
+result_json["features"] = {}
+
+for col in numerical_features:
+    result_json["features"][col] = df[col].to_json(orient='values')
+
 result_str = json.dumps(result_json)
 
-with open("reg_results_3.json", "w") as outfile:
+with open("reg_results_4.json", "w") as outfile:
     outfile.write(result_str)
 
 

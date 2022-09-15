@@ -10,6 +10,7 @@ influxdb/ui/.env
 influxdb/ui/assets/reports/
 model-runner/modelrunnerenv
 evalml-server/evalmlenv
+evidently-server/evidentlyenv
 backend/mlhelpers/VAESettings/sensors/
 experiments/
 models/

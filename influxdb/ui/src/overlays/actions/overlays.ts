@@ -1,4 +1,4 @@
-import {OverlayParams, OverlayID} from 'src/overlays/reducers/overlays'
+import { OverlayParams, OverlayID } from 'src/overlays/reducers/overlays'
 
 export enum ActionTypes {
   ShowOverlay = 'SHOW_OVERLAY',
@@ -21,9 +21,10 @@ export const showOverlay = (
   overlayParams: OverlayParams,
   onClose: () => void
 ): ShowOverlay => {
+  console.log(overlayID);
   return {
     type: ActionTypes.ShowOverlay,
-    payload: {overlayID, overlayParams, onClose},
+    payload: { overlayID, overlayParams, onClose },
   }
 }
 

@@ -372,7 +372,6 @@ def getMetadataByProcessId(token):
 @token_required(roles = ["admin", "editor", "member"])
 def getSectionsByFactory(token):
     try:
-        print("1")
         message, confirm = validator.check_request_params(
             request.json, 
             ["factoryID"]
@@ -383,11 +382,7 @@ def getSectionsByFactory(token):
             status_code = 400
             return return_response(success = False, message = message, code = 400), 400
 
-        print("2")
-
         result = model.get_sections_by_factory({"factoryID": request.json["factoryID"]})
-
-        print(result)
 
         if not result:
             message = "An error occurred while fetching sections by factory"

@@ -1,12 +1,12 @@
 // Libraries
-import React, {FC} from 'react'
-import {connect, ConnectedProps} from 'react-redux'
+import React, { FC } from 'react'
+import { connect, ConnectedProps } from 'react-redux'
 
 // Components
-import {Button, ComponentColor, IconFont} from '@influxdata/clockface'
+import { Button, ComponentColor, IconFont } from '@influxdata/clockface'
 
 // Actions
-import {showOverlay, dismissOverlay} from 'src/overlays/actions/overlays'
+import { showOverlay, dismissOverlay } from 'src/overlays/actions/overlays'
 
 interface OwnProps {
   color?: ComponentColor
@@ -24,7 +24,7 @@ const AssetLimitButton: FC<OwnProps & ReduxProps> = ({
   onDismissOverlay,
 }) => {
   const handleClick = () => {
-    onShowOverlay('asset-limit', {asset: `${resourceName}s`}, onDismissOverlay)
+    onShowOverlay('asset-limit', { asset: `${resourceName}s` }, onDismissOverlay)
   }
   return (
     <Button

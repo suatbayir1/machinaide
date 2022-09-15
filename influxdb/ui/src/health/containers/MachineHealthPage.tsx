@@ -580,7 +580,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
         }})
         let query = `from(bucket: "${FACTORY_NAME}")
         |> range(start: ${start}, stop: ${stop})
-        |> filter(fn: ${measurementString})
+        |> filter(fn: (r) => ${measurementString})
         |> aggregateWindow(every: ${this.state.aggregatePeriod}, fn: last, createEmpty: false)
         |> yield(name: "last")`
 
@@ -806,6 +806,49 @@ class MachineHealthPage extends PureComponent<Props, State>{
                           else{
                               this.props["history"].push(`/orgs/${this.props["match"]["params"]["orgID"]}/automl/${modelName}/duration`)
                           }
+                      }}
+                    />
+                  </Context.Menu>
+                  <Context.Menu
+                    icon={IconFont.Cubo}
+                    color={ComponentColor.Default}
+                  >
+                    <Context.Item
+                      label="View Model Performance"
+                      action={() => {
+                        if(modelTask === "rulreg"){
+                            let fid = this.props["match"]["params"]["FID"]
+                            let plid = this.props["match"]["params"]["PLID"]
+                            let mid = this.props["match"]["params"]["MID"]
+                            if(this.isComponent()){
+                                let cid = this.props["match"]["params"]["CID"]
+                                this.props["history"].push(`/orgs/${this.props["match"]["params"]["orgID"]}/health/rulreg-feedback/${fid}/${plid}/${mid}/${cid}/${model["pipelineID"]}`)
+                            }
+                            else
+                                this.props["history"].push(`/orgs/${this.props["match"]["params"]["orgID"]}/health/rulreg-feedback/${fid}/${plid}/${mid}/${model["pipelineID"]}`)
+                        }
+                        else if(modelTask === "pof"){
+                            let fid = this.props["match"]["params"]["FID"]
+                            let plid = this.props["match"]["params"]["PLID"]
+                            let mid = this.props["match"]["params"]["MID"]
+                            if(this.isComponent()){
+                                let cid = this.props["match"]["params"]["CID"]
+                                this.props["history"].push(`/orgs/${this.props["match"]["params"]["orgID"]}/health/pof-feedback/${fid}/${plid}/${mid}/${cid}/${model["modelID"]}`)
+                            }
+                            else
+                                this.props["history"].push(`/orgs/${this.props["match"]["params"]["orgID"]}/health/pof-feedback/${fid}/${plid}/${mid}/${model["modelID"]}`)
+                        }
+                        else if(modelTask === "rul"){
+                            let fid = this.props["match"]["params"]["FID"]
+                            let plid = this.props["match"]["params"]["PLID"]
+                            let mid = this.props["match"]["params"]["MID"]
+                            if(this.isComponent()){
+                                let cid = this.props["match"]["params"]["CID"]
+                                this.props["history"].push(`/orgs/${this.props["match"]["params"]["orgID"]}/health/rul-feedback/${fid}/${plid}/${mid}/${cid}/${model["modelID"]}`)
+                            }
+                            else
+                                this.props["history"].push(`/orgs/${this.props["match"]["params"]["orgID"]}/health/rul-feedback/${fid}/${plid}/${mid}/${model["modelID"]}`)
+                        }
                       }}
                     />
                   </Context.Menu>

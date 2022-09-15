@@ -36,16 +36,12 @@ def get_failures(token):
 @token_required(roles = ["admin", "member", "editor"])
 def get_token_test(token):
     message = "token test"
-    print(request.json)
-    print("token:")
-    print(token)
     logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
     headers = {
         'token': request.json["token"],
         'Content-Type': 'application/json'
     }
     res = requests.post(url="https://vmi474601.contaboserver.net/api/v1.0/failure/getFailures", json={"sourceName": "Press031"}, headers=headers)
-    print(res)
     # return dumps({"sourceName": source_name, "token": token})
     return dumps({"msg": "token test", "token": token}), 200
 
@@ -106,7 +102,6 @@ def remove_failure(token):
 @token_required(roles = ["admin", "editor", "member"])
 def get_by_condition(token):
     try:
-        print("request.json", request.json)
         if not request.json:
             message = "Payload cannot be empty"
             log_type = "ERROR"
@@ -129,23 +124,15 @@ def get_by_condition(token):
                 for key, value in item.items():
                     payload[key] = value
 
-        print("before in array")
 
         if "inArray" in request.json:
-            print("inside in array")
             for item in request.json["inArray"]:
-                print("item", item)
 
                 objectid_array = [ObjectId(i) for i in request.json["inArray"][item]]
-                print("objectid_array", objectid_array)
                 payload[item] = {'$in': objectid_array}
-                print("after inArray")
 
-        print("payload", payload)
 
         result = model.get_by_condition(payload)
-
-        print("result", result)
 
         message = "Failure records were successfully fetched"
         log_type = "INFO"

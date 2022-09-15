@@ -302,11 +302,13 @@ class RetirePartDetail extends PureComponent<Props, State> {
                                                                 <Table.Body>
                                                                     {
                                                                         failures.map(row => {
+                                                                            let startTimeDate = new Date(row["startTime"])
+                                                                            let endTimeDate = new Date(row["endTime"])
                                                                             let recordId = row["_id"]["$oid"];
                                                                             return (
                                                                                 <Table.Row key={recordId}>
-                                                                                    <Table.Cell>{row["startTime"]}</Table.Cell>
-                                                                                    <Table.Cell>{row["endTime"]}</Table.Cell>
+                                                                                    <Table.Cell>{(startTimeDate instanceof Date && !isNaN(startTimeDate.valueOf())) ? startTimeDate.toLocaleString() : ""}</Table.Cell>
+                                                                                    <Table.Cell>{(endTimeDate instanceof Date && !isNaN(endTimeDate.valueOf())) ? endTimeDate.toLocaleString() : ""}</Table.Cell>
                                                                                     <Table.Cell>{row["severity"]}</Table.Cell>
                                                                                     <Table.Cell>{String(row["description"]).substring(0, 50)}...</Table.Cell>
                                                                                     <Table.Cell>

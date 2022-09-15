@@ -38,6 +38,7 @@ interface State {
   showAllSensorValues: boolean
   refreshGraph: boolean
   dt: object[]
+  show3DScene: boolean
 }
 
 class DigitalTwinPage extends PureComponent<Props, State> {
@@ -52,7 +53,8 @@ class DigitalTwinPage extends PureComponent<Props, State> {
       resultNLPQuery: {},
       showAllSensorValues: false,
       refreshGraph: false,
-      dt: []
+      dt: [],
+      show3DScene: true
     }
   }
 
@@ -75,12 +77,14 @@ class DigitalTwinPage extends PureComponent<Props, State> {
   }
 
   public render(): JSX.Element {
-    const { selectedGraphNode, generalInfo, spinnerLoadingInformationPage, refreshVisualizePage, resultNLPQuery } = this.state;
+    const { selectedGraphNode, generalInfo, spinnerLoadingInformationPage, refreshVisualizePage, resultNLPQuery, show3DScene } = this.state;
 
     return (
       <Page>
         <DigitalTwinHeader
           title={i18next.t("headers.dt")}
+          onChangeStatus3DScene={() => { this.setState({ show3DScene: !this.state.show3DScene }) }}
+          show3DScene={show3DScene}
         />
 
         <Page.Contents fullWidth={true} scrollable={true}>
@@ -90,7 +94,7 @@ class DigitalTwinPage extends PureComponent<Props, State> {
                 widthXS={Columns.Twelve}
                 widthSM={Columns.Twelve}
                 widthMD={Columns.Four}
-                widthLG={Columns.Two}
+                widthLG={show3DScene ? Columns.Two : Columns.Four}
                 style={{ marginTop: '20px' }}
               >
                 <DigitalTwinInformation
@@ -109,7 +113,7 @@ class DigitalTwinPage extends PureComponent<Props, State> {
                 widthXS={Columns.Twelve}
                 widthSM={Columns.Twelve}
                 widthMD={Columns.Eight}
-                widthLG={Columns.Six}
+                widthLG={show3DScene ? Columns.Six : Columns.Eight}
                 style={{ marginTop: '20px' }}
               >
                 <DigitalTwinGraph
@@ -122,24 +126,28 @@ class DigitalTwinPage extends PureComponent<Props, State> {
                   showAllSensorValues={this.state.showAllSensorValues}
                   refreshGraph={this.state.refreshGraph}
                   orgID={this.props["match"].params.orgID}
+                  show3DScene={show3DScene}
+
                 />
               </Grid.Column>
-              <div id="dt-3d-scene">
-                <Grid.Column
-                  widthXS={Columns.Twelve}
-                  widthSM={Columns.Twelve}
-                  widthMD={Columns.Twelve}
-                  widthLG={Columns.Four}
-                  style={{ marginTop: '20px' }}
-                >
-                  <DigitalTwinVisualize
-                    selectedGraphNode={selectedGraphNode}
-                    resultNLPQuery={resultNLPQuery}
-                    refreshVisualizePage={refreshVisualizePage}
-                  />
-                </Grid.Column>
-              </div>
-
+              {
+                show3DScene &&
+                <div id="dt-3d-scene">
+                  <Grid.Column
+                    widthXS={Columns.Twelve}
+                    widthSM={Columns.Twelve}
+                    widthMD={Columns.Twelve}
+                    widthLG={Columns.Four}
+                    style={{ marginTop: '20px' }}
+                  >
+                    <DigitalTwinVisualize
+                      selectedGraphNode={selectedGraphNode}
+                      resultNLPQuery={resultNLPQuery}
+                      refreshVisualizePage={refreshVisualizePage}
+                    />
+                  </Grid.Column>
+                </div>
+              }
             </Grid.Row>
           </Grid>
         </Page.Contents>
@@ -160,6 +168,7 @@ class DigitalTwinPage extends PureComponent<Props, State> {
   }
 
   onClickNode = async (node) => {
+    console.log(node);
     this.setState({ selectedGraphNode: node })
   }
 

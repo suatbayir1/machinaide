@@ -60,7 +60,8 @@
         "delete": "Sil",
         "yes": "Evet",
         "add_user": "Kullanıcı Ekle",
-        "export": "Dışarı Aktar"
+        "export": "Dışarı Aktar",
+        "data_sources": "Veri Kaynakları"
     },
     "layout_button": {
         "top_to_down": "Yukarıdan aşağıya",

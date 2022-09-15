@@ -37,15 +37,10 @@ def get_all(token):
         object_pool = cursor_to_json(objectModel.get_object_pool())
 
         for factory in data:
-            print("1")
             for pl in factory["productionLines"]:
-                print("2")
                 for machine in pl["machines"]:
-                    print("3")
                     for component in machine["contents"]:
-                        print("4")
                         if component["@type"] == "Component":
-                            print("5")
                             if component["visual"] != "":
                                 visual = [visual for visual in object_pool if visual["_id"]["$oid"] == component["visual"]]
 
@@ -60,8 +55,6 @@ def get_all(token):
                             for sensor in component["sensors"]:
                                 if sensor["visual"] != "":
                                     visual = [visual for visual in object_pool if visual["_id"]["$oid"] == sensor["visual"]]
-
-                                    print("visual", visual)
 
                                     if not visual:
                                         sensor["visual"] = ""
@@ -360,9 +353,7 @@ def get_model_files(token):
         source = os.path.join(UPLOAD_FOLDER, 'model')
         if not os.path.isdir(source):
             os.mkdir(source)
-        print("source", source)
         fileList = os.listdir(source)
-        print("filelist", fileList)
 
         data = []
 
@@ -711,8 +702,6 @@ def updateProductionLine(token):
             log_type = "ERROR"
             status_code = 400
             return return_response(success = False, message = message, code = 400), 400
-
-        print(request.json)
 
         update_result = model.update_production_line(request.json)
 
@@ -1217,16 +1206,12 @@ def saveMachineOrders(token):
             ["plID", "machines"]
         )
 
-        print("tes2t")
-
         if not confirm:
             log_type = "ERROR"
             status_code = 400
             return return_response(success = False, message = message, code = 400), 400
 
         insert_result = model.saveMachineOrders(request.json)
-        print("test3")
-        print(insert_result)
 
         if not insert_result:
             message = "An error occurred while saving a machine orders"
@@ -1264,7 +1249,6 @@ def getMachineOrders(token):
 
         result = model.getMachineOrders(where)
 
-        print(result)
         if result == None:
             result = []
 

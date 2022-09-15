@@ -4,6 +4,7 @@ import ForceGraph2D from "react-force-graph-2d"
 import * as d3 from "d3";
 import { withSize } from "react-sizeme";
 import i18next from "i18next";
+import { connect, ConnectedProps } from "react-redux";
 
 // Components
 import AddNewNodeOverlay from "src/dt/components/AddNewNodeOverlay";
@@ -20,12 +21,15 @@ import 'src/style/custom.css'
 import DTService from 'src/shared/services/DTService';
 import FluxService from "src/shared/services/FluxService";
 
+// Actions
+import { setOverlayStatus } from 'src/dt/actions/dtActions';
+
 import {
     Panel, ComponentSize, Form, Button, Grid, Columns, ButtonType, ComponentColor, TechnoSpinner,
     RemoteDataState, SpinnerContainer, Dropdown, IconFont, Notification, Gradients,
 } from '@influxdata/clockface'
 
-interface Props {
+interface OwnProps {
     handleNodeClick: (node) => void
     refreshGeneralInfo: () => void
     refreshVisualizePage: () => void
@@ -35,6 +39,7 @@ interface Props {
     refreshGraph: boolean
     orgID: string
     generalInfo: string[]
+    show3DScene: boolean
 }
 
 interface State {
@@ -57,6 +62,10 @@ interface State {
     openVisualizeSensorDataOverlay: boolean
     valuesByField: object
 }
+
+
+type ReduxProps = ConnectedProps<typeof connector>
+type Props = ReduxProps & OwnProps
 
 const withSizeHOC = withSize({ monitorWidth: true, monitorHeight: false, noPlaceholder: true })
 
@@ -131,6 +140,7 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
             graphWidth: document.querySelector("#graphDiv").clientWidth - 30
         })
         window.addEventListener('resize', () => {
+            console.log(document.querySelector("#graphDiv").clientWidth);
             if (document.querySelector("#graphDiv") !== null) {
                 this.setState({
                     graphWidth: document.querySelector("#graphDiv").clientWidth - 30
@@ -159,6 +169,12 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                 this.getRealTimeSensorData();
             }, 5000)
 
+        }
+
+        if (prevProps.show3DScene !== this.props.show3DScene) {
+            this.setState({
+                graphWidth: document.querySelector("#graphDiv").clientWidth - 30
+            })
         }
     }
 
@@ -319,7 +335,12 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
             fields,
         })
 
-        this.graphRef.zoom(2, 1000);
+        await this.initialCameraPosition();
+    }
+
+    initialCameraPosition = async () => {
+        this.graphRef.zoom(1, 2000);
+        this.graphRef.centerAt(0, 0, 2000)
         this.graphRef.d3Force('collide', d3.forceCollide(5));
     }
 
@@ -507,6 +528,14 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
         })
     }
 
+    handleNodeClick = (node) => {
+        console.log(this.graphRef);
+        console.log(node);
+        this.graphRef.centerAt(node.x, node.y, 2000);
+        this.graphRef.zoom(3, 2000);
+        this.props.handleNodeClick(node);
+    }
+
     render() {
         const {
             prunedTree,
@@ -515,7 +544,7 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
             graphTypeList,
             visibleAddNodeOverlay,
         } = this.state;
-        const { handleNodeClick } = this.props;
+        // const { handleNodeClick } = this.props;
 
         const graphTypeMenuList = graphTypeList.map(item => {
             return (
@@ -545,6 +574,14 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                                 <Grid.Row>
                                     <Grid.Column widthXS={Columns.Twelve}>
                                         <div className="dt-graph-buttons">
+                                            <Button
+                                                text={""}
+                                                icon={IconFont.Undo}
+                                                onClick={this.initialCameraPosition}
+                                                type={ButtonType.Button}
+                                                color={ComponentColor.Primary}
+                                                className="show-only-pc"
+                                            />
                                             {
                                                 ["admin"].includes(localStorage.getItem("userRole")) &&
                                                 <Button
@@ -578,6 +615,15 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                                                 )}
                                             />
 
+                                            <Button
+                                                text={i18next.t('button.data_sources')}
+                                                icon={IconFont.Link}
+                                                onClick={() => this.props.setOverlayStatus("data-source")}
+                                                type={ButtonType.Button}
+                                                color={ComponentColor.Primary}
+                                                className="show-only-pc"
+                                            />
+
                                             {this.props.selectedGraphNode["type"] === "Field" ?
                                                 <Button
                                                     text={i18next.t('button.show_data_in_chart')}
@@ -601,7 +647,7 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
                         />
                         <ForceGraph2D
                             ref={element => { this.graphRef = element }}
-                            onNodeClick={handleNodeClick}
+                            onNodeClick={this.handleNodeClick}
                             onNodeRightClick={this.handleNodeRightClick}
                             linkColor={() => "rgb(6, 111, 197)"}
                             linkWidth={3}
@@ -692,4 +738,19 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
     }
 }
 
-export default withSizeHOC(DigitalTwinGraph);
+
+const mstp = (state) => {
+    return {
+        visibleDataSourceInformationOverlay: state.dtReducer.visibleDataSourceInformationOverlay,
+    };
+};
+
+const mdtp = (dispatch) => {
+    return {
+        setOverlayStatus: (overlayID) => dispatch(setOverlayStatus(overlayID)),
+    };
+};
+
+const connector = connect(mstp, mdtp)
+
+export default (connector)(withSizeHOC(DigitalTwinGraph));

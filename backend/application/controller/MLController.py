@@ -17,6 +17,7 @@ from mlhelpers.mlwrappers import MLSession, ModelRunner
 from mlhelpers.automl.ml_config import AUTOML_SETTINGS_DIR, AUTOML_EXPERIMENTS_DIR, MODELS_DIR
 import codecs
 from application.helpers.Helper import return_response, token_required
+import math
 # from mlserver.flask_app_ml.mlconstants import VAE_SENSOR_DIR
 
 mlserver = Blueprint("mlserver", __name__)
@@ -673,6 +674,15 @@ def getMLModels():
     models = mongo_model.get_ml_models({"assetName": {"$regex" :settings["assetName"]}})
     return json.dumps(list(models), cls=JSONEncoder)
 
+@mlserver.route('/getMLModelsWithID', methods=['POST'])
+def getMLModelsWithID():
+    settings = request.json
+    if("pipelineID" in settings):
+        models = mongo_model.get_ml_models({"pipelineID": settings["pipelineID"]})
+        return json.dumps(list(models), cls=JSONEncoder)
+    models = mongo_model.get_ml_models({"modelID": settings["modelID"]})
+    return json.dumps(list(models), cls=JSONEncoder)
+
 @mlserver.route('/startStopModel', methods=['POST'])
 def startStopModel():
     model_name = request.json["modelName"]
@@ -807,6 +817,29 @@ def updateLastDataPoint(modelID):
     mongo_model.update_ml_model(query, data)
     return jsonify(msg="Last data point is updated"), 200 
 
+def return_probability(alpha, beta, days=30):
+    if(alpha != 0 or alpha != "0"):
+        alpha = float(alpha)
+        beta = float(beta)
+        probability = 1 - math.e ** (-1 * (days/alpha)**beta)
+        return probability
+    else:
+        return 0
+
+@mlserver.route('/getModelLogsOnCondition/<model_id>', methods=['POST'])
+def getModelLogsOnCondition(model_id):
+    task = request.json["task"]
+    model_logs = mongo_model.get_model_logs({"modelID": model_id})
+    if(model_logs.count() == 0):
+        return dumps([]), 200
+    if(task == "rul"):
+        model_logs = [log for log in model_logs[0]["logs"] if log["prediction"] == "1"]
+        return dumps(model_logs), 200
+    elif(task == "pof"):
+        model_logs = [log for log in model_logs[0]["logs"]] # if return_probability(log["prediction"][0], log["prediction"][1])>=0.75]
+        return dumps(model_logs), 200
+    return dumps(model_logs[0]["logs"]), 200
+
 @mlserver.route('/getModelLogs/<model_id>', methods=['GET'])
 def getModelLogs(model_id):
     model_logs = mongo_model.get_model_logs({"modelID": model_id})
@@ -835,3 +868,14 @@ def getMLModel():
 # def get_experiments():
 #     exps = mongo_model.get_experiments()
 #     return json.dumps(list(exps), cls=JSONEncoder)
+
+@mlserver.route('/updateModelLogFeedback', methods=['PUT'])
+def updateModelLogFeedback():
+    feedback = request.json["feedback"]
+    timestamp = request.json["timestamp"]
+    modelID = request.json["modelID"]
+    query = {"modelID": modelID, "logs.time": timestamp}
+    update_set = {"logs.$.feedback": feedback}
+    data = {"$set": update_set}
+    mongo_model.update_model_log(query, data)
+    return jsonify(msg="Model log feedback is updated"), 200
