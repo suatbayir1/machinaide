@@ -25,7 +25,7 @@ class LoginService {
     }
 
     loginWithLDAP = async (payload) => {
-        const url = `${BACKEND.API_URL}auth/loginWithLDAP`;
+        const url = `${BACKEND.API_URL}auth/loginWithLDAPErmetal`;
 
         const request = fetch(url, {
             method: 'POST',

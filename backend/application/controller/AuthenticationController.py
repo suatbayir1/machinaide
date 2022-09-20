@@ -119,6 +119,7 @@ def loginWithLDAP():
 
 @auth.route("/loginWithLDAPErmetal", methods = ["POST"])
 def loginWithLDAPErmetal():
+    print("ermetal login method request")
     if not request.json:
         message = "username_password_cannot_be_empty"
         logger.add_log("ERROR", request.remote_addr, '', request.method, request.url, "", message,  400)
