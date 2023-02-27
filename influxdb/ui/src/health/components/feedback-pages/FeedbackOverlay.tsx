@@ -14,6 +14,7 @@ import HealthAssessmentService from 'src/shared/services/HealthAssessmentService
 interface Props {
     visible: boolean
     onDismiss: () => void
+    getModelLogsData: () => void
     log: object
     modelID: string
     failures: object[]
@@ -22,62 +23,37 @@ interface Props {
 
 interface State {
     feedback: string
+    feedbackRange: string
 }
 
 class FeedbackOverlay extends Component<Props, State> {
     constructor(props){
         super(props)
         this.state ={
-            feedback: ""
+            feedback: "",
+            feedbackRange: "1h"
         }
+    }
+
+    componentDidMount(): void {
+        this.setState({feedback: "feedback" in this.props.log ? this.props.log["feedback"] : "", 
+                feedbackRange: "feedbackRange" in this.props.log ? this.props.log["feedbackRange"] : ""})
     }
 
     componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
-        if ((prevProps.log && this.props.log) ) {
-            //console.log("--<", prevProps.annotationObject, this.props.annotationObject)
-            if(prevProps.log["timestamp"] !== this.props.log["timestamp"] ||
-                (prevProps.log["feedback"] ?  prevProps.log["feedback"] !== this.props.log["feedback"] : false)){
-                    if("feedback" in this.props.log){
-                        this.setState({feedback: this.props.log["feedback"]})
-                    }
-                    else{
-                        this.setState({feedback: ""})
-                    }
-            }
-            /* else{
-                if(prevState.code !== this.props.annotationObject["code"]){
-                    this.setState({code: this.props.annotationObject["code"]})
-                }
-            }
-            if(prevProps.annotationObject["description"] !== this.props.annotationObject["description"]){
-                console.log(prevState)
-                this.setState({description: this.props.annotationObject["description"]})
-            }
-            else{
-                if(prevState.description !== this.props.annotationObject["description"]){
-                    this.setState({description: this.props.annotationObject["description"]})
-                }
-            } */
+        if (JSON.stringify(prevProps) !== JSON.stringify(this.props)) {
+            console.log("diff", prevProps.log, this.props.log)
+            this.setState({feedback: "feedback" in this.props.log ? this.props.log["feedback"] : "", 
+                feedbackRange: "feedbackRange" in this.props.log ? this.props.log["feedbackRange"] : ""})
             
-            /* if(prevProps.annotationObject["description"] !== this.props.annotationObject["description"]){
-                this.setState({description: this.props.annotationObject["description"]})
-            }
-            if(prevProps.annotationObject["code"] !== this.props.annotationObject["code"]){
-                this.setState({code: this.props.annotationObject["code"]})
-            } */
         }
-        else if(!prevProps.log && this.props.log ){
-            if("feedback" in this.props.log){
-                this.setState({feedback: this.props.log["feedback"]})
-            }
-            else{
-                this.setState({feedback: ""})
-            }
-        }
-    }
+    }   
 
     updateModelLogFeedback = async () => {
-        await HealthAssessmentService.updateModelLogFeedback({"modelID": this.props.modelID, "timestamp": this.props.log["time"], "feedback": this.state.feedback})
+        console.log(this.props)
+        await HealthAssessmentService.updateModelLogFeedback({"modelID": this.props.modelID, "timestamp": this.props.log["time"], 
+            "feedback": this.state.feedback, "feedbackRange": this.state.feedbackRange})
+        this.props.getModelLogsData()
         this.props.onDismiss()
     }
 
@@ -106,7 +82,8 @@ class FeedbackOverlay extends Component<Props, State> {
                         onDismiss={() =>{
                             if(this.props.log === null){
                                 this.setState({
-                                    feedback: ""
+                                    feedback: "",
+                                    feedbackRange: "",
                                 })
                             }                            
                             this.props.onDismiss()
@@ -128,7 +105,7 @@ class FeedbackOverlay extends Component<Props, State> {
                                             />
                                         </Form.Element> 
                                     </Grid.Column>  
-                                    <Grid.Column widthXS={Columns.Four} /* style={{ margin: "7px" }} */>
+                                    <Grid.Column widthXS={Columns.One} /* style={{ margin: "7px" }} */>
                                         <Form.Element label="Log">
                                             <Label
                                                 size={ComponentSize.Small}
@@ -140,7 +117,7 @@ class FeedbackOverlay extends Component<Props, State> {
                                             />
                                         </Form.Element> 
                                     </Grid.Column>     
-                                    <Grid.Column widthXS={Columns.Four} /* style={{ margin: "7px" }} */>
+                                    <Grid.Column widthXS={Columns.Three} /* style={{ margin: "7px" }} */>
                                         <Form.Element label="Feedback">
                                             <FlexBox
                                                 alignItems={AlignItems.Center}
@@ -162,7 +139,32 @@ class FeedbackOverlay extends Component<Props, State> {
                                                 />
                                             </FlexBox>
                                         </Form.Element> 
-                                    </Grid.Column>                             
+                                    </Grid.Column>  
+                                    {this.state.feedback.length ? (
+                                        <Grid.Column widthXS={Columns.Four} /* style={{ margin: "7px" }} */>
+                                            <Form.Element label="Feedback">
+                                                <FlexBox
+                                                    alignItems={AlignItems.Center}
+                                                    margin={ComponentSize.Small}
+                                                    className="view-options--checkbox"
+                                                    key={uuid.v4()}
+                                                >
+                                                    <SelectDropdown
+                                                        // style={{width: "10%"}}
+                                                        options={["1h", "2h", "6h", "12h", "24h"]}
+                                                        selectedOption={this.state.feedbackRange}
+                                                        onSelect={(e) => {this.setState({feedbackRange: e})}}
+                                                    /> 
+                                                    <QuestionMarkTooltip
+                                                        style={{ marginLeft: "5px" }}
+                                                        diameter={15}
+                                                        color={ComponentColor.Primary}
+                                                        tooltipContents={"How many hours is valid for this feedback?"}
+                                                    />
+                                                </FlexBox>
+                                            </Form.Element> 
+                                        </Grid.Column>      
+                                    ) : <Grid.Column widthXS={Columns.Four}></Grid.Column>}                           
                                 </Grid.Row>
                                 <Grid.Row>  
                                     <Grid.Column widthXS={Columns.Six}>
@@ -208,6 +210,15 @@ class FeedbackOverlay extends Component<Props, State> {
                                         </DapperScrollbars>   
                                     </Grid.Column>
                                     <Grid.Column widthXS={Columns.Six}>
+                                        <div className="tabbed-page--header-left" style={{marginBottom: "10px"}}>
+                                            <Label
+                                                size={ComponentSize.Small}
+                                                name={"Summary"}
+                                                description={""}
+                                                color={InfluxColors.Amethyst}
+                                                id={"summary-label"} 
+                                            />
+                                        </div>  
                                         <GradientBox
                                             borderGradient={Gradients.MiyazakiSky}
                                             borderColor={InfluxColors.Raven}

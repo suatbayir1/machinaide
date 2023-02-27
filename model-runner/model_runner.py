@@ -1,6 +1,11 @@
 import math
 import json
 import datetime
+import time
+import hdbscan
+import pickle
+import threading
+import queue
 import requests
 import numpy as np
 import pandas as pd
@@ -8,6 +13,7 @@ import featuretools as ft
 from sklearn import preprocessing
 from influxdb_client import InfluxDBClient
 from sklearn.preprocessing import normalize
+from kafka import KafkaConsumer
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import backend as k
@@ -20,6 +26,7 @@ from model_runner_config import (
     TICK_SETTINGS,
     POST_MODEL_LOG,
     UPDATE_LAST_DATA_POINT,
+    POST_ANOMALY_URL,
     INFLUX,
     OPERATIONS
 )
@@ -95,7 +102,7 @@ class QueryHelper:
         self.url = settings['url']
         self.token = settings['token']
         self.org = settings["org"]
-        self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org, verify_ssl = False) 
+        self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org, verify_ssl = False, timeout=30_000) 
         self.query_api = self.client.query_api()
     
     def query_db(self, query):
@@ -313,7 +320,7 @@ def compare_last_data_point(last_stored_point, last_data_point, modelID):
 
 def get_sensor_data_query(bucket, measurement, field):
     query = f'from(bucket: "{bucket}")\
-  |> range(start: -30d)\
+  |> range(start: -10d)\
   |> filter(fn: (r) => r["_measurement"] == "{measurement}")\
   |> filter(fn: (r) => r["_field"] == "{field}")\
   |> aggregateWindow(every: 30m, fn: mean, createEmpty: true)'
@@ -382,8 +389,13 @@ class RULRegModelRunner:
                     operator, operator_value = return_operator_info(sensor_info["operator"], sensor_info["operatorValue"])
                 else:
                     operator, operator_value = (None, None)
-            data = get_query_results(self.query_helper, field["database"], field["measurement"], field["dataSource"])
+            # data = get_query_results(self.query_helper, field["database"], field["measurement"], field["dataSource"])
 
+            boolean_vals = ["Pres-Counter_Reset", "AnaMotor-Counter_Reset", "RegMotor-Counter_Reset", "YagMotor-Counter_Reset", "KaMotor-Counter_Reset"]
+            if(field["measurement"] != "Pres31-AlarmlarDB" and (not (field["measurement"] == "Pres31-Energy_DB" and (field["dataSource"] in boolean_vals)))):
+                data = get_query_results(self.query_helper, field["database"], field["measurement"], field["dataSource"])
+            else:
+                data = []
             df = pd.DataFrame(data)
             data_points = []
             if(not df.empty):
@@ -409,7 +421,7 @@ class RULRegModelRunner:
             if(len(data_points)):
                 all_data.append(data_points)
         print("<--", len(all_data))
-        if(len(all_data)):
+        """ if(len(all_data)):
             print("--", len(all_data))
             one_merged = pd.DataFrame(all_data[0])
             for i in range(1,len(all_data)):
@@ -423,7 +435,41 @@ class RULRegModelRunner:
                     cycle += 1
                 one_log_data = one_log_data + one_merged.to_dict("records")
         else:
-            one_log_data = []
+            one_log_data = [] """
+
+        # make time as key and add ather sensors to the time keys dict value
+        all_data_in_one = {}
+        if(len(all_data)):
+            print("here1", len(all_data[0]))
+            # print(all_data[0])
+            for record in all_data[0]:
+                for key in record:
+                    if(key != "time"):
+                        all_data_in_one[record["time"]] = {key: record[key]}
+            last_key = list(all_data_in_one.keys())[-1]
+            for i in range(1,len(all_data)):
+                print("start", i)
+                for record in all_data[i]:
+                    for key in record:
+                        if(key != "time"):
+                            if(record["time"] in all_data_in_one):
+                                all_data_in_one[record["time"]][key] = record[key]
+                            else:
+                                all_data_in_one[last_key][key] = record[key]
+                print("end", i)
+
+        adjusted_data = []
+        for key in all_data_in_one.keys():
+            new_row = {"time": key}
+            new_row.update(all_data_in_one[key])
+            adjusted_data.append(new_row)
+
+        cycle = 0
+        for adata in adjusted_data:
+            adata["cycle"] = cycle
+            cycle += 1
+
+        one_log_data = adjusted_data 
         
         if(len(one_log_data)):
             df = pd.DataFrame(one_log_data)
@@ -555,7 +601,13 @@ class RULModelRunner:
                     operator, operator_value = return_operator_info(sensor_info["operator"], sensor_info["operatorValue"])
                 else:
                     operator, operator_value = (None, None)
-            data = get_query_results(self.query_helper, field["database"], field["measurement"], field["dataSource"])
+            # data = get_query_results(self.query_helper, field["database"], field["measurement"], field["dataSource"])
+
+            boolean_vals = ["Pres-Counter_Reset", "AnaMotor-Counter_Reset", "RegMotor-Counter_Reset", "YagMotor-Counter_Reset", "KaMotor-Counter_Reset"]
+            if(field["measurement"] != "Pres31-AlarmlarDB" and (not (field["measurement"] == "Pres31-Energy_DB" and (field["dataSource"] in boolean_vals)))):
+                data = get_query_results(self.query_helper, field["database"], field["measurement"], field["dataSource"])
+            else:
+                data = []
 
             df = pd.DataFrame(data)
             data_points = []
@@ -580,7 +632,7 @@ class RULModelRunner:
             if(len(data_points)):
                 all_data.append(data_points)
         
-        if(len(all_data)):
+        """ if(len(all_data)):
             one_merged = pd.DataFrame(all_data[0])
             for i in range(1,len(all_data)):
                 if(len(all_data[i])):
@@ -596,7 +648,46 @@ class RULModelRunner:
             # print(one_merged)
         else:
             one_log_data = []
-        
+         """
+
+        # make time as key and add ather sensors to the time keys dict value
+        all_data_in_one = {}
+        if(len(all_data)):
+            print("here1", len(all_data[0]))
+            # print(all_data[0])
+            for record in all_data[0]:
+                for key in record:
+                    if(key != "time"):
+                        all_data_in_one[record["time"]] = {key: record[key]}
+            # print(all_data_in_one.keys())
+            last_key = list(all_data_in_one.keys())[-1]
+            for i in range(1,len(all_data)):
+                print("start", i)
+                # print("0 keys:", all_data_in_one.keys())
+                # print("1 keys:", [record["time"] for record in all_data[1]])
+                # print("2 keys:", [record["time"] for record in all_data[2]])
+                for record in all_data[i]:
+                    for key in record:
+                        if(key != "time"):
+                            if(record["time"] in all_data_in_one):
+                                all_data_in_one[record["time"]][key] = record[key]
+                            else:
+                                all_data_in_one[last_key][key] = record[key]
+                print("end", i)
+
+        adjusted_data = []
+        for key in all_data_in_one.keys():
+            new_row = {"time": key}
+            new_row.update(all_data_in_one[key])
+            adjusted_data.append(new_row)
+
+        cycle = 1
+        for adata in adjusted_data:
+            adata["time"] = cycle
+            cycle += 1
+
+        one_log_data = adjusted_data 
+
         if(len(one_log_data)):
             df = pd.DataFrame(one_log_data)
             # print("sensor df: ---------------------")
@@ -749,9 +840,12 @@ class POFModelRunner:
                     operator, operator_value = return_operator_info(sensor_info["operator"], sensor_info["operatorValue"])
                 else:
                     operator, operator_value = (None, None)
-
-            data = get_query_results(self.query_helper, field["database"], field["measurement"], field["dataSource"])
-
+            
+            boolean_vals = ["Pres-Counter_Reset", "AnaMotor-Counter_Reset", "RegMotor-Counter_Reset", "YagMotor-Counter_Reset", "KaMotor-Counter_Reset"]
+            if(field["measurement"] != "Pres31-AlarmlarDB" and (not (field["measurement"] == "Pres31-Energy_DB" and (field["dataSource"] in boolean_vals)))):
+                data = get_query_results(self.query_helper, field["database"], field["measurement"], field["dataSource"])
+            else:
+                data = []
             df = pd.DataFrame(data)
             data_points = []
 
@@ -777,7 +871,7 @@ class POFModelRunner:
             if(len(data_points)):
                 all_data.append(data_points)
             
-        if(len(all_data)):
+        """ if(len(all_data)):
             one_merged = pd.DataFrame(all_data[0])
             for i in range(1,len(all_data)):
                 if(len(all_data[i])):
@@ -792,7 +886,45 @@ class POFModelRunner:
                 one_log_data = one_log_data + one_merged.to_dict("records")
             # print(one_merged)
         else:
-            one_log_data = []
+            one_log_data = [] """
+        
+        # make time as key and add ather sensors to the time keys dict value
+        all_data_in_one = {}
+        if(len(all_data)):
+            print("here1", len(all_data[0]))
+            # print(all_data[0])
+            for record in all_data[0]:
+                for key in record:
+                    if(key != "time"):
+                        all_data_in_one[record["time"]] = {key: record[key]}
+            # print(all_data_in_one.keys())
+            last_key = list(all_data_in_one.keys())[-1]
+            for i in range(1,len(all_data)):
+                print("start", i)
+                # print("0 keys:", all_data_in_one.keys())
+                # print("1 keys:", [record["time"] for record in all_data[1]])
+                # print("2 keys:", [record["time"] for record in all_data[2]])
+                for record in all_data[i]:
+                    for key in record:
+                        if(key != "time"):
+                            if(record["time"] in all_data_in_one):
+                                all_data_in_one[record["time"]][key] = record[key]
+                            else:
+                                all_data_in_one[last_key][key] = record[key]
+                print("end", i)
+
+        adjusted_data = []
+        for key in all_data_in_one.keys():
+            new_row = {"time": key}
+            new_row.update(all_data_in_one[key])
+            adjusted_data.append(new_row)
+
+        cycle = 0
+        for adata in adjusted_data:
+            adata["time"] = cycle
+            cycle += 1
+
+        one_log_data = adjusted_data 
         
         if(len(one_log_data)):
             df = pd.DataFrame(one_log_data)
@@ -835,3 +967,160 @@ class POFModelRunner:
         if(len(seq) != 0):
             self.predict(seq)
 
+
+class KafkaHelper:
+    def __init__(self, kafka_version, kafka_servers, window_size, data_queue, delay=0):
+        self.kafka_version = kafka_version
+        self.kafka_servers = kafka_servers
+        self.data = {}
+        self.message_queue = queue.Queue()
+        self.window_size = window_size
+        self.data_queue = data_queue
+        self.delay = delay
+
+        self.kafka_consumer = None
+        self.topics = None
+        self.measurement_sensor_dict = None
+        self.sensors = None
+
+        self.consume = True
+        self.arrange = True
+
+        # self.consumers = []
+
+
+    def set_topics(self, measurement_sensor_dict):
+        self.measurement_sensor_dict = measurement_sensor_dict
+        self.topics = list(measurement_sensor_dict.keys())
+        self.sensors = [item for sublist in list(self.measurement_sensor_dict.values()) for item in sublist]
+
+
+    def round_unix_date(self, dt_series, ms=1000, up=False):
+        return dt_series // ms * ms + ms * up
+
+
+    def arrange_data(self):
+        window_count = 300
+        curr_window_count = 0
+        while self.arrange:
+            message = self.message_queue.get()
+            sensor_values = message.value.split(" ")[1].split(',')
+            timestamp = self.round_unix_date(message.timestamp)
+            try:
+                for val in sensor_values:
+                    if val.split("=")[0] in self.sensors:
+                        self.data[timestamp][self.sensors.index(val.split("=")[0])] = float(val.split("=")[1])
+            except:
+                self.data[timestamp] = [None] * len(self.sensors)
+
+                for val in sensor_values:
+                    if val.split("=")[0] in self.sensors:
+                        self.data[timestamp][self.sensors.index(val.split("=")[0])] = float(val.split("=")[1])
+
+            if len(self.data.keys()) == self.window_size + self.delay:
+                dict1 = OrderedDict(sorted(self.data.items()))
+                self.data_queue.put(list(dict1.values())[:self.window_size])
+                del dict1[list(dict1.keys())[0]]
+                self.data = dict1
+                curr_window_count += 1
+                if curr_window_count == window_count:
+                    self.arrange = False
+                    self.consume = False
+
+        # print(self.data)
+        # if sum(x is not None for x in self.data[timestamp]) == 0:
+        #     print(self.data)
+
+
+    def consume(self):
+        t = threading.Thread(target=self.arrange_data)
+        t.start()
+        while self.consume:
+            # poll messages each certain ms
+            raw_messages = self.consumer.poll(
+                timeout_ms=1000
+            )
+            # for each messages batch
+            for _, messages in raw_messages.items():
+                self.message_queue.put(messages[0])
+        t.join()
+
+    @property
+    def consumer(self):
+        if self.kafka_consumer is None:
+            self.kafka_consumer = KafkaConsumer(
+                bootstrap_servers=self.kafka_servers,
+                auto_offset_reset='latest',
+                enable_auto_commit=True,
+                api_version=self.kafka_version,
+                value_deserializer=lambda x: x.decode('utf-8')
+            )
+            self.kafka_consumer.subscribe(self.topics)
+
+        return self.kafka_consumer
+
+
+class HDBSCANRunner:
+    def __init__(self, model, hdb_settings):
+        self.db_settings = hdb_settings["db_settings"]
+        self.clusterer = model
+        self.m2s = hdb_settings["m2s"]
+        self.window_size = hdb_settings["window_size"]
+        self.model_name = hdb_settings["model_name"]
+        self.session_id = hdb_settings["session_id"]
+        self.model_id = hdb_settings["model_id"]
+
+        # self.clusterer = None
+        self.kafka_helper = None
+
+
+        self.kafka_queue = queue.Queue()
+
+    def consume(self):
+        self.consumer.consume()
+
+    @property
+    def consumer(self):
+        if self.kafka_helper == None:
+            self.kafka_helper = KafkaHelper((10,0), ["localhost:9092"], self.window_size, self.kafka_queue, 0)
+            self.kafka_helper.set_topics(self.m2s)
+
+        return self.kafka_helper
+
+    def extract_model(self):
+        with open(models_path + str(self.session_id) + "/" + self.model_name + ".maidemdl", 'rb') as f:
+            self.model = pickle.load(f)
+
+    
+    def run(self):
+        t = threading.Thread(target=self.consume)
+        t.start()
+        cycle_anomaly_count = 0
+        cycle_count = 0
+        while cycle_count < 300:
+            item = self.kafka_queue.get()
+            # print(np.asarray(item).reshape(-1, 2))
+            labels, membership_strengths = hdbscan.approximate_predict(self.clusterer, np.asarray(item).reshape(-1, len(self.columns)))
+            # print(labels)
+            print(membership_strengths)
+            for i, label in enumerate(labels):
+                if label == -1:
+                    for machine in self.m2s.keys():
+                        pkg = {
+                            "anomaly": {
+                                "feedback": "null",
+                                "timestamp": int(time.time()) * 1000,
+                                "description": "H-DBSCAN",
+                                "type": "model",
+                                "code": "Sequential"
+                            }
+                        }
+                        requests.put(url=POST_ANOMALY_URL + machine + "/" + self.model_id, json=pkg)
+                    cycle_anomaly_count += 1
+                    break
+            cycle_count += 1
+
+        now = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
+
+        log = {"modelID":modelID, "log": {"time": now, "prevCount": 0, "count": cycle_anomaly_count}}
+        requests.post(url=POST_MODEL_LOG, json=log)

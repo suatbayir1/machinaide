@@ -11,7 +11,7 @@ import AutoMLService from 'src/shared/services/AutoMLService'
 import ModelLogGraphTimeRangeDropdown from 'src/health/components/ModelLogGraphTimeRangeDropdown'
 
 import { Overlay, Grid,
-    ButtonType, Button, ComponentColor, Columns, SelectDropdown,
+    TechnoSpinner, WaitingText, ComponentColor, Columns, SelectDropdown,
     InfluxColors, ComponentSize, Label, Input, Notification,
     InputType, QuestionMarkTooltip,
     DapperScrollbars, AlignItems, InputToggleType,} from '@influxdata/clockface'
@@ -62,6 +62,7 @@ class ModelLogGraphOverlay extends PureComponent<Props, State>{
       let model = this.props.model
       console.log("model logs: ", this.props)
       let failures = await FailureService.getFailures({"sourceName": model["assetName"]})
+      failures.sort((a,b) => new Date(a["startTime"]).getTime() - new Date(b["startTime"]).getTime())
       console.log(failures)
       let failPoints = []
       for (let failure of failures) {
@@ -76,7 +77,7 @@ class ModelLogGraphOverlay extends PureComponent<Props, State>{
       }
       /* failPoints.push({
           axis:"x",
-          value: '2022-05-18T15:04:21.711010',
+          value: '2022-10-24T15:04:21.711010',
           lineStyle: { stroke: '#00A3FF', strokeWidth: 2 },
           legend: ""
       }) */
@@ -358,26 +359,32 @@ class ModelLogGraphOverlay extends PureComponent<Props, State>{
                       </Grid.Row>
                       <Grid.Row>
                           <Grid.Column widthXS={Columns.Twelve} style={{height: "500px"}}>
-                              {this.props.model && this.props.model["task"] === "pof" && gdata.length && 
+                            {gdata.length===0 ?  (
+                              <div style={{textAlign: "-webkit-center", marginTop: "60px"}}>
+                                    <TechnoSpinner style={{ width: "75px", height: "75px"}} />
+                                    <WaitingText text="Graph is loading" />
+                                </div>
+                            ) : <></>}
+                              {this.props.model && this.props.model["task"] === "pof" && gdata.length ? 
                                 <POFModelLogGraph 
                                   key={uuid.v4()}
                                   modelLogDataPoints={gdata} 
                                   annotations={inRangeAnnotations}
-                                />
+                                /> : <></>
                               }
-                              {this.props.model && this.props.model["task"] === "rul" && gdata.length && 
+                              {this.props.model && this.props.model["task"] === "rul" && gdata.length ? 
                                 <RULModelLogGraph 
                                   key={uuid.v4()}
                                   modelLogDataPoints={gdata} 
                                   annotations={inRangeAnnotations}
-                                />
+                                /> : <></>
                               }
-                              {this.props.model && this.props.model["task"] === "rulreg" && gdata.length && 
+                              {this.props.model && this.props.model["task"] === "rulreg" && gdata.length ? 
                                 <RULRegModelLogGraph 
                                   key={uuid.v4()}
                                   modelLogDataPoints={gdata} 
                                   annotations={inRangeAnnotations}
-                                />
+                                /> : <></>
                               }
                           </Grid.Column>
                       </Grid.Row>

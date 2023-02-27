@@ -1,7 +1,7 @@
 import React, { PureComponent } from "react";
 import {
     Page, QuestionMarkTooltip, ComponentColor, InfluxColors, Grid, Columns,
-    SpinnerContainer, TechnoSpinner, RemoteDataState,
+    SpinnerContainer, TechnoSpinner, RemoteDataState, SelectDropdown
 } from '@influxdata/clockface'
 import { Link } from "react-router-dom";
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
@@ -10,6 +10,7 @@ import HomeIcon from '@material-ui/icons/Home';
 import FactoryService from 'src/shared/services/FactoryService';
 import ProductionLineCard from 'src/side_nav/components/productionLines/components/ProductionLineCard';
 import ProductionLineDashboardPanel from 'src/side_nav/components/productionLines/components/ProductionLineDashboardPanel';
+import ProductionLineSummaryDashboard from "src/side_nav/components/productionLines/components/ProductionLineSummaryDashboard";
 
 // Constants
 import { tipStyle, productionLinePage } from 'src/shared/constants/tips'
@@ -19,6 +20,7 @@ interface State {
     productionLine: object
     spinnerLoading: RemoteDataState
     isLoading: boolean
+    selectedMachine: string
 }
 
 class ProductionLine extends PureComponent<Props, State> {
@@ -28,6 +30,7 @@ class ProductionLine extends PureComponent<Props, State> {
             productionLine: {},
             spinnerLoading: RemoteDataState.Loading,
             isLoading: false,
+            selectedMachine: "Press031"
         };
     }
 
@@ -57,7 +60,7 @@ class ProductionLine extends PureComponent<Props, State> {
     }
 
     render() {
-        const { productionLine, spinnerLoading, isLoading } = this.state;
+        const { productionLine, spinnerLoading, isLoading, selectedMachine } = this.state;
 
         return (
             <Page>
@@ -73,18 +76,26 @@ class ProductionLine extends PureComponent<Props, State> {
                         <React.Fragment>
                             <Page.Header fullWidth={true}>
                                 <Page.Title title={"Production Line"} />
-                                <QuestionMarkTooltip
-                                    style={{ marginBottom: '8px' }}
-                                    diameter={30}
-                                    tooltipStyle={{ width: '400px' }}
-                                    color={ComponentColor.Secondary}
-                                    tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
-                                        <div style={{ color: InfluxColors.Star }}>{"About the Production Line:"}
-                                            <hr style={tipStyle} />
-                                        </div>
-                                        {productionLinePage}
-                                    </div>}
-                                />
+                                <div className="tabbed-page--header-right">
+                                    <SelectDropdown
+                                        style={{width: "100px"}}
+                                        options={["Press030", "Press031", "Press032", "Press033", "Press034"]}
+                                        selectedOption={this.state.selectedMachine}
+                                        onSelect={(e) => {this.setState({selectedMachine: e})}}
+                                    /> 
+                                    <QuestionMarkTooltip
+                                        style={{ marginBottom: '8px' }}
+                                        diameter={30}
+                                        tooltipStyle={{ width: '400px' }}
+                                        color={ComponentColor.Secondary}
+                                        tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                            <div style={{ color: InfluxColors.Star }}>{"About the Production Line:"}
+                                                <hr style={tipStyle} />
+                                            </div>
+                                            {productionLinePage}
+                                        </div>}
+                                    />
+                                </div>
                             </Page.Header>
 
                             <Breadcrumbs separator="/" aria-label="breadcrumb" style={{ color: '#ffffff', marginLeft: '28px', marginTop: '-10px' }}>
@@ -96,7 +107,6 @@ class ProductionLine extends PureComponent<Props, State> {
                                 </Link>
                                 <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>Production Line</Typography>
                             </Breadcrumbs>
-
                             <Page.Contents fullWidth={true} scrollable={true}>
                                 <Grid>
                                     <Grid.Row>
@@ -121,9 +131,14 @@ class ProductionLine extends PureComponent<Props, State> {
                                             widthMD={Columns.Twelve}
                                             widthLG={Columns.Eight}
                                         >
-                                            <ProductionLineDashboardPanel
+                                            {/* <ProductionLineDashboardPanel
                                                 orgID={this.props["match"].params.orgID}
                                                 productionLine={productionLine}
+                                            /> */}
+                                            <ProductionLineSummaryDashboard
+                                                orgID={this.props["match"].params.orgID}
+                                                productionLine={productionLine}
+                                                selectedMachine={selectedMachine}
                                             />
                                         </Grid.Column>
                                     </Grid.Row>

@@ -365,7 +365,7 @@ class FailureBrushGraph extends Component<Props, State> {
             allSeries: this.props.graphData,
             annotation: null,
             lineAnnotation: null,
-            selectedLog: null,
+            selectedLog: {timestamp: "", prediiction: ""},
             selectedTimestamp: 0,
             windowStartX: null,
             windowEndX: null,
@@ -572,12 +572,11 @@ class FailureBrushGraph extends Component<Props, State> {
         let model = this.props.model
         if(model){
             let assetName = model["assetName"]
-            let failures = await FailureService.getAllFailures()
+            let failures = await FailureService.getLastFailures({"sourceName": assetName})
             let relatedFailures = []
             failures.forEach(failure=>{
-                if(failure["sourceName"].toLowerCase() === assetName.toLowerCase()){
-                    relatedFailures.push(failure)
-                }
+                // if(failure["sourceName"].toLowerCase() === assetName.toLowerCase())
+                relatedFailures.push(failure)
             })
 
             this.setState({relatedFailures: relatedFailures, shownRelatedFailures: relatedFailures}, ()=>this.getModelLogsData())
@@ -586,6 +585,7 @@ class FailureBrushGraph extends Component<Props, State> {
 
     getModelLogsData = async (days=30, groupIn="None") => {
       let model = this.props.model
+      // 1 hour has 2 logs - 1 day has 48 logs - 1 week has 336 logs
       if(model){
           if(model["pipelineID"]){
               AutoMLService.getModelLogsOnContion(model["pipelineID"], "rulreg").then(res=>{
@@ -603,7 +603,7 @@ class FailureBrushGraph extends Component<Props, State> {
                           this.setState({modelsLogsData: res, shownModelsLogsData: res}, () => this.addAnnotationsOnGraph())
                       }
                       else if(model["task"] === "rul"){
-                          this.setState({modelsLogsData: res, shownModelsLogsData: res}, () => this.addAnnotationsOnGraph())
+                          this.setState({modelsLogsData: res, shownModelsLogsData: res}, () => {this.addAnnotationsOnGraph(); console.log("--", this.state)})
                   }    
               }).catch(err=>console.log(err))
               }
@@ -917,7 +917,7 @@ class FailureBrushGraph extends Component<Props, State> {
             series: nextProps.data,
             annotation: null,
             lineAnnotation: null,
-            selectedLog: null,
+            selectedLog: {timestamp: "", prediiction: ""},
             selectedTimestamp: 0,
             windowStartX: null,
             windowEndX: null,
@@ -1075,6 +1075,7 @@ class FailureBrushGraph extends Component<Props, State> {
                 failures={this.getInRangeFailures(this.state.selectedLog)}
                 visible={this.state.overlay}
                 onDismiss={()=>this.setState({overlay: !this.state.overlay})}
+                getModelLogsData={this.getModelLogsData}
               />
               <Grid>
                   <Grid.Row>

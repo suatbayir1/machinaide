@@ -15,6 +15,15 @@ from evidently.model_profile.sections import ClassificationPerformanceProfileSec
 
 from evidently.dashboard import Dashboard
 
+log_feedback_range = {
+    "": 0,
+    "1h": 2,
+    "2h": 4,
+    "6h": 12,
+    "12h": 24,
+    "24h": 48
+}
+
 class RULEvidentlyReport:
     def __init__(self, settings) -> None:
         self.client = InfluxDBClient(url=INFLUX["host"], token=INFLUX["dbtoken"], org=INFLUX["orgID"], verify_ssl = False) 
@@ -42,11 +51,14 @@ class RULEvidentlyReport:
     def get_sensor_data(self):
         all_data = []
         for field in self.fields:
-            data = self.get_query_results(field["database"], field["measurement"], field["dataSource"], self.daterange)
-            df = pd.DataFrame(data)
-            data_points = df.to_dict("records")
-            if(len(data_points)):
-                all_data.append(data_points)
+            boolean_vals = ["Pres-Counter_Reset", "AnaMotor-Counter_Reset", "RegMotor-Counter_Reset", "YagMotor-Counter_Reset", "KaMotor-Counter_Reset"]
+            if(field["measurement"] != "Pres31-AlarmlarDB" and (not (field["measurement"] == "Pres31-Energy_DB" and (field["dataSource"] in boolean_vals)))):
+                data = self.get_query_results(field["database"], field["measurement"], field["dataSource"], self.daterange)
+                print(field, len(data))
+                df = pd.DataFrame(data)
+                data_points = df.to_dict("records")
+                if(len(data_points)):
+                    all_data.append(data_points)
         
         if(len(all_data)):
             one_merged = pd.DataFrame(all_data[0])
@@ -54,6 +66,8 @@ class RULEvidentlyReport:
                 if(len(all_data[i])):
                     one_merged = pd.merge(one_merged, pd.DataFrame(all_data[i]), on=["time"])
             return one_merged
+        
+        return pd.DataFrame()
             
 
         """ query = create_query(self.database, self.measurements, self.daterange)
@@ -98,13 +112,42 @@ class RULEvidentlyReport:
                     if(feature_date>=log_thirty_min and feature_date<=log_date):
                         flag = True
                         if("feedback" in log):
+                            feedback_range = 0
+                            if("feedbackRange" in log):
+                                feedback_range = log_feedback_range[log["feedbackRange"]]
+                            print("feedback range", feedback_range)
                             if(log["feedback"] == "Positive"):
+                                # if model predicted there will be a failure
+                                if(int(log["prediction"]) == 1):
+                                    range_start = len(feedback) - feedback_range
+                                    if(range_start<0):
+                                        feedback[0:] = [1] * len(feedback)
+                                    else:
+                                        feedback[range_start:] = [1] * range_start
+                                # if model predicted there will be a NO failure
+                                elif(int(log["prediction"]) == 0):
+                                    feedback.append(0)
+                            elif(log["feedback"] == "Negative"):
+                                print("***hello")
+                                # if model predicted there will be a failure
+                                if(int(log["prediction"]) == 1):
+                                    feedback.append(0)
+                                # if model predicted there will be a NO failure
+                                elif(int(log["prediction"]) == 0):
+                                    range_start = len(feedback) - feedback_range
+                                    if(range_start<0):
+                                        feedback[0:] = [1] * len(feedback)
+                                    else:
+                                        feedback[range_start:] = [1] * range_start
+                        else:
+                            feedback.append(0)
+                            """ if(log["feedback"] == "Positive"):
                                 feedback.append(int(log["prediction"]))
                             elif(log["feedback"] == "Negative"):
                                 print("***hello")
                                 feedback.append(int(not int(log["prediction"])))
                         else:
-                            feedback.append(int(log["prediction"]))
+                            feedback.append(int(log["prediction"])) """
 
                         prediction.append(int(log["prediction"]))
                         log_pivot = j + 1

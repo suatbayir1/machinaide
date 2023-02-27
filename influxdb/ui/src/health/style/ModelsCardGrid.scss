@@ -20,7 +20,7 @@ $model-grid-gap: $cf-marg-a;
 .models-card-grid {
   padding-bottom: $cf-marg-d;
   display: grid;
-  grid-template-columns: minmax(100%, 1fr);
+  grid-template-columns: minmax(100%, 1fr); 
   grid-auto-rows: 200px; /* 250 */
   grid-column-gap: $model-grid-gap;
   grid-row-gap: $model-grid-gap;
@@ -69,6 +69,6 @@ $model-card-quarter: calc(25% - #{$model-grid-gap});
 
 @media screen and (min-width: $cf-grid--breakpoint-lg) {
   .models-card-grid {
-    grid-template-columns: minmax($model-card-quarter, 1fr) minmax($model-card-quarter, 1fr) minmax($model-card-quarter, 1fr) minmax($model-card-quarter, 1fr);
+    grid-template-columns: minmax($model-card-quarter, 1fr) minmax($model-card-quarter, 1fr) minmax($model-card-quarter, 1fr) minmax($model-card-quarter, 1fr) minmax($model-card-quarter, 1fr) minmax($model-card-quarter, 1fr);
   }
 }

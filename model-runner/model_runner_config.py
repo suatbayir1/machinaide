@@ -13,6 +13,8 @@ API_URL = "http://127.0.0.1:9632/api/v1.0/"
 
 POST_MODEL_LOG = f"{API_URL}ml/postModelLog"
 UPDATE_LAST_DATA_POINT = f"{API_URL}ml/updateLastDataPoint"
+POST_ANOMALY_URL= f"{API_URL}health/addAnomalyToMachine/"
+
 
 MODELS_DIR = "/home/machinaide/project/machinaide/backend/models/"
 EVALML_MODELS_DIR = "/home/machinaide/project/machinaide/evalml-server/models/"

@@ -1,19 +1,25 @@
-import React, { PureComponent, createRef } from 'react'
+import React, { PureComponent, createRef, useState } from 'react'
 import { connect, ConnectedProps } from 'react-redux'
 
 import { Link } from "react-router-dom";
+import Slider from '@material-ui/core/Slider'
+import { makeStyles, styled  } from '@material-ui/core/styles'
+import ForceGraph2D from "react-force-graph-2d"
+// import Typography from '@material-ui/core/Typography'
 import {
     Page, Grid, Columns, Panel, Notification, ResourceCard, TechnoSpinner, RemoteDataState, InputType, Input,
     ComponentColor, ComponentSize, Gradients, IconFont, Icon, InfluxColors, WaitingText, QuestionMarkTooltip,
-    Button, ButtonType, SelectDropdown, Alignment, ButtonBase, ButtonShape, ButtonBaseRef, SparkleSpinner,
-    BorderType, Table, DapperScrollbars, SlideToggle, InputLabel, Label, SquareButton, CTAButton, GridColumn,
-    AlignItems, InputToggleType, Toggle, FlexBox
+    Button, ButtonType, SelectDropdown, SquareGrid, ButtonBase, ButtonShape, ButtonBaseRef, SparkleSpinner,
+    BorderType, Table, DapperScrollbars, GradientBox, InputLabel, Label, SquareButton, CTAButton, GridColumn,
+    AlignItems, InputToggleType, Toggle, FlexBox, ProgressBar, RangeSlider, ComponentStatus, Heading, Typeface,
+    HeadingElement, FontWeight, Tabs, SpinnerContainer
 } from '@influxdata/clockface'
 import TimeRangeDropdown from 'src/shared/components/TimeRangeDropdown'
 import TabbedPageTabs from 'src/shared/tabbedPage/TabbedPageTabs'
 import {TimeRange, AppState, AutoRefreshStatus} from 'src/types'
 import { Context } from 'src/clockface'
 import CreateModelOverlay from '../components/CreateModelOverlay'
+import MLReportOverlay from '../components/MLReportOverlay'
 import GaugeChart from 'src/shared/components/GaugeChart'
 import SingleStat from 'src/shared/components/SingleStat';
 import AnomalyBrushGraph from 'src/health/components/AnomalyBrushGraph'
@@ -22,6 +28,7 @@ import AnomalyGraphTimeRangeDropdown from 'src/health/components/AnomalyGraphTim
 import HealthAssessmentService from 'src/shared/services/HealthAssessmentService'
 import AutoMLService from 'src/shared/services/AutoMLService'
 import DTService from 'src/shared/services/DTService';
+import FailureService from 'src/shared/services/FailureService'
 import ModelLogGraphOverlay from 'src/health/components/ModelLogGraphOverlay';
 import TimeMachineRefreshDropdown from 'src/timeMachine/components/RefreshDropdown'
 import RefreshLogsDropdown from 'src/health/components/RefreshLogsDropdown'
@@ -45,6 +52,7 @@ import {
   } from 'src/eventViewer/types'
 
 import {ANOMALY_DETECTION_TASK, RULREG_TASK, RUL_TASK, POF_TASK} from '../constants'
+import {anomalyCountDailyThreshold, rulDangerValue, rulDangerValueThreshold, rulregCycleDangerThreshold, pofProbabilityThreshold} from 'src/health/constants'
 import uuid from 'uuid'
 import { GaugeViewProperties, SingleStatViewProperties } from 'src/types/dashboards'
 // Components
@@ -69,6 +77,92 @@ import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import HomeIcon from '@material-ui/icons/Home';
 import Typography from '@material-ui/core/Typography';
 
+const ScoreSlider = styled(Slider)((props)=>({
+    color: props.scoreColor,// InfluxColors.Amethyst, //color of the slider between thumbs
+    "& .MuiSlider-thumb": {
+        backgroundColor: InfluxColors.Cloud, //color of thumbs,
+        height: "18px",
+        width: "18px"
+    },
+    "& .MuiSlider-rail": {
+        // color: InfluxColors.Comet, ////color of the slider outside  teh area between thumbs
+        height: "10px",
+        backgroundImage: "linear-gradient(90deg, red, green)",
+        opacity: 0.75
+    },
+    "& .MuiSlider-markLabelActive": {
+        color: InfluxColors.Cloud
+    },
+    '& .MuiSlider-track': {
+        height: "10px",
+        backgroundImage: props.scoreColor
+    },
+    "& .MuiSlider-mark": {
+        height: "0px",
+        width: "0px"
+    },
+    "& .PrivateValueLabel-circle-6": {
+        width: "45px",
+        height: "45px"
+    },
+    "& .PrivateValueLabel-offset-5": {
+        fontSize: "18px"
+    }
+    /* color: '#52af77',
+    height: 8,
+    '& .MuiSlider-track': {
+      border: 'none',
+    },
+    '& .MuiSlider-thumb': {
+      height: 24,
+      width: 24,
+      backgroundColor: '#fff',
+      border: '2px solid currentColor',
+      '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': {
+        boxShadow: 'inherit',
+      },
+      '&:before': {
+        display: 'none',
+      },
+    },
+    '& .MuiSlider-valueLabel': {
+      lineHeight: 1.2,
+      fontSize: 12,
+      background: 'unset',
+      padding: 0,
+      width: 32,
+      height: 32,
+      borderRadius: '50% 50% 50% 0',
+      backgroundColor: '#52af77',
+      transformOrigin: 'bottom left',
+      transform: 'translate(50%, -100%) rotate(-45deg) scale(0)',
+      '&:before': { display: 'none' },
+      '&.MuiSlider-valueLabelOpen': {
+        transform: 'translate(50%, -100%) rotate(-45deg) scale(1)',
+      },
+      '& > *': {
+        transform: 'rotate(45deg)',
+      },
+    }, */
+}))
+
+const rootCauseModelParameters = {
+    "HDBSCAN": {
+        "prev_hours": {
+            "Type": "Number",
+            "Value": 72
+        },
+        "window_size": {
+            "Type": "Number",
+            "Value": 30
+        },
+        "bucket_minutes": {
+            "Type": "Number",
+            "Value": 5
+        }
+    }
+}
+
 interface Props {
     match: any
 }
@@ -80,7 +174,15 @@ interface State {
     models: object[]
     displayedModels: object[]
     createModelOverlay: boolean
+    mlReportOverlay: boolean
     rootCauseAnalysisOverlay: boolean
+    rootCauseTreeLoading: RemoteDataState
+    rootCauseGraphData: object
+    rootCausePossibleComps: string[]
+    rootCauseModels: string[]
+    rootCauseParams: any[]
+    rootCauseMeasurementSensorInfo: object
+    selectedRootCauseModel: string
     gaugeProperties: GaugeViewProperties
     selectedFailure: object
     windowStart: number
@@ -94,6 +196,10 @@ interface State {
     normalizedType1GraphData: object
     normalizedType2GraphData: object
     selectedScale: string
+    failureToAnalyze: string
+    rootCauseEndDate: string
+    topLevelTreeComponent: string
+    compToAnalyze: string
     selectedModelID: string
     anomalyModels: string[]
     isAnomalySelected: boolean
@@ -108,6 +214,11 @@ interface State {
     pofDays: number
     pofDaysSent: number
     dtData: object
+    showMLModelsSection: boolean
+    showFailureListSection: boolean
+    showAnomalyChartSection: boolean
+    showRootCauseSection: boolean
+    failures: object[]
     autoRefresh: {  status: AutoRefreshStatus
                     interval: number}
 }
@@ -139,10 +250,87 @@ function generateDayWiseTimeSeries(baseval, count, yrange) {
     return series;
 }
 
+function ParameterTable (props) {
+    // console.log("PARAMTABLE", selectedRootCauseModel)
+    const selectedRootCauseModel = props.selectedRootCauseModel
+    const rootCauseParams = props.rootCauseParams
+    const setRootCauseParams = props.setRootCauseParams
+    if(selectedRootCauseModel != "") {
+        // const [rootCauseParams, setRootCauseParams] = useState(Array(Object.keys(rootCauseModelParameters[selectedRootCauseModel]).length).fill(0))
+        function handleChange(index, newValue) {
+            const newValues = rootCauseParams.map((value, j) => {
+              if (j === index) {
+                // Increment the clicked counter
+                return newValue;
+              } else {
+                // The rest haven't changed
+                return value;
+              }
+            });
+            setRootCauseParams(newValues);
+        }
+        // console.log(rootCauseModelParameters[selectedRootCauseModel])
+        return(
+            <Table>
+            <Table.Header>
+                <Table.Row>
+                    {Object.keys(rootCauseModelParameters[selectedRootCauseModel]).map(parameter => {
+                        return <Table.HeaderCell style={{width: "100px"}}>{parameter}</Table.HeaderCell>
+                    })}
+                    {/* <Table.HeaderCell style={{width: "100px"}}>Selected Failure</Table.HeaderCell>
+                    <Table.HeaderCell style={{width: "100px"}}>Top Level Component</Table.HeaderCell>
+                    <Table.HeaderCell style={{width: "100px"}}>Model</Table.HeaderCell> */}
+                    {/* <Table.HeaderCell style={{width: "100px"}}>RUL</Table.HeaderCell>
+                    <Table.HeaderCell style={{width: "100px"}}>RULREG</Table.HeaderCell>
+                    <Table.HeaderCell style={{width: "100px"}}>POF</Table.HeaderCell>
+                    <Table.HeaderCell style={{width: "100px"}}>Critical</Table.HeaderCell> */}
+                </Table.Row>
+            </Table.Header>
+            <Table.Body>
+                <Table.Row>
+                    {Object.keys(rootCauseModelParameters[selectedRootCauseModel]).map((parameter,i)  => {
+                        return <Table.Cell style={{width: "100px"}}>{<Input type={rootCauseModelParameters[selectedRootCauseModel][parameter]["Type"]}
+                        value={rootCauseParams[i]} onChange={(e) => {
+                            handleChange(i, e.target.value)
+                        }}></Input>}</Table.Cell>
+                    })}
+                    {/* <Table.Cell style={{width: "100px"}}>{this.state.failureToAnalyze}</Table.Cell>
+                    <Table.Cell style={{width: "100px"}}>{this.state.topLevelTreeComponent}</Table.Cell>
+                    <Table.Cell style={{width: "100px"}}>{
+                        <SelectDropdown
+                        style={{width: "100px"}}
+                        buttonColor={ComponentColor.Secondary}
+                        options={this.state.rootCauseModels}
+                        selectedOption={this.state.selectedRootCauseModel}
+                        onSelect={(e) => {
+                            this.setState({selectedRootCauseModel: e})
+                        }}
+                    />
+                    }</Table.Cell> */}
+
+                    {/* <Table.Cell style={{width: "100px"}}>{rulModelsCount}</Table.Cell>
+                    <Table.Cell style={{width: "100px"}}>{rulregModelsCount}</Table.Cell>
+                    <Table.Cell style={{width: "100px"}}>{pofModelsCount}</Table.Cell>
+                    <Table.Cell style={{width: "100px"}}>{criticalCount}</Table.Cell> */}
+                </Table.Row>
+            </Table.Body>
+        </Table>
+        )
+    } else {
+        return(<></>)
+    }
+}
+
+
 class MachineHealthPage extends PureComponent<Props, State>{
+    private graphRef: React.RefObject<HTMLInputElement>;
+    private paramTableRef: React.RefObject<HTMLInputElement>;
     private popoverTrigger = createRef<ButtonBaseRef>()
     constructor(props) {
         super(props);
+        this.graphRef = React.createRef();
+        this.paramTableRef = React.createRef();
+
         this.state = {
             timeRange: {
                 seconds: 3600,
@@ -158,7 +346,16 @@ class MachineHealthPage extends PureComponent<Props, State>{
             models:[],
             displayedModels:[],
             createModelOverlay: false,
+            mlReportOverlay: false,
             rootCauseAnalysisOverlay: false,
+            rootCauseTreeLoading: RemoteDataState.Loading,
+            rootCausePossibleComps: [],
+            rootCauseModels: ["HDBSCAN"],
+            selectedRootCauseModel: "",
+            rootCauseGraphData: {},
+            rootCauseParams: [],
+            rootCauseMeasurementSensorInfo: {},
+            rootCauseEndDate: "",
             gaugeProperties: {
                 queries: [],
                 colors: [{
@@ -200,6 +397,9 @@ class MachineHealthPage extends PureComponent<Props, State>{
             normalizedType1GraphData: {},
             normalizedType2GraphData: {},
             selectedScale: "Original Data",
+            failureToAnalyze: "",
+            topLevelTreeComponent: "",
+            compToAnalyze: "",
             selectedModelID: "",
             anomalyModels: [],
             isAnomalySelected: false,
@@ -214,6 +414,11 @@ class MachineHealthPage extends PureComponent<Props, State>{
             pofDays: 30,
             pofDaysSent: 30,
             dtData: {"productionLines": {}, "machines": {}, "components": {}, "sensors": {}, "fields": {}},
+            showMLModelsSection: false,
+            showFailureListSection: false,
+            showAnomalyChartSection: false,
+            showRootCauseSection: false,
+            failures: [],
             autoRefresh: {status: AutoRefreshStatus.Paused, interval: 0}
         }
     }
@@ -222,6 +427,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
         console.log(this.props)
         this.getDTData()
         this.getMLModels()
+        this.getMachineFailures()
         if (this.state.autoRefresh.status === AutoRefreshStatus.Active) {
             this.intervalID = window.setInterval(() => {
               this.getMLModels()
@@ -229,6 +435,12 @@ class MachineHealthPage extends PureComponent<Props, State>{
         }
       
         // this.setState({})
+    }
+
+    getMachineFailures = async () => {
+        let failures = await FailureService.getFailures({sourceName: this.props.match.params.MID})
+        failures.sort((a, b) => new Date(b["startTime"]).getTime() - new Date(a["startTime"]).getTime())
+        this.setState({failures: failures}, ()=>console.log("failures: ", this.state))
     }
 
     getDTData = async () => {
@@ -272,7 +484,7 @@ class MachineHealthPage extends PureComponent<Props, State>{
             alpha = parseFloat(alpha)
             beta = parseFloat(beta)
             let probability = 1 - Math.E ** (-1 * (days/alpha)**beta)
-            return probability
+            return (probability*100).toFixed(2)
         }
         else{
             let probability = 0
@@ -340,12 +552,296 @@ class MachineHealthPage extends PureComponent<Props, State>{
                     let lastLog = await AutoMLService.getModelLastLog(model["modelID"])
                     if(lastLog){
                         modelsLastLogs[model["modelID"]] = lastLog
+                        // if(model["modelID"] == "3c09027f9e224199af1356d07756f13d") {
+                        //     console.log("ad model", lastLog)
+                        // }
                     }
                 }               
             }
             this.setState({models: [...enabledModels, ...disabledModels], displayedModels: [...enabledModels, ...disabledModels], modelsLastLogs: modelsLastLogs}, ()=>console.log("-->", this.state))
         }
     }
+
+    bringPossibleComps = () => {
+        // function similarity(s1, s2) {
+        //     var longer = s1;
+        //     var shorter = s2;
+        //     if (s1.length < s2.length) {
+        //       longer = s2;
+        //       shorter = s1;
+        //     }
+        //     var longerLength = longer.length;
+        //     if (longerLength == 0) {
+        //       return 1.0;
+        //     }
+        //     return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength);
+        //   }
+        // function editDistance(s1, s2) {
+        //     s1 = s1.toLowerCase();
+        //     s2 = s2.toLowerCase();
+          
+        //     var costs = new Array();
+        //     for (var i = 0; i <= s1.length; i++) {
+        //       var lastValue = i;
+        //       for (var j = 0; j <= s2.length; j++) {
+        //         if (i == 0)
+        //           costs[j] = j;
+        //         else {
+        //           if (j > 0) {
+        //             var newValue = costs[j - 1];
+        //             if (s1.charAt(i - 1) != s2.charAt(j - 1))
+        //               newValue = Math.min(Math.min(newValue, lastValue),
+        //                 costs[j]) + 1;
+        //             costs[j - 1] = lastValue;
+        //             lastValue = newValue;
+        //           }
+        //         }
+        //       }
+        //       if (i > 0)
+        //         costs[s2.length] = lastValue;
+        //     }
+        //     return costs[s2.length];
+        //   }
+        // // console.log(this.state.dtData)
+        // // console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        // // console.log(this.state.failureToAnalyze)
+        let possibleComps = []
+        if (this.state.failureToAnalyze != "")
+            possibleComps = Object.keys(this.state.dtData["machines"])
+            
+        // Object.keys(this.state.dtData["components"]).forEach(comp => {
+
+        //     if (similarity(comp, this.state.failureToAnalyze) > .3) {
+        //         possibleComps.push(comp)
+        //     }
+        //     // console.log(comp, this.state.failureToAnalyze, similarity(comp, this.state.failureToAnalyze))
+        // })
+
+        this.setState({rootCausePossibleComps: possibleComps, compToAnalyze: "", rootCauseTreeLoading: RemoteDataState.Done})
+
+
+        // if (possibleComps.length > 0) 
+        //     this.setState({rootCausePossibleComps: possibleComps})
+        // } else {
+        //     possibleComps.
+        // }
+    }
+
+    createRootCauseGraph = async () => {
+        const nodes = []
+        const links =  []
+        console.log(this.state.dtData, "dt")
+        if (Object.keys(this.state.dtData["machines"]).includes(this.state.compToAnalyze)) {
+            let itemOfInterest = this.state.dtData["machines"][this.state.compToAnalyze]
+            nodes.push(Object.assign({
+                id: this.state.compToAnalyze,
+                color: "red",
+                size: 400,
+                symbolType: "circle",
+                src: "/home/machinaide/project/machinaide/influxdb/ui/assets/images/graph/machine.jpg",
+            }, itemOfInterest));
+            itemOfInterest["object"]["contents"].map(component => {
+                if (component["@type"] !== "Component") {
+                    return;
+                }
+
+                nodes.push(Object.assign({
+                    id: component?.name,
+                    color: "green",
+                    size: 300,
+                    symbolType: "square",
+                    src: "/home/machinaide/project/machinaide/influxdb/ui/assets/images/graph/component.png",
+                }, component))
+
+                links.push({
+                    source: component?.parent,
+                    target: component?.name
+                })
+
+                component["sensors"].map(sensor => {
+                    nodes.push(Object.assign({
+                        id: sensor?.name,
+                        color: "orange",
+                        size: 300,
+                        symbolType: "triangle",
+                        src: "/home/machinaide/project/machinaide/influxdb/ui/assets/images/graph/sensor.jpg",
+                    }, sensor))
+
+                    links.push({
+                        source: sensor?.parent,
+                        target: sensor?.name
+                    })
+                    sensor["fields"].map(field => {
+                        // fields.push(field);
+
+                        nodes.push(Object.assign({
+                            id: field?.["name"],
+                            color: "purple",
+                            size: 300,
+                            symbolType: "triangle",
+                            src: "/home/machinaide/project/machinaide/influxdb/ui/assets/images/graph/measurement.jpg",
+                        }, field))
+
+                        links.push({
+                            source: field?.parent,
+                            target: field?.name
+                        })
+                    })
+                })
+            })
+
+            const returnData = {
+                nodes,
+                links
+            }
+
+            this.setState({rootCauseGraphData: returnData})
+
+            await this.initialCameraPosition();
+        } else if(Object.keys(this.state.dtData["components"]).includes(this.state.compToAnalyze)) {
+            let itemOfInterest = this.state.dtData["components"][this.state.compToAnalyze]
+
+            nodes.push(Object.assign({
+                id: this.state.compToAnalyze,
+                color: "green",
+                size: 400,
+                symbolType: "circle",
+                src: "/home/machinaide/project/machinaide/influxdb/ui/assets/images/graph/component.jpg",
+            }, itemOfInterest));
+            itemOfInterest["object"]["sensors"].map(sensor => {
+                nodes.push(Object.assign({
+                    id: sensor?.name,
+                    color: "orange",
+                    size: 300,
+                    symbolType: "triangle",
+                    src: "/home/machinaide/project/machinaide/influxdb/ui/assets/images/graph/sensor.jpg",
+                }, sensor))
+
+                links.push({
+                    source: sensor?.parent,
+                    target: sensor?.name
+                })
+                sensor["fields"].map(field => {
+                    // fields.push(field);
+
+                    nodes.push(Object.assign({
+                        id: field?.["name"],
+                        color: "purple",
+                        size: 300,
+                        symbolType: "triangle",
+                        src: "/home/machinaide/project/machinaide/influxdb/ui/assets/images/graph/measurement.jpg",
+                    }, field))
+
+                    links.push({
+                        source: field?.parent,
+                        target: field?.name
+                    })
+                })
+            })
+
+            const returnData = {
+                nodes,
+                links
+            }
+
+            this.setState({rootCauseGraphData: returnData})
+
+            await this.initialCameraPosition();
+        }
+    }
+
+    handleNodeClick = async (node) => {
+        const currentParamTable = this.paramTableRef.current;
+
+        console.log(currentParamTable, "CURRPARAMTABLE")
+        console.log("hello")
+        let m2s = {}
+        // let settings = {
+        //     sessionID: Date.now(),
+        //     m2s: {},
+        //     prev_hours: 72,
+        //     window_size: 30,
+        //     bucket_minutes: 5
+        // }
+        // console.log(node)
+        this.setState({topLevelTreeComponent: node.id, compToAnalyze: node.id})
+        if (Object.keys(node).includes("object")) {
+            if (node.object["@type"] == "Interface") {
+                node.object.contents.map(component => {
+                    component.sensors.map(sensor => {
+                        sensor.fields.map(field => {
+                            if (!Object.keys(m2s).includes(field.measurement)) {
+                                m2s[field.measurement] = [];
+                            }
+                            m2s[field.measurement].push(field["@id"].replace("F_", ""))
+                        })
+                    })
+                })
+            } else if(node.object["@type"] == "Component") {
+                node.object.sensors.map(sensor => {
+                    sensor.fields.map(field => {
+                        if (!Object.keys(m2s).includes(field.measurement)) {
+                            m2s[field.measurement] = [];
+                        }
+                        m2s[field.measurement].push(field["@id"].replace("F_", ""))
+                    })
+                })
+            }
+
+        } else if(node["@type"] == "Component") {
+            node.sensors.map(sensor => {
+                sensor.fields.map(field => {
+                    if (!Object.keys(m2s).includes(field.measurement)) {
+                        m2s[field.measurement] = [];
+                    }
+                    m2s[field.measurement].push(field["@id"].replace("F_", ""))
+                })
+            })
+        } else if(node.type == "Sensor") {
+            node.fields.map(field => {
+                if (!Object.keys(m2s).includes(field.measurement)) {
+                    m2s[field.measurement] = [];
+                }
+                m2s[field.measurement].push(field["@id"].replace("F_", ""))
+            })
+        } else if(node.type == "Field") {
+            if (!Object.keys(m2s).includes(node.measurement)) {
+                m2s[node.measurement] = [];
+            }
+            m2s[node.measurement].push(node["@id"].replace("F_", ""))
+        }
+
+        this.setState({rootCauseMeasurementSensorInfo: m2s})
+        // 
+        this.createRootCauseGraph()
+
+    }
+
+    startRootCauseAnalysis = async () => {
+        let settings = {
+            sessionID: Date.now().toString(),
+            m2s: this.state.rootCauseMeasurementSensorInfo,
+            end_date: this.state.rootCauseEndDate
+        }
+        Object.keys(rootCauseModelParameters[this.state.selectedRootCauseModel]).forEach((parameter, i) => {
+            settings[parameter] = this.state.rootCauseParams[i]
+        })
+
+        console.log(settings)
+        const test = await HealthAssessmentService.startRootCauseAnalysis(settings)
+    }
+
+    initialCameraPosition = async () => {
+        // this.graphRef.zoom(1, 2000);
+        this.graphRef.centerAt(0, 0, 2000)
+        this.graphRef.d3Force('collide', d3.forceCollide(5));
+    }
+
+    handleInputChange = (index) => {
+        
+    }
+
+    
 
     public handleChangeNotification = (type, message) => {
         this.setState({
@@ -392,7 +888,10 @@ class MachineHealthPage extends PureComponent<Props, State>{
 
     getMachineAnomalies = async () => {
         const anomalies = await HealthAssessmentService.getMachineAnomalies(this.props.match.params.MID)
-        let models = Object.keys(anomalies)
+        let models = []
+        if(anomalies){
+            models = Object.keys(anomalies)
+        }        
         if(models.length){
             this.setState({activeAnomalyModel: models[0], 
                 selectedModelID: models[0],
@@ -468,6 +967,21 @@ class MachineHealthPage extends PureComponent<Props, State>{
         this.setState({windowStart: windowStart, windowEnd: windowEnd})
     }
 
+    dataToPush = (row) => {
+        let valueKey = "_value" in row ? "_value" : "_value (number)" in row ? "_value (number)" : ""
+        if(valueKey.length){
+            if(row[valueKey] && row[valueKey].toFixed()){
+                return {pushData: true, valueKey: valueKey, value: row[valueKey].toFixed()}
+            }
+            else{
+                return {pushData: false}
+            }
+        }
+        else{
+            return {pushData: false}
+        }
+    }
+
     /*
       Convert a Flux CSV response into a list of objects.
     */
@@ -493,16 +1007,22 @@ class MachineHealthPage extends PureComponent<Props, State>{
 
                 rows.push(row)
             }
-            // console.log("rows: ", rows)
+            console.log("rows: ", rows)
             let graphData = {}
             for(let row of rows){
                 if(`${row["_measurement"]}_${row["_field"]}` in graphData){
-                    graphData[`${row["_measurement"]}_${row["_field"]}`]["data"].push([row["_time"], row["_value"].toFixed(2)])
+                    let resultData = this.dataToPush(row)
+                    if(resultData["pushData"]){
+                        graphData[`${row["_measurement"]}_${row["_field"]}`]["data"].push([row["_time"], resultData["value"]])
+                    }                 
                 }
                 else{
-                    graphData[`${row["_measurement"]}_${row["_field"]}`] = {
-                        name: `${row["_measurement"]}_${row["_field"]}`,
-                        data: [[row["_time"], row["_value"].toFixed(2)]]
+                    let resultData = this.dataToPush(row)
+                    if(resultData["pushData"]){
+                        graphData[`${row["_measurement"]}_${row["_field"]}`] = {
+                            name: `${row["_measurement"]}_${row["_field"]}`,
+                            data: [[row["_time"], resultData["value"]]]
+                        }
                     }
                 }
             }
@@ -765,6 +1285,197 @@ class MachineHealthPage extends PureComponent<Props, State>{
         }        
     }
 
+    getMLReportData = () => {
+        // will update ml report section
+        const {modelsLastLogs, models} = this.state
+        let enabledModelsList = models.filter(m=>m["enabled"])
+        let enabledModelCount = enabledModelsList.length
+        let rulModels = []
+        let rulregModels = []
+        let pofModels = []
+        let adModels = []
+        let enabledModelsLogs = enabledModelsList.map(model=>{
+            if(model["task"] === "rulreg"){
+                if(model["pipelineID"] in modelsLastLogs && "prediction" in modelsLastLogs[model["pipelineID"]]){
+                    let log = {task: "rulreg", log: modelsLastLogs[model["pipelineID"]]["prediction"]}
+                    rulregModels.push(log)
+                    return log
+                }                
+            }
+            if(model["task"] === "rul"){
+                if(model["modelID"] in modelsLastLogs && "prediction" in modelsLastLogs[model["modelID"]]){
+                    let log = {task: "rul", log: modelsLastLogs[model["modelID"]]["prediction"]}
+                    rulModels.push(log)
+                    return log
+                }                
+            }
+            if(model["task"] === "pof"){
+                if(model["modelID"] in modelsLastLogs && "prediction" in modelsLastLogs[model["modelID"]]){
+                    let log = {task: "pof", log: this.findProbability(modelsLastLogs[model["modelID"]]["prediction"][0], modelsLastLogs[model["modelID"]]["prediction"][1], this.state.pofDaysSent)}
+                    pofModels.push(log)
+                    return log
+                }                
+            }
+            if(model["task"] === "ad"){ // write a function that takes last day anomaly count?
+                if(model["modelID"] in modelsLastLogs && "prediction" in modelsLastLogs[model["modelID"]]){
+                    let log = {task: "pof", log: model["modelID"] in modelsLastLogs ? modelsLastLogs[model["modelID"]]["prediction"] : 0}
+                    adModels.push(log)
+                    return log
+                }                
+            }
+        })
+        let criticalCount = 0
+        enabledModelsLogs.forEach(log => {
+            console.log("--? ", log)
+            if(log && ("task" in log)){
+                if(log["task"] === "rulreg"){
+                    if(log["log"] <= rulregCycleDangerThreshold){
+                        criticalCount += 1
+                    }
+                }
+                if(log["task"] === "rul"){
+                    if(log["log"] === 0){
+                        criticalCount += 1
+                    }
+                }
+                if(log["task"] === "pof"){
+                    if(log["log"] >= pofProbabilityThreshold){
+                        criticalCount += 1
+                    }
+                }
+            }            
+        })
+        let likelyToFail = enabledModelCount>0 ? ((criticalCount/enabledModelCount) * 100).toFixed(2) : 0
+        let anomalyModelsCount = enabledModelsList.filter(m=>m["task"]==="ad").length
+        let rulModelsCount = enabledModelsList.filter(m=>m["task"]==="rul").length
+        let rulregModelsCount = enabledModelsList.filter(m=>m["task"]==="rulreg").length
+        let pofModelsCount = enabledModelsList.filter(m=>m["task"]==="pof").length
+
+        // avg anomaly models result
+        let avgAnomalyModelsResult = 0
+        let anomalyModelsResultScore = 0
+        adModels.forEach(log => {
+            avgAnomalyModelsResult += log["log"]
+            if(log["log"] >= anomalyCountDailyThreshold){
+                anomalyModelsResultScore -= 1
+            }
+            else{
+                anomalyModelsResultScore += 1
+            }
+        })
+        if(adModels.length)
+            avgAnomalyModelsResult /= adModels.length
+        
+        // avg rul models result
+        let avgRulModelsResult = 0
+        let rulModelsResultScore = 0
+        rulModels.forEach(log => {
+            avgRulModelsResult += log["log"]
+            if(log["log"] == rulDangerValue){
+                rulModelsResultScore -= 1
+            }
+            else{
+                rulModelsResultScore += 1
+            }
+        })
+        if(rulModels.length)
+            avgRulModelsResult /= rulModels.length
+        
+        // avg rulreg models result
+        let avgRulregModelsResult = 0
+        let rulregModelsResultScore = 0
+        rulregModels.forEach(log => {
+            avgRulregModelsResult += log["log"]
+            if(log["log"] <= rulregCycleDangerThreshold){
+                rulregModelsResultScore -= 1
+            }
+            else{
+                rulregModelsResultScore += 1
+            }
+        })
+        if(rulregModels.length)
+            avgRulregModelsResult /= rulregModels.length
+        
+        // avg pof models result
+        let avgPofModelsResult = 0
+        let pofModelsResultScore = 0
+        pofModels.forEach(log => {
+            avgPofModelsResult += log["log"]
+            if(log["log"] >= pofProbabilityThreshold){
+                pofModelsResultScore -= 1
+            }
+            else{
+                pofModelsResultScore += 1
+            }
+        })
+        if(pofModels.length)
+            avgPofModelsResult /= pofModels.length
+        
+        let isAnomalyInDanger = avgAnomalyModelsResult >= anomalyCountDailyThreshold ? true : false
+        let isRulInDanger = avgRulModelsResult >= rulDangerValueThreshold ? true : false
+        let isRulregInDanger = avgRulregModelsResult <= rulregCycleDangerThreshold ? true : false
+        let isPofInDanger = avgPofModelsResult >= pofProbabilityThreshold ? true : false
+
+
+        return {enabledModelCount, criticalCount, likelyToFail, anomalyModelsCount, rulModelsCount, rulregModelsCount, pofModelsCount,
+                isAnomalyInDanger, isRulInDanger, isRulregInDanger, isPofInDanger, anomalyModelsResultScore, rulModelsResultScore, rulregModelsResultScore, pofModelsResultScore}
+    }
+
+    returnSpanColor = (score) => {
+        if(score === 0)
+            return InfluxColors.Pineapple
+        else if(score < 0)
+            return InfluxColors.Fire
+        else if(score > 0)
+            return InfluxColors.Rainforest
+        else
+            return InfluxColors.Mist
+    }
+
+    returnFooterColor = (score) => {
+        if(score === 0)
+            return InfluxColors.Pineapple
+        else if(score >= 50)
+            return InfluxColors.Fire
+        else if(score < 50)
+            return InfluxColors.Rainforest
+        else
+            return InfluxColors.Mist
+    }
+
+    returnSliderColor = (score) => {
+        if(score === 0)
+            return ComponentColor.Warning
+        else if(score > 0)
+            return ComponentColor.Success
+        else if(score < 0)
+            return ComponentColor.Danger
+        else
+            return ComponentColor.Default
+    }
+
+    returnSliderColorCode = (score) => {
+        if(score === 0)
+            return InfluxColors.Pineapple
+        else if(score > 0)
+            return InfluxColors.Rainforest
+        else if(score < 0)
+            return InfluxColors.Rainforest
+        else
+            return InfluxColors.Mist
+    }
+
+    returnSliderText = (score) => {
+        if(score === 0)
+            return "AVERAGE"
+        else if(score > 0)
+            return "GOOD"
+        else if(score < 0)
+            return "BAD"
+        else
+            return "AVERAGE"
+    }
+
     contextMenu = (modelName, enabled, modelTask, model) =>{
         if(("trainingDone" in model) && model["trainingDone"]){
             return (
@@ -801,10 +1512,10 @@ class MachineHealthPage extends PureComponent<Props, State>{
                       label="View AutoML results"
                       action={() => {
                           if(modelTask === "rulreg"){
-                              this.props["history"].push(`/orgs/${this.props["match"]["params"]["orgID"]}/rulreg-automl/${model["pipelineID"]}/duration`)
+                              this.props["history"].push(`/orgs/${this.props["match"]["params"]["orgID"]}/rulreg-automl/${this.props["match"]["params"]["FID"]}/${this.props["match"]["params"]["PLID"]}/${this.props["match"]["params"]["MID"]}/${model["pipelineID"]}/duration`)
                           }
                           else{
-                              this.props["history"].push(`/orgs/${this.props["match"]["params"]["orgID"]}/automl/${modelName}/duration`)
+                              this.props["history"].push(`/orgs/${this.props["match"]["params"]["orgID"]}/automl/${this.props["match"]["params"]["FID"]}/${this.props["match"]["params"]["PLID"]}/${this.props["match"]["params"]["MID"]}/${modelName}/duration`)
                           }
                       }}
                     />
@@ -868,6 +1579,23 @@ class MachineHealthPage extends PureComponent<Props, State>{
             return(<></>)
         }
       }
+    
+    setRootCauseParameters = (newParameters) => {
+        this.setState({rootCauseParams: newParameters})
+    }
+
+    renderParameterTable = (selectedRootCauseModel) => {
+        console.log(selectedRootCauseModel)
+        if(selectedRootCauseModel != "") {
+            this.setState({rootCauseParams: Array(Object.keys(rootCauseModelParameters[selectedRootCauseModel]).length).fill(0)})
+            // const [rootCauseParams, setRootCauseParams] = useState(Array(Object.keys(rootCauseModelParameters[selectedRootCauseModel]).length).fill(0))
+        
+            return <ParameterTable rootCauseParams={this.state.rootCauseParams} setRootCauseParams={this.setRootCauseParameters} selectedRootCauseModel={selectedRootCauseModel}/>
+        } else {
+            return <></>
+        }
+
+    }
 
     public render(){
         //var htmlModule = require(this.state.reportPath);
@@ -880,7 +1608,10 @@ class MachineHealthPage extends PureComponent<Props, State>{
             tickSuffix,
             decimalPlaces,
           } = this.state.gaugeProperties */
+          
         const {modelsLastLogs} = this.state
+        const {enabledModelCount, criticalCount, likelyToFail, anomalyModelsCount, rulModelsCount, rulregModelsCount, pofModelsCount,
+            isAnomalyInDanger, isRulInDanger, isRulregInDanger, isPofInDanger, anomalyModelsResultScore, rulModelsResultScore, rulregModelsResultScore, pofModelsResultScore} = this.getMLReportData()
         return(
             <Page
                 titleTag="Health Assessment"
@@ -1011,264 +1742,455 @@ class MachineHealthPage extends PureComponent<Props, State>{
                             </Notification>
                         </Grid.Row>
                         <Grid.Row>
-                            <Grid.Column widthXS={Columns.Two} style={{border: 'solid 2px #999dab', borderRadius: '4px'}}>
-                                <img
-                                    src="../../../../assets/images/machine-image.jpg"
-                                    className="machine-image"
-                                    style={{width: "100%"}}
-                                />
-                                <br/>
-                                <div style={{display: "flex"}}>
-                                    {/* <img
-                                        src='../../../assets/icons/machine-card-icon.png'
-                                        className="machine-icon"
-                                        style={{width: "25px"}}
-                                    /> */}
-                                    <h2>
-                                        {this.props.match.params.MID}
-                                    </h2>
-                                </div>
-                            </Grid.Column>
-                            <Grid.Column widthXS={Columns.Ten}>
-                            </Grid.Column>
-                        </Grid.Row>
-                        <Grid.Row>
-                            <Grid.Column widthXS={Columns.Twelve} style={{height: "800px"}}>
-                                <Panel style={{border: 'solid 2px #999dab', borderRadius: '4px', height: "inherit"}}>
-                                    <Panel.Header size={ComponentSize.Medium} style={{padding: "10px"}}>
-                                        <h5 className="preview-data-margins">Anomaly Charts</h5>
-                                    </Panel.Header>
+                            <Grid.Column widthXS={Columns.One}>
+                                <Page
+                                    titleTag=""
+                                    style={{height: "250px", border: 'solid 2px #999dab', borderRadius: '4px'}}
+                                >
                                     <Panel.Body size={ComponentSize.Small}>
-                                        {this.state.anomalyModels.length && (
-                                            <TabbedPageTabs
-                                                tabs={this.createTabs()}
-                                                activeTab={this.state.activeAnomalyModel}
-                                                onTabClick={(id) => this.setState({ activeAnomalyModel: id, selectedModelID: id })}
-                                            />
-                                        )}
-                                        
-                                        <br />
-                                        
-                                        <div>
-                                            {this.state.isDataLoaded ? <AnomalyBrushGraph  /* this.state.machineSensorData.length */
-                                                chartID={this.state.chartID}
-                                                name={this.state.activeAnomalyModel}
-                                                sensorNames={this.state.sensorNames}
-                                                modelID={this.state.selectedModelID}
-                                                /* timeRange={this.state.timeRange}
-                                                aggregatePeriod={this.state.aggregatePeriod} */
-                                                goToAnomaly={this.setTimeRange}
-                                                orgID={this.props.match.params.orgID}
-                                                machineID={this.props.match.params.MID}
-                                                data={this.state.machineSensorData} //{this.generateData(this.state.activeAnomalyModel)} //this.state.machineSensorData
-                                                graphData={this.state.graphData}
-                                                windowStart={this.state.windowStart} 
-                                                windowEnd={this.state.windowEnd}
-                                                changeWindowPoints={this.changeWindowPoints}
-                                                isAnomalySelected={this.state.isAnomalySelected}
-                                                user={this.props.me}
-                                            /> : 
-                                            <div style={{textAlign: "-webkit-center", marginTop: "60px"}}>
-                                                <TechnoSpinner style={{ width: "75px", height: "75px"}} />
-                                                <WaitingText text="Graph is loading" />
-                                            </div>}
-                                            {/* Chart of {this.state.activeAnomalyModel} */}
+                                        <img
+                                            src="../../../../assets/images/machine-image.jpg"
+                                            className="machine-image"
+                                            style={{width: "100%"}}
+                                        />
+                                        <br/>
+                                        <div style={{display: "flex"}}>
+                                            {/* <img
+                                                src='../../../assets/icons/machine-card-icon.png'
+                                                className="machine-icon"
+                                                style={{width: "25px"}}
+                                            /> */}
+                                            <h4>
+                                                {this.props.match.params.MID}
+                                            </h4>
                                         </div>
+                                        <Button
+                                            shape={ButtonShape.Default}
+                                            color={ComponentColor.Success}
+                                            titleText="Refresh ML Report"
+                                            icon={IconFont.Refresh}
+                                            text={"Report"}
+                                            type={ButtonType.Button}
+                                            onClick={() => this.getMLReportData()}
+                                        />
                                     </Panel.Body>
-                                </Panel>
+                                </Page>
                             </Grid.Column>
+                            <Grid.Column widthXS={Columns.Eleven}>
+                                <Page
+                                    titleTag=""
+                                    style={{height: "250px", border: 'solid 2px #999dab', borderRadius: '4px'}}
+                                >
+                                    {/* <Page.Header fullWidth={false}>
+                                        <h5 className="preview-data-margins">ML Report</h5>
+                                    </Page.Header> */}
+                                    <Page.Contents
+                                        fullWidth={true}
+                                        scrollable={false}
+                                        className="alert-history-page--contents"
+                                    >
+                                        <div style={{ height: '100%'}}>
+                                            <Grid>
+                                                <Grid.Row style={{marginTop: "10px", marginBottom: "10px"}}>
+                                                    <Grid.Column widthXS={Columns.Twelve}>
+                                                        <h5 className="preview-data-margins">ML Report</h5>
+                                                    </Grid.Column>
+                                                </Grid.Row>
+                                                <Grid.Row style={{height: "125px"}}>
+                                                    <Grid.Column widthXS={Columns.Five}>
+                                                        <div style={{fontSize: "15px", color: InfluxColors.Amethyst}}>Number of Models:</div>
+                                                        <Table>
+                                                            <Table.Header>
+                                                                <Table.Row>
+                                                                    <Table.HeaderCell style={{width: "100px"}}>All</Table.HeaderCell>
+                                                                    <Table.HeaderCell style={{width: "100px"}}>Anomaly</Table.HeaderCell>
+                                                                    <Table.HeaderCell style={{width: "100px"}}>RUL</Table.HeaderCell>
+                                                                    <Table.HeaderCell style={{width: "100px"}}>RULREG</Table.HeaderCell>
+                                                                    <Table.HeaderCell style={{width: "100px"}}>POF</Table.HeaderCell>
+                                                                    <Table.HeaderCell style={{width: "100px"}}>Critical</Table.HeaderCell>
+                                                                </Table.Row>
+                                                            </Table.Header>
+                                                            <Table.Body>
+                                                                <Table.Row>
+                                                                    <Table.Cell style={{width: "100px"}}>{enabledModelCount}</Table.Cell>
+                                                                    <Table.Cell style={{width: "100px"}}>{anomalyModelsCount}</Table.Cell>
+                                                                    <Table.Cell style={{width: "100px"}}>{rulModelsCount}</Table.Cell>
+                                                                    <Table.Cell style={{width: "100px"}}>{rulregModelsCount}</Table.Cell>
+                                                                    <Table.Cell style={{width: "100px"}}>{pofModelsCount}</Table.Cell>
+                                                                    <Table.Cell style={{width: "100px"}}>{criticalCount}</Table.Cell>
+                                                                </Table.Row>
+                                                            </Table.Body>
+                                                        </Table>
+                                                        <div style={{color: this.returnFooterColor(likelyToFail), fontSize: "15px"}}>Likely to fail (%): {likelyToFail}</div>
+                                                        {/* <Label
+                                                            size={ComponentSize.Small}
+                                                            name={`Enabled Model Count: ${enabledModelCount}`}
+                                                            description={""}
+                                                            color={InfluxColors.Pool}
+                                                            id={"icon-label"} 
+                                                        />
+                                                        <Label
+                                                            size={ComponentSize.Small}
+                                                            name={`Critical Result Count: ${criticalCount}`}
+                                                            description={""}
+                                                            color={InfluxColors.Fire}
+                                                            id={"icon-label"} 
+                                                            style={{marginLeft: "5px"}}
+                                                        />
+                                                        <br/><br/>
+                                                        <Label
+                                                            size={ComponentSize.Small}
+                                                            name={`Anomaly Model Count: ${anomalyModelsCount}`}
+                                                            description={""}
+                                                            color={InfluxColors.Moonstone}
+                                                            id={"icon-label"} 
+                                                            //style={{marginLeft: "5px"}}
+                                                        />
+                                                        <Label
+                                                            size={ComponentSize.Small}
+                                                            name={`RUL Model Count:: ${rulModelsCount}`}
+                                                            description={""}
+                                                            color={InfluxColors.Magenta}
+                                                            id={"icon-label"} 
+                                                            style={{marginLeft: "5px"}}
+                                                        />
+                                                        <br/><br/>
+                                                        <Label
+                                                            size={ComponentSize.Small}
+                                                            name={`RULREG Model Count:: ${rulregModelsCount}`}
+                                                            description={""}
+                                                            color={InfluxColors.Pulsar}
+                                                            id={"icon-label"} 
+                                                            // style={{marginLeft: "5px"}}
+                                                        />
+                                                        <Label
+                                                            size={ComponentSize.Small}
+                                                            name={`POF Model Count:: ${pofModelsCount}`}
+                                                            description={""}
+                                                            color={InfluxColors.Galaxy}
+                                                            id={"icon-label"} 
+                                                            style={{marginLeft: "5px"}}
+                                                        />
+                                                        <br/><br/>
+                                                        <Label
+                                                            size={ComponentSize.Small}
+                                                            name={`Likely to fail (%): ${likelyToFail}`}
+                                                            description={""}
+                                                            color={InfluxColors.Topaz}
+                                                            id={"icon-label"} 
+                                                        /> */}
+                                                    </Grid.Column>  
+                                                    <Grid.Column widthXS={Columns.Seven} style={{border: `solid 2px ${InfluxColors.Galaxy}`}}>
+                                                        <Panel backgroundColor={InfluxColors.Raven} style={{fontSize: "13px"}}>
+                                                            {/* <Panel.Header>
+                                                                <h2></h2>
+                                                            </Panel.Header> */}
+                                                            <Panel.Body>
+                                                                <Grid>
+                                                                    <Grid.Row>
+                                                                        <Grid.Column widthXS={Columns.Twelve}>
+                                                                            <div>There are <span style={{color: InfluxColors.Pool, fontWeight: 500}}>{enabledModelCount}</span> models enabled. The score calculated for models as <span style={{color: InfluxColors.Fire, fontWeight: 500}}>"-1"</span> if failure is predicted to be happen and <span style={{color: InfluxColors.Honeydew, fontWeight: 500}}>"+1"</span> if no failure is predicted.</div><br/>
+                                                                        </Grid.Column>
+                                                                    </Grid.Row>
+                                                                    <Grid.Row>
+                                                                        <Grid.Column widthXS={Columns.Six}>
+                                                                            <div>Total Score of Anomaly Models: <span style={{color: this.returnSpanColor(anomalyModelsResultScore), fontWeight: 500}}>{anomalyModelsResultScore}</span></div>
+                                                                            <div>Total Score of RUL Models: <span style={{color: this.returnSpanColor(rulModelsResultScore), fontWeight: 500}}>{rulModelsResultScore}</span></div>
+                                                                            <div>Total Score of RULReg Models: <span style={{color: this.returnSpanColor(rulregModelsResultScore), fontWeight: 500}}>{rulregModelsResultScore}</span></div>
+                                                                            <div>Total Score of POF Models: <span style={{color: this.returnSpanColor(pofModelsResultScore), fontWeight: 500}}>{pofModelsResultScore}</span></div>
+                                                                            <div><span style={{color: InfluxColors.Laser}}>Total Score of All Models in the</span> <span style={{color: InfluxColors.Pool, fontWeight: 500}}>(+{enabledModelCount},-{enabledModelCount})</span> <span style={{color: InfluxColors.Laser}}>range:</span> <span style={{color: this.returnSpanColor(anomalyModelsResultScore + rulModelsResultScore + rulregModelsResultScore + pofModelsResultScore), fontWeight: 500}}>{anomalyModelsResultScore + rulModelsResultScore + rulregModelsResultScore + pofModelsResultScore}</span></div>
+                                                                        </Grid.Column>
+                                                                        <Grid.Column widthXS={Columns.Six}>
+                                                                            <ScoreSlider
+                                                                                aria-label="Always visible"
+                                                                                defaultValue={0}
+                                                                                value={anomalyModelsResultScore + rulModelsResultScore + rulregModelsResultScore + pofModelsResultScore}
+                                                                                getAriaValueText={()=>anomalyModelsResultScore + rulModelsResultScore + rulregModelsResultScore + pofModelsResultScore + ""}
+                                                                                step={enabledModelCount*2}
+                                                                                /* marks={[{
+                                                                                    value: -1*enabledModelCount,
+                                                                                    label: `${-1*enabledModelCount}`,
+                                                                                },{
+                                                                                    value: enabledModelCount,
+                                                                                    label: `${enabledModelCount}`,
+                                                                                }]} */
+                                                                                valueLabelDisplay="on"
+                                                                                min={-1*enabledModelCount} 
+                                                                                max={enabledModelCount} 
+                                                                                style={{marginBottom: "0px", marginTop: "10px"}}
+                                                                                scoreColor={this.returnSliderColorCode(anomalyModelsResultScore + rulModelsResultScore + rulregModelsResultScore + pofModelsResultScore)}
+                                                                                //disabled={true}
+                                                                                //color={this.returnSliderColor(anomalyModelsResultScore + rulModelsResultScore + rulregModelsResultScore + pofModelsResultScore)}
+                                                                            />
+                                                                            <div>
+                                                                                <span style={{float: "left"}}>{-1*enabledModelCount}</span>
+                                                                                <span style={{float: "right"}}>{enabledModelCount}</span>
+                                                                            </div>
+                                                                            <Heading
+                                                                                element={HeadingElement.H1}
+                                                                                type={Typeface.Rubik}
+                                                                                weight={FontWeight.Regular}
+                                                                                //className="cf-funnel-page--title"
+                                                                                style={{textAlign: "center", color: this.returnFooterColor(anomalyModelsResultScore + rulModelsResultScore + rulregModelsResultScore + pofModelsResultScore)}}
+                                                                            >{this.returnSliderText(anomalyModelsResultScore + rulModelsResultScore + rulregModelsResultScore + pofModelsResultScore)}
+                                                                            </Heading>
+                                                                        </Grid.Column>
+                                                                    </Grid.Row>
+                                                                </Grid>
+                                                                    {/* <RangeSlider 
+                                                                        color={this.returnSliderColor(anomalyModelsResultScore + rulModelsResultScore + rulregModelsResultScore + pofModelsResultScore)} 
+                                                                        onChange={(e)=>console.log(e)} 
+                                                                        //status={ComponentStatus.Disabled} 
+                                                                        value={anomalyModelsResultScore + rulModelsResultScore + rulregModelsResultScore + pofModelsResultScore} 
+                                                                        min={-1*enabledModelCount} 
+                                                                        max={enabledModelCount} 
+                                                                        step={enabledModelCount*2} 
+                                                                    /> */}
+                                                                
+                                                                {/* <div><span style={{color: InfluxColors.Galaxy}}>Class 0</span> shows the number of non-failure examples we have: <span style={{color: InfluxColors.Galaxy}}>{}</span></div><br/>
+                                                                <div><span style={{color: InfluxColors.Ruby}}>Class 1</span> shows the number of failure examples we have: <span style={{color: InfluxColors.Ruby}}>{}</span></div> */}
+                                                            </Panel.Body>
+                                                        </Panel>
+                                                        {/* <GradientBox
+                                                            borderGradient={Gradients.MiyazakiSky}
+                                                            borderColor={InfluxColors.Raven}
+                                                        >                                                            
+                                                            <DapperScrollbars
+                                                                autoHide={false}
+                                                                autoSizeHeight={false}
+                                                                style={{height: "125px", maxHeight: '125px' }}
+                                                                className="data-loading--scroll-content"
+                                                            >
+                                                                
+                                                            </DapperScrollbars>
+                                                        </GradientBox> */}
+                                                    </Grid.Column> 
+                                                    {/* <Grid.Column widthXS={Columns.Two}>
+                                                        
+                                                    </Grid.Column>
+                                                    <Grid.Column widthXS={Columns.Two}>
+                                                        
+                                                    </Grid.Column>
+                                                    <Grid.Column widthXS={Columns.Two}>
+                                                        
+                                                    </Grid.Column>
+                                                    <Grid.Column widthXS={Columns.Two}>
+                                                        
+                                                    </Grid.Column> */}
+                                                </Grid.Row>
+                                                <Grid.Row style={{marginTop: "10px"}}>
+                                                    
+                                                </Grid.Row>
+                                            </Grid>
+                                        </div>
+                                    </Page.Contents>
+                                </Page>    
+                            </Grid.Column>                        
                         </Grid.Row>
-                        <Grid.Row style={{marginTop: "20px"}}>
-                            <Grid.Column widthXS={Columns.Twelve} style={{height: "350px"}}>  
-                                <RootCauseAnalysisOverlay 
-                                    createModelOverlay={this.state.rootCauseAnalysisOverlay}
-                                    closeOverlay={() => this.setState({ rootCauseAnalysisOverlay: !this.state.rootCauseAnalysisOverlay })}
-                                    failure={this.state.selectedFailure}
-                                />                              
-                                <Panel style={{border: 'solid 2px #999dab', borderRadius: '4px', height: "inherit"}}>
-                                    <Panel.Header size={ComponentSize.ExtraSmall}>
-                                        <p className="preview-data-margins">Failure list</p>
-                                    </Panel.Header>
-                                    <Panel.Body size={ComponentSize.ExtraSmall}>
-                                        <Table
-                                            borders={BorderType.Vertical}
-                                            fontSize={ComponentSize.ExtraSmall}
-                                            cellPadding={ComponentSize.ExtraSmall}
-                                        >
-                                            <Table.Header>
-                                                <Table.Row>
-                                                    <Table.HeaderCell style={{width: "30px"}}></Table.HeaderCell>
-                                                    <Table.HeaderCell style={{width: "120px"}}>Asset Name</Table.HeaderCell>
-                                                    <Table.HeaderCell style={{width: "120px"}}>Start Time</Table.HeaderCell>
-                                                    <Table.HeaderCell style={{width: "120px"}}>End Time</Table.HeaderCell>
-                                                    <Table.HeaderCell style={{width: "30px"}}></Table.HeaderCell>
-                                                </Table.Row>
-                                            </Table.Header>
-                                        </Table>
-                                        <DapperScrollbars
-                                            autoHide={false}
-                                            autoSizeHeight={true}
-                                            style={{ maxHeight: '250px' }}
-                                            className="data-loading--scroll-content"
-                                        >
-                                            <Table
-                                                borders={BorderType.Vertical}
-                                                fontSize={ComponentSize.ExtraSmall}
-                                                cellPadding={ComponentSize.ExtraSmall}
-                                            >
-                                                <Table.Body>
-                                                    {[{severity: "critical", sourceName: "failure1", startTime: "2021-02-14T21:55", endTime: "2021-02-15T21:55"}, 
-                                                    {severity: "major", sourceName: "failure2", startTime: "2021-01-07T16:30", endTime: "2021-01-07T21:55"}, 
-                                                    {severity: "acceptable", sourceName: "failure3", startTime: "2021-03-01T07:27", endTime: "2021-03-02T21:55"},
-                                                    {severity: "acceptable", sourceName: "failure4", startTime: "2021-03-03T07:27", endTime: ""},
-                                                    {severity: "acceptable", sourceName: "failure5", startTime: "2021-03-04T07:27", endTime: "2021-03-04T21:55"},
-                                                    {severity: "acceptable", sourceName: "failure6", startTime: "2021-03-06T07:27", endTime: "2021-03-07T21:55"},
-                                                    {severity: "major", sourceName: "failure2", startTime: "2021-01-07T16:30", endTime: ""}, 
-                                                    {severity: "acceptable", sourceName: "failure3", startTime: "2021-03-01T07:27", endTime: "2021-03-03T21:55"},
-                                                    {severity: "acceptable", sourceName: "failure4", startTime: "2021-03-03T07:27", endTime: "2021-03-04T21:55"},
-                                                    {severity: "acceptable", sourceName: "failure5", startTime: "2021-03-04T07:27", endTime: ""},
-                                                    {severity: "acceptable", sourceName: "failure6", startTime: "2021-03-06T07:27", endTime: "2021-03-07T21:55"}].map((failure, i) => (
-                                                        <Table.Row key={uuid.v4()}>
-                                                            <Table.Cell style={{width: "30px", textAlign: "center", backgroundColor: this.getBackgroundColor(failure.severity)}}>{this.failureIcon(failure.severity)}</Table.Cell>
-                                                            <Table.Cell style={{width: "120px"}}>{failure.sourceName}</Table.Cell>
-                                                            <Table.Cell style={{width: "120px"}}>{failure.startTime}</Table.Cell>
-                                                            <Table.Cell style={{width: "120px"}}>{failure.endTime}</Table.Cell>
-                                                            <Table.Cell style={{width: "30px"}}>
-                                                                <SquareButton
-                                                                    icon={IconFont.EyeOpen}
-                                                                    onClick={()=>this.getFailureRootCause(failure)}
-                                                                    size={ComponentSize.ExtraSmall}
-                                                                    titleText={"View Root Cause"}
-                                                                    color={ComponentColor.Primary}
-                                                                />
-                                                            </Table.Cell>
-                                                        </Table.Row>
-                                                    ))}
-                                                </Table.Body>
-                                            </Table>
-                                        </DapperScrollbars>
-                                    </Panel.Body>
-                                </Panel>
-                            </Grid.Column>
-                        </Grid.Row>
-                        {/* <Grid.Row style={{marginTop: "20px"}}>
-                            <Grid.Column widthXS={Columns.Twelve} style={{height: "350px"}}>
-                                <Panel style={{border: 'solid 2px #999dab', borderRadius: '4px', height: "inherit"}}>
-                                    <Panel.Header size={ComponentSize.ExtraSmall}>
-                                        <p className="preview-data-margins">Model list</p>
-                                    </Panel.Header>
-                                    <Panel.Body size={ComponentSize.ExtraSmall}>
-                                        <Table
-                                            borders={BorderType.Vertical}
-                                            fontSize={ComponentSize.ExtraSmall}
-                                            cellPadding={ComponentSize.ExtraSmall}
-                                        >
-                                            <Table.Header>
-                                                <Table.Row>
-                                                    <Table.HeaderCell style={{width: "50px"}}>Model Task</Table.HeaderCell>
-                                                    <Table.HeaderCell style={{width: "120px"}}>Model Name</Table.HeaderCell>   
-                                                    <Table.HeaderCell style={{width: "100px"}}>Last Log</Table.HeaderCell>     
-                                                    <Table.HeaderCell style={{width: "150px"}}></Table.HeaderCell>                                      
-                                                </Table.Row>
-                                            </Table.Header>
-                                        </Table>
-                                        <DapperScrollbars
-                                            autoHide={false}
-                                            autoSizeHeight={true}
-                                            style={{ maxHeight: '250px' }}
-                                            className="data-loading--scroll-content"
-                                        >
-                                            <Table
-                                                borders={BorderType.Vertical}
-                                                fontSize={ComponentSize.ExtraSmall}
-                                                cellPadding={ComponentSize.ExtraSmall}
-                                            >
-                                                <Table.Body>
-                                                    {this.state.models.map((model, i) => (
-                                                        <Table.Row key={uuid.v4()}>
-                                                            <Table.Cell style={{width: "50px"}}>{model.modelTask}</Table.Cell>
-                                                            <Table.Cell style={{width: "120px"}}>{model.modelName}</Table.Cell>
-                                                            <Table.Cell style={{width: "100px"}}>{model.lastLog}</Table.Cell>
-                                                            <Table.Cell style={{width: "150px"}} horizontalAlignment={Alignment.Center}>
-                                                                <Context align={Alignment.Center}>
-                                                                    <Context.Menu icon={IconFont.GraphLine} color={ComponentColor.Primary}>
-                                                                        <Context.Item
-                                                                            label="View Log Chart"
-                                                                            action={() => console.log("log click")}
-                                                                            testID="context-menu-item-export"
-                                                                        />
-                                                                    </Context.Menu>
-                                                                    <Context.Menu icon={IconFont.BarChart} color={ComponentColor.Secondary}>
-                                                                        <Context.Item
-                                                                            label="View AutoML Results"
-                                                                            action={() => console.log("automl click")}
-                                                                            testID="context-menu-item-export"
-                                                                        />
-                                                                    </Context.Menu>
-                                                                    <Context.Menu icon={IconFont.Stop} color={ComponentColor.Danger} >
-                                                                        <Context.Item
-                                                                            label="View Stop Model"
-                                                                            action={() => console.log("stop click")}
-                                                                            testID="context-menu-item-export"
-                                                                        />
-                                                                    </Context.Menu> 
-                                                                </Context>
-                                                            </Table.Cell>
-                                                        </Table.Row>
-                                                    ))}
-                                                </Table.Body>
-                                            </Table>
-                                        </DapperScrollbars>
-                                    </Panel.Body>
-                                </Panel>
-                            </Grid.Column>
-                        </Grid.Row> */}
-                        {/* <Grid.Row style={{marginTop: "20px"}}>
-                            <Grid.Column widthXS={Columns.Three}>
-                            </Grid.Column>
-                            <Grid.Column widthXS={Columns.Nine}>
-                                <Panel style={{border: 'solid 2px #999dab', borderRadius: '4px', height: "inherit"}}>
-                                    <Panel.Header size={ComponentSize.ExtraSmall}>
-                                        <p className="preview-data-margins">Root Cause Analysis</p>
-                                    </Panel.Header>
-                                    <Panel.Body size={ComponentSize.ExtraSmall}></Panel.Body>
-                                </Panel>
-                            </Grid.Column>
-                        </Grid.Row> */}
                         <Page
                             titleTag=""
-                            style={{height: "500px", marginTop: "20px", border: 'solid 2px #999dab', borderRadius: '4px'}}
+                            style={{height: this.state.showAnomalyChartSection ? "800px" : "100px", marginTop: "20px", border: 'solid 2px #999dab', borderRadius: '4px'}}
                         >
                             <Page.Header fullWidth={false}>
-                                <Page.Title title="ML Models" />       
-                                <div className="tabbed-page--header-left" style={{marginLeft: "20px"}}>
-                                    <InputLabel>Number of Days: </InputLabel>
-                                    <Input
-                                        onChange={(e) => this.setState({ pofDays: parseInt(e.target.value) })}
-                                        name="pofDays"
-                                        type={InputType.Number}
-                                        value={this.state.pofDays}
-                                        style={{width: "15%"}}
+                                <Page.Title title="Anomaly Charts" />
+                                <div className="tabbed-page--header-right">
+                                    <Button
+                                        shape={ButtonShape.Default}
+                                        color={ComponentColor.Secondary}
+                                        titleText=""
+                                        icon={this.state.showAnomalyChartSection ? IconFont.Collapse : IconFont.Plus}
+                                        text={this.state.showAnomalyChartSection ? "Minimize" : "Maximize"}
+                                        type={ButtonType.Button}
+                                        onClick={() => this.setState({showAnomalyChartSection: !this.state.showAnomalyChartSection})}
                                     />
-                                    <SquareButton
-                                        icon={IconFont.Play}
-                                        onClick={()=>this.setState({pofDaysSent: this.state.pofDays})}
-                                        size={ComponentSize.ExtraSmall}
-                                        titleText={"Get Probability"}
-                                        color={ComponentColor.Primary}
+                                </div>
+                            </Page.Header>
+                            {this.state.showAnomalyChartSection ?
+                            <Page.Contents
+                                className="models-index__page-contents"
+                                fullWidth={false}
+                                scrollable={true}
+                            >
+                                {this.state.anomalyModels.length ? (
+                                    <TabbedPageTabs
+                                        tabs={this.createTabs()}
+                                        activeTab={this.state.activeAnomalyModel}
+                                        onTabClick={(id) => this.setState({ activeAnomalyModel: id, selectedModelID: id })}
                                     />
-                                    {/* <FlexBox
-                                        alignItems={AlignItems.Center}
-                                        margin={ComponentSize.Small}
-                                        className="view-options--checkbox"
-                                        key={uuid.v4()}
-                                        style={{margin: "0px", marginLeft: "20px"}}
+                                ) : <></>}
+                                
+                                <br />
+                                
+                                <div>
+                                    {this.state.isDataLoaded ? <AnomalyBrushGraph  /* this.state.machineSensorData.length */
+                                        chartID={this.state.chartID}
+                                        name={this.state.activeAnomalyModel}
+                                        sensorNames={this.state.sensorNames}
+                                        modelID={this.state.selectedModelID}
+                                        /* timeRange={this.state.timeRange}
+                                        aggregatePeriod={this.state.aggregatePeriod} */
+                                        goToAnomaly={this.setTimeRange}
+                                        orgID={this.props.match.params.orgID}
+                                        machineID={this.props.match.params.MID}
+                                        data={this.state.machineSensorData} //{this.generateData(this.state.activeAnomalyModel)} //this.state.machineSensorData
+                                        graphData={this.state.graphData}
+                                        windowStart={this.state.windowStart} 
+                                        windowEnd={this.state.windowEnd}
+                                        changeWindowPoints={this.changeWindowPoints}
+                                        isAnomalySelected={this.state.isAnomalySelected}
+                                        user={this.props.me}
+                                    /> : 
+                                    <div style={{textAlign: "-webkit-center", marginTop: "60px"}}>
+                                        <TechnoSpinner style={{ width: "75px", height: "75px"}} />
+                                        <WaitingText text="Graph is loading" />
+                                    </div>}
+                                    {/* Chart of {this.state.activeAnomalyModel} */}
+                                </div>
+                            </Page.Contents> : <></> }
+                        </Page>
+                        <Page
+                            titleTag=""
+                            style={{height: this.state.showFailureListSection ? "400px" : "100px", marginTop: "20px", border: 'solid 2px #999dab', borderRadius: '4px'}}
+                        >
+                            <Page.Header fullWidth={false}>
+                                <Page.Title title="Failure List" />
+                                <div className="tabbed-page--header-right">
+                                    <Button
+                                        shape={ButtonShape.Default}
+                                        color={ComponentColor.Secondary}
+                                        titleText=""
+                                        icon={this.state.showFailureListSection ? IconFont.Collapse : IconFont.Plus}
+                                        text={this.state.showFailureListSection ? "Minimize" : "Maximize"}
+                                        type={ButtonType.Button}
+                                        onClick={() => this.setState({showFailureListSection: !this.state.showFailureListSection})}
+                                    />
+                                </div>
+                            </Page.Header>
+                            <RootCauseAnalysisOverlay 
+                                createModelOverlay={this.state.rootCauseAnalysisOverlay}
+                                closeOverlay={() => this.setState({ rootCauseAnalysisOverlay: !this.state.rootCauseAnalysisOverlay })}
+                                failure={this.state.selectedFailure}
+                                rootCauseModels={this.state.rootCauseModels}
+                                dtData={this.state.dtData}
+                            />  
+                            {this.state.showFailureListSection ?
+                            <Page.Contents
+                                className="models-index__page-contents"
+                                fullWidth={false}
+                                scrollable={true}
+                            >
+                                {/* <DapperScrollbars
+                                    autoHide={false}
+                                    autoSizeHeight={true}
+                                    style={{ maxHeight: '50px' }}
+                                    className="data-loading--scroll-content"
+                                >
+                                    <Table
+                                        borders={BorderType.Vertical}
+                                        fontSize={ComponentSize.ExtraSmall}
+                                        cellPadding={ComponentSize.ExtraSmall}
                                     >
+                                        <Table.Header>
+                                            <Table.Row>
+                                                <Table.HeaderCell style={{width: "100px"}}>Start Time</Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "100px"}}>End Time</Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "70px"}}>Type</Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "70px"}}>Varlık Kodu</Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "100px"}}>İş Tipi Tanımı</Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "100px"}}>Arıza Komp Tanım</Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "30px"}}></Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "30px"}}></Table.HeaderCell>
+                                            </Table.Row>
+                                        </Table.Header>
+                                    </Table>
+                                </DapperScrollbars> */}
+                                <DapperScrollbars
+                                    autoHide={false}
+                                    autoSizeHeight={true}
+                                    style={{ maxHeight: '250px' }}
+                                    className="data-loading--scroll-content"
+                                >
+                                    <Table
+                                        borders={BorderType.Vertical}
+                                        fontSize={ComponentSize.ExtraSmall}
+                                        cellPadding={ComponentSize.ExtraSmall}
+                                    >
+                                        <Table.Header>
+                                            <Table.Row>
+                                                <Table.HeaderCell style={{width: "100px"}}>Start Time</Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "100px"}}>End Time</Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "70px"}}>Type</Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "70px"}}>Asset Code</Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "100px"}}>Job Type</Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "100px"}}>Target Component</Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "30px"}}></Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "30px"}}></Table.HeaderCell>
+                                            </Table.Row>
+                                        </Table.Header>
+                                        <Table.Body>
+                                            {this.state.failures.map((failure, i) => {
+                                                let startTimeDate = new Date(failure["startTime"])
+                                                let endTimeDate = new Date(failure["endTime"])
+                                                return (
+                                                <Table.Row key={uuid.v4()}>
+                                                    <Table.Cell style={{width: "100px"}}>
+                                                        {(startTimeDate instanceof Date && !isNaN(startTimeDate.valueOf())) ? startTimeDate.toLocaleString() : "-"}
+                                                    </Table.Cell>
+                                                    <Table.Cell style={{width: "100px"}}>
+                                                        {(endTimeDate instanceof Date && !isNaN(endTimeDate.valueOf())) ? endTimeDate.toLocaleString() : "-"}
+                                                    </Table.Cell>
+                                                    <Table.Cell style={{width: "70px"}}>
+                                                        {failure["type"]}
+                                                    </Table.Cell>
+                                                    <Table.Cell style={{width: "70px"}}>
+                                                        {failure["VARLIKKODU"]}
+                                                    </Table.Cell>
+                                                    <Table.Cell style={{width: "100px"}}>
+                                                        {failure["ISTIPITANIMI"]}
+                                                    </Table.Cell>
+                                                    <Table.Cell style={{width: "100px"}}>
+                                                        {failure["ARZKOMPTANIM"]}
+                                                    </Table.Cell>
+                                                    <Table.Cell style={{width: "30px"}}>
+                                                        <QuestionMarkTooltip
+                                                            style={{ marginLeft: "5px" }}
+                                                            diameter={15}
+                                                            color={ComponentColor.Secondary}
+                                                            tooltipContents={failure["description"]}
+                                                        />
+                                                    </Table.Cell>
+                                                    <Table.Cell style={{width: "30px"}}>
+                                                        <SquareButton
+                                                            icon={IconFont.EyeOpen}
+                                                            onClick={()=>this.getFailureRootCause(failure)}
+                                                            size={ComponentSize.ExtraSmall}
+                                                            titleText={"View Root Cause"}
+                                                            color={ComponentColor.Primary}
+                                                        />
+                                                    </Table.Cell>
+                                                </Table.Row>
+                                            )})}
+                                        </Table.Body>
+                                    </Table>
+                                </DapperScrollbars>
+                            </Page.Contents> : <></> }
+                        </Page>
+                        <Page
+                            className="load-data-page"
+                            titleTag=""
+                            style={{height: this.state.showMLModelsSection ? "500px" : "100px", marginTop: "20px", border: 'solid 2px #999dab', borderRadius: '4px'}}
+                        >
+                            <Page.Header fullWidth={false}>
+                                <Page.Title title="ML Models" />
+                                {this.state.showMLModelsSection ? <>     
+                                    <div className="tabbed-page--header-left" style={{marginLeft: "20px"}}>
+                                        <InputLabel>Number of Days: </InputLabel>
                                         <Input
                                             onChange={(e) => this.setState({ pofDays: parseInt(e.target.value) })}
                                             name="pofDays"
                                             type={InputType.Number}
                                             value={this.state.pofDays}
+                                            style={{width: "15%"}}
                                         />
                                         <SquareButton
                                             icon={IconFont.Play}
@@ -1277,254 +2199,547 @@ class MachineHealthPage extends PureComponent<Props, State>{
                                             titleText={"Get Probability"}
                                             color={ComponentColor.Primary}
                                         />
-                                    </FlexBox>  */}                                   
-                                </div>
-                                <div className="tabbed-page--header-right">
-                                    <FlexBox
-                                        alignItems={AlignItems.Center}
-                                        margin={ComponentSize.Small}
-                                        className="view-options--checkbox"
-                                        key={uuid.v4()}
-                                        style={{margin: "0px", marginRight: "25px"}}
-                                    >
-                                        <Toggle
-                                            id="prefixoptional"
-                                            checked={this.state.showEnabledModels}
-                                            name={"showEnabledModels"}
-                                            type={InputToggleType.Checkbox}
-                                            onChange={() => {
-                                                if(this.state.showEnabledModels){
-                                                    this.setState({displayedModels: this.state.models, showEnabledModels: false})
-                                                }
-                                                else{
-                                                    let enabledModels = this.state.models.filter(m=>m["enabled"])
-                                                    this.setState({displayedModels: enabledModels, showEnabledModels: true})
-                                                }
-                                            }}
-                                            size={ComponentSize.ExtraSmall}
+                                        {/* <FlexBox
+                                            alignItems={AlignItems.Center}
+                                            margin={ComponentSize.Small}
+                                            className="view-options--checkbox"
+                                            key={uuid.v4()}
+                                            style={{margin: "0px", marginLeft: "20px"}}
+                                        >
+                                            <Input
+                                                onChange={(e) => this.setState({ pofDays: parseInt(e.target.value) })}
+                                                name="pofDays"
+                                                type={InputType.Number}
+                                                value={this.state.pofDays}
+                                            />
+                                            <SquareButton
+                                                icon={IconFont.Play}
+                                                onClick={()=>this.setState({pofDaysSent: this.state.pofDays})}
+                                                size={ComponentSize.ExtraSmall}
+                                                titleText={"Get Probability"}
+                                                color={ComponentColor.Primary}
+                                            />
+                                        </FlexBox>  */}                                   
+                                    </div>
+                                    <div className="tabbed-page--header-right">
+                                        <FlexBox
+                                            alignItems={AlignItems.Center}
+                                            margin={ComponentSize.Small}
+                                            className="view-options--checkbox"
+                                            key={uuid.v4()}
+                                            style={{margin: "0px", marginRight: "25px"}}
+                                        >
+                                            <Toggle
+                                                id="prefixoptional"
+                                                checked={this.state.showEnabledModels}
+                                                name={"showEnabledModels"}
+                                                type={InputToggleType.Checkbox}
+                                                onChange={() => {
+                                                    if(this.state.showEnabledModels){
+                                                        this.setState({displayedModels: this.state.models, showEnabledModels: false})
+                                                    }
+                                                    else{
+                                                        let enabledModels = this.state.models.filter(m=>m["enabled"])
+                                                        this.setState({displayedModels: enabledModels, showEnabledModels: true})
+                                                    }
+                                                }}
+                                                size={ComponentSize.ExtraSmall}
+                                            />
+                                            <InputLabel>Show only enabled models</InputLabel>
+                                        </FlexBox>
+                                        <CreateModelOverlay 
+                                            handleChangeNotification={this.handleChangeNotification}
+                                            username={this.props.me.name}
+                                            isComponent={this.isComponent()}
+                                            parentParams={this.props["match"].params}
+                                            createModelOverlay={this.state.createModelOverlay}
+                                            closeOverlay={() => this.setState({ createModelOverlay: !this.state.createModelOverlay })}
                                         />
-                                        <InputLabel>Show only enabled models</InputLabel>
-                                    </FlexBox>
-                                    <RefreshLogsDropdown
-                                        selected={this.state.autoRefresh}
-                                        onChoose={this.handleChooseAutoRefresh}
-                                        onManualRefresh={()=>this.getMLModels()}
-                                        showManualRefresh={true}
-                                    />
-                                </div>                    
+                                        <MLReportOverlay 
+                                            handleChangeNotification={this.handleChangeNotification}
+                                            username={this.props.me.name}
+                                            parentParams={this.props["match"].params}
+                                            mlReportOverlay={this.state.mlReportOverlay}
+                                            closeOverlay={() => this.setState({ mlReportOverlay: !this.state.mlReportOverlay })}
+                                        />
+                                        <RefreshLogsDropdown
+                                            selected={this.state.autoRefresh}
+                                            onChoose={this.handleChooseAutoRefresh}
+                                            onManualRefresh={()=>this.getMLModels()}
+                                            showManualRefresh={true}
+                                        />
+                                        <Button
+                                            icon={IconFont.Plus}
+                                            color={ComponentColor.Success}
+                                            text={"Add Model"}
+                                            onClick={()=>this.setState({createModelOverlay: !this.state.createModelOverlay})}
+                                        />
+                                        <Button
+                                            shape={ButtonShape.Default}
+                                            color={ComponentColor.Secondary}
+                                            titleText=""
+                                            icon={this.state.showMLModelsSection ? IconFont.Collapse : IconFont.Plus}
+                                            text={this.state.showMLModelsSection ? "Minimize" : "Maximize"}
+                                            type={ButtonType.Button}
+                                            onClick={() => this.setState({showMLModelsSection: !this.state.showMLModelsSection})}
+                                        />
+                                    </div> 
+                                </> : <><Button
+                                    shape={ButtonShape.Default}
+                                    color={ComponentColor.Secondary}
+                                    titleText=""
+                                    icon={this.state.showMLModelsSection ? IconFont.Collapse : IconFont.Plus}
+                                    text={this.state.showMLModelsSection ? "Minimize" : "Maximize"}
+                                    type={ButtonType.Button}
+                                    onClick={() => this.setState({showMLModelsSection: !this.state.showMLModelsSection})}
+                                /></>}                     
                             </Page.Header>
                             <ModelLogGraphOverlay
                                 modelLogGraphOverlay={this.state.modelLogGraphOverlay}
                                 closeOverlay={()=>this.setState({modelLogGraphOverlay: !this.state.modelLogGraphOverlay})}
                                 model={this.state.selectedModel}
                             />
+                            {this.state.showMLModelsSection ? 
                             <Page.Contents
-                                className="models-index__page-contents"
+                                //className="models-index__page-contents"
                                 fullWidth={false}
                                 scrollable={true}
                             >
-                                <div style={{ height: '100%'}}> {/* , display: 'grid' */} 
-                                    <div className="models-card-grid">
-                                        {this.state.displayedModels.length === 0 && (
-                                            <div>There are no models created yet</div>
+                                {this.state.displayedModels.length === 0 && (
+                                            <h4>There are no models created yet</h4>
                                         )}
-                                        {this.state.displayedModels.map((model, i) => (
-                                            <ResourceCard
-                                                key={uuid.v4()}
-                                                contextMenu={this.contextMenu(model["modelName"], model["enabled"], model["task"], model)}
-                                                style={model["enabled"] ? {background: "#afdf80", color:"red !important"} : {}}
-                                            >
-                                                <ResourceCard.Name
-                                                    name={`Task: ${model["task"]}`}
-                                                    style={{color: "red !important"}}
+                                <Tabs.TabContents>
+                                <div
+                                    className="write-data--section"
+                                    data-testid={`write-model-section`}
+                                >
+                                    <SquareGrid cardSize="200px" gutter={ComponentSize.Small}>
+                                    
+                                            {this.state.displayedModels.map((model, i) => (
+                                                <ResourceCard
+                                                    key={uuid.v4()}
+                                                    contextMenu={this.contextMenu(model["modelName"], model["enabled"], model["task"], model)}
+                                                    style={model["enabled"] ? {background: "#afdf80", color:"red !important", height: "170px"} : {height: "170px"}}
                                                 >
-                                                    <div>Test children</div>
-                                                </ResourceCard.Name>
-                                                {("trainingDone" in model) && !model["trainingDone"] && (<>
-                                                    <SparkleSpinner style={{alignSelf: "center"}} loading={RemoteDataState.Loading} />
-                                                    <WaitingText style={{textAlign: "center"}} text="Training process is running" />
-                                                </>) }
-                                                {model["trainingDone"] && (model["task"] === "rul") && 
-                                                    (modelsLastLogs[model["modelID"]] ? parseInt(modelsLastLogs[model["modelID"]]["prediction"]) === 1 ? <Button
-                                                        shape={ButtonShape.Default}
-                                                        color={ComponentColor.Danger}
-                                                        titleText=""
-                                                        icon={IconFont.Stop}
-                                                        text="Danger"
-                                                        type={ButtonType.Button}
-                                                        onClick={() => console.log("click action")}
-                                                        style={{top: "30%", height: "50px"}}
-                                                    /> :
-                                                    <Button
-                                                        shape={ButtonShape.Default}
-                                                        color={ComponentColor.Success}
-                                                        titleText=""
-                                                        icon={IconFont.Sun}
-                                                        text="Healthy"
-                                                        type={ButtonType.Button}
-                                                        onClick={() => console.log("click action")}
-                                                        style={{marginTop: "12.5%", marginBottom: "12.5%", height: "50px"}}
-                                                    /> : <Button
+                                                    <ResourceCard.Name
+                                                        name={`Task: ${model["task"]}`}
+                                                        style={{color: "red !important"}}
+                                                    >
+                                                        <div>Test children</div>
+                                                    </ResourceCard.Name>
+                                                    {((("trainingDone" in model) && !model["trainingDone"]) || (!("trainingDone" in model))) && (<>
+                                                        <SparkleSpinner style={{alignSelf: "center"}} sizePixels={75} loading={RemoteDataState.Loading} />
+                                                        <WaitingText style={{textAlign: "center"}} text="Training process is running" />
+                                                    </>) }
+                                                    {model["trainingDone"] && (model["task"] === "rul") && 
+                                                        (modelsLastLogs[model["modelID"]] ? parseInt(modelsLastLogs[model["modelID"]]["prediction"]) === 1 ? <Button
                                                             shape={ButtonShape.Default}
-                                                            color={ComponentColor.Default}
+                                                            color={ComponentColor.Danger}
                                                             titleText=""
-                                                            icon={IconFont.Clock}
-                                                            text="No Log Found"
+                                                            icon={IconFont.Stop}
+                                                            text="Danger"
                                                             type={ButtonType.Button}
                                                             onClick={() => console.log("click action")}
                                                             style={{marginTop: "12.5%", marginBottom: "12.5%", height: "50px"}}
-                                                        />)
-                                                } 
-                                                {model["trainingDone"] && (model["task"] === "rulreg" )&& 
-                                                    <div style={{ width: 'auto', height: '150px' }}>
-                                                        <SingleStat
-                                                            key={uuid.v4()}
-                                                            stat={modelsLastLogs[model["pipelineID"]] ? modelsLastLogs[model["pipelineID"]]["prediction"] : "-"}
-                                                            style={{width: "90%", height: "90%", top: "auto", bottom: "-5px", right: "auto", left: "auto"}}
-                                                            properties={{
-                                                                queries: [],
-                                                                colors: [
-                                                                    {
-                                                                        type: "text",
-                                                                        hex: "#34BB55",
-                                                                        id: "base",
-                                                                        name: "rainforest",
-                                                                        value: 15,
-                                                                    },
-                                                                    {
-                                                                        type: "text",
-                                                                        hex: "#DC4E58",
-                                                                        id: uuid.v4(),
-                                                                        name: "fire",
-                                                                        value: 0,
-                                                                    },
-                                                                    {
-                                                                        type: "text",
-                                                                        hex: "#513CC6",
-                                                                        id: uuid.v4(),
-                                                                        name: "pulsar",
-                                                                        value: -99999999999999,
-                                                                    }
-                                                                ],
-                                                                prefix: '',
-                                                                tickPrefix: '',
-                                                                suffix: ' days',
-                                                                tickSuffix: '',
-                                                                note: '',
-                                                                showNoteWhenEmpty: false,
-                                                                decimalPlaces: {
-                                                                isEnforced: false,
-                                                                digits: 0,
-                                                                },
-                                                            }}
-                                                            theme={'dark'}
-                                                        />
-                                                    </div>                                                    
-                                                }   
-                                                {model["trainingDone"] && (model["task"] === "pof") && 
-                                                    <>
-                                                        <div style={{ width: 'auto', height: '150px' }}>
-                                                            <GaugeChart
+                                                        /> :
+                                                        <Button
+                                                            shape={ButtonShape.Default}
+                                                            color={ComponentColor.Success}
+                                                            titleText=""
+                                                            icon={IconFont.Sun}
+                                                            text="Healthy"
+                                                            type={ButtonType.Button}
+                                                            onClick={() => console.log("click action")}
+                                                            style={{marginTop: "12.5%", marginBottom: "12.5%", height: "50px"}}
+                                                        /> : <Button
+                                                                shape={ButtonShape.Default}
+                                                                color={ComponentColor.Default}
+                                                                titleText=""
+                                                                icon={IconFont.Clock}
+                                                                text="No Log Found"
+                                                                type={ButtonType.Button}
+                                                                onClick={() => console.log("click action")}
+                                                                style={{marginTop: "12.5%", marginBottom: "12.5%", height: "50px"}}
+                                                            />)
+                                                    } 
+                                                    {model["trainingDone"] && (model["task"] === "rulreg" )&& 
+                                                        <div style={{ width: 'auto', height: '85px' }}>
+                                                            <SingleStat
                                                                 key={uuid.v4()}
-                                                                value={modelsLastLogs[model["modelID"]] ? this.findProbability(modelsLastLogs[model["modelID"]]["prediction"][0], modelsLastLogs[model["modelID"]]["prediction"][1], this.state.pofDaysSent) : ""}
-                                                                properties={this.state.gaugeProperties}
+                                                                stat={modelsLastLogs[model["pipelineID"]] ? modelsLastLogs[model["pipelineID"]]["prediction"] : "-"}
+                                                                style={{width: "90%", height: "100%", top: "auto", bottom: "-5px", right: "auto", left: "auto"}}
+                                                                properties={{
+                                                                    queries: [],
+                                                                    colors: [
+                                                                        {
+                                                                            type: "text",
+                                                                            hex: "#34BB55",
+                                                                            id: "base",
+                                                                            name: "rainforest",
+                                                                            value: 15,
+                                                                        },
+                                                                        {
+                                                                            type: "text",
+                                                                            hex: "#DC4E58",
+                                                                            id: uuid.v4(),
+                                                                            name: "fire",
+                                                                            value: 0,
+                                                                        },
+                                                                        {
+                                                                            type: "text",
+                                                                            hex: "#513CC6",
+                                                                            id: uuid.v4(),
+                                                                            name: "pulsar",
+                                                                            value: -99999999999999,
+                                                                        }
+                                                                    ],
+                                                                    prefix: '',
+                                                                    tickPrefix: '',
+                                                                    suffix: ' cycles',
+                                                                    tickSuffix: '',
+                                                                    note: '',
+                                                                    showNoteWhenEmpty: false,
+                                                                    decimalPlaces: {
+                                                                    isEnforced: false,
+                                                                    digits: 0,
+                                                                    },
+                                                                }}
                                                                 theme={'dark'}
-                                                                style={{height: "150px", width: "auto"}}
                                                             />
-                                                            {/* <div className="gauge">
-                                                                <Gauge
-                                                                    width={150}
-                                                                    height={150}
-                                                                    colors={colors}
-                                                                    prefix={prefix}
-                                                                    tickPrefix={tickPrefix}
-                                                                    suffix={suffix}
-                                                                    tickSuffix={tickSuffix}
-                                                                    gaugePosition={parseFloat(model.lastLog) ? parseFloat(model.lastLog) : ""}
-                                                                    decimalPlaces={decimalPlaces}
-                                                                    theme={GAUGE_THEME_DARK}
-                                                                />
-                                                            </div> */}                                                    
-                                                        </div>
-                                                        <Grid>
-                                                            <Grid.Row>
-                                                                <Grid.Column widthXS={Columns.Six}>
+                                                        </div>                                                    
+                                                    }   
+                                                    {model["trainingDone"] && (model["task"] === "pof") && 
+                                                        <>
+                                                            <div style={{ width: 'auto', height: '55px' }}>
+                                                                {/* <GaugeChart
+                                                                    key={uuid.v4()}
+                                                                    value={modelsLastLogs[model["modelID"]] ? this.findProbability(modelsLastLogs[model["modelID"]]["prediction"][0], modelsLastLogs[model["modelID"]]["prediction"][1], this.state.pofDaysSent) : ""}
+                                                                    properties={this.state.gaugeProperties}
+                                                                    theme={'dark'}
+                                                                />    */}     
+                                                                <ProgressBar
+                                                                    label=""
+                                                                    value={modelsLastLogs[model["modelID"]] ? this.findProbability(modelsLastLogs[model["modelID"]]["prediction"][0], modelsLastLogs[model["modelID"]]["prediction"][1], this.state.pofDaysSent) : 0}
+                                                                    color={InfluxColors.Comet}
+                                                                    barGradient={Gradients.JungleDusk}
+                                                                    max={100}
+                                                                />   
+                                                                {/* <ProgressBar
+                                                                    label=""
+                                                                    value={99}
+                                                                    color={InfluxColors.Comet}
+                                                                    barGradient={Gradients.JungleDusk} //{start: InfluxColors.Rainforest, stop: InfluxColors.Fire}
+                                                                    max={100}
+                                                                />   */}                                     
+                                                            </div>
+                                                            <Grid>
+                                                                <Grid.Row>
+                                                                    <Grid.Column widthXS={Columns.Six}>
+                                                                        <div className="tabbed-page--header-left">
+                                                                            <Label
+                                                                                size={ComponentSize.Small}
+                                                                                name={"Healthy"}
+                                                                                description={"Fail is unlikely"}
+                                                                                color={InfluxColors.Rainforest}
+                                                                                id={"icon-label"} 
+                                                                            />
+                                                                        </div>
+                                                                    </Grid.Column>
+                                                                    <Grid.Column widthXS={Columns.Six}>
+                                                                        <div className="tabbed-page--header-right">
+                                                                            <Label
+                                                                                size={ComponentSize.Small}
+                                                                                name={"Danger"}
+                                                                                description={"High failure risk"}
+                                                                                color={InfluxColors.Fire}
+                                                                                id={"icon-label"} 
+                                                                            />
+                                                                        </div>
+                                                                    </Grid.Column>
+                                                                </Grid.Row> 
+                                                                {/* <Grid.Row>
+                                                                    <Grid.Column widthXS={Columns.Six}>
+                                                                        <Input
+                                                                            onChange={(e) => this.setState({ pofDays: parseInt(e.target.value) })}
+                                                                            name="modelNamae"
+                                                                            type={InputType.Number}
+                                                                            value={this.state.pofDays}
+                                                                        />
+                                                                    </Grid.Column>
+                                                                </Grid.Row> */}
+                                                            </Grid>
+                                                        </>
+                                                    }{
+                                                        model["trainingDone"] && (model["task"] === "ad" )&& 
+                                                        <>
+                                                            <div style={{ width: 'auto', height: '100px' }}>
+                                                                <Grid>
+                                                                <Grid.Column widthXS={Columns.Three} >
+
+                                                                    <Grid.Row>
+                                                                    {/* <Grid.Column>
+                                                                        Previous Cycle:
+                                                                    </Grid.Column> */}
+                                                                        <div className="tabbed-page--header-left">
+                                                                            <Label
+                                                                                size={ComponentSize.ExtraSmall}
+                                                                                name={modelsLastLogs[model["modelID"]]["prevCount"]}
+                                                                                description={"Anomaly Count for Previous Cycle"}
+                                                                                color={InfluxColors.Rainforest}
+                                                                                id={"icon-label"} 
+                                                                            />
+                                                                        </div>
+                                                                    </Grid.Row>
+                                                                    <div></div>
+                                                                    <Grid.Row></Grid.Row>
+                                                                    <Grid.Row>
+                                                                    {/* <Grid.Column>
+                                                                        Most Recent Cycle:
+                                                                    </Grid.Column> */}
+                                                                    {/* <Grid.Column> */}
+                                                                        <div className="tabbed-page--header-left">
+                                                                            <Label
+                                                                                size={ComponentSize.ExtraSmall}
+                                                                                name={modelsLastLogs[model["modelID"]]["count"]}
+                                                                                description={"Anomaly Count for Most Recent Cycle"}
+                                                                                color={InfluxColors.Rainforest}
+                                                                                id={"icon-label"} 
+                                                                            />
+                                                                        </div>
+                                                                    {/* </Grid.Column> */}
+                                                                    </Grid.Row>
+                                                                    {/* </Grid.Column> */}
+                                                                </Grid.Column>
+                                                                    <Grid.Column widthXS={Columns.Three}>
+                                                                    <Grid.Row></Grid.Row>
+                                                                    <Grid.Row>
                                                                     <div className="tabbed-page--header-left">
-                                                                        <Label
-                                                                            size={ComponentSize.Small}
-                                                                            name={"Healthy"}
-                                                                            description={"Fail is unlikely"}
-                                                                            color={InfluxColors.Rainforest}
-                                                                            id={"icon-label"} 
-                                                                        />
-                                                                    </div>
-                                                                </Grid.Column>
-                                                                <Grid.Column widthXS={Columns.Six}>
-                                                                    <div className="tabbed-page--header-right">
-                                                                        <Label
-                                                                            size={ComponentSize.Small}
-                                                                            name={"Danger"}
-                                                                            description={"High failure risk"}
-                                                                            color={InfluxColors.Fire}
-                                                                            id={"icon-label"} 
-                                                                        />
-                                                                    </div>
-                                                                </Grid.Column>
-                                                            </Grid.Row> 
-                                                            {/* <Grid.Row>
-                                                                <Grid.Column widthXS={Columns.Six}>
-                                                                    <Input
-                                                                        onChange={(e) => this.setState({ pofDays: parseInt(e.target.value) })}
-                                                                        name="modelNamae"
-                                                                        type={InputType.Number}
-                                                                        value={this.state.pofDays}
-                                                                    />
-                                                                </Grid.Column>
-                                                            </Grid.Row> */}
-                                                        </Grid>
-                                                    </>
-                                                }                                                   
-                                                <ResourceCard.Meta>
-                                                    <QuestionMarkTooltip
-                                                        diameter={15}
-                                                        /* tooltipStyle={{ width: '400px' }} */
-                                                        color={ComponentColor.Secondary}
-                                                        tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
-                                                            <div style={{ color: InfluxColors.Star }}>{"Model Meta Data"}
-                                                                <hr style={{ borderStyle: 'none none solid none', borderWidth: '2px', borderColor: '#BE2EE4', boxShadow: '0 0 5px 0 #8E1FC3', margin: '3px' }} />
+                                                                            <Label
+                                                                                size={ComponentSize.ExtraSmall}
+                                                                                name={(100*(modelsLastLogs[model["modelID"]]["count"] - modelsLastLogs[model["modelID"]]["prevCount"]) / modelsLastLogs[model["modelID"]]["prevCount"]).toString()}
+                                                                                description={"Change as Percentage"}
+                                                                                color={InfluxColors.Rainforest}
+                                                                                id={"icon-label"} 
+                                                                            />
+                                                                        </div>
+                                                                    </Grid.Row>
+                                                                    </Grid.Column>
+                                                                </Grid>
                                                             </div>
-                                                            <div>
-                                                                <span style={{color: InfluxColors.Pool}}>
-                                                                    Model Name:
-                                                                </span> {model["modelName"] ? model["modelName"] : "-"}
-                                                            </div>
-                                                            <div>
-                                                                <span style={{color: InfluxColors.Rainforest}}>
-                                                                    Creator: 
-                                                                </span> {model["creator"] ? model["creator"] : "-"}
-                                                            </div>
-                                                            <div>
-                                                                <span style={{color: InfluxColors.Topaz}}>
-                                                                    Algorithm: 
-                                                                </span> {model["algorithm"] ? model["algorithm"] : "-"}
-                                                            </div>
-                                                        </div>}
-                                                    />
-                                                </ResourceCard.Meta>
-                                            </ResourceCard>
-                                        ))}
-                                    </div>
+
+                                                        </>
+                                                    }                                                   
+                                                    <ResourceCard.Meta>
+                                                        <QuestionMarkTooltip
+                                                            diameter={15}
+                                                            /* tooltipStyle={{ width: '400px' }} */
+                                                            color={ComponentColor.Secondary}
+                                                            tooltipContents={<div style={{ whiteSpace: 'pre-wrap', fontSize: "13px" }}>
+                                                                <div style={{ color: InfluxColors.Star }}>{"Model Meta Data"}
+                                                                    <hr style={{ borderStyle: 'none none solid none', borderWidth: '2px', borderColor: '#BE2EE4', boxShadow: '0 0 5px 0 #8E1FC3', margin: '3px' }} />
+                                                                </div>
+                                                                <div>
+                                                                    <span style={{color: InfluxColors.Pool}}>
+                                                                        Model Name:
+                                                                    </span> {model["modelName"] ? model["modelName"] : "-"}
+                                                                </div>
+                                                                <div>
+                                                                    <span style={{color: InfluxColors.Rainforest}}>
+                                                                        Creator: 
+                                                                    </span> {model["creator"] ? model["creator"] : "-"}
+                                                                </div>
+                                                                <div>
+                                                                    <span style={{color: InfluxColors.Topaz}}>
+                                                                        Algorithm: 
+                                                                    </span> {model["algorithm"] ? model["algorithm"] : "-"}
+                                                                </div>
+                                                            </div>}
+                                                        />
+                                                    </ResourceCard.Meta>
+                                                </ResourceCard>
+                                            ))}
+                                    </SquareGrid>
                                 </div>
-                            </Page.Contents>
+                                </Tabs.TabContents>
+                            </Page.Contents> : <></>}
                         </Page>
-                        <Grid.Row style={{marginTop: "20px"}}>
+                        <Page
+                            className="load-data-page"
+                            titleTag=""
+                            style={{height: this.state.showRootCauseSection ? "500px" : "100px", marginTop: "20px", border: 'solid 2px #999dab', borderRadius: '4px'}}
+                        >
+                            <Page.Header fullWidth={false}>
+                                <Page.Title title="Root Cause Analysis" />
+                                <div className="tabbed-page--header-right">
+                                <Button
+                                        shape={ButtonShape.Default}
+                                        color={ComponentColor.Secondary}
+                                        titleText=""
+                                        icon={this.state.showRootCauseSection ? IconFont.Collapse : IconFont.Plus}
+                                        text={this.state.showRootCauseSection ? "Minimize" : "Maximize"}
+                                        type={ButtonType.Button}
+                                        onClick={() => this.setState({showRootCauseSection: !this.state.showRootCauseSection})}
+                                    />
+                                </div>
+                                {this.state.showRootCauseSection ? <>
+
+                                    {/* <div className="tabbed-page--header-right">
+                                    </div>  */}
+                                </> : <></>}                     
+                            </Page.Header>
+                            <ModelLogGraphOverlay
+                                modelLogGraphOverlay={this.state.modelLogGraphOverlay}
+                                closeOverlay={()=>this.setState({modelLogGraphOverlay: !this.state.modelLogGraphOverlay})}
+                                model={this.state.selectedModel}
+                            />
+                            {this.state.showRootCauseSection ? 
+                            <Page.Contents
+                                //className="models-index__page-contents"
+                                fullWidth={false}
+                                scrollable={true}
+                            >
+                                <Grid>
+                                <Grid.Row>
+                                <Grid.Column
+                                    widthXS={Columns.Two}
+                                    widthSM={Columns.Two}
+                                    widthMD={Columns.Two}
+                                    widthLG={Columns.Two}
+                                    style={{ marginTop: '20px' }}
+                                >
+                                    <SelectDropdown
+                                        style={{width: "150px"}}
+                                        options={this.state.failures.map(failure => {
+                                            let failureStart = new Date(failure["startTime"])
+                                            let failureEnd = new Date(failure["endTime"])
+                                            
+                                            return failure["ARZKOMPTANIM"]
+                                        })}
+                                        selectedOption={this.state.failureToAnalyze}
+                                        onSelect={(e) => {
+                                            this.setState({failureToAnalyze: e, topLevelTreeComponent: ""})
+                                            this.state.failures.forEach((failure) => {
+                                                if(failure["ARZKOMPTANIM"] === e) {
+                                                    this.setState({rootCauseEndDate: failure["startTime"]})
+                                                }
+                                            })
+                                            this.bringPossibleComps()
+                                        }}
+                                    />
+                                    <br></br>
+                                    <br></br>
+                                    <SelectDropdown
+                                        style={{width: "150px"}}
+                                        options={this.state.rootCausePossibleComps}
+                                        selectedOption={this.state.compToAnalyze}
+                                        onSelect={(e) => {
+                                            this.setState({compToAnalyze: e})
+                                            this.createRootCauseGraph()
+                                        }}
+                                    />
+                                </Grid.Column>
+                                <Grid.Column widthXS={Columns.Six}
+                                    widthSM={Columns.Six}
+                                    widthMD={Columns.Six}
+                                    widthLG={Columns.Six}
+                                    style={{ marginTop: '20px' }}>
+                                <Panel>
+                                    <Panel.Header size={ComponentSize.ExtraSmall}>
+                                    </Panel.Header>
+                                    <Panel.Body size={ComponentSize.ExtraSmall} id={"graphDiv"}>
+                                        {Object.keys(this.state.rootCauseGraphData).length == 0 ? (
+                                            <SpinnerContainer
+                                            loading={this.state.rootCauseTreeLoading}
+                                            spinnerComponent={<TechnoSpinner />}
+                                            />
+                                        ):(
+                                            <ForceGraph2D
+                                            ref={element => { this.graphRef = element }}
+                                            onNodeClick={this.handleNodeClick}
+                                            width={750}
+                                            height={500}
+                                            linkDirectionalParticles={3}
+                                            linkDirectionalParticleWidth={5}
+                                            linkDirectionalArrowRelPos={1}
+                                            dagMode={'td'}
+                                            dagLevelDistance={50}
+                                            graphData={this.state.rootCauseGraphData}/>
+                                        ) }
+                                    </Panel.Body>
+                                </Panel>
+                                </Grid.Column>
+                                <Grid.Column
+                                    widthXS={Columns.Four}
+                                    widthSM={Columns.Four}
+                                    widthMD={Columns.Four}
+                                    widthLG={Columns.Four}
+                                    style={{ marginTop: '20px' }}
+                                >
+                                    <Table>
+                                        <Table.Header>
+                                            <Table.Row>
+                                                <Table.HeaderCell style={{width: "100px"}}>Selected Failure</Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "100px"}}>Top Level Component</Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "100px"}}>Model</Table.HeaderCell>
+                                                {/* <Table.HeaderCell style={{width: "100px"}}>RUL</Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "100px"}}>RULREG</Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "100px"}}>POF</Table.HeaderCell>
+                                                <Table.HeaderCell style={{width: "100px"}}>Critical</Table.HeaderCell> */}
+                                            </Table.Row>
+                                        </Table.Header>
+                                        <Table.Body>
+                                            <Table.Row>
+                                                <Table.Cell style={{width: "100px"}}>{this.state.failureToAnalyze}</Table.Cell>
+                                                <Table.Cell style={{width: "100px"}}>{this.state.topLevelTreeComponent}</Table.Cell>
+                                                <Table.Cell style={{width: "100px"}}>{
+                                                    <SelectDropdown
+                                                    style={{width: "100px"}}
+                                                    buttonColor={ComponentColor.Secondary}
+                                                    options={this.state.rootCauseModels}
+                                                    selectedOption={this.state.selectedRootCauseModel}
+                                                    onSelect={(e) => {
+                                                        this.setState({selectedRootCauseModel: e, rootCauseParams: Array(Object.keys(rootCauseModelParameters[e]).length).fill(0)})
+                                                    }}
+                                                />
+                                                }</Table.Cell>
+
+                                                {/* <Table.Cell style={{width: "100px"}}>{rulModelsCount}</Table.Cell>
+                                                <Table.Cell style={{width: "100px"}}>{rulregModelsCount}</Table.Cell>
+                                                <Table.Cell style={{width: "100px"}}>{pofModelsCount}</Table.Cell>
+                                                <Table.Cell style={{width: "100px"}}>{criticalCount}</Table.Cell> */}
+                                            </Table.Row>
+                                        </Table.Body>
+                                    </Table>
+                                    <br></br>
+                                    <br></br>
+                                    {this.state.selectedRootCauseModel !== "" ? (
+                                        // this.setState({rootCauseParams: Array(Object.keys(rootCauseModelParameters[selectedRootCauseModel]).length).fill(0)})
+                                        <ParameterTable rootCauseParams={this.state.rootCauseParams} setRootCauseParams={this.setRootCauseParameters} selectedRootCauseModel={this.state.selectedRootCauseModel}/>
+
+                                    ):(<></>)}
+                                    <br></br>
+                                    <br></br>
+                                    <Button
+                                        color={ComponentColor.Secondary}
+                                        titleText="Start Root Cause Analysis"
+                                        text="START"
+                                        type={ButtonType.Button}
+                                        onClick={this.startRootCauseAnalysis}
+                                    />
+                                </Grid.Column>
+                                </Grid.Row></Grid>
+                                    
+
+                            </Page.Contents> : <></>}
+                        </Page>
+                        {/* <Grid.Row style={{marginTop: "20px"}}>
                             <Grid.Column widthXS={Columns.Two}>
                                 <div className="tabbed-page--header-left">
                                     <CTAButton
                                         icon={IconFont.TextBlock}
                                         color={ComponentColor.Secondary}
                                         text={"Generate Report"}
-                                        onClick={()=>console.log("generate report")}
+                                        onClick={()=>this.setState({mlReportOverlay: !this.state.mlReportOverlay})}
                                     />
                                 </div>
                             </Grid.Column>
@@ -1544,8 +2759,15 @@ class MachineHealthPage extends PureComponent<Props, State>{
                                     createModelOverlay={this.state.createModelOverlay}
                                     closeOverlay={() => this.setState({ createModelOverlay: !this.state.createModelOverlay })}
                                 />
+                                <MLReportOverlay 
+                                    handleChangeNotification={this.handleChangeNotification}
+                                    username={this.props.me.name}
+                                    parentParams={this.props["match"].params}
+                                    mlReportOverlay={this.state.mlReportOverlay}
+                                    closeOverlay={() => this.setState({ mlReportOverlay: !this.state.mlReportOverlay })}
+                                />
                             </Grid.Column>
-                        </Grid.Row>
+                        </Grid.Row> */}
                     </Grid>
                     
                 </Page.Contents>

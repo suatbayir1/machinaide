@@ -1,6 +1,7 @@
 import os
 import gc
 import json
+import pickle
 import evalml
 import datetime
 from bson import ObjectId
@@ -14,7 +15,7 @@ from tensorflow import keras
 from pymongo import MongoClient
 from flask import Flask, jsonify
 from tensorflow.keras import backend as k
-from model_runner import POFModelRunner, RULModelRunner, RULRegModelRunner, CustomMetric
+from model_runner import POFModelRunner, RULModelRunner, RULRegModelRunner, CustomMetric, HDBSCANRunner
 from apscheduler.schedulers.background import BackgroundScheduler
 
 # from model_runner import RULModelRunner, POFModelRunner, RULRegModelRunner, CustomMetric
@@ -162,7 +163,15 @@ def load_models():
                 if(os.path.exists(model_path)):  
                     settings["loadedModel"] = evalml.pipelines.PipelineBase.load(model_path)
                     models[pipeline_id] = settings
-    print(models)
+            elif(model["task"] == "ad"):
+                model_path = "/home/machinaide/project/machinaide/backend/mlhelpers/Models/" + model["sessionID"] + "/"
+                with open(model_path + model["modelName"] + ".maidemdl", 'rb') as f:
+                    hdb_model = pickle.load(f)
+                with open(model_path + model["modelName"] + "_info.json", 'r') as fp:
+                    hdb_settings = json.load(fp)
+                models[model["modelID"]] = [hdb_model, hdb_settings]
+                
+    # print(models)
     # free stopped models
     for mid in modelIDs:
         del models[mid]
@@ -187,22 +196,28 @@ def predict_rul_and_pof():
     global models
     # use list() to force a copy of the keys to be made to avoid RuntimeError: dictionary changed size during iteration
     for model in list(models):
-        print(models[model]["task"])
-        if(models[model]["task"] == "rul"):
-            rul_runner = RULModelRunner(models[model])
-            rul_runner.run()
+        if("task" in models[model]):
+            if(models[model]["task"] == "rul"):
+                rul_runner = RULModelRunner(models[model])
+                rul_runner.run()
+                # invoke the Garbage Collector after every prediction
+                _ = gc.collect() # referring https://stackoverflow.com/a/64210176
+            elif(models[model]["task"] == "pof"):
+                pof_runner = POFModelRunner(models[model])
+                pof_runner.run()
+                # invoke the Garbage Collector after every prediction
+                _ = gc.collect() # referring https://stackoverflow.com/a/64210176
+            elif(models[model]["task"] == "rulreg"):
+                rulreg_runner = RULRegModelRunner(models[model])
+                rulreg_runner.run()
+                # invoke the Garbage Collector after every prediction
+                _ = gc.collect() # referring https://stackoverflow.com/a/64210176
+        """ else:
+            hdbscan_runner = HDBSCANRunner(models[model][0], models[model][1])
+            hdbscan_runner.run()
             # invoke the Garbage Collector after every prediction
-            _ = gc.collect() # referring https://stackoverflow.com/a/64210176
-        elif(models[model]["task"] == "pof"):
-            pof_runner = POFModelRunner(models[model])
-            pof_runner.run()
-            # invoke the Garbage Collector after every prediction
-            _ = gc.collect() # referring https://stackoverflow.com/a/64210176
-        elif(models[model]["task"] == "rulreg"):
-            rulreg_runner = RULRegModelRunner(models[model])
-            rulreg_runner.run()
-            # invoke the Garbage Collector after every prediction
-            _ = gc.collect() # referring https://stackoverflow.com/a/64210176
+            _ = gc.collect() # referring https://stackoverflow.com/a/64210176 """
+
     # print(models)
     print("END OF THE PREDICTION ------------------------------------------------------------------------------------")
 

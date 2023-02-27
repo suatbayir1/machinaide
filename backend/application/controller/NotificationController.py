@@ -18,7 +18,7 @@ def alert():
             body = request.json["content"],
             password = config.authentication["USER_PASSWORD"],
         )
-        return {"text": "notification_test"}
+        return {"text": "Email send successfully"}
     except:
         return return_response(data = [], success = False, message = "An error occurred while sending a email"), 404
 

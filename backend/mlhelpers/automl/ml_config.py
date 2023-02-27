@@ -59,7 +59,7 @@ OPERATIONS = {
 
 AUTOML_OPTIMIZERS = {
     # "default": {"compile": ["accuracy", tf.keras.metrics.Precision(), tf.keras.metrics.Recall()], "objective": "val_accuracy"},
-    "default": {"compile": ["acc", "MeanSquaredError"], "objective": "val_loss"},
+    "default": {"compile": ["acc", "Precision", "Recall"], "objective": kt.Objective("recall", direction="max")},
     "auc": {"compile": ["acc", "Precision", "Recall", "AUC"], "objective": kt.Objective("auc", direction="max")},
     "tp": {"compile": ["acc", "Precision", "Recall", "TruePositives"], "objective": kt.Objective("true_positives", direction="max")},
     "fp": {"compile": ["acc", "Precision", "Recall", "FalsePositives"], "objective": kt.Objective("false_positives", direction="min")},
@@ -67,6 +67,7 @@ AUTOML_OPTIMIZERS = {
     "tn": {"compile": ["acc", "Precision", "Recall", "TrueNegatives"], "objective": kt.Objective("true_negatives", direction="max")},
     "precision": {"compile": ["acc", "Precision", "Recall"], "objective": kt.Objective("precision", direction="max")},
     "recall": {"compile": ["acc", "Precision", "Recall"], "objective": kt.Objective("recall", direction="max")},
+    # "f1": {"compile": ["acc", "Precision", "Recall"], "objective": kt.Objective("f1_score", direction="max")},
     "val_loss": {"compile": ["acc", "Precision", "Recall"], "objective": "val_loss"},
     "val_accuracy": {"compile": ["acc", "Precision", "Recall"], "objective": "val_acc"},
     "accuracy": {"compile": ["acc", "Precision", "Recall"], "objective": "acc"},

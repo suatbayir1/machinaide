@@ -150,13 +150,47 @@ def queueTrainingSession(auto=None):
         with open(t_dir, 'w') as fp:
             json.dump(settings, fp)
         timeout = str(settings['timeout']) + "h"
-        cmd = "timeout -k 10 " + timeout + \
-            " python3 ./mlhelpers/automl_runner.py -e " + experiment_name + \
+        # cmd = "timeout -k 10 " + timeout + \
+        cmd = "python3 ./mlhelpers/automl_runner.py -e " + experiment_name + \
             " -u " + username + " -t " + settings['task']
         print(cmd)
         process = subprocess.Popen(cmd.split(), close_fds=True)
         msg = "experiment " + experiment_name + " started with timeout " + timeout + " from user: " + username
         return {"msg": msg}
+
+
+@mlserver.route('/rootCauseAnalysis', methods=['POST'])
+def startRootCauseAnalysis():
+    settings = request.json
+    t_dir = config.models_path + str(settings['sessionID'])
+    os.makedirs(t_dir)
+
+    print(settings["m2s"])
+    for msr in settings["m2s"]:
+        for field in settings["m2s"][msr]:
+            field_settings = {"sessionID": settings['sessionID'], "m2s": {msr: [field]}, 
+            "prev_hours": settings['prev_hours'], 
+            "end_date": settings['end_date'], 
+            "window_size": settings['window_size'], 
+            "bucket_minutes": settings['bucket_minutes']
+            }
+            with open(t_dir + "/sessioninfo_" + field + ".json", 'w') as fp:
+                json.dump(field_settings, fp)
+            cmd = " python3 ./mlhelpers/mlsession.py -t root -s " + str(settings['sessionID']) + " -f " + str(field)
+            process = subprocess.Popen(cmd.split(), close_fds=True)
+    field_settings = {"sessionID": settings['sessionID'], "m2s": settings["m2s"],
+        "prev_hours": settings['prev_hours'], 
+        "end_date": settings['end_date'], 
+        "window_size": settings['window_size'], 
+        "bucket_minutes": settings['bucket_minutes']
+    }
+    with open(t_dir + "/sessioninfo_ALL" + ".json", 'w') as fp:
+        json.dump(field_settings, fp)
+    cmd = " python3 ./mlhelpers/mlsession.py -t root -s " + str(settings['sessionID']) + " -f " + "ALL"
+    process = subprocess.Popen(cmd.split(), close_fds=True)
+    print(settings)
+    msg = "root trial"
+    return {"msg": msg}, 201
 
 
 """ @mlserver.route('/startPOFModelTraining', methods=['POST'])
@@ -492,6 +526,21 @@ def startRULModelTraining():
     return {"msg": msg}
 
 pof_experiment_process_pool = {}
+
+
+@mlserver.route('/createClusterer', methods=['POST'])
+def createClusterer():
+    settings = request.json
+    t_dir = config.models_path + str(settings['sessionID'])
+    os.makedirs(t_dir)
+    with open(t_dir + "/sessioninfo.json", 'w') as fp:
+        json.dump(settings, fp)
+    cmd = " python3 ./mlhelpers/mlsession.py -t cluster -s " + str(settings['sessionID'])
+    process = subprocess.Popen(cmd.split(), close_fds=True)
+    # print(settings)
+    msg = "cluster trial"
+    return {"msg": msg}, 201
+
 
 @mlserver.route('/startPOFModelTraining', methods=['POST'])
 def startPOFModelTraining():
@@ -833,12 +882,12 @@ def getModelLogsOnCondition(model_id):
     if(model_logs.count() == 0):
         return dumps([]), 200
     if(task == "rul"):
-        model_logs = [log for log in model_logs[0]["logs"] if log["prediction"] == "1"]
+        model_logs = [log for log in model_logs[0]["logs"] if log["prediction"] == "1"][-100:]
         return dumps(model_logs), 200
     elif(task == "pof"):
-        model_logs = [log for log in model_logs[0]["logs"]] # if return_probability(log["prediction"][0], log["prediction"][1])>=0.75]
+        model_logs = [log for log in model_logs[0]["logs"]][-100:] # if return_probability(log["prediction"][0], log["prediction"][1])>=0.75]
         return dumps(model_logs), 200
-    return dumps(model_logs[0]["logs"]), 200
+    return dumps(model_logs[0]["logs"][-100:]), 200
 
 @mlserver.route('/getModelLogs/<model_id>', methods=['GET'])
 def getModelLogs(model_id):
@@ -872,10 +921,11 @@ def getMLModel():
 @mlserver.route('/updateModelLogFeedback', methods=['PUT'])
 def updateModelLogFeedback():
     feedback = request.json["feedback"]
+    feedbackRange = request.json["feedbackRange"]
     timestamp = request.json["timestamp"]
     modelID = request.json["modelID"]
     query = {"modelID": modelID, "logs.time": timestamp}
-    update_set = {"logs.$.feedback": feedback}
+    update_set = {"logs.$.feedback": feedback, "logs.$.feedbackRange": feedbackRange}
     data = {"$set": update_set}
     mongo_model.update_model_log(query, data)
     return jsonify(msg="Model log feedback is updated"), 200

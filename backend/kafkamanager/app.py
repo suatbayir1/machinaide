@@ -1,5 +1,5 @@
 from pykafka import KafkaClient
-from data import get_sensor_data
+# from data import get_sensor_data
 import json
 import time
 
@@ -8,7 +8,11 @@ topic = client.topics["sensors_data"]
 producer = topic.get_sync_producer()
 
 while True:
-    message = get_sensor_data()
+    message = {
+        "name": "test",
+        "value": 1
+    }
+    # message = get_sensor_data()
     message = json.dumps(message).encode("utf-8")
     producer.produce(message)
     print(message)

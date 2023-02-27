@@ -1200,7 +1200,7 @@ class AnomalyBrushGraph extends Component<Props, State> {
                       
                       <Grid.Column 
                         widthXS={Columns.Three}
-                        style={{position: "absolute", left: "85%", top: "53%", transform: "translate(-50%, -50%)"}}
+                        style={{position: "absolute", left: "85%", top: "47%", transform: "translate(-50%, -50%)"}}
                       >
                         
                         <div className="tabbed-page--header-right">
@@ -1358,27 +1358,7 @@ class AnomalyBrushGraph extends Component<Props, State> {
                             style={{ height: '250px', background: InfluxColors.Castle}}
                             className="data-loading--scroll-content"
                         >
-                          {/* {this.state.machineAnomalies.map(anomaly => {
-                            return(                              
-                              <FlexBox
-                                alignItems={AlignItems.Center}
-                                margin={ComponentSize.Small}
-                                className="view-options--checkbox"
-                                key={uuid.v4()}
-                              >
-                                <SquareButton
-                                  icon={IconFont.EyeOpen}
-                                  onClick={() => this.onClickAnomaly(anomaly["timestamp"] ? anomaly["timestamp"] : undefined)}
-                                  titleText={"Go to this timestamp on graph"}
-                                  //status={status}
-                                  className="flow-move-cell-button"
-                                  color={ComponentColor.Success}
-                                />
-                                <InputLabel>{anomaly["timestamp"] ? new Date(anomaly["timestamp"]).toLocaleString() : "-"}</InputLabel>                                
-                              </FlexBox>
-                            )
-                          })} */}
-                          <Table
+                          {this.state.shownMachineAnomalies.length>0 ? <Table
                               borders={BorderType.Vertical}
                               fontSize={ComponentSize.ExtraSmall}
                               cellPadding={ComponentSize.ExtraSmall}
@@ -1457,7 +1437,7 @@ class AnomalyBrushGraph extends Component<Props, State> {
                                   }
                                   )}
                               </Table.Body>
-                          </Table>
+                          </Table> : <h4>There are no anomalies</h4>}
                         </DapperScrollbars>
 
                       </Grid.Column>

@@ -5,6 +5,8 @@ import json
 from application.helpers.Helper import return_response, token_required
 from core.logger.MongoLogger import MongoLogger
 from bson import ObjectId
+from application.helpers.JSONEncoder import JSONEncoder
+
 
 # TODO: add logger
 
@@ -25,6 +27,14 @@ def get_machine_anomalies(machine_id):
     if(result):
         result = result["anomalies"]
     return return_response(data = result, success = True), 200
+
+
+@health_assessment.route('/getRootCauseAnalysis/<failureIDD>', methods=['GET'])
+def get_root_cause_analysis(failureIDD):
+    analysis = model.db.find_one("root_cause_analysis_info", {"failureIDD": failureIDD})
+
+    print(analysis)
+    return json.dumps(analysis, cls=JSONEncoder)
 
 
 @health_assessment.route("/addAnomalyToMachine/<machine_id>/<model_id>", methods = ["PUT"])
