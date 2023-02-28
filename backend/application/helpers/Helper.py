@@ -83,26 +83,32 @@ def token_required(f=None, roles=None):
     return decorated
 
 def send_mail(sender, receivers, subject, body, password):
-    print(1)
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.starttls()
-       
-    # Email Headers
-    message = MIMEMultipart()
-    message["From"] = sender
-    message["To"] = ", ".join(receivers)
-    message["Subject"] = subject
-    print(2)
-    
-    # # Message Body
-    message.attach(MIMEText(body, "plain"))
+    try: 
+        print(1)
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        print("as")
+        return {"text": "Email send successfully"}
+        server.starttls()
+        
+        # Email Headers
+        message = MIMEMultipart()
+        message["From"] = sender
+        message["To"] = ", ".join(receivers)
+        message["Subject"] = subject
+        print(2)
+        
+        # # Message Body
+        message.attach(MIMEText(body, "plain"))
 
-    text = message.as_string()
-    print(3)
+        text = message.as_string()
+        print(3)
 
-    # Log in to server using secure context and send email
-    context = ssl.create_default_context()
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-        server.login(sender, password)
-        server.sendmail(sender, receivers, text)
-        print(4)
+        # Log in to server using secure context and send email
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+            server.login(sender, password)
+            server.sendmail(sender, receivers, text)
+            print(4)
+    except Exception as e:
+        print(e)
+        return return_response(data = [], success = False, message = "An error occurred while sending a email"), 404

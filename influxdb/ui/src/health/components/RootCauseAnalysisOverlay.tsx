@@ -904,7 +904,11 @@ createAnalysisGraph = async (topLevelComp) => {
         let settings = {
             sessionID: Date.now().toString(),
             m2s: this.state.rootCauseMeasurementSensorInfo,
-            end_date: this.props.failure ? this.props.failure["startTime"] : ""
+            end_date: this.props.failure ? this.props.failure["startTime"] : "",
+            failureIDD: this.props.failure ? this.props.failure.IDD : "",
+            failureName: this.props.failure ? this.props.failure["ARZKOMPTANIM"] : "",
+            topLevelTreeComponent: this.state.topLevelTreeComponent,
+            usedModel: this.state.selectedRootCauseModel
         }
         Object.keys(rootCauseModelParameters[this.state.selectedRootCauseModel]).forEach((parameter, i) => {
             settings[parameter] = this.state.rootCauseParams[i]

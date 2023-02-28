@@ -24,6 +24,10 @@ class RootCauseChecker:
         self.end_date = settings["end_date"]
         self.window_size = int(settings["window_size"])
         self.bucket_minutes = int(settings["bucket_minutes"])
+        self.failureName = settings["failureName"]
+        self.failureIDD = settings["failureIDD"]
+        self.topLevelTreeComponent = settings["topLevelTreeComponent"]
+        self.usedModel = settings["usedModel"]
 
         self.influx_helper = None
 
@@ -77,7 +81,17 @@ class RootCauseChecker:
             hist_values.append(cnt)
 
         print(hist_values, self.m2s[self.measurement])
-        print("DONE", self.m2s[self.measurement])        
+        print("DONE", self.m2s[self.measurement])
+
+        analysisInfo = {
+            "failureName": self.failureName,
+            "failureIDD": self.failureIDD,
+            "topLevelTreeComponent" = self.topLevelTreeComponent,
+            "usedModel" = self.usedModel
+            "usedParameterValues" = [self.prev_hours, self.window_size, self.bucket_minutes]
+        }
+
+        requests.post() 
         # plt.figure(figsize=(60, 40))
         # plt.bar(range(len(hist_values)), hist_values)
         # plt.savefig("/home/machinaide/project/machinaide/rootImage/anomalyCountPerBucket_" + self.field + ".png")

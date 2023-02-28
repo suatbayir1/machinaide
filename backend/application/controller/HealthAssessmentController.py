@@ -37,6 +37,16 @@ def get_root_cause_analysis(failureIDD):
     return json.dumps(analysis, cls=JSONEncoder)
 
 
+@health_assessment.route('/postRootCauseAnalysis', methods=["POST"])
+def post_root_cause_analysis():
+    analysis = request.json
+
+    model.db.insert_one("root_cause_analysis_info", analysis)
+
+
+    return return_response(success=True), 201
+
+
 @health_assessment.route("/addAnomalyToMachine/<machine_id>/<model_id>", methods = ["PUT"])
 # @token_required(roles = ["admin", "member", "editor"])
 def add_anomaly_to_machine(machine_id, model_id):
