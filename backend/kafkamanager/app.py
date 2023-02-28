@@ -11,8 +11,9 @@ producer = topic.get_sync_producer()
 while True:
     message = {
         "name": "test",
-        "current_value": random.randint(0, 100)
+        "value": 1
     }
+    # message = get_sensor_data()
     message = json.dumps(message).encode("utf-8")
     producer.produce(message)
     print(message)

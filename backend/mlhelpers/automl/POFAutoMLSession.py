@@ -7,6 +7,7 @@ import uuid
 import requests
 import numpy as np
 import pandas as pd
+import datetime
 from FillNanValues import FillNanValues
 from tensorflow.keras import backend as k
 from dateutil import parser, relativedelta
@@ -359,7 +360,9 @@ class POFAutoMLSession:
         failures = []
         for failure in failure_res:
             failure["startTime"] = parser.parse(failure["startTime"][0:16])
-            failures.append(failure)
+            data_start = datetime.datetime(2022, 4, 1)
+            if(failure["startTime"] >= data_start):
+                failures.append(failure)
         
         failures.sort(key=lambda r: r["startTime"])
         print("failures: ", failures)
@@ -426,8 +429,13 @@ class POFAutoMLSession:
                             operator, operator_value = return_operator_info(sensor_info["operation"], sensor_info["operationValue"])
                         else:
                             operator, operator_value = (None, None)
-                    data = self.get_query_results(field["database"], field["measurement"], field["dataSource"], duration_start_date, duration_end_date)
-
+                    
+                    boolean_vals = ["Pres-Counter_Reset", "AnaMotor-Counter_Reset", "RegMotor-Counter_Reset", "YagMotor-Counter_Reset", "KaMotor-Counter_Reset"]
+                    if(field["measurement"] != "Pres31-AlarmlarDB" and (not (field["measurement"] == "Pres31-Energy_DB" and (field["dataSource"] in boolean_vals)))):
+                        data = self.get_query_results(field["database"], field["measurement"], field["dataSource"], duration_start_date, duration_end_date)
+                    else:
+                        data = []
+                        
                     df = pd.DataFrame(data)
                     data_points = []
                     if(not df.empty):
@@ -456,7 +464,7 @@ class POFAutoMLSession:
                         all_data.append(data_points)
                 
 
-                if(len(all_data)):
+                """ if(len(all_data)):
                     one_merged = pd.DataFrame(all_data[0])
                     for i in range(1,len(all_data)):
                         if(len(all_data[i])):
@@ -471,7 +479,37 @@ class POFAutoMLSession:
                         one_fail_data = one_fail_data + one_merged.to_dict("records")
                     # print(one_merged)
                 else:
-                    one_fail_data = []
+                    one_fail_data = [] """
+                
+                # make time as key and add ather sensors to the time keys dict value
+                all_data_in_one = {}
+                if(len(all_data)):
+                    print("here1", len(all_data[0]))
+                    print(all_data[0])
+                    for record in all_data[0]:
+                        for key in record:
+                            if(key != "time"):
+                                all_data_in_one[record["time"]] = {key: record[key]}
+                    for i in range(1,len(all_data)):
+                        print("start", i)
+                        for record in all_data[i]:
+                            for key in record:
+                                if(key != "time"):
+                                    all_data_in_one[record["time"]][key] = record[key]
+                        print("end", i)
+
+                adjusted_data = []
+                for key in all_data_in_one.keys():
+                    new_row = {"time": key}
+                    new_row.update(all_data_in_one[key])
+                    adjusted_data.append(new_row)
+
+                cycle = 0
+                for adata in adjusted_data:
+                    adata["time"] = cycle
+                    cycle += 1
+
+                one_fail_data = adjusted_data 
                 
                                 
                 # print(one_fail_data)

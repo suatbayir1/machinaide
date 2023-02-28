@@ -146,7 +146,23 @@ def get_basic_models():
 def post_basic_model():
     # model = request.json
     # print(model)
-    model.db.insert_one("basic_models", request.json)
+    print("*******************", request.json)
+    res = model.db.insert_one("basic_models", request.json)
+    print(res)
     # mongo.db.basic_models.insert_one(model)
 
     return "UPDATED", 201
+
+
+@metadataserver.route('/updateBasicModel', methods=['PUT'])
+def update_basic_model():
+    sent_model = request.json
+    query = {"modelID": sent_model["modelID"]}
+    new_values = {"$set": {"trainingDone": sent_model["trainingDone"]}}
+
+    model.db.update_one("basic_models", new_values, query)
+    # mongo.db.model_data.update_one(query, new_values)
+
+    return "UPDATED"
+
+

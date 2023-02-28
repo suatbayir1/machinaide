@@ -5,7 +5,7 @@ class QueryHelper:
         self.url = settings['url']
         self.token = settings['token']
         self.org = settings["org"]
-        self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org, verify_ssl = False) 
+        self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org, verify_ssl = False, timeout=30_000) 
         self.query_api = self.client.query_api()
     
     def query_db(self, query):

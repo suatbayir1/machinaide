@@ -1,5 +1,8 @@
 // Libraries
 import React, { PureComponent } from 'react'
+import Breadcrumbs from '@material-ui/core/Breadcrumbs';
+import HomeIcon from '@material-ui/icons/Home';
+import Typography from '@material-ui/core/Typography';
 import { Link } from 'react-router-dom'
 import uuid from 'uuid'
 
@@ -380,10 +383,27 @@ class RULRegAutoMLPage extends PureComponent<Props, State> {
                     <Page.Header fullWidth={false}>
                         <Page.Title title={"AutoML"} />
                         {
-                            this.optionsComponents
+                            // this.optionsComponents
                         }
                     </Page.Header>
-
+                    <Breadcrumbs separator="/" aria-label="breadcrumb" style={{ color: '#ffffff', marginLeft: '28px', marginTop: '-10px' }}>
+                        <Link color="inherit" to="/">
+                            <HomeIcon style={{ marginTop: '4px' }} />
+                        </Link>
+                        <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/allFactories`}>
+                            Factories
+                        </Link>
+                        <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/production-line/${this.props["match"].params.FID}/${this.props["match"].params.PLID}`}>
+                            Production Lines
+                        </Link>
+                        <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/machines/${this.props["match"].params.FID}/${this.props["match"].params.PLID}`}>
+                            Machines
+                        </Link>
+                        <Link color="inherit" to={`/orgs/${this.props["match"].params["orgID"]}/health/${this.props["match"].params.FID}/${this.props["match"].params.PLID}/${this.props["match"].params.MID}`}>
+                            {this.props["match"].params.MID} Health Assessment
+                        </Link>  
+                        <Typography style={{ color: '#ffffff', marginBottom: '8px' }}>{this.props["match"].params.MID} RULReg AutoML</Typography>                 
+                    </Breadcrumbs>
                     <Page.Contents fullWidth={false} scrollable={true}>
                         <Grid>
                             <Grid.Row style={{ border: 'solid 2px #999dab', borderRadius: '4px' }}>

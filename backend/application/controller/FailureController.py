@@ -20,17 +20,31 @@ def get_all_failures(token):
     message = "get_all_failures"
     logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
     return return_response(data = result, success = True, message = message), 200
+    # return return_response(data = result[result.count()-30:], success = True, message = message), 200
 
 @failure.route("/getFailures", methods = ["POST"])
 @token_required(roles = ["admin", "member", "editor"])
 def get_failures(token):
     source_name = request.json["sourceName"]
-    result = model.get_failures({"sourceName": source_name})
+    result = model.get_failures({"sourceName": source_name, "description" : {"$regex" : "ariza", '$options' : 'i'}})
     message = "get_failures"
     logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
     # return dumps({"sourceName": source_name, "token": token})
     # return dumps(result), 200
+    # return return_response(data = result[result.count()-30:], success = True, message = message), 200
     return return_response(data = result, success = True, message = message), 200
+
+@failure.route("/getLastFailures", methods = ["POST"])
+@token_required(roles = ["admin", "member", "editor"])
+def get_last_failures(token):
+    source_name = request.json["sourceName"]
+    result = model.get_failures({"sourceName": source_name, "description" : {"$regex" : "ariza", '$options' : 'i'}})
+    message = "get_last_failures"
+    logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+    # return dumps({"sourceName": source_name, "token": token})
+    # return dumps(result), 200
+    # return return_response(data = result[result.count()-30:], success = True, message = message), 200
+    return return_response(data = list(result)[-100:], success = True, message = message), 200
 
 @failure.route("/getTokenTest", methods = ["POST"])
 @token_required(roles = ["admin", "member", "editor"])
@@ -107,7 +121,7 @@ def get_by_condition(token):
             log_type = "ERROR"
             return return_response(success = False, message = message), 400
 
-        payload = {}
+        payload = {"description" : {"$regex" : "ariza", '$options' : 'i'}}
 
         if "regex" in request.json:
             for item in request.json["regex"]:
@@ -131,12 +145,16 @@ def get_by_condition(token):
                 objectid_array = [ObjectId(i) for i in request.json["inArray"][item]]
                 payload[item] = {'$in': objectid_array}
 
+        print("payload", payload)
 
         result = model.get_by_condition(payload)
 
-        message = "Failure records were successfully fetched"
+        print("len", type(result))
+        print("len2", len(result))
+
+        message = f"Failure records were successfully fetched. Count: {len(result)}"
         log_type = "INFO"
-        return return_response(data = result, success = True, message = message), 200
+        return return_response(data = result[len(result)-30:], success = True, message = message), 200
     except:
         message = "An expected error has occurred"
         log_type = "ERROR"

@@ -169,6 +169,21 @@ class POFFeedbackPage extends PureComponent<Props, State>{
             notificationMessage: message,
         })
     }
+    
+    dataToPush = (row) => {
+        let valueKey = "_value" in row ? "_value" : "_value (number)" in row ? "_value (number)" : ""
+        if(valueKey.length){
+            if(row[valueKey] && row[valueKey].toFixed()){
+                return {pushData: true, valueKey: valueKey, value: row[valueKey].toFixed()}
+            }
+            else{
+                return {pushData: false}
+            }
+        }
+        else{
+            return {pushData: false}
+        }
+    }
 
     /*
       Convert a Flux CSV response into a list of objects.
@@ -199,12 +214,18 @@ class POFFeedbackPage extends PureComponent<Props, State>{
             let graphData = {}
             for(let row of rows){
                 if(`${row["_measurement"]}_${row["_field"]}` in graphData){
-                    graphData[`${row["_measurement"]}_${row["_field"]}`]["data"].push([row["_time"], row["_value"].toFixed(2)])
+                    let resultData = this.dataToPush(row)
+                    if(resultData["pushData"]){
+                        graphData[`${row["_measurement"]}_${row["_field"]}`]["data"].push([row["_time"], resultData["value"]])
+                    }                 
                 }
                 else{
-                    graphData[`${row["_measurement"]}_${row["_field"]}`] = {
-                        name: `${row["_measurement"]}_${row["_field"]}`,
-                        data: [[row["_time"], row["_value"].toFixed(2)]]
+                    let resultData = this.dataToPush(row)
+                    if(resultData["pushData"]){
+                        graphData[`${row["_measurement"]}_${row["_field"]}`] = {
+                            name: `${row["_measurement"]}_${row["_field"]}`,
+                            data: [[row["_time"], resultData["value"]]]
+                        }
                     }
                 }
             }

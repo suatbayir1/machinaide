@@ -15,6 +15,10 @@ backend/mlhelpers/VAESettings/sensors/
 experiments/
 models/
 experiment_settings/
+<<<<<<< HEAD
+=======
+Models/
+>>>>>>> b56bd240ec50cb453352e3b72ecd57d83797ffce
 backend/mlhelpers/Models/
 
 # Byte-compiled / optimized / DLL files

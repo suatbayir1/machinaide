@@ -5,6 +5,7 @@ import json
 import requests
 import tensorflow as tf
 import keras_tuner as kt
+import datetime
 from dateutil import parser, relativedelta
 import numpy as np
 from sklearn import preprocessing
@@ -91,6 +92,9 @@ class RULAutoMLSession:
         else:
             tuner = 'hyperband'
         self.tuner_type = tuner
+        # delete this
+        # settings["optimizer"] = "recall"
+        print("settings", settings)
         self.optimizer = settings["optimizer"]
 
         if(("windowLength" in settings) and (isinstance(settings["windowLength"], int) or len(settings["windowLength"]))):
@@ -219,8 +223,9 @@ class RULAutoMLSession:
         model = tuner.hypermodel.build(best_hps)
         history = model.fit(seq_array, label_array, epochs=best_hps.get('epochs'), batch_size=50, validation_split=0.2, verbose=1)
 
-        val_acc_per_epoch = history.history['val_acc']
-        best_epoch = val_acc_per_epoch.index(max(val_acc_per_epoch)) + 1
+        # val_acc_per_epoch = history.history['val_acc']
+        val_recall_per_epoch = history.history['val_recall']
+        best_epoch = val_recall_per_epoch.index(max(val_recall_per_epoch)) + 1
         print('Best epoch: ',best_epoch)
         hypermodel = tuner.hypermodel.build(best_hps)
 
@@ -304,18 +309,21 @@ class RULAutoMLSession:
             return results
         
         elif(type == "sensor"):
-            query = get_sensor_data_query(bucket, measurement, field, start_time, stop_time)
+            if(measurement != "Pres31-AlarmlarDB"):
+                query = get_sensor_data_query(bucket, measurement, field, start_time, stop_time)
 
-            result = self.query_helper.query_db(query)
-            results = []
-            for table in result:
-                for record in table.records:
-                    data_point = {}
-                    data_point["time"] = record.get_time()
-                    data_point[f"{measurement}.{record.get_field()}"] = record.get_value()
-                    results.append(data_point)
-            
-            return results
+                result = self.query_helper.query_db(query)
+                results = []
+                for table in result:
+                    for record in table.records:
+                        data_point = {}
+                        data_point["time"] = record.get_time()
+                        data_point[f"{measurement}.{record.get_field()}"] = record.get_value()
+                        results.append(data_point)
+                
+                return results
+            else:
+                return []
         
         else:
             return []
@@ -393,7 +401,9 @@ class RULAutoMLSession:
         failures = []
         for failure in failure_res:
             failure["startTime"] = parser.parse(failure["startTime"][0:16])
-            failures.append(failure)
+            data_start = datetime.datetime(2022, 4, 1)
+            if(failure["startTime"] >= data_start):
+                failures.append(failure)
         
         failures.sort(key=lambda r: r["startTime"])
         print("failures: ", failures)
@@ -460,7 +470,11 @@ class RULAutoMLSession:
                             operator, operator_value = return_operator_info(sensor_info["operation"], sensor_info["operationValue"])
                         else:
                             operator, operator_value = (None, None)
-                    data = self.get_query_results("sensor", field["database"], field["measurement"], field["dataSource"], duration_start_date, duration_end_date)
+                    boolean_vals = ["Pres-Counter_Reset", "AnaMotor-Counter_Reset", "RegMotor-Counter_Reset", "YagMotor-Counter_Reset", "KaMotor-Counter_Reset"]
+                    if(field["measurement"] != "Pres31-AlarmlarDB" and (not (field["measurement"] == "Pres31-Energy_DB" and (field["dataSource"] in boolean_vals)))):
+                        data = self.get_query_results("sensor", field["database"], field["measurement"], field["dataSource"], duration_start_date, duration_end_date)
+                    else:
+                        data = []
 
                     df = pd.DataFrame(data)
                     data_points = []
@@ -490,7 +504,7 @@ class RULAutoMLSession:
                         all_data.append(data_points)
                 
 
-                if(len(all_data)):
+                """ if(len(all_data)):
                     one_merged = pd.DataFrame(all_data[0])
                     for i in range(1,len(all_data)):
                         if(len(all_data[i])):
@@ -505,14 +519,42 @@ class RULAutoMLSession:
                         one_fail_data = one_fail_data + one_merged.to_dict("records")
                     # print(one_merged)
                 else:
-                    one_fail_data = []
+                    one_fail_data = [] """
                 
-                                
+                # make time as key and add ather sensors to the time keys dict value
+                all_data_in_one = {}
+                if(len(all_data)):
+                    print("here1", len(all_data[0]))
+                    print(all_data[0])
+                    for record in all_data[0]:
+                        for key in record:
+                            if(key != "time"):
+                                all_data_in_one[record["time"]] = {key: record[key]}
+                    for i in range(1,len(all_data)):
+                        print("start", i)
+                        for record in all_data[i]:
+                            for key in record:
+                                if(key != "time"):
+                                    all_data_in_one[record["time"]][key] = record[key]
+                        print("end", i)
+
+                adjusted_data = []
+                for key in all_data_in_one.keys():
+                    new_row = {"time": key}
+                    new_row.update(all_data_in_one[key])
+                    adjusted_data.append(new_row)
+
+                cycle = 1
+                for adata in adjusted_data:
+                    adata["time"] = cycle
+                    cycle += 1
+
+                one_fail_data = adjusted_data                
                 # print(one_fail_data)
                 all_failure_data.append(one_fail_data)
                 
                 
-            
+            print("--545--")
             frames = []
             fid = 1
             seq_len = RUL_SEQUENCE_LENGTH

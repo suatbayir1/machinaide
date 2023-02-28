@@ -62,46 +62,56 @@ def get_query_results(query_helper, type, bucket, measurement="", field="", star
         return results
     
     elif(type == "sensor"):
-        query = get_sensor_data_query(bucket, measurement, field, start_time, stop_time)
+        if(measurement != "Pres31-AlarmlarDB"):
+            query = get_sensor_data_query(bucket, measurement, field, start_time, stop_time)
 
-        result = query_helper.query_db(query)
-        results = []
-        for table in result:
-            for record in table.records:
-                data_point = {}
-                data_point["time"] = record.get_time()
-                data_point[f"{measurement}.{record.get_field()}"] = record.get_value()
-                results.append(data_point)
+            result = query_helper.query_db(query)
+            results = []
+            for table in result:
+                for record in table.records:
+                    data_point = {}
+                    data_point["time"] = record.get_time()
+                    data_point[f"{measurement}.{record.get_field()}"] = record.get_value()
+                    results.append(data_point)
         
-        return results
+            return results
+        else:
+            return []
 
     elif(type == "sensor-missing"):
-        query = get_sensor_missing_data_query(bucket, measurement, field, start_time, stop_time, True)
+        if(measurement != "Pres31-AlarmlarDB"):
+            query = get_sensor_missing_data_query(bucket, measurement, field, start_time, stop_time, True)
 
-        result = query_helper.query_db(query)
-        results = []
-        for table in result:
-            for record in table.records:
-                data_point = {}
-                data_point["time"] = record.get_time()
-                data_point[f"{measurement}.{record.get_field()}"] = record.get_value()
-                results.append(data_point)
-        
-        return results
+            print("---------> query: ", query)
+            result = query_helper.query_db(query)
+            results = []
+            for table in result:
+                for record in table.records:
+                    data_point = {}
+                    data_point["time"] = record.get_time()
+                    data_point[f"{measurement}.{record.get_field()}"] = record.get_value()
+                    results.append(data_point)
+            
+            return results
+        else:
+            return []
     
     elif(type == "sensor-missing-2"):
-        query = get_sensor_missing_data_query(bucket, measurement, field, start_time, stop_time, False)
+        if(measurement != "Pres31-AlarmlarDB"):
+            query = get_sensor_missing_data_query(bucket, measurement, field, start_time, stop_time, False)
 
-        result = query_helper.query_db(query)
-        results = []
-        for table in result:
-            for record in table.records:
-                data_point = {}
-                data_point["time"] = record.get_time()
-                data_point[f"{measurement}.{record.get_field()}"] = record.get_value()
-                results.append(data_point)
-        
-        return results
+            result = query_helper.query_db(query)
+            results = []
+            for table in result:
+                for record in table.records:
+                    data_point = {}
+                    data_point["time"] = record.get_time()
+                    data_point[f"{measurement}.{record.get_field()}"] = record.get_value()
+                    results.append(data_point)
+            
+            return results
+        else:
+            return []
     
     else:
         return []
@@ -148,8 +158,11 @@ def data_status(failures, experiment_name, selected_fields, query_helper, produc
         
         used_data_points_missing_data_check = []
         for field in fields:
-            data = get_query_results(query_helper, "sensor-missing", field["database"], field["measurement"], field["dataSource"], duration_start_date, duration_end_date)
-
+            boolean_vals = ["Pres-Counter_Reset", "AnaMotor-Counter_Reset", "RegMotor-Counter_Reset", "YagMotor-Counter_Reset", "KaMotor-Counter_Reset"]
+            if(field["measurement"] != "Pres31-AlarmlarDB" and (not (field["measurement"] == "Pres31-Energy_DB" and (field["dataSource"] in boolean_vals)))):
+                data = get_query_results(query_helper, "sensor-missing", field["database"], field["measurement"], field["dataSource"], duration_start_date, duration_end_date)
+            else: 
+                data = []
             df = pd.DataFrame(data)
             data_points = []
             if(not df.empty):
@@ -160,27 +173,44 @@ def data_status(failures, experiment_name, selected_fields, query_helper, produc
                     # print(on_off_range["start"], on_off_range["end"])
                     df_in_range = df.loc[(df['time'] >= pd.Timestamp(on_off_range["start"])) & (df['time'] <= pd.Timestamp(on_off_range["end"]))]
                     data_points += df_in_range.to_dict("records")
-            
+            print("len data points: ", len(data_points))
             if(len(data_points)):
                 # all_data.append(data_points)
                 used_data_points_missing_data_check.append(data_points)
-        
-        df_missing_data_check = pd.DataFrame()
+        print("len used_data_points_missing_data_check: ", len(used_data_points_missing_data_check))
+
+        # make time as key and add ather sensors to the time keys dict value
+        all_data_in_one = {}
         if(len(used_data_points_missing_data_check)):
-            # merge data on time
-            df_missing_data_check = pd.DataFrame(used_data_points_missing_data_check[0])
+            print("here1", len(used_data_points_missing_data_check[0]))
+            print(used_data_points_missing_data_check[0])
+            for record in used_data_points_missing_data_check[0]:
+                for key in record:
+                    if(key != "time"):
+                        all_data_in_one[record["time"]] = {key: record[key]}
             for i in range(1,len(used_data_points_missing_data_check)):
-                if(len(used_data_points_missing_data_check[i])):
-                    df_missing_data_check = pd.merge(df_missing_data_check, pd.DataFrame(used_data_points_missing_data_check[i]), on=["time"])
+                print("start", i)
+                for record in used_data_points_missing_data_check[i]:
+                    for key in record:
+                        if(key != "time"):
+                            all_data_in_one[record["time"]][key] = record[key]
+                print("end", i)
         
-        # add null point numbers 
+        adjusted_data = []
+        for key in all_data_in_one.keys():
+            new_row = {"time": key}
+            new_row.update(all_data_in_one[key])
+            adjusted_data.append(new_row)
+        
+        df_missing_data_check = pd.DataFrame(adjusted_data)
+        print("new df shape: ", df_missing_data_check.shape)
         missing_data_points_number += len(df_missing_data_check[df_missing_data_check.isna().any(axis=1)])
 
         # drop nulls get valid points
         # print(df_missing_data_check.dropna())
         all_data += df_missing_data_check.dropna().to_dict("records")
         print(len(all_data))
-        print("----------")
+        print(" 213 ----------")
         print(pd.DataFrame(all_data))
         # df_missing_data_check.dropna().to_csv("./alldata.csv") 
 

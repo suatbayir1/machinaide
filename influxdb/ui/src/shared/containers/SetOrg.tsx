@@ -213,8 +213,8 @@ const SetOrg: FC<Props> = ({
         <Route exact path={`${orgPath}/advanced-ml`} component={MLAdvancedContainer} />
         <Route exact path={`${orgPath}/retrain`} component={RetrainControlContainer} />
         {/* <Route exact path={`${orgPath}/automl/:experimentName/:tab`} component={AutoML} /> */}
-        <Route exact path={`${orgPath}/automl/:experimentName/:tab`} component={AutoMLPage} />
-        <Route exact path={`${orgPath}/rulreg-automl/:pipelineID/:tab`} component={RULRegAutoMLPage} />
+        <Route exact path={`${orgPath}/automl/:FID/:PLID/:MID/:experimentName/:tab`} component={AutoMLPage} />
+        <Route exact path={`${orgPath}/rulreg-automl/:FID/:PLID/:MID/:pipelineID/:tab`} component={RULRegAutoMLPage} />
 
         {/* User Manual */}
         <PermittedRoute exact path={`${orgPath}/user-manual`} component={UserManualContainer} allowedRoles={["member", "admin", "editor"]} />

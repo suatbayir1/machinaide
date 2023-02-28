@@ -4,6 +4,7 @@ import datetime
 import requests
 import os
 import uuid
+import queue
 import json
 import tensorflow as tf
 from kafka import KafkaConsumer
@@ -16,6 +17,7 @@ from tensorflow.keras import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import Dense, Conv2D, Dropout, Lambda, LSTM, Input, RepeatVector, TimeDistributed
 from tensorflow.keras import backend as K
+from mlhelpers.mlhdbscan import MLHDBSCAN
 from tensorflow.keras.callbacks import EarlyStopping
 import math
 import subprocess

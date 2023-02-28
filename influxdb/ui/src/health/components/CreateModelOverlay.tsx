@@ -520,8 +520,18 @@ class CreateModelOverlay extends PureComponent<Props, State>{
         const test = await HealthAssessmentService.startRULRegAutoMLSession(settings)
         console.log("test token res:", test)
       }
-      this.props.closeOverlay()
-      
+      else if(this.state.task === ANOMALY_DETECTION_TASK){
+        let settings = {
+          "assetName": this.state.selectedAsset,
+          "fields": fields, "modelName": this.state.modelName,
+          "sessionID": Date.now(),
+          "creator": this.props.username
+        }
+
+        const test = await HealthAssessmentService.startClusteringSession(settings)
+        console.log("test token res:", test)
+      }
+      this.props.closeOverlay()      
   }
 
     public render(){

@@ -9,7 +9,7 @@ class QueryHelper:
         self.url = settings['url']
         self.token = settings['token']
         self.org = settings["org"]
-        self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org, verify_ssl = False) 
+        self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org, verify_ssl = False, timeout=30_000) 
         self.query_api = self.client.query_api()
     
     def query_db(self, query):
@@ -161,8 +161,11 @@ def data_status(failures, experiment_name, selected_fields, query_helper, produc
         
         used_data_points_missing_data_check = []
         for field in fields:
-            data = get_query_results(query_helper, "sensor-missing", field["database"], field["measurement"], field["dataSource"], duration_start_date, duration_end_date)
-
+            boolean_vals = ["Pres-Counter_Reset", "AnaMotor-Counter_Reset", "RegMotor-Counter_Reset", "YagMotor-Counter_Reset", "KaMotor-Counter_Reset"]
+            if(field["measurement"] != "Pres31-AlarmlarDB" and (not (field["measurement"] == "Pres31-Energy_DB" and (field["dataSource"] in boolean_vals)))):
+                data = get_query_results(query_helper, "sensor-missing", field["database"], field["measurement"], field["dataSource"], duration_start_date, duration_end_date)
+            else: 
+                data = []
             df = pd.DataFrame(data)
             data_points = []
             if(not df.empty):
@@ -178,13 +181,39 @@ def data_status(failures, experiment_name, selected_fields, query_helper, produc
                 # all_data.append(data_points)
                 used_data_points_missing_data_check.append(data_points)
         
-        df_missing_data_check = pd.DataFrame()
+        """ df_missing_data_check = pd.DataFrame()
         if(len(used_data_points_missing_data_check)):
             # merge data on time
             df_missing_data_check = pd.DataFrame(used_data_points_missing_data_check[0])
             for i in range(1,len(used_data_points_missing_data_check)):
                 if(len(used_data_points_missing_data_check[i])):
-                    df_missing_data_check = pd.merge(df_missing_data_check, pd.DataFrame(used_data_points_missing_data_check[i]), on=["time"])
+                    df_missing_data_check = pd.merge(df_missing_data_check, pd.DataFrame(used_data_points_missing_data_check[i]), on=["time"]) """
+        
+        # make time as key and add ather sensors to the time keys dict value
+        all_data_in_one = {}
+        if(len(used_data_points_missing_data_check)):
+            print("here1", len(used_data_points_missing_data_check[0]))
+            print(used_data_points_missing_data_check[0])
+            for record in used_data_points_missing_data_check[0]:
+                for key in record:
+                    if(key != "time"):
+                        all_data_in_one[record["time"]] = {key: record[key]}
+            for i in range(1,len(used_data_points_missing_data_check)):
+                print("start", i)
+                for record in used_data_points_missing_data_check[i]:
+                    for key in record:
+                        if(key != "time"):
+                            all_data_in_one[record["time"]][key] = record[key]
+                print("end", i)
+        
+        adjusted_data = []
+        for key in all_data_in_one.keys():
+            new_row = {"time": key}
+            new_row.update(all_data_in_one[key])
+            adjusted_data.append(new_row)
+        
+        df_missing_data_check = pd.DataFrame(adjusted_data)
+        print("new df shape: ", df_missing_data_check.shape)
         
         # add null point numbers 
         missing_data_points_number += len(df_missing_data_check[df_missing_data_check.isna().any(axis=1)])

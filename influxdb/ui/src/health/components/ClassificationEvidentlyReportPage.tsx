@@ -263,7 +263,7 @@ class ClassificationEvidentlyReportPage extends PureComponent<Props, State>{
                             text="Update Report"
                             type={ButtonType.Button}
                             icon={IconFont.Redo}
-                            onClick={() => this.handleChangeNotification("success", "update report")}
+                            onClick={() => {this.handleChangeNotification("success", "update report"); this.onClickCreateReport();}}
                         />}
                         {this.state.pageState === RemoteDataState.Loading && this.state.reportState === ReportState.DontExist && <Button
                             color={ComponentColor.Secondary}

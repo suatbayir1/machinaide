@@ -18,6 +18,7 @@ def get_all_maintenance(token):
     result = model.get_all_maintenance()
     message = "All maintenance records were successfully fetched"
     logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+    # return return_response(data = result[result.count()-30:], success = True, message = message), 200
     return return_response(data = result, success = True, message = message), 200
 
 @maintenance.route("/addMaintenance", methods = ["POST"])
@@ -123,8 +124,9 @@ def get_by_condition(token):
 
         result = model.get_by_condition(payload)
 
-        message = "Maintenance records were successfully fetched"
+        message = f"Maintenance records were successfully fetched. Count: {len(result)}"
         log_type = "INFO"
+        # return return_response(data = result[len(result)-30:], success = True, message = message), 200
         return return_response(data = result, success = True, message = message), 200
     except:
         message = "An expected error has occurred"

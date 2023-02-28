@@ -1,27 +1,26 @@
-from backend.mlhelpers.mlwrappers import KafkaHelper
+# from mlhelpers.mlwrappers import KafkaHelper
 from mlhelpers.mlutils import Influx2QueryHelper, MLPreprocessor
 from datetime import datetime, timedelta
-from config import models_path, POSTREALANOMALYURL
+from config import models_path, POSTREALANOMALYURL, PUTBASICURL
 import json
 import time
 import numpy as np
 import hdbscan
 import pickle
 import queue
-import uuid
 import threading
 import requests
 
 
 class MLHDBSCAN:
-    def __init__(self, db_settings, prev_hours, end_date, sample_size, model_name, session_id, m2s):
+    def __init__(self, db_settings, prev_hours, end_date, sample_size, model_name, session_id, m2s, model_id):
         self.db_settings = db_settings
         self.m2s = m2s
         self.prev_hours = prev_hours
         self.end_date = end_date
         self.model_name = model_name
         self.session_id = session_id
-        self.model_id = uuid.uuid4().hex
+        self.model_id = model_id
         self.window_size = sample_size
 
         self.influx_helper = None
@@ -29,7 +28,7 @@ class MLHDBSCAN:
     
     def cluster(self, df):
         seq_arr = list()
-        window_size = self.sample_size
+        window_size = self.window_size
         for i in range(len(df) - window_size - 1):
             seq_arr.append(df.values[i:i+window_size])
         seq_arr = np.asarray(seq_arr)
@@ -42,7 +41,7 @@ class MLHDBSCAN:
         pkg = {
             "db_settings": self.db_settings,
             "m2s": self.m2s,
-            "window_size": self.sample_size,
+            "window_size": self.window_size,
             "model_name": self.model_name,
             "session_id": self.session_id,
             "model_id": self.model_id
@@ -50,14 +49,22 @@ class MLHDBSCAN:
         with open(models_path + str(self.session_id) + "/" + self.model_name + "_info.json", 'w') as f:
             json.dump(pkg, f)
 
-        print(self.session_id, "saved with model name", self.model_name)
+        obj = {
+            "modelID": self.model_id,
+            "trainingDone": True
+        }
+        requests.put(url=PUTBASICURL, json=obj)
+        print("putbasicdone")
+
+        # print(self.session_id, "saved with model name", self.model_name)
 
 
     
     def query(self):
-        end_date = datetime.strptime(time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime(int(str(self.end_date)[:-3]))), "%Y-%m-%dT%H:%M:%SZ")
+        # end_date = datetime.strptime(time.strftime('%Y-%m-%dT%H:%M:%SZ', datetime.utcfromtimestamp(int(str(self.end_date)[:-3]))), "%Y-%m-%dT%H:%M:%SZ")
+        end_date = datetime.utcfromtimestamp(int(str(self.end_date)[:-3]))
         start_date = end_date - timedelta(hours=self.prev_hours)
-
+        print(start_date ,end_date, "DATE@@@@@@@@@@@@@@@@@@")
         start_date = start_date.strftime('%Y-%m-%dT%H:%M:%SZ')
         end_date = end_date.strftime('%Y-%m-%dT%H:%M:%SZ')
 

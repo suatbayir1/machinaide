@@ -40,11 +40,13 @@ class RULRegEvidentlyReport:
     def get_sensor_data(self):
         all_data = []
         for field in self.fields:
-            data = self.get_query_results(field["database"], field["measurement"], field["dataSource"], self.daterange)
-            df = pd.DataFrame(data)
-            data_points = df.to_dict("records")
-            if(len(data_points)):
-                all_data.append(data_points)
+            boolean_vals = ["Pres-Counter_Reset", "AnaMotor-Counter_Reset", "RegMotor-Counter_Reset", "YagMotor-Counter_Reset", "KaMotor-Counter_Reset"]
+            if(field["measurement"] != "Pres31-AlarmlarDB" and (not (field["measurement"] == "Pres31-Energy_DB" and (field["dataSource"] in boolean_vals)))):
+                data = self.get_query_results(field["database"], field["measurement"], field["dataSource"], self.daterange)
+                df = pd.DataFrame(data)
+                data_points = df.to_dict("records")
+                if(len(data_points)):
+                    all_data.append(data_points)
         
         if(len(all_data)):
             one_merged = pd.DataFrame(all_data[0])

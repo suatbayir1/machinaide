@@ -7,7 +7,7 @@ import numpy as np
 import requests
 from scipy import stats
 from tensorflow.keras import backend as K
-from config import celldataurl, ANOMALYURL, INFLUXDB_CLIENT
+from config import celldataurl, ANOMALYURL, INFLUXDB_CLIENT, INFLUX
 from influxdb_client import InfluxDBClient as idbc
 
 
@@ -356,10 +356,10 @@ class Influx2QueryHelper:
                     query += 'r._field == "{}" or '.format(sensor)
                 else:
                     query += 'r._field == "{}")'.format(sensor)
-            
+            print(query)
             query_list.append(query)
 
-        return query_list
+        return query_list   
 
 
     def query_weibull(self, measurement_to_sensor, startTime, endTime, groupWith):

@@ -119,6 +119,7 @@ def loginWithLDAP():
 
 @auth.route("/loginWithLDAPErmetal", methods = ["POST"])
 def loginWithLDAPErmetal():
+    print("ermetal login method request")
     if not request.json:
         message = "username_password_cannot_be_empty"
         logger.add_log("ERROR", request.remote_addr, '', request.method, request.url, "", message,  400)
@@ -131,6 +132,8 @@ def loginWithLDAPErmetal():
 
     username = request.json["username"]
     password = request.json["password"]
+
+    print("username", username)
 
     try:
         con = ldap.initialize(config.LDAP["ERMETAL_URL"], bytes_mode=False)
@@ -175,14 +178,17 @@ def loginWithLDAPErmetal():
     except ldap.INVALID_CREDENTIALS:
         con.unbind()
         message = "password_is_wrong"
+        print(message)
         logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
         return return_response(data = [], success = False, message = message, code = 400), 400
     except ldap.SERVER_DOWN as e:
         message = "LDAP Server is not running"
+        print(message)
         logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
         return return_response(data = [], success = False, message = message, code = 400), 400
     except Exception as error:
         message = error.args[0]
+        print(message)
         logger.add_log("ERROR", request.remote_addr, username, request.method, request.url, request.json, message,  400)
         return return_response(data = [], success = False, message = message, code = 400), 400
 

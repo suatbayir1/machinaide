@@ -64,11 +64,11 @@ const aggregatePeriods = ["5s", "10s", "20s", "30s", "60s"]
 class RULFeedbackPage extends PureComponent<Props, State>{
     state = {
         timeRange: {
-            seconds: 3600,
-            lower: "now() - 1h",
+            seconds: 3600*4,
+            lower: "now() - 4h",
             upper: null,
-            label: "Past 1h",
-            duration: "1h",
+            label: "Past 4h",
+            duration: "4h",
             type: "selectable-duration",
             windowPeriod: 10000
         },
@@ -114,7 +114,7 @@ class RULFeedbackPage extends PureComponent<Props, State>{
         const models = await HealthAssessmentService.getMLModelsWithID({"modelID": modelID})
         console.log("ml models: ", this.props.match.params.MID, models)
         let allModels = [...models] 
-        this.setState({models: allModels})
+        this.setState({models: allModels, selectedModelID: modelID})
     }
 
     getMachineAnomalies = async () => {
@@ -159,7 +159,7 @@ class RULFeedbackPage extends PureComponent<Props, State>{
         this.setState({dtData: assets}, ()=>{
             console.log("dt data", assets)
             this.getMachineData()
-            this.getMachineAnomalies()
+            // this.getMachineAnomalies()
         })
     }
 
@@ -180,6 +180,21 @@ class RULFeedbackPage extends PureComponent<Props, State>{
             notificationType: type,
             notificationMessage: message,
         })
+    }
+
+    dataToPush = (row) => {
+        let valueKey = "_value" in row ? "_value" : "_value (number)" in row ? "_value (number)" : ""
+        if(valueKey.length){
+            if(row[valueKey] && row[valueKey].toFixed()){
+                return {pushData: true, valueKey: valueKey, value: row[valueKey].toFixed()}
+            }
+            else{
+                return {pushData: false}
+            }
+        }
+        else{
+            return {pushData: false}
+        }
     }
 
     /*
@@ -211,12 +226,18 @@ class RULFeedbackPage extends PureComponent<Props, State>{
             let graphData = {}
             for(let row of rows){
                 if(`${row["_measurement"]}_${row["_field"]}` in graphData){
-                    graphData[`${row["_measurement"]}_${row["_field"]}`]["data"].push([row["_time"], row["_value"].toFixed(2)])
+                    let resultData = this.dataToPush(row)
+                    if(resultData["pushData"]){
+                        graphData[`${row["_measurement"]}_${row["_field"]}`]["data"].push([row["_time"], resultData["value"]])
+                    }                 
                 }
                 else{
-                    graphData[`${row["_measurement"]}_${row["_field"]}`] = {
-                        name: `${row["_measurement"]}_${row["_field"]}`,
-                        data: [[row["_time"], row["_value"].toFixed(2)]]
+                    let resultData = this.dataToPush(row)
+                    if(resultData["pushData"]){
+                        graphData[`${row["_measurement"]}_${row["_field"]}`] = {
+                            name: `${row["_measurement"]}_${row["_field"]}`,
+                            data: [[row["_time"], resultData["value"]]]
+                        }
                     }
                 }
             }
@@ -333,7 +354,8 @@ class RULFeedbackPage extends PureComponent<Props, State>{
                 upper: stop,
                 type: "custom",
         }})
-        let query = `from(bucket: "${FACTORY_NAME}")
+        let factory = this.props.match.params.FID
+        let query = `from(bucket: "${factory}")
         |> range(start: ${start}, stop: ${stop})
         |> filter(fn: (r) => ${measurementString})
         |> aggregateWindow(every: ${this.state.aggregatePeriod}, fn: last, createEmpty: false)

@@ -1,4 +1,4 @@
-#!/home/machinaide/evidently-server/evidentlyenv/bin/python
+#!/home/machinaide/project/machinaide/evidently-server/evidentlyenv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

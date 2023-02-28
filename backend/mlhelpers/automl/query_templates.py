@@ -13,7 +13,7 @@ def get_sensor_data_query(bucket, measurement, field, start_time, stop_time):
   |> range(start: {start_time}, stop: {stop_time})\
   |> filter(fn: (r) => r["_measurement"] == "{measurement}")\
   |> filter(fn: (r) => r["_field"] == "{field}")\
-  |> aggregateWindow(every: 30m, fn: mean, createEmpty: true)'
+  |> aggregateWindow(every: 5m, fn: mean, createEmpty: true)'
     # print(query)
     return query
 
@@ -25,7 +25,7 @@ def get_sensor_missing_data_query(bucket, measurement, field, start_time, stop_t
   |> range(start: {start_time}, stop: {stop_time})\
   |> filter(fn: (r) => r["_measurement"] == "{measurement}")\
   |> filter(fn: (r) => r["_field"] == "{field}")\
-  |> aggregateWindow(every: 30m, fn: mean, createEmpty: {fill_null})'
+  |> aggregateWindow(every: 5m, fn: mean, createEmpty: {fill_null})'
     # print(query)
     return query
 

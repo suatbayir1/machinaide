@@ -1,0 +1,985 @@
+<pykafka.protocol.message.Message object at 0x7f802e80ca98>
+Pres31-Energy_DB KaMotor-Total_Active_Power=0 1676635856263000064
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB AnaMotor-Total_Active_Power=0 1676635856278000128
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB Pres-U_L1=225.2542 1676635856291000064
+<pykafka.protocol.message.Message object at 0x7f802e80ca98>
+Pres31-Energy_DB Pres-Reactive_Counter=2382.5073 1676635856318000128
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB Pres-Active_Counter=3016.488 1676635856329999872
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB KaMotor-I_L3=0 1676635856348999936
+<pykafka.protocol.message.Message object at 0x7f802e80ca98>
+Pres31-Energy_DB AnaMotor-Total_Reactive_Power=0 1676635856372999936
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB Pres-Frequency=50.00977 1676635856382000128
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB KaMotor-Cos_Total=0 1676635856392000000
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB KaMotor-U_L3_L1=387.41226 1676635856392999936
+<pykafka.protocol.message.Message object at 0x7f802e80ca98>
+Pres31-Energy_DB KaMotor-Total_Reactive_Power=0 1676635856392999936
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB KaMotor-Reactive_Counter=108.608696 1676635856393999872
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB KaMotor-Total_Active_Power=0 1676635856395000064
+<pykafka.protocol.message.Message object at 0x7f802e80c570>
+Pres31-Energy_DB AnaMotor-Total_Active_Power=0 1676635856395000064
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB Pres-U_L1=225.2542 1676635856396000000
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB Pres-Reactive_Counter=2382.5073 1676635856396999936
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB Pres-Active_Counter=3016.488 1676635856398000128
+<pykafka.protocol.message.Message object at 0x7f802e80ce58>
+Pres31-Energy_DB KaMotor-I_L3=0 1676635856399000064
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB AnaMotor-Total_Reactive_Power=0 1676635856399000064
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB Pres-Frequency=50.00977 1676635856400000000
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB Pres-I_L1=0 1676635856403000064
+<pykafka.protocol.message.Message object at 0x7f802e80ce58>
+Pres31-Energy_DB KaMotor-I_L1=0 1676635856415000064
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB KaMotor-Active_Counter=143.04538 1676635856423000064
+<pykafka.protocol.message.Message object at 0x7f802e80ce58>
+Pres31-Energy_DB Pres-Total_Reactive_Power=0 1676635856432000000
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB Pres-U_L2=224.00691 1676635856439000064
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB Pres-I_L1=0 1676635856440999936
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB KaMotor-I_L1=0 1676635856440999936
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB Pres-Total_Reactive_Power=0 1676635856441999872
+<pykafka.protocol.message.Message object at 0x7f802e80c570>
+Pres31-Energy_DB KaMotor-Active_Counter=143.04538 1676635856441999872
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB Pres-U_L1_L2=390.62955 1676635856452000000
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB AnaMotor-Reactive_Counter=59660.04 1676635856459000064
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB AnaMotor-U_L2_L3=387.14624 1676635856468000000
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB AnaMotor-U_L3_L1=388.09888 1676635856476000000
+<pykafka.protocol.message.Message object at 0x7f802e80ce58>
+Pres31-Energy_DB Pres-I_L3=0 1676635856486000128
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB Pres-U_L2=224.00691 1676635856491000064
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB AnaMotor-Reactive_Counter=59660.04 1676635856491000064
+<pykafka.protocol.message.Message object at 0x7f802e80ca98>
+Pres31-Energy_DB Pres-U_L1_L2=390.62955 1676635856491000064
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB AnaMotor-U_L2_L3=387.14624 1676635856492999936
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB AnaMotor-U_L3_L1=388.09888 1676635856495000064
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB Pres-I_L3=0 1676635856495000064
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB YagMotor-U_L1_L2=389.5254 1676635856508000000
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB YagMotor-I_L3=0 1676635856536000000
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB RegMotor-U_L1_L2=389.93512 1676635856547000064
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB YagMotor-I_L3=0 1676635856548000000
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB RegMotor-U_L1_L2=389.93512 1676635856548000000
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB YagMotor-U_L1_L2=389.5254 1676635856548000000
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB YagMotor-I_L1=0 1676635856555000064
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB YagMotor-I_L2=0 1676635856561999872
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB YagMotor-Total_Active_Power=0 1676635856580000000
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB RegMotor-U_L2_L3=387.22937 1676635856592000000
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB YagMotor-I_L1=0 1676635856599000064
+<pykafka.protocol.message.Message object at 0x7f802e80ca98>
+Pres31-Energy_DB YagMotor-I_L2=0 1676635856599000064
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB YagMotor-Total_Active_Power=0 1676635856599000064
+<pykafka.protocol.message.Message object at 0x7f802e80ce58>
+Pres31-Energy_DB RegMotor-U_L2_L3=387.22937 1676635856600000000
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB RegMotor-Cos_Total=0 1676635856600000000
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB YagMotor-Reactive_Counter=4838.9883 1676635856608999936
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB RegMotor-Active_Counter=75.43218 1676635856616999936
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB RegMotor-Reactive_Counter=154.32608 1676635856624999936
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB RegMotor-Total_Active_Power=0 1676635856632999936
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB YagMotor-U_L2_L3=388.0403 1676635856641999872
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB YagMotor-U_L3_L1=388.40222 1676635856649999872
+<pykafka.protocol.message.Message object at 0x7f802e80ce58>
+Pres31-Energy_DB YagMotor-Reactive_Counter=4838.9883 1676635856649999872
+<pykafka.protocol.message.Message object at 0x7f802e80ca98>
+Pres31-Energy_DB RegMotor-Active_Counter=75.43218 1676635856651000064
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB RegMotor-Reactive_Counter=154.32608 1676635856651000064
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB RegMotor-Total_Active_Power=0 1676635856652000000
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB YagMotor-U_L2_L3=388.0403 1676635856652000000
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB RegMotor-Cos_Total=0 1676635856652999936
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB Pres-U_L3=222.60672 1676635856660999936
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB Pres-U_L3_L1=388.476 1676635856668999936
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB RegMotor-Counter_Reset=False 1676635856679000064
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB Pres-U_L2_L3=387.72507 1676635856688000000
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB RegMotor-I_L1=0 1676635856696999936
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB YagMotor-U_L3_L1=388.40222 1676635856704000000
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB Pres-U_L3=222.60672 1676635856704999936
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB Pres-U_L3_L1=388.476 1676635856705999872
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB RegMotor-Counter_Reset=False 1676635856708000000
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB Pres-U_L2_L3=387.72507 1676635856708000000
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB RegMotor-I_L1=0 1676635856710000128
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB YagMotor-Cos_Total=0 1676635856710000128
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB RegMotor-I_L3=0 1676635856718000128
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB RegMotor-I_L3=0 1676635856768999936
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB YagMotor-Cos_Total=0 1676635856771000064
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB AnaMotor-I_L3=0 1676635856840999936
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB AnaMotor-Counter_Reset=False 1676635856872999936
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB Pres-Counter_Reset=False 1676635856899000064
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB AnaMotor-Cos_Total=0 1676635856907000064
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB Pres-Total_Active_Power=0 1676635856913999872
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB KaMotor-U_L1_L2=390.15485 1676635856924999936
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB KaMotor-U_L2_L3=386.7565 1676635856935000064
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB Pres-Cos_Total=0 1676635856944000000
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB AnaMotor-U_L1_L2=390.93628 1676635856953999872
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB KaMotor-I_L2=0 1676635856961999872
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB KaMotor-Counter_Reset=False 1676635856976999936
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB Pres-I_L2=0 1676635856984999936
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB YagMotor-Counter_Reset=False 1676635856995000064
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB RegMotor-U_L3_L1=387.29117 1676635857004999936
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB YagMotor-Active_Counter=5210.5366 1676635857016999936
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB RegMotor-Total_Reactive_Power=0 1676635857025999872
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB YagMotor-Total_Reactive_Power=0 1676635857033999872
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB RegMotor-I_L2=0 1676635857041999872
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB AnaMotor-I_L2=0 1676635857811000064
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB AnaMotor-Active_Counter=73006.445 1676635858329999872
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB Pres-U_L2=225.26338 1676635858355000064
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB AnaMotor-Reactive_Counter=59660.04 1676635858368000000
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB AnaMotor-I_L1=0 1676635858382000128
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB AnaMotor-I_L3=0 1676635858468000000
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB AnaMotor-Counter_Reset=False 1676635858553999872
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB YagMotor-Total_Active_Power=0 1676635858572999936
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB AnaMotor-Cos_Total=0 1676635858596999936
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB Pres-Counter_Reset=False 1676635858632000000
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB KaMotor-U_L1_L2=390.12494 1676635858646000128
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB Pres-Total_Active_Power=0 1676635858660000000
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB KaMotor-U_L2_L3=386.91534 1676635858673999872
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB Pres-Cos_Total=0 1676635858697999872
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB AnaMotor-U_L1_L2=389.83838 1676635858704999936
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB KaMotor-I_L2=0 1676635858721999872
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB KaMotor-Cos_Total=0 1676635858742000128
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB KaMotor-U_L3_L1=386.33905 1676635858755000064
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB KaMotor-Counter_Reset=False 1676635858772000000
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB KaMotor-Total_Reactive_Power=0 1676635858806000128
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB KaMotor-Reactive_Counter=108.608696 1676635858832999936
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB Pres-U_L1=225.20354 1676635858916000000
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB Pres-Active_Counter=3016.488 1676635858942000128
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB Pres-Reactive_Counter=2382.5073 1676635858956999936
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB KaMotor-I_L3=0 1676635858980999936
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB AnaMotor-Total_Reactive_Power=0 1676635858990000128
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB Pres-Frequency=50.00977 1676635859012999936
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB Pres-I_L1=0 1676635859040999936
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB KaMotor-I_L1=0 1676635859056000000
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB KaMotor-Active_Counter=143.04538 1676635859064999936
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB Pres-Total_Reactive_Power=0 1676635859091000064
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB AnaMotor-U_L2_L3=387.45917 1676635859268000000
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB AnaMotor-U_L3_L1=386.82294 1676635859280000000
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB Pres-I_L3=0 1676635859297999872
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB Pres-I_L2=0 1676635859305999872
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB RegMotor-U_L3_L1=386.1537 1676635859324000000
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB YagMotor-U_L1_L2=389.30347 1676635859352999936
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB YagMotor-Counter_Reset=False 1676635859367000064
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB YagMotor-I_L3=0 1676635859383000064
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB RegMotor-U_L1_L2=389.95868 1676635859404999936
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB YagMotor-I_L1=0 1676635859415000064
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB YagMotor-I_L2=0 1676635859436000000
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB YagMotor-Active_Counter=5210.5366 1676635859460999936
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB RegMotor-Cos_Total=0 1676635859488999936
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB RegMotor-U_L2_L3=386.62088 1676635859508000000
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB RegMotor-Total_Reactive_Power=0 1676635859521999872
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB YagMotor-Reactive_Counter=4838.9883 1676635859536000000
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB YagMotor-Total_Reactive_Power=0 1676635859560999936
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB RegMotor-Active_Counter=75.43218 1676635859579000064
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB RegMotor-Reactive_Counter=154.32608 1676635859596000000
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB RegMotor-Total_Active_Power=0 1676635859612000000
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB YagMotor-U_L2_L3=386.17957 1676635859633999872
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB YagMotor-U_L3_L1=385.42426 1676635859656000000
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB RegMotor-I_L2=0 1676635859688000000
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB Pres-U_L3=220.70723 1676635859715000064
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB Pres-U_L3_L1=385.5442 1676635859732999936
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB RegMotor-Counter_Reset=False 1676635859753999872
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB Pres-U_L2_L3=386.1179 1676635859771000064
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB RegMotor-I_L1=0 1676635859795000064
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB YagMotor-Cos_Total=0 1676635859812999936
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB Pres-Reactive_Counter=2382.5073 1676635860000000000
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB AnaMotor-U_L2_L3=387.45917 1676635860132999936
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB AnaMotor-U_L3_L1=386.82294 1676635860135000064
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB Pres-I_L3=0 1676635860136000000
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB Pres-I_L2=0 1676635860136999936
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB RegMotor-U_L3_L1=386.1537 1676635860137999872
+<pykafka.protocol.message.Message object at 0x7f802e80ca98>
+Pres31-Energy_DB YagMotor-U_L1_L2=389.30347 1676635860139000064
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB YagMotor-Counter_Reset=False 1676635860139000064
+<pykafka.protocol.message.Message object at 0x7f802e80ce58>
+Pres31-Energy_DB YagMotor-I_L3=0 1676635860140000000
+<pykafka.protocol.message.Message object at 0x7f802e80ca98>
+Pres31-Energy_DB RegMotor-U_L1_L2=389.95868 1676635860140999936
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB YagMotor-I_L1=0 1676635860142000128
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB YagMotor-I_L2=0 1676635860142000128
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB YagMotor-Active_Counter=5210.5366 1676635860143000064
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB RegMotor-Cos_Total=0 1676635860143000064
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB RegMotor-U_L2_L3=386.62088 1676635860144000000
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB RegMotor-Total_Reactive_Power=0 1676635860144000000
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB YagMotor-Reactive_Counter=4838.9883 1676635860144999936
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB YagMotor-Total_Reactive_Power=0 1676635860147000064
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB RegMotor-Active_Counter=75.43218 1676635860148000000
+<pykafka.protocol.message.Message object at 0x7f802e80c570>
+Pres31-Energy_DB RegMotor-Reactive_Counter=154.32608 1676635860148999936
+<pykafka.protocol.message.Message object at 0x7f802e80c660>
+Pres31-Energy_DB RegMotor-Total_Active_Power=0 1676635860152999936
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB YagMotor-U_L2_L3=386.17957 1676635860203000064
+<pykafka.protocol.message.Message object at 0x7f802e80c570>
+Pres31-Energy_DB YagMotor-U_L3_L1=385.42426 1676635860201999872
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB RegMotor-I_L2=0 1676635860204000000
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB Pres-U_L3_L1=385.5442 1676635860204999936
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB Pres-U_L3=220.70723 1676635860204999936
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB Pres-U_L2_L3=386.1179 1676635860206000128
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB RegMotor-I_L1=0 1676635860208999936
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB YagMotor-Cos_Total=0 1676635860209999872
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB Pres-Reactive_Counter=2382.5073 1676635860248000000
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB RegMotor-Counter_Reset=False 1676635860206000128
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB AnaMotor-U_L2_L3=387.45917 1676635860259000064
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB AnaMotor-U_L3_L1=386.82294 1676635860260000000
+<pykafka.protocol.message.Message object at 0x7f802e80c570>
+Pres31-Energy_DB Pres-I_L3=0 1676635860260000000
+<pykafka.protocol.message.Message object at 0x7f802e80c660>
+Pres31-Energy_DB Pres-I_L2=0 1676635860260999936
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB RegMotor-U_L3_L1=386.1537 1676635860262000128
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB YagMotor-U_L1_L2=389.30347 1676635860262000128
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB YagMotor-Counter_Reset=False 1676635860263000064
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB YagMotor-I_L3=0 1676635860264000000
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB RegMotor-U_L1_L2=389.95868 1676635860264999936
+<pykafka.protocol.message.Message object at 0x7f802e80ca98>
+Pres31-Energy_DB YagMotor-I_L1=0 1676635860264999936
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB YagMotor-I_L2=0 1676635860265999872
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB YagMotor-Active_Counter=5210.5366 1676635860265999872
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB RegMotor-Cos_Total=0 1676635860267000064
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB RegMotor-Total_Reactive_Power=0 1676635860268000000
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB RegMotor-U_L2_L3=386.62088 1676635860268000000
+<pykafka.protocol.message.Message object at 0x7f802e80c660>
+Pres31-Energy_DB YagMotor-Reactive_Counter=4838.9883 1676635860268999936
+<pykafka.protocol.message.Message object at 0x7f802e80c570>
+Pres31-Energy_DB YagMotor-Total_Reactive_Power=0 1676635860268999936
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB RegMotor-Reactive_Counter=154.32608 1676635860270000128
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB RegMotor-Active_Counter=75.43218 1676635860270000128
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB RegMotor-Total_Active_Power=0 1676635860270000128
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB YagMotor-U_L2_L3=386.17957 1676635860276000000
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB YagMotor-U_L3_L1=385.42426 1676635860276000000
+<pykafka.protocol.message.Message object at 0x7f802e80c570>
+Pres31-Energy_DB RegMotor-I_L2=0 1676635860276999936
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB Pres-U_L3=220.70723 1676635860278000128
+<pykafka.protocol.message.Message object at 0x7f802e80c660>
+Pres31-Energy_DB Pres-U_L3_L1=385.5442 1676635860278000128
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB RegMotor-Counter_Reset=False 1676635860278000128
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB Pres-U_L2_L3=386.1179 1676635860278000128
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB RegMotor-I_L1=0 1676635860279000064
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB YagMotor-Cos_Total=0 1676635860279000064
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB AnaMotor-I_L2=0 1676635860656000000
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB AnaMotor-I_L2=0 1676635860668000000
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB AnaMotor-Active_Counter=73006.445 1676635860824999936
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB AnaMotor-Active_Counter=73006.445 1676635860831000064
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB AnaMotor-I_L1=0 1676635860832000000
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB Pres-U_L2=225.03174 1676635860840000000
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB AnaMotor-Reactive_Counter=59660.04 1676635860848999936
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB Pres-U_L2=225.03174 1676635860884000000
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB AnaMotor-I_L1=0 1676635860881999872
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB AnaMotor-Reactive_Counter=59660.04 1676635860884999936
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB AnaMotor-I_L3=0 1676635860888999936
+<pykafka.protocol.message.Message object at 0x7f802e80c660>
+Pres31-Energy_DB AnaMotor-Counter_Reset=False 1676635860923000064
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB AnaMotor-Cos_Total=0 1676635860936000000
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB AnaMotor-I_L3=0 1676635860937999872
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB AnaMotor-Counter_Reset=False 1676635860939000064
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB YagMotor-Total_Active_Power=0 1676635860944000000
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB Pres-Counter_Reset=False 1676635860963000064
+<pykafka.protocol.message.Message object at 0x7f802e80c660>
+Pres31-Energy_DB Pres-Total_Active_Power=0 1676635860976000000
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB KaMotor-U_L1_L2=388.92072 1676635860984999936
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB Pres-Counter_Reset=False 1676635860988999936
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB AnaMotor-Cos_Total=0 1676635860988999936
+<pykafka.protocol.message.Message object at 0x7f802e80c570>
+Pres31-Energy_DB Pres-Total_Active_Power=0 1676635860988999936
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB KaMotor-U_L1_L2=388.92072 1676635860992999936
+<pykafka.protocol.message.Message object at 0x7f802e80c570>
+Pres31-Energy_DB KaMotor-U_L2_L3=385.48416 1676635860993999872
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB YagMotor-Total_Active_Power=0 1676635860992999936
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB AnaMotor-U_L1_L2=388.73883 1676635861007000064
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB Pres-Cos_Total=0 1676635861016000000
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB KaMotor-I_L2=0 1676635861024999936
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB KaMotor-Cos_Total=0 1676635861032999936
+<pykafka.protocol.message.Message object at 0x7f802e80c570>
+Pres31-Energy_DB KaMotor-Counter_Reset=False 1676635861041999872
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB KaMotor-U_L3_L1=384.7058 1676635861152999936
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB KaMotor-Total_Active_Power=0 1676635861208999936
+<pykafka.protocol.message.Message object at 0x7f802e80c570>
+Pres31-Energy_DB KaMotor-Total_Reactive_Power=0 1676635861231000064
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB KaMotor-Reactive_Counter=108.608696 1676635861259000064
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB AnaMotor-I_L2=0 1676635861267000064
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB AnaMotor-Active_Counter=73006.445 1676635861272999936
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB AnaMotor-I_L1=0 1676635861273999872
+<pykafka.protocol.message.Message object at 0x7f802e80c660>
+Pres31-Energy_DB AnaMotor-I_L3=0 1676635861279000064
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB AnaMotor-Counter_Reset=False 1676635861281999872
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB AnaMotor-Cos_Total=0 1676635861284000000
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB Pres-Total_Active_Power=0 1676635861286000128
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB KaMotor-U_L1_L2=388.92072 1676635861287000064
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB KaMotor-U_L2_L3=385.48416 1676635861288000000
+<pykafka.protocol.message.Message object at 0x7f802e80ca98>
+Pres31-Energy_DB Pres-Cos_Total=0 1676635861288000000
+<pykafka.protocol.message.Message object at 0x7f802e80ce58>
+Pres31-Energy_DB AnaMotor-U_L1_L2=388.73883 1676635861288999936
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB KaMotor-I_L2=0 1676635861288999936
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB KaMotor-Cos_Total=0 1676635861289999872
+<pykafka.protocol.message.Message object at 0x7f802e80cb88>
+Pres31-Energy_DB Pres-Counter_Reset=False 1676635861289999872
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB KaMotor-Counter_Reset=False 1676635861291000064
+<pykafka.protocol.message.Message object at 0x7f802e80cb88>
+Pres31-Energy_DB Pres-U_L2=225.03174 1676635861292000000
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB AnaMotor-Reactive_Counter=59660.04 1676635861292999936
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB AnaMotor-Total_Active_Power=0 1676635861329999872
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB Pres-U_L1=224.03691 1676635861352999936
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB Pres-Active_Counter=3016.488 1676635861360000000
+<pykafka.protocol.message.Message object at 0x7f802e80cb88>
+Pres31-Energy_DB KaMotor-I_L3=0 1676635861416999936
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB AnaMotor-Total_Reactive_Power=0 1676635861436999936
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB YagMotor-Total_Active_Power=0 1676635861438000128
+<pykafka.protocol.message.Message object at 0x7f802e80cb88>
+Pres31-Energy_DB Pres-Frequency=50.00977 1676635861455000064
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB Pres-I_L1=0 1676635861468000000
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB KaMotor-I_L1=0 1676635861484999936
+<pykafka.protocol.message.Message object at 0x7f802e80ce58>
+Pres31-Energy_DB KaMotor-Active_Counter=143.04538 1676635861520999936
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB Pres-Total_Reactive_Power=0 1676635861540999936
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB Pres-U_L1_L2=389.3647 1676635861585999872
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB RegMotor-I_L3=0 1676635861766000128
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB AnaMotor-Total_Active_Power=0 1676635861905999872
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB KaMotor-I_L3=0 1676635861966000128
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB RegMotor-I_L3=0 1676635862032000000
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB AnaMotor-I_L1=0 1676635862276000000
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB Pres-Reactive_Counter=2382.5073 1676635862348000000
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB AnaMotor-U_L3_L1=386.67917 1676635862364999936
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB AnaMotor-U_L2_L3=387.82263 1676635862387000064
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB Pres-I_L3=0 1676635862435000064
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB Pres-I_L2=0 1676635862449999872
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB RegMotor-U_L3_L1=386.34167 1676635862460000000
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB YagMotor-U_L1_L2=390.17633 1676635862489999872
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB YagMotor-Counter_Reset=False 1676635862499000064
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB YagMotor-I_L3=0 1676635862515000064
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB RegMotor-U_L1_L2=390.37384 1676635862535000064
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB YagMotor-I_L1=0 1676635862551000064
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB YagMotor-I_L2=0 1676635862580000000
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB YagMotor-Active_Counter=5210.5366 1676635862596000000
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB AnaMotor-Total_Active_Power=0 1676635862596000000
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB KaMotor-I_L3=0 1676635862596999936
+<pykafka.protocol.message.Message object at 0x7f802e80ce58>
+Pres31-Energy_DB RegMotor-Cos_Total=0 1676635862603000064
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB RegMotor-U_L2_L3=387.6775 1676635862625999872
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB AnaMotor-Reactive_Counter=59660.04 1676635862643000064
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB RegMotor-I_L3=0 1676635862648999936
+<pykafka.protocol.message.Message object at 0x7f802e80cb88>
+Pres31-Energy_DB YagMotor-Reactive_Counter=4838.9883 1676635862659000064
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB Pres-Reactive_Counter=2382.5073 1676635862665999872
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB AnaMotor-U_L2_L3=387.82263 1676635862667000064
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB AnaMotor-U_L3_L1=386.67917 1676635862667000064
+<pykafka.protocol.message.Message object at 0x7f802e80ce58>
+Pres31-Energy_DB Pres-I_L3=0 1676635862668000000
+<pykafka.protocol.message.Message object at 0x7f802e80ca98>
+Pres31-Energy_DB RegMotor-U_L3_L1=386.34167 1676635862668999936
+<pykafka.protocol.message.Message object at 0x7f802e80ce58>
+Pres31-Energy_DB Pres-I_L2=0 1676635862668999936
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB YagMotor-U_L1_L2=390.17633 1676635862670000128
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB YagMotor-Counter_Reset=False 1676635862671000064
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB YagMotor-I_L3=0 1676635862672999936
+<pykafka.protocol.message.Message object at 0x7f802e80cb88>
+Pres31-Energy_DB RegMotor-U_L1_L2=390.37384 1676635862673999872
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB YagMotor-I_L1=0 1676635862673999872
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB YagMotor-I_L2=0 1676635862675000064
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB YagMotor-Active_Counter=5210.5366 1676635862675000064
+<pykafka.protocol.message.Message object at 0x7f802e80cb88>
+Pres31-Energy_DB RegMotor-Cos_Total=0 1676635862676000000
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB RegMotor-U_L2_L3=387.6775 1676635862676000000
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB YagMotor-Total_Reactive_Power=0 1676635862688000000
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB RegMotor-Active_Counter=75.43218 1676635862696999936
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB YagMotor-Reactive_Counter=4838.9883 1676635862697999872
+<pykafka.protocol.message.Message object at 0x7f802e80cb88>
+Pres31-Energy_DB YagMotor-Total_Reactive_Power=0 1676635862699000064
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB RegMotor-Active_Counter=75.43218 1676635862700000000
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB RegMotor-Reactive_Counter=154.32608 1676635862727000064
+<pykafka.protocol.message.Message object at 0x7f802e80ce58>
+Pres31-Energy_DB RegMotor-Total_Active_Power=0 1676635862736000000
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB YagMotor-U_L2_L3=387.6703 1676635862744000000
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB RegMotor-Reactive_Counter=154.32608 1676635862750000128
+<pykafka.protocol.message.Message object at 0x7f802e80cb88>
+Pres31-Energy_DB RegMotor-Total_Active_Power=0 1676635862751000064
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB YagMotor-U_L2_L3=387.6703 1676635862752000000
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB YagMotor-U_L3_L1=386.33154 1676635862752000000
+<pykafka.protocol.message.Message object at 0x7f802e80cb88>
+Pres31-Energy_DB RegMotor-I_L2=0 1676635862759000064
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB Pres-U_L3=221.62263 1676635862767000064
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB Pres-U_L3_L1=386.40405 1676635862776999936
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB RegMotor-Counter_Reset=False 1676635862784999936
+<pykafka.protocol.message.Message object at 0x7f802e80ce58>
+Pres31-Energy_DB Pres-U_L2_L3=387.61142 1676635862796999936
+<pykafka.protocol.message.Message object at 0x7f802e80ca98>
+Pres31-Energy_DB YagMotor-U_L3_L1=386.33154 1676635862800999936
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB Pres-U_L3=221.62263 1676635862800999936
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB Pres-U_L3_L1=386.40405 1676635862801999872
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB RegMotor-Counter_Reset=False 1676635862803000064
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB Pres-U_L2_L3=387.61142 1676635862803000064
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB RegMotor-I_L2=0 1676635862800999936
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB RegMotor-I_L1=0 1676635862804000000
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB RegMotor-I_L1=0 1676635862854000128
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB YagMotor-Cos_Total=0 1676635862943000064
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB KaMotor-U_L3_L1=386.34064 1676635862959000064
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB KaMotor-U_L3_L1=386.34064 1676635862960999936
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB YagMotor-Cos_Total=0 1676635862963000064
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB KaMotor-Total_Reactive_Power=0 1676635862968000000
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB KaMotor-Total_Active_Power=0 1676635862976999936
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB KaMotor-Reactive_Counter=108.608696 1676635862985999872
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB Pres-U_L1=224.5551 1676635863016999936
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB Pres-Active_Counter=3016.488 1676635863047000064
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB AnaMotor-Total_Reactive_Power=0 1676635863105999872
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB Pres-Frequency=50 1676635863113999872
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB Pres-I_L1=0 1676635863156000000
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB KaMotor-I_L1=0 1676635863164000000
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB KaMotor-Active_Counter=143.04538 1676635863223000064
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB Pres-Total_Reactive_Power=0 1676635863236999936
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB Pres-U_L1_L2=389.81476 1676635863265999872
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB KaMotor-U_L3_L1=386.34064 1676635863312000000
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB KaMotor-Total_Reactive_Power=0 1676635863312999936
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB KaMotor-Reactive_Counter=108.608696 1676635863313999872
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB KaMotor-Total_Active_Power=0 1676635863316000000
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB Pres-U_L1=224.5551 1676635863328000000
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB AnaMotor-U_L3_L1=386.2116 1676635863407000064
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB RegMotor-Cos_Total=0 1676635863567000064
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB YagMotor-Active_Counter=5210.5366 1676635863584000000
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB AnaMotor-I_L2=0 1676635863592000000
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB YagMotor-Total_Reactive_Power=0 1676635863624999936
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB RegMotor-Reactive_Counter=154.32608 1676635863640999936
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB AnaMotor-Active_Counter=73006.445 1676635863700999936
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB RegMotor-I_L2=0 1676635863724000000
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB AnaMotor-I_L3=0 1676635863779000064
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB YagMotor-Cos_Total=0 1676635863804000000
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB Pres-Active_Counter=3016.488 1676635863806000128
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB AnaMotor-Total_Reactive_Power=0 1676635863807000064
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB Pres-Frequency=50 1676635863807000064
+<pykafka.protocol.message.Message object at 0x7f802e80ca98>
+Pres31-Energy_DB Pres-I_L1=0 1676635863808999936
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB KaMotor-I_L1=0 1676635863809999872
+<pykafka.protocol.message.Message object at 0x7f802e80ca98>
+Pres31-Energy_DB KaMotor-Active_Counter=143.04538 1676635863812000000
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB Pres-Total_Reactive_Power=0 1676635863812999936
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB Pres-U_L1_L2=389.81476 1676635863814000128
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB RegMotor-I_L1=0 1676635863820999936
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB AnaMotor-Counter_Reset=False 1676635863864000000
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB AnaMotor-Cos_Total=0 1676635863892999936
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB Pres-Counter_Reset=False 1676635863904000000
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB Pres-Total_Active_Power=0 1676635863911000064
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB KaMotor-U_L1_L2=389.86673 1676635863920000000
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB Pres-Cos_Total=0 1676635863928000000
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB KaMotor-U_L2_L3=387.22818 1676635863939000064
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB AnaMotor-U_L1_L2=389.87274 1676635863945999872
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB KaMotor-I_L2=0 1676635863953999872
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB KaMotor-Cos_Total=0 1676635863963000064
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB KaMotor-Counter_Reset=False 1676635863977999872
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB Pres-U_L2=225.73172 1676635863992000000
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB YagMotor-Total_Active_Power=0 1676635864015000064
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB AnaMotor-I_L2=0 1676635864105999872
+<pykafka.protocol.message.Message object at 0x7f802e80cc00>
+Pres31-Energy_DB AnaMotor-Active_Counter=73006.445 1676635864108999936
+<pykafka.protocol.message.Message object at 0x7f802e80ca98>
+Pres31-Energy_DB AnaMotor-I_L3=0 1676635864112000000
+<pykafka.protocol.message.Message object at 0x7f802e80c7c8>
+Pres31-Energy_DB AnaMotor-Counter_Reset=False 1676635864112999936
+<pykafka.protocol.message.Message object at 0x7f802e80c480>
+Pres31-Energy_DB AnaMotor-Cos_Total=0 1676635864115000064
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB Pres-Counter_Reset=False 1676635864116000000
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB Pres-Total_Active_Power=0 1676635864116999936
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB KaMotor-U_L1_L2=389.86673 1676635864118000128
+<pykafka.protocol.message.Message object at 0x7f802e80ce58>
+Pres31-Energy_DB KaMotor-U_L2_L3=387.22818 1676635864118000128
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB KaMotor-I_L2=0 1676635864119000064
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB Pres-Cos_Total=0 1676635864119000064
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB KaMotor-U_L3_L1=386.34064 1676635864120000000
+<pykafka.protocol.message.Message object at 0x7f802e80cb88>
+Pres31-Energy_DB KaMotor-Cos_Total=0 1676635864120000000
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB KaMotor-Counter_Reset=False 1676635864120000000
+<pykafka.protocol.message.Message object at 0x7f802e80c660>
+Pres31-Energy_DB KaMotor-Reactive_Counter=108.608696 1676635864120999936
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB KaMotor-Total_Reactive_Power=0 1676635864120999936
+<pykafka.protocol.message.Message object at 0x7f802e80c570>
+Pres31-Energy_DB KaMotor-Total_Active_Power=0 1676635864120999936
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB Pres-Active_Counter=3016.488 1676635864121999872
+<pykafka.protocol.message.Message object at 0x7f802e80c6d8>
+Pres31-Energy_DB Pres-U_L1=224.5551 1676635864121999872
+<pykafka.protocol.message.Message object at 0x7f802e80ced0>
+Pres31-Energy_DB AnaMotor-Total_Reactive_Power=0 1676635864121999872
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB Pres-I_L1=0 1676635864123000064
+<pykafka.protocol.message.Message object at 0x7f802e80c6d8>
+Pres31-Energy_DB Pres-Frequency=50 1676635864123000064
+<pykafka.protocol.message.Message object at 0x7f802e80c5e8>
+Pres31-Energy_DB AnaMotor-U_L1_L2=389.87274 1676635864124000000
+<pykafka.protocol.message.Message object at 0x7f802e80c6d8>
+Pres31-Energy_DB KaMotor-Active_Counter=143.04538 1676635864123000064
+<pykafka.protocol.message.Message object at 0x7f802e80ced0>
+Pres31-Energy_DB Pres-Total_Reactive_Power=0 1676635864124000000
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB Pres-U_L2=225.73172 1676635864124999936
+<pykafka.protocol.message.Message object at 0x7f802e80c570>
+Pres31-Energy_DB Pres-U_L1_L2=389.81476 1676635864124999936
+<pykafka.protocol.message.Message object at 0x7f802e80c660>
+Pres31-Energy_DB AnaMotor-U_L3_L1=386.2116 1676635864126000128
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB YagMotor-Active_Counter=5210.5366 1676635864126000128
+<pykafka.protocol.message.Message object at 0x7f802e80cb88>
+Pres31-Energy_DB YagMotor-Total_Active_Power=0 1676635864127000064
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB RegMotor-Cos_Total=0 1676635864127000064
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB RegMotor-Reactive_Counter=154.32608 1676635864127000064
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB YagMotor-Total_Reactive_Power=0 1676635864127000064
+<pykafka.protocol.message.Message object at 0x7f802e80ce58>
+Pres31-Energy_DB RegMotor-I_L1=0 1676635864128999936
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB YagMotor-Cos_Total=0 1676635864128999936
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB KaMotor-I_L1=0 1676635864123000064
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB RegMotor-I_L2=0 1676635864128000000
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB AnaMotor-I_L1=0 1676635864401999872
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB AnaMotor-Total_Active_Power=0 1676635864420999936
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB Pres-Reactive_Counter=2382.5073 1676635864433999872
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB KaMotor-I_L3=0 1676635864448999936
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB AnaMotor-Reactive_Counter=59660.04 1676635864452000000
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB AnaMotor-I_L1=0 1676635864455000064
+<pykafka.protocol.message.Message object at 0x7f802e80ce58>
+Pres31-Energy_DB AnaMotor-Total_Active_Power=0 1676635864457999872
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB Pres-Reactive_Counter=2382.5073 1676635864457999872
+<pykafka.protocol.message.Message object at 0x7f802e80ccf0>
+Pres31-Energy_DB KaMotor-I_L3=0 1676635864459000064
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB AnaMotor-U_L2_L3=386.31934 1676635864460000000
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB Pres-I_L3=0 1676635864481999872
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB Pres-I_L2=0 1676635864499000064
+<pykafka.protocol.message.Message object at 0x7f802e80cb88>
+Pres31-Energy_DB AnaMotor-U_L2_L3=386.31934 1676635864505999872
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB AnaMotor-Reactive_Counter=59660.04 1676635864505999872
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB RegMotor-U_L3_L1=385.70953 1676635864507000064
+<pykafka.protocol.message.Message object at 0x7f802e80c660>
+Pres31-Energy_DB Pres-I_L3=0 1676635864508000000
+<pykafka.protocol.message.Message object at 0x7f802e80c570>
+Pres31-Energy_DB Pres-I_L2=0 1676635864508000000
+<pykafka.protocol.message.Message object at 0x7f802e80ced0>
+Pres31-Energy_DB RegMotor-U_L3_L1=385.70953 1676635864508999936
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB YagMotor-U_L1_L2=389.40485 1676635864515000064
+<pykafka.protocol.message.Message object at 0x7f802e80ced0>
+Pres31-Energy_DB YagMotor-Counter_Reset=False 1676635864521999872
+<pykafka.protocol.message.Message object at 0x7f802e80c570>
+Pres31-Energy_DB YagMotor-I_L3=0 1676635864532000000
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB RegMotor-U_L1_L2=388.54532 1676635864543000064
+<pykafka.protocol.message.Message object at 0x7f802e80c660>
+Pres31-Energy_DB YagMotor-I_L1=0 1676635864552999936
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB YagMotor-U_L1_L2=389.40485 1676635864559000064
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB RegMotor-U_L1_L2=388.54532 1676635864567000064
+<pykafka.protocol.message.Message object at 0x7f802e80cb88>
+Pres31-Energy_DB YagMotor-I_L1=0 1676635864568000000
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB YagMotor-I_L3=0 1676635864564000000
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB YagMotor-Counter_Reset=False 1676635864561999872
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB YagMotor-Reactive_Counter=4838.9883 1676635864593999872
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB RegMotor-Active_Counter=75.43218 1676635864607000064
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB YagMotor-Reactive_Counter=4838.9883 1676635864611000064
+<pykafka.protocol.message.Message object at 0x7f802e80c750>
+Pres31-Energy_DB RegMotor-Active_Counter=75.43218 1676635864611000064
+<pykafka.protocol.message.Message object at 0x7f802e80cb88>
+Pres31-Energy_DB YagMotor-I_L2=0 1676635864624000000
+<pykafka.protocol.message.Message object at 0x7f802e80c9a8>
+Pres31-Energy_DB RegMotor-U_L2_L3=386.37497 1676635864639000064
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB YagMotor-U_L2_L3=386.9326 1676635864648000000
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB RegMotor-Total_Active_Power=0 1676635864656999936
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB YagMotor-I_L2=0 1676635864662000128
+<pykafka.protocol.message.Message object at 0x7f802e80c660>
+Pres31-Energy_DB RegMotor-Total_Active_Power=0 1676635864663000064
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB YagMotor-U_L2_L3=386.9326 1676635864664000000
+<pykafka.protocol.message.Message object at 0x7f802e80ced0>
+Pres31-Energy_DB RegMotor-U_L2_L3=386.37497 1676635864664999936
+<pykafka.protocol.message.Message object at 0x7f802e80c570>
+Pres31-Energy_DB RegMotor-I_L3=0 1676635864667000064
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB YagMotor-U_L3_L1=385.65228 1676635864691000064
+<pykafka.protocol.message.Message object at 0x7f802e80c570>
+Pres31-Energy_DB Pres-U_L3=221.95978 1676635864700000000
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB RegMotor-Counter_Reset=False 1676635864708000000
+<pykafka.protocol.message.Message object at 0x7f802e80c570>
+Pres31-Energy_DB RegMotor-I_L3=0 1676635864711000064
+<pykafka.protocol.message.Message object at 0x7f802e80ced0>
+Pres31-Energy_DB YagMotor-U_L3_L1=385.65228 1676635864711000064
+<pykafka.protocol.message.Message object at 0x7f802e80c660>
+Pres31-Energy_DB Pres-U_L3=221.95978 1676635864712000000
+<pykafka.protocol.message.Message object at 0x7f802e80cde0>
+Pres31-Energy_DB RegMotor-Counter_Reset=False 1676635864712999936
+<pykafka.protocol.message.Message object at 0x7f802e80cb10>
+Pres31-Energy_DB Pres-U_L2_L3=387.41223 1676635864728999936
+<pykafka.protocol.message.Message object at 0x7f802e80ced0>
+Pres31-Energy_DB Pres-U_L3_L1=386.57062 1676635864739000064
+<pykafka.protocol.message.Message object at 0x7f802e80ca20>
+Pres31-Energy_DB RegMotor-Total_Reactive_Power=0 1676635864747000064
+<pykafka.protocol.message.Message object at 0x7f802e80c660>
+Pres31-Energy_DB Pres-U_L3_L1=386.57062 1676635864763000064
+<pykafka.protocol.message.Message object at 0x7f802e80cd68>
+Pres31-Energy_DB Pres-U_L2_L3=387.41223 1676635864764000000
+<pykafka.protocol.message.Message object at 0x7f802e80cf48>
+Pres31-Energy_DB RegMotor-Total_Reactive_Power=0 1676635864763000064
+<pykafka.protocol.message.Message object at 0x7f802e80c570>

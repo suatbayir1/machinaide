@@ -30,6 +30,22 @@ const optimizers = {
     'custom': 'Custom',
 }
 
+const optimizersReverse = {
+    'Accuracy': 'accuracy',
+    'Validation Accuracy': 'val_accuracy',
+    'Loss': 'loss',
+    'Validation Loss': 'val_loss',
+    'Mean Squared Error': 'mse',
+    'AUC (Area Under The Curve)': 'auc',
+    'True Positives': 'tp',
+    'True Negatives': 'tn',
+    'False Positives': 'fp',
+    'False Negatives': 'fn',
+    'Precision': 'precision',
+    'Recall': 'recall',
+    'Custom': 'custom',
+}
+
 export const customMetricTipText = `Create a custom optimizer for classification problems. Use:
  - tp (for true positive)
  - tn (for true negative)
@@ -106,7 +122,7 @@ class AutoMLSettingsOverlay extends PureComponent<Props, State>{
         let settings = await AutoMLService.getAutoMLSettings()
         this.setState({
             selectedKerasTunerType: settings["kerasTunerType"],
-            selectedKerasTunerOptimizer: settings["kerasTunerOptimizer"],
+            selectedKerasTunerOptimizer: optimizers[settings["kerasTunerOptimizer"]],
             kerasTunerNumberOfEpochs: settings["kerasTunerNumberOfEpochs"],
             kerasTunerMinDataPoints: settings["kerasTunerMinDataPoints"],
             kerasTunerCustomMetricEquation: settings["kerasTunerCustomMetricEquation"],
@@ -126,7 +142,7 @@ class AutoMLSettingsOverlay extends PureComponent<Props, State>{
         if(this.state.activeTab === "kerasTuner"){
             let settings = {settingsType: "kerasTuner"}
             settings["kerasTunerType"] = this.state.selectedKerasTunerType
-            settings["kerasTunerOptimizer"] = this.state.selectedKerasTunerOptimizer
+            settings["kerasTunerOptimizer"] = optimizersReverse[this.state.selectedKerasTunerOptimizer]
             settings["kerasTunerNumberOfEpochs"] = this.state.kerasTunerNumberOfEpochs
             settings["kerasTunerMinDataPoints"] = this.state.kerasTunerMinDataPoints
             settings["kerasTunerCustomMetricEquation"] = this.state.kerasTunerCustomMetricEquation
