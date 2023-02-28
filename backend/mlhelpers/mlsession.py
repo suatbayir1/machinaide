@@ -1,8 +1,12 @@
 import argparse
 import json
-from config import MLSESSIONDIR
+
+from numpy import False_
+from config import MLSESSIONDIR, models_path
 from pandas import read_csv
 from mlhelpers.mllstm import MLLSTM, LSTMRunner
+from mlhelpers.mlwrappers import ADClustererSession
+from mlhelpers.mlhdbscan import HDBSCANRunner
 # from mlhelpers.semisupervised import SemiSupervisedVAE
 
 
@@ -69,24 +73,44 @@ class MLRunner:
         self.start_running()
 
 
+class ClusterSetup:
+    def __init__(self, session_id):
+        self.session_id = session_id
+
+        self.settings = None
+
+    def run(self):
+        with open(models_path + str(self.session_id) + "/sessioninfo.json", 'r') as fp:
+            self.settings = json.load(fp)
+        
+        print("session done")
+        clusterer = ADClustererSession(self.settings)
+        clusterer.run()
+
+# class ClusterRunner:
+#     def __init__(self, session_id):
+#         self.session_id = session_id
+
+#     def run(self)
 
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument("-t", "--task", required=True, type=str,
-            help="train or run")
+            help="train or run or cluster")
     ap.add_argument("-s", "--session", required=True, type=str,
             help="session id")
-    ap.add_argument("-m", "--model", required=True, type=str,
+    ap.add_argument("-m", "--model", required=False, type=str,
             help="model id")
-    ap.add_argument("-a", "--algorithm", required=True, type=str,
+    ap.add_argument("-a", "--algorithm", required=False, type=str,
             help="algorithm to be used")
         
     args = vars(ap.parse_args())
     task = args["task"]
     session_id = args["session"]
-    model_id = args["model"]
-    algorithm = args["algorithm"]
+    if task != "cluster":
+        model_id = args["model"]
+        algorithm = args["algorithm"]
 
     if task == "train":
         setupobj = MLSetup(session_id, model_id ,algorithm)
@@ -94,3 +118,6 @@ if __name__ == '__main__':
     elif task == "run":
         runnerobj = MLRunner(session_id, model_id, algorithm)
         runnerobj.run()
+    elif task == "cluster":
+        clusterobj = ClusterSetup(session_id)
+        clusterobj.run()

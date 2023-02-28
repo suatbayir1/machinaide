@@ -1,6 +1,7 @@
 from pykafka import KafkaClient
-from data import get_sensor_data
+# from data import get_sensor_data
 import json
+import random
 import time
 
 client = KafkaClient(hosts = "localhost:9092")
@@ -8,7 +9,10 @@ topic = client.topics["sensors_data"]
 producer = topic.get_sync_producer()
 
 while True:
-    message = get_sensor_data()
+    message = {
+        "name": "test",
+        "current_value": random.randint(0, 100)
+    }
     message = json.dumps(message).encode("utf-8")
     producer.produce(message)
     print(message)

@@ -19,6 +19,8 @@ from tensorflow.keras import backend as K
 from tensorflow.keras.callbacks import EarlyStopping
 import math
 import subprocess
+import queue
+import threading
 
 # from mlutils import Influx2QueryHelper
 tf.compat.v1.enable_eager_execution()
@@ -30,6 +32,7 @@ from config import (
     ADHPSDIR,
     ADSENSORDIR,
     CELLURL,
+    INFLUXDB_CLIENT,
     METAURL,
     BASICURL,
     PUTBASICURL,
@@ -63,6 +66,7 @@ from mlhelpers.mlutils import QueryHelper, POFQueryHelper, MLPreprocessor, Influ
 # from mliforest import MLIFOREST
 # from mlmahalanobis import MLMAHALANOBIS
 from mlhelpers.mllstm import MLLSTM, LSTMRunner
+from mlhelpers.mlhdbscan import MLHDBSCAN
 from mlhelpers.mlauto import RULBayesianOptimization, RULHyperband, RULModelBuilder, RULRandomSearch, RULReportIntermediates, AUTOML_OPTIMIZERS, start_rul_automl_experiment, numpy_converter
 # from tensorflow.keras.models import load_model
 from multiprocessing import Process
@@ -1777,6 +1781,40 @@ class ADAutoMLSession:
         requests.put(url=PUTBASICURL + self.model_ID, json=obj)
 
 
+
+class ADClustererSession:
+    def __init__(self, settings):
+        self.db_settings = {
+            # 'host':INFLUXDB_CLIENT['URL'].split(":")[0] + ":" + INFLUXDB_CLIENT['URL'].split(":")[1],
+            # 'port':INFLUXDB_CLIENT['URL'].split(":")[2],
+            # 'host': "https://vmi1011403.contaboserver.net",
+            'host': "https://vmi474601.contaboserver.net",
+            'port': 8080,
+            # 'db': settings['fields'][0]['database'],
+            'db': "ErmetalClone2",
+            'rp': "autogen"
+        }
+        self.model_name = settings['modelName']
+        self.session_id = str(settings['sessionID'])
+        self.end_date = settings['sessionID']
+
+        self.sample_size = 30
+        self.prev_hours = 1
+
+        self.m2s = {}
+
+        for field in settings['fields']:
+            if field['measurement'] not in self.m2s.keys():
+                self.m2s[field['measurement']] = list()
+            self.m2s[field['measurement']].append(field['dataSource'])
+
+    def run(self):
+        model = MLHDBSCAN(self.db_settings, self.prev_hours, self.end_date, self.sample_size,
+                            self.model_name, self.session_id, self.m2s)
+        print("wrappers done")
+        model.run()
+
+
 class RULAutoMLSession:
     def __init__(self, settings):
         super().__init__()
@@ -2459,39 +2497,71 @@ class AlertModule:
 
 
 class KafkaHelper:
-    def __init__(self, kafka_version, kafka_servers):
-        self.topics = None
-        self.measurement_sensor_dict = None
+    def __init__(self, kafka_version, kafka_servers, window_size, data_queue, delay=0):
         self.kafka_version = kafka_version
         self.kafka_servers = kafka_servers
+        self.data = {}
+        self.message_queue = queue.Queue()
+        self.window_size = window_size
+        self.data_queue = data_queue
+        self.delay = delay
 
         self.kafka_consumer = None
+        self.topics = None
+        self.measurement_sensor_dict = None
+        self.sensors = None
         # self.consumers = []
 
 
     def set_topics(self, measurement_sensor_dict):
         self.measurement_sensor_dict = measurement_sensor_dict
         self.topics = list(measurement_sensor_dict.keys())
+        self.sensors = [item for sublist in list(self.measurement_sensor_dict.values()) for item in sublist]
 
-    
+
+    def round_unix_date(self, dt_series, ms=1000, up=False):
+        return dt_series // ms * ms + ms * up
+
+
+    def arrange_data(self):
+        while True:
+            message = self.message_queue.get()
+            sensor_values = message.value.split(" ")[1].split(',')
+            timestamp = self.round_unix_date(message.timestamp)
+            try:
+                for val in sensor_values:
+                    if val.split("=")[0] in self.sensors:
+                        self.data[timestamp][self.sensors.index(val.split("=")[0])] = float(val.split("=")[1])
+            except:
+                self.data[timestamp] = [None] * len(self.sensors)
+
+                for val in sensor_values:
+                    if val.split("=")[0] in self.sensors:
+                        self.data[timestamp][self.sensors.index(val.split("=")[0])] = float(val.split("=")[1])
+
+            if len(self.data.keys()) == self.window_size + self.delay:
+                dict1 = OrderedDict(sorted(self.data.items()))
+                self.data_queue.put(list(dict1.values())[:self.window_size])
+                del dict1[list(dict1.keys())[0]]
+                self.data = dict1
+
+        # print(self.data)
+        # if sum(x is not None for x in self.data[timestamp]) == 0:
+        #     print(self.data)
+
+
     def consume(self):
-        message_dict = {}
+        t = threading.Thread(target=self.arrange_data)
+        t.start()
         while True:
             # poll messages each certain ms
             raw_messages = self.consumer.poll(
                 timeout_ms=1000
             )
             # for each messages batch
-            for topic_partition, messages in raw_messages.items():
-                try:
-                    message_dict[topic_partition.topic].append(messages)
-                except:
-                    message_dict[topic_partition.topic] = list()
-                    message_dict[topic_partition.topic].append(messages)
-
-            print(message_dict)
-            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-            message_dict = {}
+            for _, messages in raw_messages.items():
+                self.message_queue.put(messages[0])
+        t.join()
 
     @property
     def consumer(self):

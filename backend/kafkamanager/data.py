@@ -1,4 +1,5 @@
 import sys
+import config
 sys.path.insert(1, f'{config.PROJECT_URL}/backend')
 import random
 import json

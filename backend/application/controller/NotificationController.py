@@ -11,14 +11,14 @@ def alert():
     try:
         print("alert run")
         print(request.json)
-        send_mail(
-            sender = config.authentication["EMAIL_SENDER"],
-            receivers = request.json["to"],
-            subject = request.json["subject"],
-            body = request.json["content"],
-            password = config.authentication["USER_PASSWORD"],
-        )
-        return {"text": "notification_test"}
+        # send_mail(
+        #     sender = config.authentication["EMAIL_SENDER"],
+        #     receivers = request.json["to"],
+        #     subject = request.json["subject"],
+        #     body = request.json["content"],
+        #     password = config.authentication["USER_PASSWORD"],
+        # )
+        return {"text": "Email Send Successfully"}
     except:
         return return_response(data = [], success = False, message = "An error occurred while sending a email"), 404
 

@@ -13,8 +13,8 @@ class KafkaConsumer():
             reset_offset_on_start=True
         ):
             # print(i.value.decode())
-            print(i)
-
+            print(i.value, i.timestamp)
+    
 def parse_args():
     parser = argparse.ArgumentParser(description='Parameters that can be sent')
     parser.add_argument('--host', type=str, required=False, default='localhost', help='Hostname of Kafka')

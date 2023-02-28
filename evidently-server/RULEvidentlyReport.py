@@ -43,6 +43,7 @@ class RULEvidentlyReport:
         all_data = []
         for field in self.fields:
             data = self.get_query_results(field["database"], field["measurement"], field["dataSource"], self.daterange)
+            print(field, len(data))
             df = pd.DataFrame(data)
             data_points = df.to_dict("records")
             if(len(data_points)):
@@ -54,6 +55,8 @@ class RULEvidentlyReport:
                 if(len(all_data[i])):
                     one_merged = pd.merge(one_merged, pd.DataFrame(all_data[i]), on=["time"])
             return one_merged
+        
+        return pd.DataFrame()
             
 
         """ query = create_query(self.database, self.measurements, self.daterange)

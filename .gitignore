@@ -15,6 +15,7 @@ backend/mlhelpers/VAESettings/sensors/
 experiments/
 models/
 experiment_settings/
+backend/mlhelpers/Models/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

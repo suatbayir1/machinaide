@@ -10,7 +10,7 @@ tp = TopicPartition(topic, 0)
 
 # To consume latest messages and auto-commit offsets
 consumer = KafkaConsumer('sensors_data',
-                         auto_offset_reset='earliest', 
+                         auto_offset_reset='latest', 
                          enable_auto_commit=False,
                          bootstrap_servers=['localhost:9092'])
 

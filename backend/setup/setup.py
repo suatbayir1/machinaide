@@ -4,7 +4,7 @@ import math
 
 class Setup:
     def __init__(self):
-        self.xls = pd.ExcelFile('ermetal_setup.xls')
+        self.xls = pd.ExcelFile('ermetal_setup_prototype.xls')
         client = pymongo.MongoClient('mongodb://machinaide:erste2020@localhost:27017/machinaide?authSource=admin')
         self.db = client.machinaide
         self.dt = []
