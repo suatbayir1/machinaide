@@ -493,10 +493,10 @@ class Influx2QueryHelper:
     @property
     def influxdb(self):
         if self._influxdb is None:
-            org = "machinaide"
-            token = "-Y8yuCS19k6ZD0FLiVvpY-zcEK4VhbBe6HC7WPKR7Z5X2bkm-Ag2iMJUSDSBOugpG6klF2XEddhCMkHRuJPbsQ=="
+            org = "Machinaide"
+            token = "aBnAbLrfPcX4iywnFDb9dVDnss8REjC9JW5sAViCCij7kQC5NBBuNTCt09AYec1jJpyg232L6eLQe--w9P_pzg=="
             # print(INFLUXDB_CLIENT)
-            self._influxdb = idbc(url=INFLUX["host"], token=INFLUX["dbtoken"], org=INFLUX["orgID"], verify_ssl=False)
+            self._influxdb = idbc(url=INFLUXDB_CLIENT["URL"], token=INFLUXDB_CLIENT["TOKEN"], org=INFLUXDB_CLIENT["ORG"], verify_ssl=False)
 
 
         return self._influxdb.query_api()

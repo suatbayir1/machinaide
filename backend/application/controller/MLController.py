@@ -637,6 +637,20 @@ def updateExperiment():
     mongo_model.update_experiment({"experimentName": experiment_name}, data)
     return {"msg": "Experiment " + experiment_name + " is updated with metric and end time."}
 
+@mlserver.route('/createClusterer', methods=['POST'])
+def createClusterer():
+    settings = request.json
+    t_dir = config.models_path + str(settings['sessionID'])
+    os.makedirs(t_dir)
+    with open(t_dir + "/sessioninfo.json", 'w') as fp:
+        json.dump(settings, fp)
+    cmd = " python3 ./mlhelpers/mlsession.py -t cluster -s " + str(settings['sessionID'])
+    process = subprocess.Popen(cmd.split(), close_fds=True)
+    # print(settings)
+    msg = "cluster trial"
+    return {"msg": msg}, 201
+
+
 @mlserver.route('/updateMLModel/<modelID>', methods=['PUT'])
 def updateMLModel(modelID):
     query = {"modelID": modelID}

@@ -54,6 +54,8 @@ class RULRegEvidentlyReport:
                 if(len(all_data[i])):
                     one_merged = pd.merge(one_merged, pd.DataFrame(all_data[i]), on=["time"])
             return one_merged
+
+        return pd.DataFrame()
             
 
         """ query = create_query(self.database, self.measurements, self.daterange)

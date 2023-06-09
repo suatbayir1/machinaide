@@ -25,9 +25,9 @@ def alert():
 
     running = influxManager.isMachineRunning()
 
-    # if running == False:
-    #     print("makine calismiyor")
-    #     return {"message": "Machine is not working"}
+    if running == False:
+        print("makine calismiyor")
+        return {"message": "Machine is not working"}
 
     thresholds = influxManager.getCheckById(request.json['_check_id'])
     try:

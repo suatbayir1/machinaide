@@ -21,6 +21,8 @@ from mlhelpers.mlhdbscan import MLHDBSCAN
 from tensorflow.keras.callbacks import EarlyStopping
 import math
 import subprocess
+import queue
+import threading
 
 # from mlutils import Influx2QueryHelper
 tf.compat.v1.enable_eager_execution()
@@ -32,6 +34,7 @@ from config import (
     ADHPSDIR,
     ADSENSORDIR,
     CELLURL,
+    INFLUXDB_CLIENT,
     METAURL,
     BASICURL,
     PUTBASICURL,
@@ -65,6 +68,7 @@ from mlhelpers.mlutils import QueryHelper, POFQueryHelper, MLPreprocessor, Influ
 # from mliforest import MLIFOREST
 # from mlmahalanobis import MLMAHALANOBIS
 from mlhelpers.mllstm import MLLSTM, LSTMRunner
+from mlhelpers.mlhdbscan import MLHDBSCAN
 from mlhelpers.mlauto import RULBayesianOptimization, RULHyperband, RULModelBuilder, RULRandomSearch, RULReportIntermediates, AUTOML_OPTIMIZERS, start_rul_automl_experiment, numpy_converter
 # from tensorflow.keras.models import load_model
 from multiprocessing import Process
@@ -1783,22 +1787,18 @@ class ADAutoMLSession:
 class ADClustererSession:
     def __init__(self, settings):
         self.db_settings = {
-            'host': host_ip,
-            'port': influx_port,
+            # 'host':INFLUXDB_CLIENT['URL'].split(":")[0] + ":" + INFLUXDB_CLIENT['URL'].split(":")[1],
+            # 'port':INFLUXDB_CLIENT['URL'].split(":")[2],
             # 'host': "https://vmi1011403.contaboserver.net",
-            # 'host': "https://vmi474601.contaboserver.net",
-            # 'port': 8080,
-            'db': settings['fields'][0]['database'],
-            # 'db': "ErmetalClone2",
+            'host': "https://vmi474601.contaboserver.net",
+            'port': 8080,
+            # 'db': settings['fields'][0]['database'],
+            'db': "ErmetalClone2",
             'rp': "autogen"
         }
         self.model_name = settings['modelName']
         self.session_id = str(settings['sessionID'])
         self.end_date = settings['sessionID']
-        self.part_name = settings['assetName']
-        print("PART NAME", self.part_name)
-        self.username = settings['creator']
-        self.model_id = uuid.uuid4().hex
 
         self.sample_size = 30
         self.prev_hours = 1
@@ -1812,28 +1812,11 @@ class ADClustererSession:
 
     def run(self):
         model = MLHDBSCAN(self.db_settings, self.prev_hours, self.end_date, self.sample_size,
-                            self.model_name, self.session_id, self.m2s, self.model_id)
-        pkg = {
-            "algorithm": "HDBSCAN",
-            "task": "ad",
-            "modelName": self.model_name,
-            "creator": self.username,
-            "assetName": self.part_name,
-            "modelID": self.model_id,
-            "sessionID": self.session_id,
-            "Settings": self.db_settings,
-            "trainingDone": False,
-            "Optional": {
-                "asset": self.part_name,
-            }
-        }
-        print("post request")
-        requests.post(url=BASICURL, json=pkg)
-
+                            self.model_name, self.session_id, self.m2s)
         print("wrappers done")
         model.run()
 
-        
+
 class RULAutoMLSession:
     def __init__(self, settings):
         super().__init__()

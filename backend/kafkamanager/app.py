@@ -1,6 +1,7 @@
 from pykafka import KafkaClient
 # from data import get_sensor_data
 import json
+import random
 import time
 
 client = KafkaClient(hosts = "localhost:9092")

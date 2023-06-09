@@ -14,10 +14,16 @@ authentication = dict(
     EMAIL_SENDER = "email.machinaide@gmail.com"
 )
 
+# INFLUXDB_CLIENT = dict(
+#     URL = "http://localhost:8080",
+#     TOKEN = "-Y8yuCS19k6ZD0FLiVvpY-zcEK4VhbBe6HC7WPKR7Z5X2bkm-Ag2iMJUSDSBOugpG6klF2XEddhCMkHRuJPbsQ==",
+#     ORG = "machinaide"
+# )
+
 INFLUXDB_CLIENT = dict(
-    URL = "http://localhost:8080",
-    TOKEN = "-Y8yuCS19k6ZD0FLiVvpY-zcEK4VhbBe6HC7WPKR7Z5X2bkm-Ag2iMJUSDSBOugpG6klF2XEddhCMkHRuJPbsQ==",
-    ORG = "machinaide"
+    URL = "https://vmi1011403.contaboserver.net:8080",
+    TOKEN = "aBnAbLrfPcX4iywnFDb9dVDnss8REjC9JW5sAViCCij7kQC5NBBuNTCt09AYec1jJpyg232L6eLQe--w9P_pzg==",
+    ORG = "Machinaide"
 )
 
 INFLUX = dict(
