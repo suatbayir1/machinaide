@@ -32,7 +32,19 @@ LDAP = dict(
     # URL = "ldap://161.97.67.73:10389",
     # DC = "dc=example,dc=com",
     ERMETAL_URL = "ldap://10.16.0.10:389",
-    ERMETAL_DC = "OU=BT,OU=BIM,OU=Ermetal,DC=ermetal,DC=local"
+    # ERMETAL_DC = "OU=BT,OU=BIM,OU=Ermetal,DC=ermetal,DC=local"
+    ERMETAL_DC = "OU=Ermetal,DC=ermetal,DC=local"
+)
+
+SMS_SENDER = dict(
+    account_sid = "ACf2d7f8ab38460b711663901517f0b040",
+    auth_token = "12d7377d63b7a20319859f9e7c5c2371",
+    from_ = "+12766001683",
+)
+
+EMAIL_SENDER = dict(
+    from_ = "email.machinaide@gmail.com",
+    password = "ontjvprxnujdctiz"
 )
 
 url = dict(

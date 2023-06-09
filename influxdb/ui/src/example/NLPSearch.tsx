@@ -6,7 +6,8 @@ import { withRouter, RouteComponentProps } from 'react-router-dom'
 // Components
 import {
     Button, ButtonType, FlexBox, ComponentColor, ComponentSize, Grid, QuestionMarkTooltip,
-    Overlay, Columns, Icon, IconFont, TextArea, SelectDropdown, InfluxColors,
+    Overlay, Columns, Icon, IconFont, TextArea, SelectDropdown, InfluxColors, Page,
+    Tabs, SquareGrid, SparkleSpinner, WaitingText
 } from '@influxdata/clockface'
 import Microphone from 'src/dt/components/Microphone';
 import GaugeChart from 'src/shared/components/GaugeChart'
@@ -72,6 +73,8 @@ interface State {
     speechRecognitionAlternatives: object[]
     similarQuestions: object[]
     visibleSpeechRecognitionAlternativesOverlay: boolean
+    influxGauges: object[]
+    queryDone: boolean
 }
 
 const colors = {
@@ -118,6 +121,12 @@ const tempInfo = ` Select the relevant template type.\n Types:
  - "Maintenance Count": Returns the count of specified maintenance records
  - "Failure": Returns source names that have specified failure records
  - "Failure Count": Returns the count of specified failure records`
+
+const sensorsMapping = {
+    "heat": ["Yaglama_sic_act", "Robot_hava_sic_act", "Kavr_hava_sic_act", "Frn_grup_sic_act", "Deng_hava_sic_act", "Ana_hava_sic_act", // Pres31-DB1
+                "AM_Govde_sic", "Volan_Yatak_sic"], // Pres31-DB2
+    "vibration": ["AM_Arka_Vib", "AM_On_Vib", "Hid_Pomp_Vib", "Volan_Vib"] // Pres31-DB2
+} 
 
 class NLPSearch extends PureComponent<Props, State>{
     // private triggerRef: RefObject<ButtonRef> = createRef()
@@ -211,11 +220,13 @@ class NLPSearch extends PureComponent<Props, State>{
         speechRecognitionAlternatives: [],
         similarQuestions: [],
         visibleSpeechRecognitionAlternativesOverlay: false,
+        influxGauges: [],
+        queryDone: false
     }
 
     async componentDidMount() {
         await this.generateChartValues();
-        let intervalId = window.setInterval(this.generateChartValues, 5000);
+        let intervalId = window.setInterval(this.generateChartValues, 15000);
         this.setState({ intervalId });
     }
 
@@ -383,7 +394,7 @@ class NLPSearch extends PureComponent<Props, State>{
                     graphOverlay: true,
                     value: [], textcatLabels: res['textcatLabels'], mongoTemplate: res['mongoTextcat'],
                     fluxQueries: [res["graphOverlay"] ? (res['textcatLabels'] === 'mongodb' ? { ...this.state.fluxQueries[0], type: 'single-stat' } : { ...this.state.fluxQueries[0], query: q2 }) : { ...this.state.fluxQueries[0] }]
-                }, () => { this.speak(res["resultText"]) })
+                }, () => { console.log(this.stae); this.speak(res["resultText"]) })
             }
             else {
                 this.setState({
@@ -455,18 +466,71 @@ class NLPSearch extends PureComponent<Props, State>{
     }
 
     fluxQueryResult = async (query) => {
-        //console.log("? ",query)
+        console.log("? query: ",query, this.state.question)
         const csvResult = await FactoryDashboardService.fluxQuery(this.props.match.params.orgID, query["query"]);
         const jsonResult = await csvToJSON(csvResult);
-
+        // console.log("? 2 ",csvResult, jsonResult)
         let queries = [...this.state.fluxQueries];
+        /* let influxGauges = []
+        let influxGaugesDict = {}
+        for(let jres of jsonResult){
+            console.log("one ", jres["_field\r"], jres)
+            if("_field\r"!== undefined){
+                if(!(jres["_field\r"] in influxGaugesDict)){
+                    influxGaugesDict[jres["_field\r"]] = jres
+                    influxGauges.push(jres)
+                }
+            }
+        }
+        console.log("dict: ", influxGaugesDict) */
+        if(this.state.question.includes("heat")){
+            let selectedFields = []
+            for(let jres of jsonResult.slice(0, -2)){
+                // console.log("one ", jres["_field\r"], sensorsMapping["heat"], jres["_field\r"] in sensorsMapping["heat"])
+                if(jres["_field\r"].includes("_sic")){
+                    selectedFields.push(jres)
+                }
+            }
+            console.log("heat: ", selectedFields)
+            this.setState({influxGauges: selectedFields, queryDone: true})
+        }
+        else if(this.state.question.includes("vibration")){
+            let selectedFields = []
+            for(let jres of jsonResult.slice(0, -2)){
+                // console.log("one ", jres["_field\r"], sensorsMapping["vibration"], jres["_field\r"] in sensorsMapping["vibration"])
+                if(jres["_field\r"].includes("_Vib")){
+                    selectedFields.push(jres)
+                }
+            }
+            console.log("vib: ", selectedFields)
+            this.setState({influxGauges: selectedFields, queryDone: true})
+        }
+        else if(this.state.question.includes("pressure")){
+            let selectedFields = []
+            for(let jres of jsonResult.slice(0, -2)){
+                // console.log("one ", jres["_field\r"], sensorsMapping["vibration"], jres["_field\r"] in sensorsMapping["vibration"])
+                if(jres["_field\r"].includes("_bas")){
+                    selectedFields.push(jres)
+                }
+            }
+            console.log("bas: ", selectedFields)
+            this.setState({influxGauges: selectedFields, queryDone: true})
+        }
+        else{
+            console.log("else final gauges: ", jsonResult.slice(0, -2))
+            this.setState({influxGauges: jsonResult.slice(0, -2), queryDone: true})
+        }
+        console.log("fields: ", jsonResult)
+        console.log("final gauges: ", jsonResult.slice(0, -2))
+        console.log("? 3: ", queries)
         queries = queries.map(q => {
             if (q["key"] === query["key"]) {
                 q["loading"] = RemoteDataState.Done
             }
             return q;
         })
-
+        console.log("? 4: ", queries)
+        console.log("? 5: ", [query["key"]], jsonResult[0] !== undefined ? Number(Number(jsonResult[0]["_value"]).toFixed(2)) : 0)
         this.setState({
             fluxResults: {
                 ...this.state.fluxResults,
@@ -482,7 +546,7 @@ class NLPSearch extends PureComponent<Props, State>{
                 <Overlay.Container maxWidth={900} style={{ minHeight: "350px" }}>
                     <Overlay.Header
                         title="Annotate Question"
-                        onDismiss={() => this.setState({ overlayVisible: !this.state.overlayVisible })}
+                        onDismiss={() => this.setState({ overlayVisible: !this.state.overlayVisible})}
                     />
                     <Overlay.Body>
                         <Grid>
@@ -595,10 +659,10 @@ class NLPSearch extends PureComponent<Props, State>{
     graphOverlayComponent = () => {
         return (
             <Overlay visible={this.state.graphOverlay}>
-                <Overlay.Container maxWidth={750} style={{ minHeight: "300px" }}>
+                <Overlay.Container maxWidth={this.state.textcatLabels[0] === 'influxdb' ? 900 : 750} style={{ minHeight: this.state.textcatLabels[0] === 'influxdb' ? '700px' : "300px" }}>
                     <Overlay.Header
                         title="NLPAIDE"
-                        onDismiss={() => this.setState({ graphOverlay: !this.state.graphOverlay })}
+                        onDismiss={() => this.setState({ graphOverlay: !this.state.graphOverlay, queryDone: false, influxGauges: [] })}
                     />
                     <Overlay.Body>
                         <Grid>
@@ -640,19 +704,68 @@ class NLPSearch extends PureComponent<Props, State>{
                                 </div>
                             </Grid.Row>
                             <Grid.Row>
-                                <Grid.Column widthXS={Columns.Three} />
-                                <Grid.Column widthXS={Columns.Six}>
-                                    <div style={{ width: 'auto', height: '250px' }}>
+                                {/* <Grid.Column widthXS={Columns.Three} /> */}
+                                <Grid.Column widthXS={Columns.Twelve}>
+                                    <div style={{ width: 'auto', height:this.state.textcatLabels[0] === 'influxdb' ? '500px' : '250px' }}>
                                         {
                                             this.state.textcatLabels.length > 0 && this.state.fluxQueries.map((query, idx) => {
                                                 if (this.state.textcatLabels[0] === 'influxdb') {
-                                                    return (
-                                                        <GaugeChart
-                                                            key={idx}
-                                                            value={this.state.textcatLabels[0] === 'influxdb' ? (this.state.fluxResults[query["key"]] !== undefined ? this.state.fluxResults[query["key"]] : 0) : parseInt(this.state.query)}
-                                                            properties={this.state.properties}
-                                                            theme={'dark'}
-                                                        />)
+                                                    return(
+                                                        <Page
+                                                            className="load-data-page"
+                                                            titleTag=""
+                                                            style={{height: "500px", marginTop: "20px", border: 'solid 2px #999dab', borderRadius: '4px'}}
+                                                        >
+                                                            <Page.Header fullWidth={false}>
+                                                                <h4 style={{color: InfluxColors.Mist}}>{`Count: ${this.state.influxGauges.length}`}</h4>
+                                                            </Page.Header>
+                                                            <Page.Contents
+                                                                //className="models-index__page-contents"
+                                                                fullWidth={false}
+                                                                scrollable={true}
+                                                                style={{textAlign: "-webkit-center"}}
+                                                            >
+                                                                {(this.state.influxGauges.length === 0 && !this.state.queryDone) && (
+                                                                            <>
+                                                                                <SparkleSpinner style={{alignSelf: "center"}} sizePixels={75} loading={RemoteDataState.Loading} />
+                                                                                <WaitingText style={{textAlign: "center"}} text="Query is running" />
+                                                                            </>
+                                                                        )}
+                                                                {(this.state.influxGauges.length === 0 && this.state.queryDone) && (
+                                                                            <h4>No sensor returned</h4>
+                                                                        )}
+                                                                <Tabs.TabContents>
+                                                                <div
+                                                                    className="write-data--section"
+                                                                    data-testid={`write-model-section`}
+                                                                >
+                                                                    <SquareGrid cardSize="200px" gutter={ComponentSize.ExtraSmall} style={{gridGap: "20px"}}>
+                                                                    
+                                                                            {this.state.influxGauges.map((gauge, i) => (
+                                                                                <>
+                                                                                    <Grid.Row style={{textAlign: "center", border: `1px solid ${InfluxColors.Mint}`, borderRadius: "25px"}}>
+                                                                                    <label style={{ color: InfluxColors.Pool}}>
+                                                                                        <b>{gauge["_field\r"]}</b>
+                                                                                    </label>
+                                                                                    
+                                                                                        <GaugeChart
+                                                                                            key={idx}
+                                                                                            value={Number(gauge["_value"]).toFixed(2)}
+                                                                                            //value={this.state.textcatLabels[0] === 'influxdb' ? (this.state.fluxResults[query["key"]] !== undefined ? this.state.fluxResults[query["key"]] : 0) : parseInt(this.state.query)}
+                                                                                            properties={this.state.properties}
+                                                                                            theme={'dark'}
+                                                                                        />
+                                                                                        
+                                                                                    </Grid.Row>
+                                                                                </>
+                                                                            ))}
+                                                                    </SquareGrid>
+                                                                </div>
+                                                                </Tabs.TabContents>
+                                                            </Page.Contents> 
+                                                        </Page>
+                                                    )
+                                                    
                                                 } else {
                                                     switch (this.state.mongoTextcat) {
                                                         case 'maintenancecount':
@@ -689,7 +802,7 @@ class NLPSearch extends PureComponent<Props, State>{
                                             })}
                                     </div>
                                 </Grid.Column>
-                                <Grid.Column widthXS={Columns.Three} />
+                                {/* <Grid.Column widthXS={Columns.Three} /> */}
                             </Grid.Row>
                         </Grid>
                     </Overlay.Body>

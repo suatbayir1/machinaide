@@ -43,6 +43,7 @@ class AllFactories extends PureComponent<Props, State> {
 
     getAllFactories = async () => {
         const factories = await FactoryService.getFactories();
+        console.log(factories, "factories")
 
         this.setState({
             factory: factories?.[0],

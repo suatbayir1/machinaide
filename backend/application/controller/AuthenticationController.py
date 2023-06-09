@@ -142,6 +142,7 @@ def loginWithLDAPErmetal():
         con.simple_bind_s(username, password)
 
         res = con.search_s(config.LDAP["ERMETAL_DC"], ldap.SCOPE_SUBTREE, f"(userPrincipalName={username})")
+        # print("res", res)
         for dn, entry in res:
             userInfo = {
                 "givenName": entry["givenName"][0].decode('utf-8'),
@@ -149,6 +150,7 @@ def loginWithLDAPErmetal():
                 "sn": entry["sn"][0].decode('utf-8'),
                 "uid": username
             }
+            print("userInfo", userInfo)
 
         # Get user role from mongodb
         user = user_model.get_user_by_username(username)

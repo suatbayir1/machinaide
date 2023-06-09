@@ -22,10 +22,11 @@ class InfluxManager():
         # get the db/bucket
         machine_entities = [ent for ent in doc.ents if ent.label_ == "MACH"]
 
-        if(len(machine_entities) > 0):
-            query = query + "from(bucket: {})".format("\"" + machine_entities[0].text + "\"")
-        else:
-            query = query + "from(bucket: \\{})".format("\"" + "nlp_sample" + "\\" + "\"")
+        # if(len(machine_entities) > 0):
+        #     query = query + "from(bucket: {})".format("\"" + machine_entities[0].text + "\"")
+        # else:
+        #     query = query + "from(bucket: \\{})".format("\"" + "nlp_sample" + "\\" + "\"")
+        query = query + "from(bucket: \\{})".format("\"" + "Ermetal" + "\\" + "\"")
         
         # get range
         range_entities = [ent for ent in doc.ents if ent.label_ == "RANGE"]

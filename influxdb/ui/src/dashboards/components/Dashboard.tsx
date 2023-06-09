@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 
 // Components
 import Cells from 'src/shared/components/cells/Cells'
-import CustomAddedCells from 'src/dashboards/components/CustomAddedCells'
+// import CustomAddedCells from 'src/dashboards/components/CustomAddedCells'
 import DashboardEmpty from 'src/dashboards/components/dashboard_empty/DashboardEmpty'
 import {
   Page,
@@ -63,10 +63,10 @@ class DashboardComponent extends PureComponent<Props, State> {
         <Page.Contents fullWidth={true} scrollable={true} className="dashboard">
           {!!cells.length ? (
             <>
-              {
+              {/* {
                 isExists &&
                 <CustomAddedCells manualRefresh={manualRefresh} />
-              }
+              } */}
               <Cells manualRefresh={manualRefresh} />
             </>
           ) : (

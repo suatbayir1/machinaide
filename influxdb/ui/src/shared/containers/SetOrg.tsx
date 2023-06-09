@@ -122,6 +122,7 @@ import {
 
 // Selectors
 import { getAll } from 'src/resources/selectors'
+import EmailsAndPhoneNumbers from 'src/users/containers/EmailsAndPhoneNumbers'
 
 interface OwnProps {
   children: React.ReactElement<any>
@@ -217,8 +218,8 @@ const SetOrg: FC<Props> = ({
         <Route exact path={`${orgPath}/rulreg-automl/:FID/:PLID/:MID/:pipelineID/:tab`} component={RULRegAutoMLPage} />
 
         {/* User Manual */}
-        <PermittedRoute exact path={`${orgPath}/user-manual`} component={UserManualContainer} allowedRoles={["member", "admin", "editor"]} />
-        <PermittedRoute exact path={`${orgPath}/user-manual/:page`} component={UserManualContainer} allowedRoles={["member", "admin", "editor"]} />
+        {/* <PermittedRoute exact path={`${orgPath}/user-manual`} component={UserManualContainer} allowedRoles={["member", "admin", "editor"]} /> */}
+        {/* <PermittedRoute exact path={`${orgPath}/user-manual/:page`} component={UserManualContainer} allowedRoles={["member", "admin", "editor"]} /> */}
 
         {/* ERRORS PAGE */}
         <Route exact path={`${orgPath}/errors/401`} component={Error401Page} />
@@ -348,6 +349,10 @@ const SetOrg: FC<Props> = ({
         {/* Users */}
         {!CLOUD && (
           <PermittedRoute exact path={`${orgPath}/users`} component={UsersIndex} allowedRoles={["admin"]} />
+        )}
+
+                {!CLOUD && (
+          <PermittedRoute exact path={`${orgPath}/email-and-phone-numbers`} component={EmailsAndPhoneNumbers} allowedRoles={["admin"]} />
         )}
 
         {/* REPORTS */}

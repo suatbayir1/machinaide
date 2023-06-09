@@ -41,10 +41,33 @@ def get_root_cause_analysis(failureIDD):
 def post_root_cause_analysis():
     analysis = request.json
 
-    model.db.insert_one("root_cause_analysis_info", analysis)
+    result = model.db.find_one("root_cause_analysis_info", {"failureIDD": analysis["failureIDD"]})
+    if result is None:
+        model.db.insert_one("root_cause_analysis_info", analysis)
 
 
     return return_response(success=True), 201
+
+
+@health_assessment.route('/updateRootCauseAnalysis/<failureIDD>', methods=["PUT"])
+def update_root_cause_analysis(failureIDD):
+    payload = request.json
+
+    current_doc = model.db.find_one("root_cause_analysis_info", {"failureIDD": failureIDD})
+
+    if "result" not in current_doc.keys():
+        current_doc["result"] = dict()
+    current_doc["result"][payload["field"]] = payload["result"]
+
+    print(current_doc)
+    new_values = {"$set": {"result": current_doc["result"]}}
+    where = {"failureIDD": failureIDD}
+
+    model.db.update_one("root_cause_analysis_info", new_values, where)
+
+    return return_response(success=True), 200
+
+
 
 
 @health_assessment.route("/addAnomalyToMachine/<machine_id>/<model_id>", methods = ["PUT"])

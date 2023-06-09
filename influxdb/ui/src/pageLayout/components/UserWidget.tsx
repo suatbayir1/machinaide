@@ -100,6 +100,18 @@ const UserWidget: FC<Props> = ({
             )}
           />
         }
+                {
+          ["admin"].includes(localStorage.getItem("userRole")) &&
+          <TreeNav.UserItem
+            id="email-and-phone-numbers"
+            label="Email & Phone Numbers"
+            testID="user-nav-item-users"
+            active={getNavItemActivation(['email-and-phone-numbers'], location.pathname)}
+            linkElement={className => (
+              <Link className={className} to={`${orgPrefix}/email-and-phone-numbers`} id="user-menu-users-link" />
+            )}
+          />
+        }
         {/* <TreeNav.UserItem
           id="members"
           label="Members"
@@ -120,12 +132,12 @@ const UserWidget: FC<Props> = ({
             )}
           />
         }
-        <TreeNav.UserItem
+        {/* <TreeNav.UserItem
           id="switch-orgs"
           label="Switch Production Line"
           testID="user-nav-item-switch-orgs"
           onClick={handleSwitchOrganizations}
-        />
+        /> */}
         {
           ["admin"].includes(localStorage.getItem("userRole")) &&
           <TreeNav.UserItem

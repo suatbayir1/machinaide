@@ -30,13 +30,23 @@ fields = ['IDD', 'isemri', 'kd', 'part', 'tanim', 'ob', 'duedate', 'en', 'boy',
        'kalinlik', 'urungr', 'kalite', 'kayit_tarihi']
 
 def write_is_emri_to_mongo(df):
+    written = 0
     for i in range(df.shape[0]):
         record = {}
         for field in fields:
             record[field] = df.iloc[i][field]
         record["IDD"] = str(record["IDD"])
-        print(record)
-        mongo_isemri.insert_one(record)
+        already_exist_job = mongo_isemri.count_documents({"isemri": str(record["isemri"])})
+        if(already_exist_job):
+            print("pass ", record["isemri"])
+            print("-", record)
+            pass
+        else:
+            written += 1
+            print("new record")
+            print("+", record)
+            mongo_isemri.insert_one(record)
+    print("data written count:", written)
 
 def connect_to_sql():
     query = "select * from qad_wodet ORDER BY duedate"

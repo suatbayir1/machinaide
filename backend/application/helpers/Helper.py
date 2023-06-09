@@ -14,6 +14,8 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from twilio.rest import Client
+from email.message import EmailMessage
 
 logger = MongoLogger()
 
@@ -82,33 +84,172 @@ def token_required(f=None, roles=None):
         return f(*args, **kwargs)
     return decorated
 
-def send_mail(sender, receivers, subject, body, password):
+def send_sms(body, to):
     try: 
-        print(1)
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        print("as")
-        return {"text": "Email send successfully"}
-        server.starttls()
-        
-        # Email Headers
-        message = MIMEMultipart()
-        message["From"] = sender
-        message["To"] = ", ".join(receivers)
-        message["Subject"] = subject
-        print(2)
-        
-        # # Message Body
-        message.attach(MIMEText(body, "plain"))
+        print("sms not working right now")
 
-        text = message.as_string()
-        print(3)
+        # client = Client(config.SMS_SENDER["account_sid"], config.SMS_SENDER["auth_token"])
 
-        # Log in to server using secure context and send email
+        # message = client.messages.create(
+        #     body=body,
+        #     from_ = config.SMS_SENDER["from_"],
+        #     to=to
+        # )
+
+        # print(message.sid)
+
+    except Exception as e:
+        print(e)
+        return return_response(data = [], success = False, message = "An error occurred while sending a smss"), 404
+
+def getLevelUpperCase(level):
+    temp = ""
+    if level == "crit":
+        temp = "CRIT"
+    elif level == "warn":
+        temp = "WARN"
+    elif level == "info":
+        temp = "INFO"
+    elif level == "ok":
+        temp = "OK"
+    else:
+        temp = "default"
+    return temp
+
+def getThresholdHTML(thresholds, level):
+    temp = ""
+    for threshold in thresholds:
+        print(threshold)
+        if threshold["level"] == level:
+            if threshold["type"] == "greater":
+                temp = f'''
+                    <tr>
+                        <td>Eşik Türü</td>
+                        <td>Greater</td>
+                    </tr>
+                    <tr>
+                        <td>Max Değer</td>
+                        <td>{threshold["value"]}</td>
+                    </tr>
+                '''
+            elif threshold["type"] == "lesser":
+                temp = f'''
+                    <tr>
+                        <td>Eşik Türü</td>
+                        <td>Lesser</td>
+                    </tr>
+                    <tr>
+                        <td>Min Değer</td>
+                        <td>{threshold["value"]}</td>
+                    </tr>
+                '''
+            elif threshold["type"] == "range" and threshold["within"] == True:
+                print("threshold")
+                print(threshold)
+                if "min" not in threshold:
+                    min_value = 0
+                else:
+                    min_value = threshold["min"]
+
+                if "max" not in threshold:
+                    max_value = 0
+                else:
+                    max_value = threshold["max"]
+
+                temp = f'''
+                    <tr>
+                        <td>Eşik Türü</td>
+                        <td>Inside Range</td>
+                    </tr>
+                    <tr>
+                        <td>Min Değer</td>
+                        <td>{min_value}</td>
+                    </tr>
+                    <tr>
+                        <td>Max Değer</td>
+                        <td>{max_value}</td>
+                    </tr>
+                '''
+            elif threshold["type"] == "range" and threshold["within"] == False:
+                if "min" not in threshold:
+                    min_value = 0
+                else:
+                    min_value = threshold["min"]
+
+                if "max" not in threshold:
+                    max_value = 0
+                else:
+                    max_value = threshold["max"]
+
+                temp = f'''
+                    <tr>
+                        <td>Eşik Türü</td>
+                        <td>Outside Range</td>
+                    </tr>
+                    <tr>
+                        <td>Min Değer</td>
+                        <td>{min_value}</td>
+                    </tr>
+                    <tr>
+                        <td>Max Değer</td>
+                        <td>{max_value}</td>
+                    </tr>
+                '''
+            else:
+                temp = ""
+    return temp
+
+def send_mail(to, subject, title, value, thresholds, level):
+    try:
+        level = getLevelUpperCase(level)
+        thresholdHTML = getThresholdHTML(thresholds, level)
+        current_date = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
+        html = f'''
+        <html>
+        <head>
+        <style></style>
+        </head>
+        <body>
+            <table>
+                <tr>
+                    <td colspan="2">{title}</td>
+                </tr>
+                <tr>
+                    <td>Gerçekleşen Değer</td>
+                    <td>{value}</td>
+                </tr>
+                <threshold></threshold>
+                <tr>
+                    <td>{current_date.split(" ")[0]}</td>
+                    <td>{current_date.split(" ")[1]}</td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        '''
+        css = """<style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        </style>"""
+        html_with_style = html.replace('<style></style>', css)
+        html_with_style = html_with_style.replace('<threshold></threshold>', thresholdHTML)
+        em = EmailMessage()
+
+        em['From'] = config.EMAIL_SENDER["from_"]
+        em['To'] = to
+        em['Subject'] = subject
+        # em.set_content(content)
+        em.add_alternative(html_with_style, subtype='html')
+
         context = ssl.create_default_context()
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-            server.login(sender, password)
-            server.sendmail(sender, receivers, text)
-            print(4)
+
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+            smtp.login(config.EMAIL_SENDER["from_"], config.EMAIL_SENDER["password"])
+            smtp.sendmail(config.EMAIL_SENDER["from_"], to, em.as_string())
+            print("mail gonderildi")
+
     except Exception as e:
         print(e)
         return return_response(data = [], success = False, message = "An error occurred while sending a email"), 404

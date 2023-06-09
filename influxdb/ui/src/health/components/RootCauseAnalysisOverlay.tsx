@@ -6,6 +6,7 @@ import { Overlay, Grid,
 import ForceGraph2D from "react-force-graph-2d"
 import HealthAssessmentService from 'src/shared/services/HealthAssessmentService'
 import { Box, Tab, Tabs, Typography } from '@material-ui/core'
+import { deleteFieldConfirmationText, sensors } from 'src/shared/constants/tips'
 
 
   function ParameterTable (props) {
@@ -79,9 +80,27 @@ import { Box, Tab, Tabs, Typography } from '@material-ui/core'
     }
 }
 
+const rootCauseModelParameters = {
+    "HDBSCAN": {
+        "prev_hours": {
+            "Type": "Number",
+            "Value": 72
+        },
+        "window_size": {
+            "Type": "Number",
+            "Value": 30
+        },
+        "bucket_minutes": {
+            "Type": "Number",
+            "Value": 5
+        }
+    }
+}
+
 function ParameterInfoTable (props) {
     const usedModel = props.usedModel
     const rootCauseParams = props.rootCauseParams
+    console.log("usedModel", props)
     return(
         <Table>
         <Table.Header>
@@ -102,24 +121,6 @@ function ParameterInfoTable (props) {
     </Table>
     )
 }
-
-
-const rootCauseModelParameters = {
-      "HDBSCAN": {
-          "prev_hours": {
-              "Type": "Number",
-              "Value": 72
-          },
-          "window_size": {
-              "Type": "Number",
-              "Value": 30
-          },
-          "bucket_minutes": {
-              "Type": "Number",
-              "Value": 5
-          }
-      }
-  }
   
 
 interface Props {
@@ -136,6 +137,7 @@ interface State {
     topLevelTreeComponent: string
     compToAnalyze: string
     analysisGraphData: object
+    colorInfo: object
     rootCauseGraphData: object
     rootCauseAnalysisInfo: object
     rootCauseTreeLoading: RemoteDataState
@@ -555,10 +557,11 @@ class RootCauseAnalysisOverlay extends PureComponent<Props, State>{
       analysisTreeLoading: RemoteDataState.Loading,
       rootCauseGraphData: {},
       rootCauseAnalysisInfo: {},
+      colorInfo:{},
       rootCauseTreeLoading: RemoteDataState.Loading,
       rootCauseMeasurementSensorInfo: {}
     }
-
+ 
     componentDidMount(): void {
         console.log(this.props, "props")
         this.createRootCauseGraph()
@@ -644,7 +647,8 @@ class RootCauseAnalysisOverlay extends PureComponent<Props, State>{
   createRootCauseGraph = async () => {
     const nodes = []
     const links =  []
-    
+    console.log(this.state.colorInfo)
+
     // console.log(this.props.dtData, "dt")
     if (Object.keys(this.props.dtData["machines"]).includes(this.state.compToAnalyze)) {
         let itemOfInterest = this.props.dtData["machines"][this.state.compToAnalyze]
@@ -662,7 +666,7 @@ class RootCauseAnalysisOverlay extends PureComponent<Props, State>{
 
             nodes.push(Object.assign({
                 id: component?.name,
-                color: "green",
+                color: "#BC544B",
                 size: 300,
                 symbolType: "square",
                 src: "/home/machinaide/project/machinaide/influxdb/ui/assets/images/graph/component.png",
@@ -718,7 +722,7 @@ class RootCauseAnalysisOverlay extends PureComponent<Props, State>{
 
         nodes.push(Object.assign({
             id: this.state.compToAnalyze,
-            color: "green",
+            color: "#BC544B",
             size: 400,
             symbolType: "circle",
             src: "/home/machinaide/project/machinaide/influxdb/ui/assets/images/graph/component.jpg",
@@ -768,13 +772,14 @@ class RootCauseAnalysisOverlay extends PureComponent<Props, State>{
 createAnalysisGraph = async (topLevelComp) => {
     const nodes = []
     const links =  []
-    
+    console.log(this.state.colorInfo, "colorInfo")
+
     // console.log(this.props.dtData, "dt")
     if (Object.keys(this.props.dtData["machines"]).includes(topLevelComp)) {
         let itemOfInterest = this.props.dtData["machines"][topLevelComp]
         nodes.push(Object.assign({
             id: topLevelComp,
-            color: "green",
+            color: "#BC544B",
             size: 400,
             symbolType: "circle",
             src: "/home/machinaide/project/machinaide/influxdb/ui/assets/images/graph/machine.jpg",
@@ -786,7 +791,7 @@ createAnalysisGraph = async (topLevelComp) => {
 
             nodes.push(Object.assign({
                 id: component?.name,
-                color: "green",
+                color: Object.keys(this.state.colorInfo).includes(component?.name) ? this.state.colorInfo[component?.name] : "green",
                 size: 300,
                 symbolType: "square",
                 src: "/home/machinaide/project/machinaide/influxdb/ui/assets/images/graph/component.png",
@@ -800,7 +805,7 @@ createAnalysisGraph = async (topLevelComp) => {
             component["sensors"].map(sensor => {
                 nodes.push(Object.assign({
                     id: sensor?.name,
-                    color: "green",
+                    color: Object.keys(this.state.colorInfo).includes(sensor?.name) ? this.state.colorInfo[sensor?.name] : "green",
                     size: 300,
                     symbolType: "triangle",
                     src: "/home/machinaide/project/machinaide/influxdb/ui/assets/images/graph/sensor.jpg",
@@ -815,7 +820,7 @@ createAnalysisGraph = async (topLevelComp) => {
 
                     nodes.push(Object.assign({
                         id: field?.["name"],
-                        color: "green",
+                        color: Object.keys(this.state.colorInfo).includes(field?.name) ? this.state.colorInfo[field?.name] : "green",
                         size: 300,
                         symbolType: "triangle",
                         src: "/home/machinaide/project/machinaide/influxdb/ui/assets/images/graph/measurement.jpg",
@@ -842,7 +847,7 @@ createAnalysisGraph = async (topLevelComp) => {
 
         nodes.push(Object.assign({
             id: topLevelComp,
-            color: "green",
+            color: Object.keys(this.state.colorInfo).includes(topLevelComp) ? this.state.colorInfo[topLevelComp] : "green",
             size: 400,
             symbolType: "circle",
             src: "/home/machinaide/project/machinaide/influxdb/ui/assets/images/graph/component.jpg",
@@ -850,7 +855,7 @@ createAnalysisGraph = async (topLevelComp) => {
         itemOfInterest["object"]["sensors"].map(sensor => {
             nodes.push(Object.assign({
                 id: sensor?.name,
-                color: "green",
+                color: Object.keys(this.state.colorInfo).includes(sensor?.name) ? this.state.colorInfo[sensor?.name] : "green",
                 size: 300,
                 symbolType: "triangle",
                 src: "/home/machinaide/project/machinaide/influxdb/ui/assets/images/graph/sensor.jpg",
@@ -862,10 +867,10 @@ createAnalysisGraph = async (topLevelComp) => {
             })
             sensor["fields"].map(field => {
                 // fields.push(field);
-
+                console.log(field.name)
                 nodes.push(Object.assign({
                     id: field?.["name"],
-                    color: "green",
+                    color: Object.keys(this.state.colorInfo).includes(field?.["name"]) ? this.state.colorInfo[field?.name] : "green",
                     size: 300,
                     symbolType: "triangle",
                     src: "/home/machinaide/project/machinaide/influxdb/ui/assets/images/graph/measurement.jpg",
@@ -904,7 +909,7 @@ createAnalysisGraph = async (topLevelComp) => {
         let settings = {
             sessionID: Date.now().toString(),
             m2s: this.state.rootCauseMeasurementSensorInfo,
-            end_date: this.props.failure ? this.props.failure["startTime"] : "",
+            end_date: this.props.failure ? this.props.failure["endTime"] : "",
             failureIDD: this.props.failure ? this.props.failure.IDD : "",
             failureName: this.props.failure ? this.props.failure["ARZKOMPTANIM"] : "",
             topLevelTreeComponent: this.state.topLevelTreeComponent,
@@ -926,10 +931,116 @@ createAnalysisGraph = async (topLevelComp) => {
         this.analysisGraphRef = element
     }
 
+    calculateColors = (helperInfo, anoInfo) => {
+        let colorInfo = {}
+        let colorScores = {}
+        console.log(anoInfo, "anoInfo")
+        console.log(helperInfo, "helperInfo")
+        if(Object.keys(this.props.dtData["components"]).includes(helperInfo["topLevelTreeComponent"])) {
+            colorInfo[this.props.dtData["components"][helperInfo["topLevelTreeComponent"]].object.name] = "#BC544B"
+            Object.keys(helperInfo["result"]).forEach(anoField=> {
+                let innerTotal = helperInfo["result"][anoField].reduce((a, b) => {return a + b})
+                if (innerTotal === 0) {
+                    colorScores["F_" + anoField] = 0
+                    return;
+                }
+                helperInfo["result"][anoField].forEach((anoCount, i) => {
+                    if(!Object.keys(colorScores).includes("F_" + anoField)) {colorScores["F_" + anoField] = 0}
+                    if(i < helperInfo["result"][anoField].length/2) {
+                        // colorScores["F_" + anoField] += (((i + (anoCount) / (innerTotal)) / helperInfo["result"][anoField].length)) * ((anoCount) / (innerTotal)) * innerTotal / anoInfo["allSum"]
+                        colorScores["F_" + anoField] += 0.5 * ((anoCount) / (innerTotal)) * innerTotal / anoInfo["allSum"]
+
+                    } else {
+                        colorScores["F_" + anoField] += ((anoCount) / (innerTotal)) * innerTotal / anoInfo["allSum"]
+                    }
+                })
+            })
+
+            Object.keys(colorScores).forEach(anoField => {
+                if(colorScores[anoField] > 0.7) {
+                    colorInfo[anoField] = "#9B1003"
+                } else if(colorScores[anoField] > 0.5) {
+                    colorInfo[anoField] = "#BC544B"
+                } else {
+                    colorInfo[anoField] = "green"
+                }
+                this.props.dtData["components"][helperInfo["topLevelTreeComponent"]]["object"]["sensors"].forEach(sensor => {
+                    if (!Object.keys(colorInfo).includes(sensor.name))
+                        colorInfo[sensor.name] = "green"
+                    sensor.fields.forEach(dtField => {
+                        console.log(dtField.name, anoField, "anfld")
+                        if(dtField.name === anoField) {
+                            console.log(dtField.name, colorInfo[dtField.name])
+                            if (colorInfo[dtField.name] === "green") {
+                                return
+                            }
+                            colorInfo[sensor.name] = "#BC544B"
+
+                        }
+                    })
+                    // colorInfo[sensor.name] 
+                })
+            })
+            
+            // Object.keys(anoInfo).forEach(field=> {
+            //     // if(field === "Yaglama_sic_act")
+            //     //     return;
+            //     // colorInfo["F_" + field] = "#BC544B"
+            //     // this.props.dtData["components"][helperInfo["topLevelTreeComponent"]]["object"]["sensors"].forEach(sensor => {
+            //     //     sensor.fields.forEach(dtField => {
+            //     //         if(dtField.name === "F_" + field) {
+            //     //             colorInfo[sensor.name] = "#BC544B"
+            //     //         }
+            //     //     })
+            //     // })
+
+            // })
+        }
+        console.log(colorScores, "helperInfo", "anoInfo")
+        
+
+        this.setState({colorInfo: colorInfo})
+    }
+
     getRootCauseAnalysis = async (failureIDD) => {
+        function percentage(partialValue, totalValue) {
+            return (100 * partialValue) / totalValue;
+        } 
         const info = await HealthAssessmentService.getRootCauseAnalysis(failureIDD)
+        let colorCalculationInfo = {
+            allSum: 0,
+            percentageArray: []
+        }
+        // let allSum = 0
+        // let percentageArray = []
+        info.result["ALL"].forEach(count => {
+            colorCalculationInfo.allSum += count
+        })
+        let runningSum = 0
+        info.result["ALL"].forEach(count => {
+            runningSum += count
+            colorCalculationInfo.percentageArray.push(percentage(runningSum, colorCalculationInfo.allSum))
+        })
+
+        Object.keys(info.result).forEach(field => {
+            if (field !== "ALL") {
+                let allSumPartial = 0
+                colorCalculationInfo[field] = []
+                let runningSumPartial = 0
+                info.result[field].forEach(count => {
+                    allSumPartial += count
+                })
+                info.result[field].forEach(count => {
+                    runningSumPartial += count
+                    colorCalculationInfo[field].push(percentage(runningSumPartial, allSumPartial))
+                })
+            }
+        })
+
+        console.log(colorCalculationInfo)
+        this.calculateColors(info, colorCalculationInfo)
         this.setState({rootCauseAnalysisInfo: info})
-        console.log(info, failureIDD)
+        // console.log(info, failureIDD)
     }
 
 

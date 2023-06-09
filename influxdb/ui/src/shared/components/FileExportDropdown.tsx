@@ -107,12 +107,12 @@ class FileExportDropdown extends PureComponent<StateProps, State> {
     private exportXlsx = () => {
         const { files } = this.props;
         const csv = files.join('\n\n');
-        const xlsx = csv.replace(",", "\t");
-
+        const xlsx = csv.replaceAll(",", "\t");
+        
         const now = moment().format('YYYY-MM-DD-HH-mm')
         const filename = `${now} Chronograf Data`
 
-        downloadTextFile(xlsx, filename, '.xlsx', 'text/plain')
+        downloadTextFile(xlsx, filename, '.xls', 'application/vnd.ms-excel')
     }
 
     private exportJson = async () => {

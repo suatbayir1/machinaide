@@ -177,8 +177,6 @@ class FailureAlarmScene extends PureComponent<Props, State> {
         let cubeInfo = JSON.parse(JSON.stringify(payload));
         const { filteredFailures } = this.state;
 
-        console.log({ cubeInfo })
-
         let splittedSource;
 
         await
@@ -209,8 +207,6 @@ class FailureAlarmScene extends PureComponent<Props, State> {
                     })
                 })
             })
-
-
 
         // color all machine errors
         await filteredFailures.map(failure => {
@@ -254,7 +250,7 @@ class FailureAlarmScene extends PureComponent<Props, State> {
                             if (component["@type"] === "Component") {
                                 if (splittedSource[1] === component["name"]) {
                                     if (component["visual"] !== undefined && component["visual"] !== "") {
-                                        component["visual"].forEach(async visual => {
+                                        component["visual"]["objects"].forEach(async visual => {
                                             visual["color"] = await this.getFailureColor(failure["severity"])
                                         })
                                     }
@@ -353,8 +349,6 @@ class FailureAlarmScene extends PureComponent<Props, State> {
     cubeCreator(payload) {
         let CubeInfo = payload;
         let wireframe;
-
-        console.log({ CubeInfo })
 
         // if (CubeInfo === undefined) {
         //     return;

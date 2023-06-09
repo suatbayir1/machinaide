@@ -82,16 +82,14 @@ class RootCauseChecker:
 
         print(hist_values, self.m2s[self.measurement])
         print("DONE", self.m2s[self.measurement])
-
+        if len(self.m2s[self.measurement]) > 1: 
+            self.field = "ALL"
         analysisInfo = {
-            "failureName": self.failureName,
-            "failureIDD": self.failureIDD,
-            "topLevelTreeComponent" = self.topLevelTreeComponent,
-            "usedModel" = self.usedModel
-            "usedParameterValues" = [self.prev_hours, self.window_size, self.bucket_minutes]
+            "field": self.field,
+            "result": hist_values
         }
 
-        requests.post() 
+        requests.put(url="http://localhost:9632/api/v1.0/health/updateRootCauseAnalysis/{}".format(str(self.failureIDD)), json=analysisInfo)
         # plt.figure(figsize=(60, 40))
         # plt.bar(range(len(hist_values)), hist_values)
         # plt.savefig("/home/machinaide/project/machinaide/rootImage/anomalyCountPerBucket_" + self.field + ".png")

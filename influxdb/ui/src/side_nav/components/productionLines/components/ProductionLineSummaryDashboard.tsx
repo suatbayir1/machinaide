@@ -6,10 +6,10 @@ import GaugeChart from "src/shared/components/GaugeChart";
 import {
     Grid, Columns, SpinnerContainer,
     ComponentSize, FlexBox, TechnoSpinner, WaitingText,
-    Icon, IconFont, RemoteDataState, InfluxColors
+    Icon, IconFont, RemoteDataState, InfluxColors, ComponentColor, Button
 } from "@influxdata/clockface"
-import React, {PureComponent} from 'react'
 import Chart from 'react-apexcharts'
+import JobsList from "src/side_nav/components/productionLines/components/JobsList";
 
 // Types
 import { GaugeViewProperties } from 'src/types/dashboards'
@@ -43,6 +43,7 @@ interface State {
     uptimeAndDowntimeData: object
     isemriCount: object
     isemriDistribution: object
+    isemriOverlay: boolean
     loading: boolean
     pageState: RemoteDataState
     machines: string[]
@@ -98,6 +99,7 @@ class ProductionLineSummaryDashboard extends PureComponent<Props, State> {
             uptimeAndDowntimeData: {},
             isemriCount: {},
             isemriDistribution: {},
+            isemriOverlay: false,
             loading: true,
             pageState: RemoteDataState.Loading,
             machines: [],
@@ -252,7 +254,7 @@ class ProductionLineSummaryDashboard extends PureComponent<Props, State> {
         let h = Math.floor(mins%(60*24)/60);
         let m = mins % 60.0;
         h = h < 10 ? '0' + h : h; // (or alternatively) h = String(h).padStart(2, '0')
-        m = m < 10 ? '0' + m : m; // (or alternatively) m = String(m).padStart(2, '0')
+        m = m < 10 ? '0' + m.toFixed() : m.toFixed(); // (or alternatively) m = String(m).padStart(2, '0')
         return `${d>0 ? `${d}d ` : ''}${h}h ${m}m`;
     }
 
@@ -459,6 +461,18 @@ class ProductionLineSummaryDashboard extends PureComponent<Props, State> {
                         </div>
                         <div id="kaliteChart" style={{ background: '#292933', fontSize: '15px' }}>
                             <Chart options={this.state.kaliteOptions} series={[{data: this.state.kaliteSeries, color: InfluxColors.Amethyst}]} type="bar" height={300} style={{color: "black"}} />
+                        </div>
+                        <div className="tabbed-page--header-right" style={{marginTop: "10px"}}>
+                            <Button
+                                icon={IconFont.Calendar}
+                                color={ComponentColor.Secondary}
+                                text={"Show Jobs"}
+                                onClick={()=>this.setState({isemriOverlay: !this.state.isemriOverlay})}
+                            />
+                            <JobsList
+                                jobListOverlay={this.state.isemriOverlay}
+                                closeOverlay={()=>this.setState({isemriOverlay: !this.state.isemriOverlay})}
+                            />
                         </div>
                     </Grid.Column>
                 </Grid>

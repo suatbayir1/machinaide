@@ -2,6 +2,7 @@ import spacy
 from spacy.matcher import Matcher
 import config
 
+print("PATH ", f"{config.PROJECT_URL}/nlp/ner-pipe/training/model-best")
 nlp = spacy.load(f"{config.PROJECT_URL}/nlp/ner-pipe/training/model-best")
 
 # The source pipeline with different components

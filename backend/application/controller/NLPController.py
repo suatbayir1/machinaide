@@ -10,6 +10,7 @@ import argparse
 import requests
 import config
 import sys
+import traceback
 sys.path.insert(1, f'{config.PROJECT_URL}/backend')
 from core.nlp.QuestionCorrector import QuestionCorrector
 from core.nlp.MongoManager import MongoManager
@@ -38,10 +39,11 @@ validator = Validator()
 def postQuestion(token):
     try:
         question = request.json["question"]
-
+        print("nlp question:", question)
         fixed_question, is_question_fixed = questionCorrector.fixed_question(question)
+        print("nlp fixed: ", fixed_question, is_question_fixed)
         in_mongodb = handler.check_in_training_data(fixed_question)
-
+        print("nlp in_mongodb: ", in_mongodb)
         if(in_mongodb["exists"]):
             query_result = in_mongodb["query"]
             labels = in_mongodb["labels"]
@@ -50,8 +52,12 @@ def postQuestion(token):
             graph_overlay = False
         else:
             # ner part
+            print("here 54")
+            print("pipes: ", nlp.pipe_names)
             doc = nlp(fixed_question)
+            print("doc", doc)
             result = handler.create_query(fixed_question)
+            print("result: ", result)
             query_result = result["query"]
             labels = result["labels"]
             textcat_labels = result["textcatLabels"]
@@ -59,12 +65,15 @@ def postQuestion(token):
             graph_overlay = result["graphOverlay"]
 
         if(textcat_labels[0] == "influxdb"):
-            payload2 = "{\"query\": \"" + query_result + "\",\"type\": \"flux\"}"
+            print("influx 68", query_result)
+            query_updated = query_result + "|> keep(columns: [\\\"_field\\\", \\\"_value\\\"])"
+            print(query_updated)
+            payload2 = "{\"query\": \"" + query_updated + "\",\"type\": \"flux\"}"
             # url = "http://localhost:8086/api/v2/query?orgID=" + config.influx["orgID"]
             url = config.influx["host"] + "/api/v2/query?orgID=" + config.influx["orgID"]
             headers = {'Authorization': 'Token '+ config.influx["dbtoken"],'Content-Type': 'application/json'}
             api_response = requests.request('POST', url, headers=headers, data=payload2)
-
+            print(api_response)
             if('json' in api_response.headers.get('Content-Type')):
                 return jsonify(
                     error=api_response.json()["message"], 
@@ -75,8 +84,9 @@ def postQuestion(token):
                     textcatLabels=textcat_labels
                 )
             if(api_response.text):
+                # print("87 data: ", api_response.text)
                 return jsonify(
-                    query=query_result, 
+                    query=query_updated, 
                     data=api_response.text, 
                     entities=labels, 
                     fixedQuestion=fixed_question, 
@@ -109,7 +119,9 @@ def postQuestion(token):
                 mongoTextcat=mongo_template,
                 resultText=text
             )
-    except:
+    except Exception as err:
+        print("error: ", err)
+        print(traceback.format_exc())
         return jsonify(
             error= "An unexpected error has occurred",
             entities="", 

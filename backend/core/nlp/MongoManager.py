@@ -28,7 +28,7 @@ class MongoManager():
         maintenances = [maintenance for maintenance in maintenance_records if(maintenance["maintenanceType"] in type)]
 
         if(from_date != ""):
-            res = [maintenance["asset"] for maintenance in maintenances if (datetime.datetime.fromisoformat(maintenance["date"])>from_date and datetime.datetime.fromisoformat(maintenance["date"])<now)]
+            res = [maintenance["asset"] for maintenance in maintenances if (datetime.datetime.strptime(maintenance["date"], "%Y-%m-%dT%H:%M:%S.000Z")>from_date and datetime.datetime.strptime(maintenance["date"], "%Y-%m-%dT%H:%M:%S.000Z")<now)]
         else:
             res = [maintenance["asset"] for maintenance in maintenances]
         res = list(dict.fromkeys(res))
@@ -45,11 +45,12 @@ class MongoManager():
 
         if(from_date != ""):
             for failure in failures:
-                if(datetime.datetime.fromisoformat(failure["startTime"])>from_date):
+                # print("failure time: ", failure["startTime"])
+                if(datetime.datetime.strptime(failure["startTime"], "%Y-%m-%dT%H:%M:%S.000Z")>from_date):
                     if(failure["endTime"] == ""):
                         res.append(failure["sourceName"])
                     else:
-                        if(datetime.datetime.fromisoformat(failure["endTime"])<to_date):
+                        if(datetime.datetime.strptime(failure["endTime"], "%Y-%m-%dT%H:%M:%S.000Z")<to_date):
                             res.append(failure["sourceName"])
         else:
             res = [failures["sourceName"] for failure in failures]
@@ -71,15 +72,16 @@ class MongoManager():
 
         if(time != ""):
             time = datetime.datetime.now() - datetime.timedelta(days=1)
-            maintenance_count = [maintenance["asset"] for maintenance in maintenances if (datetime.datetime.fromisoformat(maintenance["date"])<now)]
+            maintenance_count = [maintenance["asset"] for maintenance in maintenances if (datetime.datetime.strptime(maintenance["date"], "%Y-%m-%dT%H:%M:%S.000Z")<now)]
         else:
-            maintenance_count = [maintenance["asset"] for maintenance in maintenances if (datetime.datetime.fromisoformat(maintenance["date"])<now)]
+            maintenance_count = [maintenance["asset"] for maintenance in maintenances if (datetime.datetime.strptime(maintenance["date"], "%Y-%m-%dT%H:%M:%S.000Z")<now)]
         return len(maintenance_count)
 
     def failure_count(self, sources, from_date, to_date, severity = []):
         query = []
         for source in sources:
             search_source = ".*" + source + ".*"
+            print("source: ", search_source)
             query.append({"sourceName": {"$regex": search_source}})
 
         if(to_date == ""):
@@ -93,11 +95,11 @@ class MongoManager():
         failure_count = []
         if(from_date != ""):
             for failure in failure_records:
-                if(datetime.datetime.fromisoformat(failure["startTime"])>from_date):
+                if(datetime.datetime.strptime(failure["startTime"], "%Y-%m-%dT%H:%M:%S.000Z")>from_date):
                     if(failure["endTime"] == ""):
                         failure_count.append(failure)
                     else:
-                        if(datetime.datetime.fromisoformat(failure["endTime"])<to_date):
+                        if(datetime.datetime.strptime(failure["startTime"], "%Y-%m-%dT%H:%M:%S.000Z")<to_date):
                             failure_count.append(failure)
         else:
             failure_count = [failure for failure in failure_records]
@@ -120,11 +122,11 @@ class MongoManager():
         job_count = []
         if(from_date != ""):
             for job in completed_job:
-                if(datetime.datetime.fromisoformat(job["startTime"]) > from_date):
+                if(datetime.datetime.strptime(job["startTime"], "%Y-%m-%dT%H:%M:%S.000Z") > from_date):
                     if(job["endTime"] == ""):
                         job_count.append(job)
                     else:
-                        if(datetime.datetime.fromisoformat(job["endTime"]) < to_date):
+                        if(datetime.datetime.strptime(job["endTime"], "%Y-%m-%dT%H:%M:%S.000Z") < to_date):
                             job_count.append(job)
         else:
             job_count = [job for job in completed_job]
@@ -220,7 +222,7 @@ class MongoManager():
                 res = self.failure_count(source_entities, from_date, to_date)
                 return {"query": str(res), "labels": entities, "graphOverlay": True, "textcatLabels": textcat_labels, "mongoTextcat": "failurecount"}
             else:
-                res = self.failure_count("default_source", from_date, to_date)
+                res = self.failure_count("Press031", from_date, to_date)
                 return {"query": str(res), "labels": entities, "graphOverlay": True, "textcatLabels": textcat_labels, "mongoTextcat": "failurecount"}
         elif(temp == "maintenancecount"):
             # TODO check if these source names are in the given source names array, if not just throw them away
@@ -315,7 +317,7 @@ class MongoManager():
                 res = self.failure_count(source_entities, from_date, to_date, severity_entities)
                 return {"query": str(res), "labels": labels, "graphOverlay": True, "textcatLabels": textcat_labels, "mongoTextcat": "failurecount"}
             else:
-                res = self.failure_count(["default_source"], from_date, to_date, severity_entities)
+                res = self.failure_count(["Press031"], from_date, to_date, severity_entities)
                 return {"query": str(res), "labels": labels, "graphOverlay": True, "textcatLabels": textcat_labels, "mongoTextcat": "failurecount"}
         elif(textcat_labels_mongo[0] == "maintenancecount"):
             # TODO check if these source names are in the given source names array, if not just throw them away

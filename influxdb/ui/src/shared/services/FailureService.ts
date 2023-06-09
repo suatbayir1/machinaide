@@ -4,7 +4,7 @@ import axios from "axios";
 class FailureService {
     getAllFailures = async () => {
         const url = `${BACKEND.API_URL}failure/getAllFailures`;
-
+        
         const request = fetch(url, {
             method: 'GET',
             mode: 'cors',
@@ -31,7 +31,7 @@ class FailureService {
 
     getFailures = async (payload) => {
         const url = `${BACKEND.API_URL}failure/getFailures`;
-
+        console.log("token", window.localStorage.getItem("token"))
         const request = fetch(url, {
             method: 'POST',
             mode: 'cors',

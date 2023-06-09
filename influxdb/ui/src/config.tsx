@@ -1,17 +1,21 @@
 export const BACKEND = {
-    "API_URL": "http://127.0.0.1:9632/api/v1.0/",
+    "API_URL": "http://10.16.5.3:9632/api/v1.0/",
+    // "API_URL": "http://127.0.0.1:9632/api/v1.0/",
     // "API_URL": "https://vmi474601.contaboserver.net/api/v1.0/",
-    "EVALML_URL": "http://127.0.0.1:6363",
-    "EVIDENTLY_URL": "http://127.0.0.1:6161",
-    "SOCKET_URL": "http://127.0.0.1:5000",
-    "NLP_URL": "http://127.0.0.1:7777",
-    "NLP_MODULE_URL": "http://127.0.0.1:8787"
+    "EVALML_URL": "http://10.16.5.3:6363",
+    // "EVALML_URL": "http://127.0.0.1:6363",
+    "EVIDENTLY_URL": "http://10.16.5.3:6161",
+    // "EVIDENTLY_URL": "http://127.0.0.1:6161",
+    // "SOCKET_URL": "http://127.0.0.1:5000",
+    // "NLP_URL": "http://127.0.0.1:7777",
+    // "NLP_MODULE_URL": "http://127.0.0.1:8787"
 }
 
 export const FACTORY_NAME = "Ermetal"
 
 export const INFLUX = {
-    "CHRONOGRAF_URL": "http://localhost:8080/",
+    "CHRONOGRAF_URL": "http://10.16.5.3:8080/",
+    // "CHRONOGRAF_URL": "http://localhost:8080/",
     // "CHRONOGRAF_URL": "https://vmi474601.contaboserver.net:8080/"
 }
 

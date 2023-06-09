@@ -42,6 +42,60 @@ class UserService {
         }
     }
 
+     getEmails = async () => {
+        const url = `${BACKEND.API_URL}user/getEmails`;
+
+        const request = fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
+            },
+        })
+
+        try {
+            const response = await request;
+            const res = await response.json();
+
+            if (res.data.success !== true) return;
+            const result = JSON.parse(res.data.data);
+            return result;
+        } catch (err) {
+            console.error(err);
+        }
+     }
+    
+    getPhoneNumbers = async () => {
+        const url = `${BACKEND.API_URL}user/getPhoneNumbers`;
+
+        const request = fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
+            },
+        })
+
+        try {
+            const response = await request;
+            const res = await response.json();
+
+            if (res.data.success !== true) return;
+            const result = JSON.parse(res.data.data);
+            return result;
+        } catch (err) {
+            console.error(err);
+        }
+         }
+    
     addUser = async (payload) => {
         const url = `${INFLUX.CHRONOGRAF_URL}api/v2/users`;
 
@@ -107,6 +161,70 @@ class UserService {
         }
     }
 
+     addEmail = async (payload) => {
+        const url = `${BACKEND.API_URL}user/addEmail`;
+
+        const request = fetch(url, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
+            },
+            body: JSON.stringify(payload)
+        })
+
+        try {
+            const response = await request;
+            const res = await response.json();
+
+            if (response.status !== 200) {
+                throw new Error(res.data.message.text);
+            }
+
+            if (res.data.success !== true) return;
+            return res;
+        } catch (err) {
+            alert(err);
+            console.error(err);
+        }
+     }
+    
+    addPhoneNumber = async (payload) => {
+        const url = `${BACKEND.API_URL}user/addPhoneNumber`;
+
+        const request = fetch(url, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
+            },
+            body: JSON.stringify(payload)
+        })
+
+        try {
+            const response = await request;
+            const res = await response.json();
+
+            if (response.status !== 200) {
+                throw new Error(res.data.message.text);
+            }
+
+            if (res.data.success !== true) return;
+            return res;
+        } catch (err) {
+            alert(err);
+            console.error(err);
+        }
+    }
+
     deleteUser = async (userId) => {
         const url = `${INFLUX.CHRONOGRAF_URL}api/v2/users/${userId}`;
 
@@ -125,6 +243,70 @@ class UserService {
 
     deleteUserFromMongo = async (payload) => {
         const url = `${BACKEND.API_URL}user/delete`;
+
+        const request = fetch(url, {
+            method: 'DELETE',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
+            },
+            body: JSON.stringify(payload)
+        })
+
+        try {
+            const response = await request;
+            const res = await response.json();
+
+            if (response.status !== 200) {
+                throw new Error(res.data.message.text);
+            }
+
+            if (res.data.success !== true) return;
+            return res;
+        } catch (err) {
+            alert(err);
+            console.error(err);
+        }
+    }
+
+    deleteEmail = async (payload) => {
+        const url = `${BACKEND.API_URL}user/deleteEmail`;
+
+        const request = fetch(url, {
+            method: 'DELETE',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                'token': window.localStorage.getItem("token")
+            },
+            body: JSON.stringify(payload)
+        })
+
+        try {
+            const response = await request;
+            const res = await response.json();
+
+            if (response.status !== 200) {
+                throw new Error(res.data.message.text);
+            }
+
+            if (res.data.success !== true) return;
+            return res;
+        } catch (err) {
+            alert(err);
+            console.error(err);
+        }
+    }
+
+    deletePhoneNumber = async (payload) => {
+        const url = `${BACKEND.API_URL}user/deletePhoneNumber`;
 
         const request = fetch(url, {
             method: 'DELETE',

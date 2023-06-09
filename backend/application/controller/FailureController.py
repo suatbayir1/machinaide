@@ -26,7 +26,7 @@ def get_all_failures(token):
 @token_required(roles = ["admin", "member", "editor"])
 def get_failures(token):
     source_name = request.json["sourceName"]
-    result = model.get_failures({"sourceName": source_name, "description" : {"$regex" : "ariza", '$options' : 'i'}})
+    result = model.get_failures({"sourceName": source_name}) #, "description" : {"$regex" : "ariza", '$options' : 'i'}})
     message = "get_failures"
     logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
     # return dumps({"sourceName": source_name, "token": token})
@@ -38,7 +38,7 @@ def get_failures(token):
 @token_required(roles = ["admin", "member", "editor"])
 def get_last_failures(token):
     source_name = request.json["sourceName"]
-    result = model.get_failures({"sourceName": source_name, "description" : {"$regex" : "ariza", '$options' : 'i'}})
+    result = model.get_failures({"sourceName": source_name})#, "description" : {"$regex" : "ariza", '$options' : 'i'}})
     message = "get_last_failures"
     logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
     # return dumps({"sourceName": source_name, "token": token})
@@ -121,7 +121,7 @@ def get_by_condition(token):
             log_type = "ERROR"
             return return_response(success = False, message = message), 400
 
-        payload = {"description" : {"$regex" : "ariza", '$options' : 'i'}}
+        payload = {}#{"description" : {"$regex" : "ariza", '$options' : 'i'}}
 
         if "regex" in request.json:
             for item in request.json["regex"]:

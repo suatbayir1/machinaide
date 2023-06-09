@@ -172,7 +172,11 @@ def startRootCauseAnalysis():
             "prev_hours": settings['prev_hours'], 
             "end_date": settings['end_date'], 
             "window_size": settings['window_size'], 
-            "bucket_minutes": settings['bucket_minutes']
+            "bucket_minutes": settings['bucket_minutes'],
+            "failureName": settings["failureName"],
+            "failureIDD": settings["failureIDD"],
+            "topLevelTreeComponent": settings["topLevelTreeComponent"],
+            "usedModel": settings["usedModel"]
             }
             with open(t_dir + "/sessioninfo_" + field + ".json", 'w') as fp:
                 json.dump(field_settings, fp)
@@ -182,12 +186,22 @@ def startRootCauseAnalysis():
         "prev_hours": settings['prev_hours'], 
         "end_date": settings['end_date'], 
         "window_size": settings['window_size'], 
-        "bucket_minutes": settings['bucket_minutes']
+        "bucket_minutes": settings['bucket_minutes'],
+        "failureName": settings["failureName"],
+        "failureIDD": settings["failureIDD"],
+        "topLevelTreeComponent": settings["topLevelTreeComponent"],
+        "usedModel": settings["usedModel"],
     }
     with open(t_dir + "/sessioninfo_ALL" + ".json", 'w') as fp:
         json.dump(field_settings, fp)
     cmd = " python3 ./mlhelpers/mlsession.py -t root -s " + str(settings['sessionID']) + " -f " + "ALL"
     process = subprocess.Popen(cmd.split(), close_fds=True)
+    requests.post(url="http://localhost:9632/api/v1.0/health/postRootCauseAnalysis", json={"failureIDD": settings["failureIDD"],
+    "failureName": settings["failureName"],
+    "topLevelTreeComponent": settings["topLevelTreeComponent"],
+    "usedModel": settings["usedModel"],
+    "usedParameterValues": [settings["prev_hours"], settings["window_size"], settings["bucket_minutes"]]
+    })
     print(settings)
     msg = "root trial"
     return {"msg": msg}, 201

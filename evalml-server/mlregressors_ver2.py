@@ -199,6 +199,7 @@ class RULRegressionSession:
     def prepare_data(self):
         # TODO: get failures 
         failure_res = requests.post(url=GET_FAILURES_URL, json={"sourceName": self.asset_name}, headers={'token': self.token, 'Content-Type': 'application/json'}).json()
+        print("first", failure_res)
         failure_res = json.loads(failure_res["data"]["data"])
         """ failure_res = [
             {
@@ -207,10 +208,12 @@ class RULRegressionSession:
             {
                 "failureStartTime": '2022-06-02T11:30'
             },] """
+        print("fail res", failure_res)
         failures = []
         for failure in failure_res:
             failure["startTime"] = parser.parse(failure["startTime"][0:16])
             data_start = datetime.datetime(2022, 4, 1)
+            print("--", failure, data_start)
             if(failure["startTime"] >= data_start):
                 failures.append(failure)
         

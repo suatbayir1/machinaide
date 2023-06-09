@@ -106,8 +106,6 @@ class FailureAlarmInformationBox extends PureComponent<Props, State> {
         const { objects, selectedObject } = this.props;
         let foundPart;
 
-        console.log("selectedObject", selectedObject);
-
         objects[0]["productionLines"].forEach(pl => {
             pl["machines"].forEach(machine => {
                 machine["contents"].forEach(component => {

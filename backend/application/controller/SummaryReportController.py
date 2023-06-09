@@ -5,6 +5,7 @@ from flask import Blueprint, request, jsonify
 from flask_cors import CORS, cross_origin
 from datetime import datetime, timedelta
 from bson import ObjectId, json_util
+from bson.json_util import dumps
 import json
 
 summary_report = Blueprint("summaryreport", __name__)
@@ -25,7 +26,10 @@ def return_uptime_and_downtime(type, records):
         if("DURUSSURE" in record and int(record["DURUSSURE"])!=0):
             recorded_downtime_minutes += int(record["DURUSSURE"])
         start_time = datetime.strptime(record[start_time_string], '%Y-%m-%dT%H:%M:%S.000Z') # 2020-01-02T04:30:00.000Z
-        end_time = datetime.strptime(record[end_time_string], '%Y-%m-%dT%H:%M:%S.000Z') 
+        if(len(record[end_time_string])):
+            end_time = datetime.strptime(record[end_time_string], '%Y-%m-%dT%H:%M:%S.000Z') 
+        else:
+            end_time = datetime.strptime(datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000Z"), '%Y-%m-%dT%H:%M:%S.000Z') 
         record_time = end_time - start_time
         record_time_minutes = record_time.total_seconds()/60.0
         duration_time += record_time_minutes
@@ -186,3 +190,13 @@ def get_isemri_distribution():
                 kalite[record["kalite"]] = 1
     
     return {"kalite": kalite, "kalinlik": kalinlik}
+
+@summary_report.route("/getJobsInADay", methods=["POST"])
+def get_jobs_in_a_day():
+    settings = request.json
+    selected_date = settings["date"]
+    start_date = datetime.strptime(selected_date,"%Y-%m-%d")
+    end_date = start_date + timedelta(days=1)
+    records = model.get_isemri_records({"duedate": {"$gte":start_date, "$lt": end_date}})
+    return {"jobs": dumps(records)}
+    

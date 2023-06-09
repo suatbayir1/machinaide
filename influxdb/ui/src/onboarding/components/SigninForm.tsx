@@ -115,8 +115,17 @@ class SigninForm extends PureComponent<Props, State> {
     const { INFLUX_USERNAME, INFLUX_PASSWORD } = process.env;
 
     try {
-      const resp = await postSignin({ auth: { username: INFLUX_USERNAME, password: INFLUX_PASSWORD } })
       const tokenResp = await LoginService.loginWithLDAP({ username, password });
+
+      if (!tokenResp) {
+        notify({
+          ...copy.SigninError,
+          message: 'Login failed: username or password is invalid',
+        })
+        return;
+      }
+      
+      const resp = await postSignin({ auth: { username: INFLUX_USERNAME, password: INFLUX_PASSWORD } })
 
       localStorage.setItem("userRole", tokenResp[0]["role"]);
       localStorage.setItem("token", tokenResp[0]["token"]);

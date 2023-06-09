@@ -17,6 +17,12 @@ class UserModel():
 
         return cursor_to_json(self.db.find_by_columns(self.collection, {}, filter))
 
+    def get_emails(self):
+        return cursor_to_json(self.db.find("emails"))
+
+    def get_phone_numbers(self):
+        return cursor_to_json(self.db.find("phone_numbers"))
+
     def delete(self, id):
         try:
             where = {
@@ -24,6 +30,26 @@ class UserModel():
             }
 
             return self.db.delete_one(self.collection, where)
+        except:
+            return False
+
+    def delete_email(self, id):
+        try:
+            where = {
+                "_id": ObjectId(id)
+            }
+
+            return self.db.delete_one("emails", where)
+        except:
+            return False
+
+    def delete_phone_number(self, id):
+        try:
+            where = {
+                "_id": ObjectId(id)
+            }
+
+            return self.db.delete_one("phone_numbers", where)
         except:
             return False
 
@@ -69,6 +95,18 @@ class UserModel():
             }
 
             return self.db.update_one(self.collection, update_data, where)
+        except:
+            return False
+
+    def add_email(self, payload):
+        try:
+            return self.db.insert_one("emails", payload)
+        except:
+            return False
+
+    def add_phone_number(self, payload):
+        try:
+            return self.db.insert_one("phone_numbers", payload)
         except:
             return False
 

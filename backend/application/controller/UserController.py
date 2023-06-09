@@ -18,6 +18,23 @@ def get_all(token):
     logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
     return return_response(data = result, success = True, message = message, code = 200), 200
 
+@user.route("/getEmails", methods = ["GET"])
+@token_required(roles = ["admin"])
+def get_emails(token):
+    result = model.get_emails()
+    message = "All emails fetched in successfully"
+    logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+    return return_response(data = result, success = True, message = message, code = 200), 200
+
+@user.route("/getPhoneNumbers", methods = ["GET"])
+@token_required(roles = ["admin"])
+def get_phone_numbers(token):
+    result = model.get_phone_numbers()
+    message = "All phone numbers fetched in successfully"
+    logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, "", message,  200)
+    return return_response(data = result, success = True, message = message, code = 200), 200
+
+
 @user.route("/delete", methods = ["POST", "DELETE"])
 @token_required(roles = ["admin"])
 def delete(token):
@@ -29,6 +46,34 @@ def delete(token):
         return return_response(success = False, message = message, code = 400), 400
     else:
         message = "User successfully deleted"
+        logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, request.json, message,  200)
+        return return_response(success = True, message = message, code = 200), 200
+
+@user.route("/deleteEmail", methods = ["POST", "DELETE"])
+@token_required(roles = ["admin"])
+def delete_email(token):
+    result = model.delete_email(request.json["oid"])
+
+    if not result:
+        message = "An error occurred while deleting an email"
+        logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, request.json, message,  400)
+        return return_response(success = False, message = message, code = 400), 400
+    else:
+        message = "Email successfully deleted"
+        logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, request.json, message,  200)
+        return return_response(success = True, message = message, code = 200), 200
+
+@user.route("/deletePhoneNumber", methods = ["POST", "DELETE"])
+@token_required(roles = ["admin"])
+def delete_phone_number(token):
+    result = model.delete_phone_number(request.json["oid"])
+
+    if not result:
+        message = "An error occurred while deleting a phone number"
+        logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, request.json, message,  400)
+        return return_response(success = False, message = message, code = 400), 400
+    else:
+        message = "Phone number successfully deleted"
         logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, request.json, message,  200)
         return return_response(success = True, message = message, code = 200), 200
 
@@ -89,6 +134,41 @@ def add_user_to_organization(token):
             return return_response(success = True, message = message, code = 200), 200
     except:
         return {"text": "error"}
+
+@user.route("/addEmail", methods = ["POST", "PUT"])
+@token_required(roles = ["admin"])
+def add_email(token):
+    try:
+        result = model.add_email(request.json)
+
+        if not result:
+            message = "An error occurred while adding an email to system"
+            logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, request.json, message,  400)
+            return return_response(success = False, message = message, code = 400), 400
+        else:
+            message = "Email added to system successfully"
+            logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, request.json, message,  200)
+            return return_response(success = True, message = message, code = 200), 200
+    except:
+        return return_response(success = False, message = "An error occurred while adding an email to system", code = 500), 500
+
+@user.route("/addPhoneNumber", methods = ["POST", "PUT"])
+@token_required(roles = ["admin"])
+def add_phone_number(token):
+    try:
+        result = model.add_phone_number(request.json)
+
+        if not result:
+            message = "An error occurred while adding phone number to system"
+            logger.add_log("ERROR", request.remote_addr, token["username"], request.method, request.url, request.json, message,  400)
+            return return_response(success = False, message = message, code = 400), 400
+        else:
+            message = "Phone number added to system successfully"
+            logger.add_log("INFO", request.remote_addr, token["username"], request.method, request.url, request.json, message,  200)
+            return return_response(success = True, message = message, code = 200), 200
+    except:
+        return return_response(success = False, message = "An error occurred while adding an email to system", code = 500), 500
+
 
 @user.route("/removeUserFromOrganization", methods = ["POST", "DELETE"])
 @token_required(roles = ["admin"])

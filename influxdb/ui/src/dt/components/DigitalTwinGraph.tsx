@@ -184,22 +184,28 @@ class DigitalTwinGraph extends PureComponent<Props, State> {
 
         const query = `
             from(bucket: "Ermetal")
-            |> range(start: -5)
+            |> range(start: -5m)
             |> last()
         `
 
         const csvResult = await FluxService.fluxQuery(this.props.orgID, query);
         const jsonResult = await csvToJSON(csvResult);
 
-        console.log({ jsonResult });
-        console.log({ fields });
         for (const field of fields) {
             for (const data of jsonResult) {
                 if (data["_measurement"] === field["measurement"] && data["_field"] === field["dataSource"]) {
-                    valuesByField[field["name"]] = Number(data["_value"]).toFixed(2)
+                    valuesByField[field["name"]] = Number(data["_value"]).toFixed(2) === "NaN"
+                        ? "-"
+                        // : Math.floor(Math.random() * 101);
+                        : Number(data["_value"]).toFixed(2)
                 }
             }
         }
+
+        console.log("values", valuesByField);
+        Object.keys(valuesByField).forEach(key => {
+            console.log(valuesByField[key]);
+        })
 
         this.setState({ valuesByField });
     }
